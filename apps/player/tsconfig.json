@@ -1,0 +1,4 @@
+{
+  "extends": "@rublox/config/tsconfig.react.json",
+  "include": ["src", "vite.config.ts"]
+}

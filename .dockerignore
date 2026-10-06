@@ -1,0 +1,20 @@
+# Keep the build context small and free of local state.
+.git
+**/node_modules
+**/dist
+**/.turbo
+**/.vite
+**/coverage
+**/*.tsbuildinfo
+**/*.log
+data
+.data
+playwright-report
+test-results
+blob-report
+docs/screenshots
+.env
+.env.*
+!.env.example
+.DS_Store
+docker/compose*.yaml
