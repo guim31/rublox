@@ -15,8 +15,9 @@ import { Input, Select } from '../../components/ui/input.tsx'
 import { Segmented } from '../../components/ui/segmented.tsx'
 import { Switch } from '../../components/ui/switch.tsx'
 import { cn } from '../../lib/cn.ts'
+import { errorMessage } from '../../lib/errors.ts'
 import { usePrefs } from '../../lib/prefs.ts'
-import { MAX_IMAGE_BYTES, storeAssetFile } from '../../storage/assets.ts'
+import { MAX_IMAGE_BYTES } from '../../storage/assets.ts'
 import { useDoc, useSession } from '../context.tsx'
 
 export type EditorProps<T = unknown> = {
@@ -415,7 +416,12 @@ export function AssetEditor({ id, value, onChange, def }: EditorProps<string>) {
     if (!file.type.startsWith('image/'))
       return void toast.error(t('editor.inspector.image.notImage'))
     if (file.size > MAX_IMAGE_BYTES) return void toast.error(t('editor.inspector.image.tooBig'))
-    const stored = await storeAssetFile(file, 'image' as AssetKind)
+    let stored: Awaited<ReturnType<typeof session.storeAsset>>
+    try {
+      stored = await session.storeAsset(file, 'image' as AssetKind)
+    } catch (error) {
+      return void toast.error(errorMessage(t, error))
+    }
     const existing = Object.entries(doc.assets).find(([, a]) => a.sha256 === stored.sha256)
     onChange(existing ? existing[0] : addAsset(session.ydoc, stored))
   }

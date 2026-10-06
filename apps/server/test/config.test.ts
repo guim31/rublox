@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { ConfigError, loadConfig } from '../src/config.ts'
+import { ConfigError, DEVELOPMENT_SECRET, loadConfig } from '../src/config.ts'
 import { defaultPlayerDist, defaultStudioDist, serverRoot } from '../src/paths.ts'
 
 describe('loadConfig', () => {
@@ -19,7 +19,7 @@ describe('loadConfig', () => {
   })
 
   it('uses single-port origins outside development', () => {
-    const config = loadConfig({ NODE_ENV: 'production' })
+    const config = loadConfig({ NODE_ENV: 'production', RUBLOX_SECRET: 's'.repeat(32) })
     expect(config.studioUrl).toBe('http://localhost:3000')
     expect(config.appsUrl).toBe('http://127.0.0.1:3000')
     expect(config.isProduction).toBe(true)
@@ -53,7 +53,20 @@ describe('loadConfig', () => {
   it('treats empty variables as unset', () => {
     const config = loadConfig({ DATABASE_URL: '', RUBLOX_SECRET: '' })
     expect(config.databaseUrl).toBeUndefined()
-    expect(config.secret).toBeUndefined()
+    expect(config.secret).toBe(DEVELOPMENT_SECRET)
+  })
+
+  it('requires a secret in production', () => {
+    expect(() => loadConfig({ NODE_ENV: 'production' })).toThrow(/RUBLOX_SECRET/)
+  })
+
+  it('reads the first administrator, both variables or neither', () => {
+    expect(loadConfig({}).admin).toBeUndefined()
+    expect(
+      loadConfig({ RUBLOX_ADMIN_USERNAME: 'admin', RUBLOX_ADMIN_PASSWORD: 'secret password' })
+        .admin,
+    ).toEqual({ username: 'admin', password: 'secret password' })
+    expect(() => loadConfig({ RUBLOX_ADMIN_USERNAME: 'admin' })).toThrow(ConfigError)
   })
 
   it.each([

@@ -3,10 +3,11 @@ import { ImagePlus, Trash2 } from 'lucide-react'
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { MAX_IMAGE_BYTES, storeAssetFile } from '../../storage/assets.ts'
+import { errorMessage } from '../../lib/errors.ts'
+import { MAX_IMAGE_BYTES } from '../../storage/assets.ts'
 import { useAssetsVersion, useDoc, useSession } from '../context.tsx'
 
-/** The project's images, stored in this browser in guest mode (SPEC § 4.1, J0). */
+/** The project's images: in this browser in guest mode, on the server with an account. */
 export function AssetsPanel() {
   const { t } = useTranslation()
   const session = useSession()
@@ -30,7 +31,13 @@ export function AssetsPanel() {
         toast.error(t('editor.inspector.image.tooBig'))
         continue
       }
-      const stored = await storeAssetFile(file, 'image')
+      let stored: Awaited<ReturnType<typeof session.storeAsset>>
+      try {
+        stored = await session.storeAsset(file, 'image')
+      } catch (error) {
+        toast.error(errorMessage(t, error))
+        continue
+      }
       if (!assets.some(([, a]) => a.sha256 === stored.sha256)) addAsset(session.ydoc, stored)
     }
   }

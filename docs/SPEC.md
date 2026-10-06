@@ -9,7 +9,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | Jalon | Contenu | État |
 |---|---|---|
 | J0 | Socle et tranche verticale (mode invité) | fait (PR #1), voir § 0.1 |
-| J1 | Comptes, espaces, invitations, projets côté serveur | à faire |
+| J1 | Comptes, espaces, invitations, projets côté serveur | fait (PR #2), voir § 0.2 |
 | J2 | Catalogue complet des composants et de leurs blocs | à faire |
 | J3 | Expérience Junior et Studio, apprentissage, accueil | à faire |
 | J4 | Collaboration, test sur téléphone, publication PWA, export | à faire |
@@ -83,6 +83,86 @@ mise à jour de ce paragraphe.
 - Serveur : `createApp` dans `apps/server/src/app.ts`, routes d'API dans `api.ts` (type `Api`
   exporté pour `hc`), base dans `db/` (Drizzle, migrations dans `apps/server/drizzle/`,
   appliquées au démarrage).
+
+### 0.2 Ce que le J1 a fixé (06/10/2026)
+
+**Écarts au cahier des charges, et pourquoi**
+
+- Champs de `user` (§ 6.8) : le nom affiché est le champ `name` de Better Auth (pas de colonne
+  `displayName`), « désactivé » est le `banned` du plugin admin (il bloque déjà la connexion), et
+  une colonne `theme` s'ajoute (le thème fait partie du profil, § 4.7). Better Auth exige une
+  adresse unique : un compte sans e-mail reçoit `<uuid>@rublox.invalid` (domaine réservé), que
+  l'API ne montre jamais (`email: null`).
+- Better Auth n'est joignable que par une **liste blanche** de routes (`AUTH_ROUTES` dans
+  `apps/server/src/auth.ts`) : connexion par identifiant, e-mail ou passkey, sessions, mot de
+  passe. Les routes des plugins admin et organisations sont fermées : comptes, espaces,
+  invitations et administration passent par `/api/*`, où les autorisations sont écrites une fois
+  et testées. Les plugins servent pour le schéma, le blocage des comptes désactivés et les
+  passkeys.
+- Espaces = organisations Better Auth : rôles `owner` (créateur) et `admin` = responsables,
+  `member` = membre. La table `invitation` du plugin existe mais ne sert pas ; les invitations
+  de Rublox sont dans `invites` (code gardé en HMAC-SHA256 avec `RUBLOX_SECRET`).
+- Un responsable n'agit (mot de passe, suppression) **que sur les comptes créés par un espace
+  qu'il gère** (`user.managedBySpaceId`), pas sur un adulte invité comme simple membre. Il voit
+  en lecture seule les projets des membres (rôle `member`) de ses espaces. Supprimer un espace
+  est refusé tant qu'il contient des comptes créés par lui.
+- Force brute : le limiteur de requêtes de Better Auth est éteint ; `FailureGuard` compte les
+  **échecs** (connexion, passkey, vérification et usage d'un code d'invitation), 5 par adresse en
+  15 minutes, en mémoire. Better Auth lit l'adresse que Rublox a résolue (`X-Real-IP` seulement si
+  `TRUST_PROXY=true`), jamais `X-Forwarded-For`.
+- Réponses 401 : `/api/me` n'en renvoie jamais (`user: null` hors connexion) et le studio ne
+  sonde aucune route protégée. Restent deux cas, voulus : un mauvais mot de passe (ce que le
+  reverse proxy doit voir) et une session révoquée depuis un autre appareil (une seule fois, puis
+  retour à la connexion).
+- Toute requête `/api/*` qui modifie quelque chose doit porter l'en-tête `Origin` du studio.
+- Projets du serveur : l'état Yjs est synchronisé **par HTTP** jusqu'à Hocuspocus (J4) :
+  `POST /api/projects/:id/sync` reçoit ce qui manque au serveur et renvoie ce qui manque au
+  studio (vecteurs d'état, base64), à chaque modification (600 ms), toutes les 15 s et au retour
+  sur l'onglet. Le serveur valide chaque état avec `projectDocSchema` et refuse un projet abîmé ;
+  il possède `meta.id` (UUIDv7 ; les projets invités gardent leur nanoid jusqu'au rapatriement).
+  Pas encore de cache hors ligne pour ces projets (J4).
+- Historique : instantanés JSON (`project_versions`), automatiques à la synchronisation si le
+  dernier a plus de 10 minutes, ou nommés. Restaurer garde d'abord l'état courant, puis remplace
+  le contenu par une modification Yjs ordinaire (les onglets ouverts la reçoivent).
+- Lecture seule (partage en lecture, responsable) : bandeau, rien n'est envoyé, bouton « En
+  faire une copie ». L'éditeur n'est pas verrouillé pour autant (on peut essayer sans enregistrer).
+- Ressources : une ligne `assets` par (projet, fichier), fichiers sous `DATA_DIR/assets/ab/<sha256>`,
+  servis sur l'origine des applis avec CORS ouvert (le studio en fait des `blob:`) et une CSP
+  `sandbox` (SVG sans script). Types acceptés, lus sur le contenu (`sniff.ts`) : PNG, JPEG, GIF,
+  WebP, AVIF, SVG, MP3, OGG, WAV, M4A, MP4, WebM, WOFF, WOFF2, TTF, OTF, Lottie (JSON ou
+  `.lottie`). Le quota compte chaque fichier une fois par compte ; il est réglé, comme la taille
+  maximale, dans l'administration (`instance_settings`, 500 Mo et `MAX_UPLOAD_MB` par défaut).
+- Droits des membres d'un espace (publier, IA, galerie) : enregistrés (`space_settings`), à
+  appliquer par J4 et J6. Valeur par défaut de « publier » : oui pour famille et équipe, non pour
+  classe (proposition du § 10).
+- Avatars : 12 illustrations SVG dessinées pour Rublox (`apps/studio/src/components/avatar.tsx`),
+  le serveur accepte tout identifiant `[a-z0-9-]{1,32}`.
+- Transférer la propriété d'un projet (P1) est fait ; RGPD (export, suppression par soi-même,
+  P1), TOTP (P2), journal d'administration (P2) et commentaires des responsables (P2) restent à
+  faire.
+- `RUBLOX_SECRET` est obligatoire en production (le serveur refuse de démarrer sans).
+
+**Contrats pour les jalons suivants**
+
+- API : routes dans `apps/server/src/routes/` (`me`, `spaces`, `invites`, `admin`, `projects`),
+  assemblées dans `api.ts` (type `Api`). Corps validés par `jsonBody(schéma Zod)` ; erreurs
+  `{ error: code }` (`ErrorCode` dans `http.ts`), traduites par `errors.<code>` côté studio.
+  Accès aux projets : `requireProject(db, userId, projectId, 'read' | 'write' | 'owner')`, aux
+  espaces : `requireMembership`, aux comptes membres : `requireManagedAccount` (`access.ts`).
+- Studio : client typé `api` et `call()` (`apps/studio/src/lib/api.ts`), session `useMe()`
+  (`lib/session.ts`), client Better Auth `authClient` (`lib/auth-client.ts`). Les préférences
+  restent dans `usePrefs` et sont recopiées dans le profil par `useProfileSync`.
+- Éditeur : `ProjectSession.open(id, 'guest' | 'server')`, `session.source` (`DocSource` :
+  `GuestSource` ou `ServerSource`, `editor/sources.ts`), `session.readOnly`, et
+  **`session.storeAsset(file, kind)`** pour toute ressource envoyée (J2 : sons, vidéos, polices,
+  Lottie passent par là, jamais directement par IndexedDB).
+- Tableau de bord : `ProjectsBackend` (`storage/backend.ts`), `guestBackend` ou `serverBackend`.
+- Chaînes du J1 : `packages/i18n/src/{fr,en}/accounts.ts`, fondues dans l'espace `studio`.
+- J4 : Hocuspocus remplace `ServerSource.sync` (même `project_docs.state`, mêmes droits via
+  `requireProject`, cookie de session sur `/ws/collab`) ; ajouter le cache y-indexeddb des
+  projets du serveur ; appliquer `membersCanPublish`.
+- J3 : les comptes créés par un espace démarrent en Junior (`uiMode`) ; `Avatar` et la mascotte
+  sont réutilisables ; la progression d'apprentissage se rattache à `user.id`.
 
 ## 1. En bref
 

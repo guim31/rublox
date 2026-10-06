@@ -151,3 +151,22 @@ export async function dropEvent(page: Page, text: RegExp, type: string, at = { x
   await expect(block).toBeVisible()
   return block
 }
+
+/** The first administrator, created by the server from the environment (playwright.config.ts). */
+export const ADMIN = { username: 'admin', password: 'admin-password' }
+
+let counter = 0
+/** A suffix that keeps accounts and projects of parallel tests apart. */
+export function unique(): string {
+  counter += 1
+  return `${Date.now().toString(36)}${counter}${Math.floor(Math.random() * 1000)}`
+}
+
+/** Signs in through the login page and waits for the dashboard. */
+export async function signIn(page: Page, username: string, password: string) {
+  await page.goto('/login')
+  await page.getByLabel(/Identifiant ou e-mail|Username or e-mail/).fill(username)
+  await page.getByLabel(/^(Mot de passe|Password)$/).fill(password)
+  await page.getByRole('button', { name: /^(Me connecter|Sign in)$/ }).click()
+  await expect(page.getByTestId('user-menu')).toBeVisible()
+}

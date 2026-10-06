@@ -7,6 +7,9 @@ export const MEMORY_DATABASE_URL = 'memory://'
 
 const MIN_SECRET_BYTES = 32
 
+/** Used when `RUBLOX_SECRET` is not set, outside production only. Public: never deploy it. */
+export const DEVELOPMENT_SECRET = 'rublox-development-secret-not-for-production-use'
+
 const optionalString = z
   .string()
   .trim()
@@ -45,6 +48,8 @@ const envSchema = z.object({
       )
       .optional(),
   ),
+  RUBLOX_ADMIN_USERNAME: optionalString,
+  RUBLOX_ADMIN_PASSWORD: optionalString,
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).optional(),
   STUDIO_DIST: optionalString,
   PLAYER_DIST: optionalString,
@@ -70,7 +75,10 @@ export interface Config {
   dataDir: string
   trustProxy: boolean
   maxUploadBytes: number
-  secret: string | undefined
+  /** Signs sessions and keys the invitation hashes. A fixed value outside production. */
+  secret: string
+  /** First start only: the administrator account created when the database has no account. */
+  admin: { username: string; password: string } | undefined
   logLevel: LogLevel
   studioDist: string
   playerDist: string
@@ -111,6 +119,16 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     )
   }
   const apps = new URL(appsUrl)
+  if (e.NODE_ENV === 'production' && !e.RUBLOX_SECRET) {
+    throw new ConfigError(
+      `Invalid configuration: RUBLOX_SECRET is required in production (${MIN_SECRET_BYTES} bytes or more)`,
+    )
+  }
+  if (Boolean(e.RUBLOX_ADMIN_USERNAME) !== Boolean(e.RUBLOX_ADMIN_PASSWORD)) {
+    throw new ConfigError(
+      'Invalid configuration: set both RUBLOX_ADMIN_USERNAME and RUBLOX_ADMIN_PASSWORD, or neither',
+    )
+  }
 
   return {
     nodeEnv: e.NODE_ENV,
@@ -124,7 +142,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     dataDir: resolve(e.DATA_DIR),
     trustProxy: e.TRUST_PROXY,
     maxUploadBytes: Math.round(e.MAX_UPLOAD_MB * 1024 * 1024),
-    secret: e.RUBLOX_SECRET,
+    secret: e.RUBLOX_SECRET ?? DEVELOPMENT_SECRET,
+    admin:
+      e.RUBLOX_ADMIN_USERNAME && e.RUBLOX_ADMIN_PASSWORD
+        ? { username: e.RUBLOX_ADMIN_USERNAME, password: e.RUBLOX_ADMIN_PASSWORD }
+        : undefined,
     logLevel: e.LOG_LEVEL ?? (e.NODE_ENV === 'test' ? 'silent' : 'info'),
     studioDist: e.STUDIO_DIST ? resolve(e.STUDIO_DIST) : defaultStudioDist,
     playerDist: e.PLAYER_DIST ? resolve(e.PLAYER_DIST) : defaultPlayerDist,

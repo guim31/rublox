@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { createRootRoute, type ErrorComponentProps, Link, Outlet } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,10 +11,8 @@ import { useCommands } from '../lib/commands.ts'
 import { isMod, useKeydown } from '../lib/hotkeys.ts'
 import { i18next } from '../lib/i18n.ts'
 import { isDark, usePrefs } from '../lib/prefs.ts'
-
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: Number.POSITIVE_INFINITY } },
-})
+import { useProfileSync } from '../lib/profile-sync.ts'
+import { queryClient } from '../lib/query.ts'
 
 export const Route = createRootRoute({
   component: Root,
@@ -43,7 +41,16 @@ function usePrefsOnDocument() {
 }
 
 function Root() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  )
+}
+
+function App() {
   usePrefsOnDocument()
+  useProfileSync()
   const theme = usePrefs((s) => s.theme)
   useKeydown((event) => {
     if (isMod(event) && event.key.toLowerCase() === 'k') {
@@ -52,18 +59,16 @@ function Root() {
     }
   })
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Outlet />
-        <CommandPalette />
-        <Toaster
-          position="bottom-center"
-          theme={theme}
-          toastOptions={{ className: 'font-ui' }}
-          closeButton
-        />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <TooltipProvider>
+      <Outlet />
+      <CommandPalette />
+      <Toaster
+        position="bottom-center"
+        theme={theme}
+        toastOptions={{ className: 'font-ui' }}
+        closeButton
+      />
+    </TooltipProvider>
   )
 }
 

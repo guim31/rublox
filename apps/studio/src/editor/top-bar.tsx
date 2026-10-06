@@ -16,8 +16,11 @@ import {
   Check,
   ChevronDown,
   Cloud,
+  CloudOff,
   CloudUpload,
   Copy,
+  Eye,
+  History,
   Layers,
   MoreHorizontal,
   Pencil,
@@ -57,6 +60,8 @@ import type { EditorTab } from '../routes/p.$projectId.tsx'
 import { addNewScreen } from './actions.ts'
 import { useDoc, useSaveState, useSession, useUndoState } from './context.tsx'
 import { useEditorNavigate } from './nav.ts'
+import { ShareDialog } from './share-dialog.tsx'
+import { VersionsDialog } from './versions-dialog.tsx'
 
 type Props = { projectId: string; tab: EditorTab; screenId: WorkspaceKey }
 
@@ -138,8 +143,13 @@ export function TopBar({ projectId, tab, screenId }: Props) {
       >
         <Search size={18} />
       </IconButton>
+      {session.source.kind === 'server' ? <HistoryButton /> : null}
       <Soon label={t('editor.testSoon')} icon={<Smartphone size={16} />} text={t('editor.test')} />
-      <Soon label={t('editor.guestOnly')} icon={<Share2 size={16} />} text={t('editor.share')} />
+      {session.source.kind === 'server' ? (
+        <ShareButton />
+      ) : (
+        <Soon label={t('editor.guestOnly')} icon={<Share2 size={16} />} text={t('editor.share')} />
+      )}
       <Soon
         label={t('editor.guestOnly')}
         icon={<Rocket size={16} />}
@@ -150,6 +160,38 @@ export function TopBar({ projectId, tab, screenId }: Props) {
       <ModeSwitch />
       <PrefsMenu />
     </header>
+  )
+}
+
+function ShareButton() {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <Tooltip content={t('editor.share')}>
+        <Button
+          icon={<Share2 size={16} />}
+          aria-label={t('editor.share')}
+          onClick={() => setOpen(true)}
+        >
+          <span className="hidden xl:inline">{t('editor.share')}</span>
+        </Button>
+      </Tooltip>
+      {open ? <ShareDialog open onClose={() => setOpen(false)} /> : null}
+    </>
+  )
+}
+
+function HistoryButton() {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <IconButton label={t('versions.open')} onClick={() => setOpen(true)}>
+        <History size={18} />
+      </IconButton>
+      {open ? <VersionsDialog open onClose={() => setOpen(false)} /> : null}
+    </>
   )
 }
 
@@ -243,20 +285,53 @@ function ProjectName() {
 
 function SaveIndicator() {
   const { t } = useTranslation()
+  const session = useSession()
   const state = useSaveState()
+  const server = session.source.kind === 'server'
+  const hint =
+    state === 'offline'
+      ? t('sync.offlineHint')
+      : state === 'readonly'
+        ? t('sync.readOnlyHint')
+        : server
+          ? t('sync.savedHint')
+          : t('editor.savedHint')
+  const label =
+    state === 'saving'
+      ? t('editor.saving')
+      : state === 'offline'
+        ? t('sync.offline')
+        : state === 'readonly'
+          ? t('sync.readOnly')
+          : t('editor.saved')
+  const Icon =
+    state === 'saving'
+      ? CloudUpload
+      : state === 'offline'
+        ? CloudOff
+        : state === 'readonly'
+          ? Eye
+          : Cloud
   return (
-    <Tooltip content={t('editor.savedHint')}>
+    <Tooltip content={hint}>
       <span
-        className="hidden items-center gap-1.5 px-1 text-ui-sm text-muted lg:inline-flex"
+        className={cn(
+          'hidden items-center gap-1.5 px-1 text-ui-sm text-muted lg:inline-flex',
+          state === 'offline' && 'text-text',
+        )}
         role="status"
         aria-live="polite"
+        data-testid="save-state"
+        data-state={state}
       >
-        {state === 'saving' ? (
-          <CloudUpload size={15} className="text-primary-text" />
-        ) : (
-          <Cloud size={15} />
-        )}
-        {state === 'saving' ? t('editor.saving') : t('editor.saved')}
+        <Icon
+          size={15}
+          className={cn(
+            state === 'saving' && 'text-primary-text',
+            state === 'offline' && 'text-coral',
+          )}
+        />
+        {label}
       </span>
     </Tooltip>
   )

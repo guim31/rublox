@@ -1,6 +1,8 @@
 import type { Messages } from '../types.ts'
+import { accounts } from './accounts.ts'
 
 export const studio: Messages['studio'] = {
+  ...accounts,
   appName: 'Rublox',
   tagline: 'Build real phone apps, with blocks.',
   playerIntro:
@@ -67,7 +69,7 @@ export const studio: Messages['studio'] = {
   },
   guest: {
     badge: 'Guest mode',
-    explain: 'Your projects stay in this browser. Accounts are coming soon.',
+    explain: 'Your projects stay in this browser. Sign in to find them everywhere.',
   },
   dashboard: {
     title: 'My projects',
