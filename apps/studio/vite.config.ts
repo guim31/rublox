@@ -13,7 +13,7 @@ import { defineConfig, type Plugin } from 'vite'
  */
 function blocklyMedia(): Plugin {
   const require = createRequire(import.meta.url)
-  const media = join(dirname(require.resolve('blockly/package.json')), 'media')
+  const media = join(dirname(require.resolve('blockly')), 'media')
   const files = readdirSync(media).filter((name) => !name.endsWith('.mp3'))
   return {
     name: 'rublox:blockly-media',

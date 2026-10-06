@@ -4,6 +4,7 @@ import { type ComponentId, type Screen, type ScreenId, setProp } from '@rublox/s
 import { GripVertical, Minus, Moon, Plus, RotateCcw, Scan, Sun } from 'lucide-react'
 import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { PhoneFrame } from '../../components/phone.tsx'
 import { IconButton } from '../../components/ui/button.tsx'
 import { Select } from '../../components/ui/input.tsx'
 import { Tooltip } from '../../components/ui/tooltip.tsx'
@@ -55,7 +56,11 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     const area = areaRef.current
     if (!area) return
     const update = () => {
-      const next = Math.min((area.clientWidth - 64) / width, (area.clientHeight - 64) / height, 1)
+      const next = Math.min(
+        (area.clientWidth - 64) / (width + 24),
+        (area.clientHeight - 64) / (height + 24),
+        1,
+      )
       setFit(Math.max(0.3, Math.round(next * 100) / 100))
     }
     update()
@@ -210,46 +215,36 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
         onDrop={onDrop}
       >
         <div className="flex min-h-full min-w-full items-center justify-center p-8">
-          <div
-            ref={stageRef}
-            className="relative"
-            style={{ width: width * scale + 24, height: height * scale + 24 }}
-          >
-            <div
-              className="absolute top-0 left-0 origin-top-left rounded-[44px] bg-[#16141f] p-3 shadow-3 dark:bg-[#05040a] dark:ring-1 dark:ring-white/10"
-              style={{ width: width + 24, height: height + 24, transform: `scale(${scale})` }}
-            >
-              <div className="relative size-full overflow-hidden rounded-[34px]">
-                <AppSurface theme={doc.settings.theme} scheme={appScheme}>
-                  {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer selection; the layers panel is the keyboard path */}
-                  {/* biome-ignore lint/a11y/useKeyWithClickEvents: same */}
-                  <div
-                    ref={screenRef}
-                    className="size-full"
-                    data-testid="canvas-screen"
-                    onClick={(event) => select(componentAt(event.target) ?? screen.rootId)}
-                    onMouseMove={(event) => {
-                      const id = componentAt(event.target)
-                      if (id !== useEditor.getState().hovered) hover(id)
-                    }}
-                    onMouseLeave={() => hover(null)}
-                  >
-                    <ScreenView
-                      screen={screen}
-                      locale={doc.meta.locale}
-                      mode="design"
-                      assetUrl={session.assetUrl}
-                      decorateChildren={(parentId, children) =>
-                        children.length
-                          ? children
-                          : [<EmptyHint key="empty" root={parentId === screen.rootId} />]
-                      }
-                    />
-                  </div>
-                </AppSurface>
-                <div className="pointer-events-none absolute top-1.5 left-1/2 h-5 w-24 -translate-x-1/2 rounded-full bg-[#16141f] dark:bg-[#05040a]" />
-              </div>
-            </div>
+          <div ref={stageRef} className="relative">
+            <PhoneFrame width={width} height={height} scale={scale} dark={appScheme === 'dark'}>
+              <AppSurface theme={doc.settings.theme} scheme={appScheme}>
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer selection; the layers panel is the keyboard path */}
+                {/* biome-ignore lint/a11y/useKeyWithClickEvents: same */}
+                <div
+                  ref={screenRef}
+                  className="size-full"
+                  data-testid="canvas-screen"
+                  onClick={(event) => select(componentAt(event.target) ?? screen.rootId)}
+                  onMouseMove={(event) => {
+                    const id = componentAt(event.target)
+                    if (id !== useEditor.getState().hovered) hover(id)
+                  }}
+                  onMouseLeave={() => hover(null)}
+                >
+                  <ScreenView
+                    screen={screen}
+                    locale={doc.meta.locale}
+                    mode="design"
+                    assetUrl={session.assetUrl}
+                    decorateChildren={(parentId, children) =>
+                      children.length
+                        ? children
+                        : [<EmptyHint key="empty" root={parentId === screen.rootId} />]
+                    }
+                  />
+                </div>
+              </AppSurface>
+            </PhoneFrame>
             <Overlay
               boxes={boxes}
               drop={drop?.line}

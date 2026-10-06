@@ -4,6 +4,7 @@ import type { ProjectDoc, ScreenId, WorkspaceKey } from '@rublox/schema'
 import { Moon, RotateCw, Square, Sun } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { PhoneFrame } from '../../components/phone.tsx'
 import { IconButton } from '../../components/ui/button.tsx'
 import { cn } from '../../lib/cn.ts'
 import { appsOrigin, config } from '../../lib/config.ts'
@@ -71,6 +72,15 @@ export function Preview({
     }
   }, [ready, doc, code, assetsVersion, locale, mode, screenId, session])
 
+  // The preview follows the screen being edited.
+  const shownScreen = useRef(screenId)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `post` only reads a ref
+  useEffect(() => {
+    if (!ready || shownScreen.current === screenId) return
+    shownScreen.current = screenId
+    post({ type: 'rx:restart', screenId })
+  }, [ready, screenId])
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: `post` only reads a ref
   useEffect(() => {
     if (ready) post({ type: 'rx:scheme', scheme: appScheme })
@@ -116,7 +126,7 @@ export function Preview({
           <span
             className={cn(
               'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-strong',
-              running ? 'bg-mint-soft text-mint' : 'bg-surface-3 text-muted',
+              running ? 'bg-mint-soft text-mint-text' : 'bg-surface-3 text-muted',
             )}
             data-testid="preview-state"
           >
@@ -155,24 +165,16 @@ export function Preview({
         ref={area}
         className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4"
       >
-        <div
-          style={{ width: (width + 20) * scale, height: (height + 20) * scale }}
-          className="relative shrink-0"
-        >
-          <div
-            className="absolute top-0 left-0 origin-top-left rounded-[40px] bg-[#16141f] p-2.5 shadow-3 dark:bg-[#05040a] dark:ring-1 dark:ring-white/10"
-            style={{ width: width + 20, height: height + 20, transform: `scale(${scale})` }}
-          >
-            <iframe
-              ref={frame}
-              title={t('editor.preview.frame')}
-              src={`${config.appsUrl.replace(/\/$/, '')}/`}
-              allow="camera; microphone; geolocation; accelerometer; gyroscope; clipboard-write; web-share; fullscreen; autoplay"
-              className="size-full rounded-[30px] bg-white"
-              data-testid="preview-frame"
-            />
-          </div>
-        </div>
+        <PhoneFrame width={width} height={height} scale={scale} dark={appScheme === 'dark'}>
+          <iframe
+            ref={frame}
+            title={t('editor.preview.frame')}
+            src={`${config.appsUrl.replace(/\/$/, '')}/`}
+            allow="camera; microphone; geolocation; accelerometer; gyroscope; clipboard-write; web-share; fullscreen; autoplay"
+            className="size-full"
+            data-testid="preview-frame"
+          />
+        </PhoneFrame>
       </div>
     </section>
   )

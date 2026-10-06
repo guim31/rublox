@@ -188,7 +188,7 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
         {projects.isPending ? (
           <Grid>
             {[0, 1, 2].map((key) => (
-              <div key={key} className="h-[272px] animate-pulse rounded-ui-lg bg-surface-2" />
+              <li key={key} className="h-[272px] animate-pulse rounded-ui-lg bg-surface-2" />
             ))}
           </Grid>
         ) : live.length === 0 && filter !== 'trash' ? (

@@ -115,3 +115,39 @@ export async function buildHelloBlocks(page: Page, text = 'Bonjour') {
 export function preview(page: Page) {
   return page.frameLocator('[data-testid=preview-frame]')
 }
+
+/** A block of the main workspace, by its Blockly type (Blockly puts the type in the class). */
+export function blockOfType(page: Page, type: string): Locator {
+  return page
+    .locator(`[data-testid=blockly-workspace] svg.blocklySvg g.blocklyDraggable.${type}`)
+    .first()
+}
+
+/** Drops a block from the open flyout into the statement input of `parent`. */
+export async function dropInside(page: Page, block: Locator, parent: Locator) {
+  const box = await parent.boundingBox()
+  if (!box) throw new Error('no parent block')
+  await dragBlock(page, block, { x: box.x + 18, y: box.y + Math.min(box.height * 0.55, 52) })
+}
+
+/** Drops a value block onto the value input currently holding `shadow`. */
+export async function dropOnValue(page: Page, block: Locator, shadow: Locator) {
+  const box = await shadow.boundingBox()
+  const source = await block.boundingBox()
+  if (!box || !source) throw new Error('no target')
+  await page.mouse.move(source.x + 4, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 30, source.y + source.height / 2 + 10, { steps: 4 })
+  await page.mouse.move(box.x + 4, box.y + box.height / 2, { steps: 12 })
+  await page.mouse.up()
+}
+
+/** Drops a hat block (an event) somewhere free in the workspace and returns it. */
+export async function dropEvent(page: Page, text: RegExp, type: string, at = { x: 380, y: 120 }) {
+  const area = await workspace(page).boundingBox()
+  if (!area) throw new Error('no workspace')
+  await dragBlock(page, flyoutBlock(page, text), { x: area.x + at.x, y: area.y + at.y })
+  const block = blockOfType(page, type)
+  await expect(block).toBeVisible()
+  return block
+}

@@ -1,4 +1,4 @@
-import { getComponentDef, SCREEN_TYPE } from '@rublox/catalog'
+import { getComponentDef, resolveDefault, SCREEN_TYPE } from '@rublox/catalog'
 import { messages } from '@rublox/i18n'
 import { APP_WORKSPACE } from '@rublox/schema'
 import type * as Blockly from 'blockly/core'
@@ -38,8 +38,11 @@ function componentItems(id: string, type: string, all: boolean): Item[] {
   }
   const setters = propertyKeys(def, 'set').filter((entry) => all || entry.junior)
   for (const { key } of setters) {
-    const kind = def.props[key]?.kind ?? 'string'
-    const shadow = shadowFor(kind, kind === 'boolean' ? true : undefined)
+    const prop = def.props[key]
+    const kind = prop?.kind ?? 'string'
+    // Start from the default value (text size 16, opacity 100…), but never from a text.
+    const initial = prop && kind !== 'string' ? resolveDefault(prop, 'en') : undefined
+    const shadow = shadowFor(kind, kind === 'boolean' ? true : initial)
     items.push(
       block(setterBlockType(type), {
         fields: { COMPONENT: id, PROP: key },

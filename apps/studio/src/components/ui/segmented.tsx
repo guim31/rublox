@@ -40,7 +40,6 @@ export function Segmented<T extends string>({
           key={option.value}
           value={option.value}
           title={option.title}
-          aria-label={option.title}
           className={cn(
             'inline-flex items-center justify-center gap-1.5 rounded-[calc(var(--radius)-2px)] px-2.5 font-strong text-muted transition-colors hover:text-text data-[state=on]:bg-surface data-[state=on]:text-text data-[state=on]:shadow-1',
             size === 'sm'

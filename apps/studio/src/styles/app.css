@@ -32,6 +32,7 @@
   --c-yellow-soft: #fff4d1;
   --c-mint: #13a27f;
   --c-mint-soft: #d9f6ee;
+  --c-mint-text: #0a6b52;
   --c-danger: #c8321f;
   --c-overlay: rgb(20 16 48 / 0.45);
   --c-canvas: #e9e7f3;
@@ -61,6 +62,7 @@
   --c-yellow-soft: #352c14;
   --c-mint: #4fd6b2;
   --c-mint-soft: #13332b;
+  --c-mint-text: #6ee3c3;
   --c-danger: #ff7a68;
   --c-overlay: rgb(4 3 12 / 0.6);
   --c-canvas: #0b0a12;
@@ -117,6 +119,7 @@
   --color-yellow-soft: var(--c-yellow-soft);
   --color-mint: var(--c-mint);
   --color-mint-soft: var(--c-mint-soft);
+  --color-mint-text: var(--c-mint-text);
   --color-danger: var(--c-danger);
   --color-overlay: var(--c-overlay);
   --color-canvas: var(--c-canvas);
@@ -208,4 +211,28 @@ body {
 }
 .blocklyToolbox {
   font-family: var(--font-ui);
+}
+
+/*
+ * Tailwind's preflight gives every svg `display: block`, which beats the `display="none"`
+ * attribute Blockly uses to hide flyout scrollbars and other parts.
+ */
+svg[display="none"] {
+  display: none;
+}
+
+.blocklyToolboxCategory {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.blocklyToolboxCategoryLabel {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+}
+:root[data-mode="junior"] .blocklyToolboxCategoryLabel {
+  font-size: 16px;
+}
+:root[data-mode="junior"] .blocklyTreeRow,
+:root[data-mode="junior"] .blocklyToolboxCategory {
+  min-height: 36px;
 }

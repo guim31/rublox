@@ -56,6 +56,9 @@ export function CodeView({ code }: { code: string }) {
         ],
       }),
     })
+    // The code scrolls: keyboard users must be able to reach it (WCAG 2.1.1).
+    view.current.scrollDOM.tabIndex = 0
+    view.current.scrollDOM.setAttribute('aria-label', t('editor.blocks.codeTitle'))
     return () => view.current?.destroy()
   }, [t])
 

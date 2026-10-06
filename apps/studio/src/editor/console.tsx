@@ -72,7 +72,7 @@ export function ConsolePanel({ open, projectId }: { open: boolean; projectId: st
       {open ? (
         <ol
           ref={list}
-          className="h-36 overflow-y-auto border-t border-border font-mono text-[12px] junior:h-40 junior:font-ui junior:text-ui-sm"
+          className="h-28 overflow-y-auto border-t border-border font-mono text-[12px] junior:h-32 junior:font-ui junior:text-ui-sm"
           aria-live="polite"
           data-testid="console"
         >
