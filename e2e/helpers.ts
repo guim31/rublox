@@ -81,7 +81,7 @@ export function workspaceBlocks(page: Page): Locator {
 }
 
 /** Builds "when Bouton1 is clicked, set Texte1.text to <text>" with the mouse. */
-export async function buildHelloBlocks(page: Page, text = 'Bonjour') {
+export async function buildHelloBlocks(page: Page, text = 'Bonjour', target = 'Texte1') {
   await openCategory(page, 'Bouton1')
   const area = await workspace(page).boundingBox()
   if (!area) throw new Error('no workspace')
@@ -94,7 +94,7 @@ export async function buildHelloBlocks(page: Page, text = 'Bonjour') {
   const eventBox = await event.boundingBox()
   if (!eventBox) throw new Error('no event block')
 
-  await openCategory(page, 'Texte1')
+  await openCategory(page, target)
   await dragBlock(page, flyoutBlock(page, /^mettre\s*texte|^set\s*text/), {
     x: eventBox.x + 18,
     y: eventBox.y + eventBox.height * 0.55,
