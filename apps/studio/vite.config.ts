@@ -54,6 +54,9 @@ export default defineConfig({
     tailwindcss(),
     blocklyMedia(),
   ],
+  // One copy of these, whatever peer variants pnpm installs for each workspace package: two
+  // Blockly copies keep two workspace registries (`getWorkspaceById` returns null).
+  resolve: { dedupe: ['blockly', 'yjs'] },
   server: {
     host: 'localhost',
     port: 5173,

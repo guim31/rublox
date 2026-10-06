@@ -1,4 +1,7 @@
+import { accounts } from './accounts.ts'
+
 export const studio = {
+  ...accounts,
   appName: 'Rublox',
   tagline: 'Fabrique de vraies applis pour téléphone, avec des blocs.',
   playerIntro:
@@ -65,7 +68,7 @@ export const studio = {
   },
   guest: {
     badge: 'Mode invité',
-    explain: 'Tes projets restent dans ce navigateur. Les comptes arrivent bientôt.',
+    explain: 'Tes projets restent dans ce navigateur. Connecte-toi pour les retrouver partout.',
   },
   dashboard: {
     title: 'Mes projets',

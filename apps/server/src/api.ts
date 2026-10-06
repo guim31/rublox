@@ -46,7 +46,12 @@ export function createApi(services: Services) {
         await next()
       })
       .use(async (c, next) => {
-        c.set('session', await auth.api.getSession({ headers: c.req.raw.headers }))
+        // No session cookie, no session: spare the database.
+        const signedIn = c.req.header('cookie')?.includes('session_token=') ?? false
+        c.set(
+          'session',
+          signedIn ? await auth.api.getSession({ headers: c.req.raw.headers }) : null,
+        )
         await next()
       })
       .get('/config', (c) =>

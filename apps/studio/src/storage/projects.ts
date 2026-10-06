@@ -15,6 +15,16 @@ import { clearDocument, IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
 import { get, getAll, put, remove, STORES } from './db.ts'
 
+/** What the caller may do with a project (server projects; guest projects are `owner`). */
+export type ProjectAccess = 'owner' | 'editor' | 'viewer' | 'manager'
+
+export type ProjectOwner = {
+  id: string
+  displayName: string
+  username: string
+  avatar: string | null
+}
+
 /** What the dashboard shows of a project, without opening its document. */
 export type ProjectSummary = {
   id: string
@@ -27,6 +37,11 @@ export type ProjectSummary = {
   deletedAt: string | null
   /** The start screen, drawn as the card's thumbnail. */
   preview: { screen: Screen; theme: Theme; locale: Locale } | null
+  /** Server projects only. */
+  access?: ProjectAccess
+  owner?: ProjectOwner
+  /** The space through which a manager sees the project. */
+  spaceId?: string | null
 }
 
 export const TRASH_DAYS = 30

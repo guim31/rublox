@@ -1,4 +1,4 @@
-import type { Context } from 'hono'
+import type { Context, MiddlewareHandler } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { validator } from 'hono/validator'
 import type { z } from 'zod'
@@ -57,13 +57,21 @@ export function requireAdmin(c: Context<ApiEnv>): SessionUser {
   return user
 }
 
-/** JSON body validated by a Zod schema; its output type flows to the `hc` client. */
+/**
+ * JSON body validated by a Zod schema. The `hc` client sees the schema's input type (fields
+ * with a default are optional), the route its output type.
+ */
 export function jsonBody<T extends z.ZodType>(schema: T) {
   return validator('json', (value): z.output<T> => {
     const result = schema.safeParse(value)
     if (!result.success) fail(400, 'invalid')
     return result.data
-  })
+  }) as unknown as MiddlewareHandler<
+    // biome-ignore lint/suspicious/noExplicitAny: the environment comes from the route
+    any,
+    string,
+    { in: { json: z.input<T> }; out: { json: z.output<T> } }
+  >
 }
 
 /** Query string validated by a Zod schema. */
@@ -72,7 +80,12 @@ export function queryParams<T extends z.ZodType>(schema: T) {
     const result = schema.safeParse(value)
     if (!result.success) fail(400, 'invalid')
     return result.data
-  })
+  }) as unknown as MiddlewareHandler<
+    // biome-ignore lint/suspicious/noExplicitAny: the environment comes from the route
+    any,
+    string,
+    { in: { query: z.input<T> }; out: { query: z.output<T> } }
+  >
 }
 
 export function toBase64(bytes: Uint8Array): string {

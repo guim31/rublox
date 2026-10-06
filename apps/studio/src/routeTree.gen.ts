@@ -10,11 +10,37 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as InviteCodeRouteImport } from './routes/invite.$code'
 import { Route as PProjectIdRouteImport } from './routes/p.$projectId'
+import { Route as SpacesIndexRouteImport } from './routes/spaces.index'
+import { Route as SpacesSpaceIdRouteImport } from './routes/spaces.$spaceId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteCodeRoute = InviteCodeRouteImport.update({
+  id: '/invite/$code',
+  path: '/invite/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PProjectIdRoute = PProjectIdRouteImport.update({
@@ -22,31 +48,90 @@ const PProjectIdRoute = PProjectIdRouteImport.update({
   path: '/p/$projectId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SpacesIndexRoute = SpacesIndexRouteImport.update({
+  id: '/spaces/',
+  path: '/spaces/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpacesSpaceIdRoute = SpacesSpaceIdRouteImport.update({
+  id: '/spaces/$spaceId',
+  path: '/spaces/$spaceId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/login': typeof LoginRoute
+  '/invite/$code': typeof InviteCodeRoute
   '/p/$projectId': typeof PProjectIdRoute
+  '/spaces/$spaceId': typeof SpacesSpaceIdRoute
+  '/spaces/': typeof SpacesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/login': typeof LoginRoute
+  '/invite/$code': typeof InviteCodeRoute
   '/p/$projectId': typeof PProjectIdRoute
+  '/spaces/$spaceId': typeof SpacesSpaceIdRoute
+  '/spaces': typeof SpacesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/login': typeof LoginRoute
+  '/invite/$code': typeof InviteCodeRoute
   '/p/$projectId': typeof PProjectIdRoute
+  '/spaces/$spaceId': typeof SpacesSpaceIdRoute
+  '/spaces/': typeof SpacesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/p/$projectId'
+  fullPaths:
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/login'
+    | '/invite/$code'
+    | '/p/$projectId'
+    | '/spaces/$spaceId'
+    | '/spaces/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/p/$projectId'
-  id: '__root__' | '/' | '/p/$projectId'
+  to:
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/login'
+    | '/invite/$code'
+    | '/p/$projectId'
+    | '/spaces/$spaceId'
+    | '/spaces'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/login'
+    | '/invite/$code'
+    | '/p/$projectId'
+    | '/spaces/$spaceId'
+    | '/spaces/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRoute
+  LoginRoute: typeof LoginRoute
+  InviteCodeRoute: typeof InviteCodeRoute
   PProjectIdRoute: typeof PProjectIdRoute
+  SpacesSpaceIdRoute: typeof SpacesSpaceIdRoute
+  SpacesIndexRoute: typeof SpacesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +143,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$code': {
+      id: '/invite/$code'
+      path: '/invite/$code'
+      fullPath: '/invite/$code'
+      preLoaderRoute: typeof InviteCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$projectId': {
       id: '/p/$projectId'
       path: '/p/$projectId'
@@ -65,12 +178,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PProjectIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/spaces/': {
+      id: '/spaces/'
+      path: '/spaces'
+      fullPath: '/spaces/'
+      preLoaderRoute: typeof SpacesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spaces/$spaceId': {
+      id: '/spaces/$spaceId'
+      path: '/spaces/$spaceId'
+      fullPath: '/spaces/$spaceId'
+      preLoaderRoute: typeof SpacesSpaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
+  AdminRoute: AdminRoute,
+  LoginRoute: LoginRoute,
+  InviteCodeRoute: InviteCodeRoute,
   PProjectIdRoute: PProjectIdRoute,
+  SpacesSpaceIdRoute: SpacesSpaceIdRoute,
+  SpacesIndexRoute: SpacesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

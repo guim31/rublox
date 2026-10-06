@@ -1,15 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import * as projects from '../storage/projects.ts'
+import type { ProjectsBackend } from '../storage/backend.ts'
 
 export const PROJECTS_KEY = ['projects'] as const
 
-export function useProjects() {
+export function useProjects(backend: ProjectsBackend | null) {
   return useQuery({
-    queryKey: PROJECTS_KEY,
-    queryFn: async () => {
-      await projects.purgeExpired()
-      return projects.listProjects()
-    },
+    queryKey: [...PROJECTS_KEY, backend?.kind ?? 'pending'],
+    queryFn: () => (backend ? backend.list() : []),
+    enabled: backend !== null,
+    // Server projects change elsewhere too (members, shared projects): refresh on each visit.
+    staleTime: backend?.kind === 'server' ? 0 : Number.POSITIVE_INFINITY,
+    refetchOnWindowFocus: backend?.kind === 'server',
   })
 }
 

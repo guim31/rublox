@@ -13,32 +13,53 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Logo, Mascot } from '../components/brand.tsx'
-import { ModeSwitch, PrefsMenu } from '../components/prefs-controls.tsx'
+import { AppHeader } from '../components/app-header.tsx'
+import { Avatar } from '../components/avatar.tsx'
+import { Mascot } from '../components/brand.tsx'
 import { Button, IconButton } from '../components/ui/button.tsx'
 import { Dialog } from '../components/ui/dialog.tsx'
 import { Input, Select } from '../components/ui/input.tsx'
-import { Kbd } from '../components/ui/kbd.tsx'
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../components/ui/menu.tsx'
 import { Segmented } from '../components/ui/segmented.tsx'
 import { cn } from '../lib/cn.ts'
 import { useCommands } from '../lib/commands.ts'
+import { errorMessage } from '../lib/errors.ts'
 import { isDark, usePrefs } from '../lib/prefs.ts'
+import { useMe } from '../lib/session.ts'
 import { relativeTime } from '../lib/time.ts'
+import { guestBackend, serverBackend } from '../storage/backend.ts'
 import type { ProjectSummary } from '../storage/projects.ts'
-import * as store from '../storage/projects.ts'
+import { GuestImport } from './guest-import.tsx'
 import { useProjectMutation, useProjects } from './queries.ts'
 import { ProjectThumbnail } from './thumbnail.tsx'
 
-type Filter = 'all' | 'favorites' | 'trash'
+type Filter = 'all' | 'mine' | 'shared' | 'space' | 'favorites' | 'trash'
 type Sort = 'recent' | 'name'
 
-/** Guest dashboard: the projects stored in this browser (SPEC § 4.8). */
+const mine = (p: ProjectSummary) => !p.access || p.access === 'owner'
+
+function matches(project: ProjectSummary, filter: Filter): boolean {
+  if (filter === 'trash') return project.deletedAt !== null
+  if (project.deletedAt) return false
+  if (filter === 'favorites') return project.favorite
+  if (filter === 'mine') return mine(project)
+  if (filter === 'shared') return project.access === 'editor' || project.access === 'viewer'
+  if (filter === 'space') return project.access === 'manager'
+  return true
+}
+
+/**
+ * The dashboard (SPEC § 4.8): the projects of the account, or of this browser in guest mode.
+ */
 export function Dashboard({ openNew }: { openNew: boolean }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { mode, locale, theme } = usePrefs()
-  const projects = useProjects()
+  const me = useMe()
+  const signedIn = Boolean(me.data?.user)
+  const backend = me.isPending ? null : signedIn ? serverBackend : guestBackend
+  const store = backend ?? guestBackend
+  const projects = useProjects(backend)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
   const [sort, setSort] = useState<Sort>('recent')
@@ -55,28 +76,34 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
     useCommands.getState().setPage([])
   }, [])
 
-  const create = useProjectMutation((name: string) => store.createProject({ name, locale, mode }))
+  const create = useProjectMutation((name: string) => store.create({ name, locale, mode }))
   const rename = useProjectMutation(({ id, name }: { id: string; name: string }) =>
-    store.renameProject(id, name),
+    store.rename(id, name),
   )
   const duplicate = useProjectMutation(({ id, name }: { id: string; name: string }) =>
-    store.duplicateProject(id, name),
+    store.duplicate(id, name),
   )
   const favorite = useProjectMutation(({ id, value }: { id: string; value: boolean }) =>
     store.setFavorite(id, value),
   )
-  const trash = useProjectMutation((id: string) => store.moveToTrash(id))
-  const restore = useProjectMutation((id: string) => store.restoreFromTrash(id))
+  const trash = useProjectMutation((id: string) => store.trash(id))
+  const restore = useProjectMutation((id: string) => store.restore(id))
   const destroy = useProjectMutation((id: string) => store.deleteForever(id))
 
   const all = projects.data ?? []
   const live = all.filter((p) => !p.deletedAt)
+  const hasShared = live.some((p) => matches(p, 'shared'))
+  const hasSpace = live.some((p) => matches(p, 'space'))
   const visible = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase(locale)
     return all
-      .filter((p) => (filter === 'trash' ? p.deletedAt : !p.deletedAt))
-      .filter((p) => filter !== 'favorites' || p.favorite)
-      .filter((p) => !needle || p.name.toLocaleLowerCase(locale).includes(needle))
+      .filter((p) => matches(p, filter))
+      .filter(
+        (p) =>
+          !needle ||
+          p.name.toLocaleLowerCase(locale).includes(needle) ||
+          (p.owner?.displayName.toLocaleLowerCase(locale).includes(needle) ?? false),
+      )
       .sort((a, b) =>
         sort === 'name'
           ? a.name.localeCompare(b.name, locale)
@@ -85,7 +112,7 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
   }, [all, query, filter, sort, locale])
 
   const defaultName = () => {
-    const names = new Set(all.map((p) => p.name))
+    const names = new Set(all.filter(mine).map((p) => p.name))
     for (let n = 1; ; n++) {
       const name = t('dashboard.defaultName', { n })
       if (!names.has(name)) return name
@@ -97,36 +124,12 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-bg/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-5 junior:h-[72px]">
-          <Logo />
-          <span
-            className="hidden items-center gap-1.5 rounded-full bg-yellow-soft px-3 py-1 text-ui-sm font-strong text-text sm:inline-flex"
-            title={t('guest.explain')}
-          >
-            <span className="size-2 rounded-full bg-yellow" aria-hidden="true" />
-            {t('guest.badge')}
-          </span>
-          <div className="flex-1" />
-          <button
-            type="button"
-            onClick={() => useCommands.getState().setOpen(true)}
-            className="hidden h-control items-center gap-2 rounded-ui border border-border bg-surface px-3 text-muted hover:border-border-strong md:inline-flex"
-          >
-            <Search size={15} />
-            <span className="text-ui-sm">{t('commands.open')}</span>
-            <Kbd>Mod+K</Kbd>
-          </button>
-          <ModeSwitch />
-          <PrefsMenu />
-        </div>
-      </header>
-
+      <AppHeader />
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 pt-8 pb-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-ui-xl font-strong tracking-tight">{t('dashboard.title')}</h1>
-            <p className="mt-1 text-muted">{t('guest.explain')}</p>
+            {signedIn ? null : <p className="mt-1 text-muted">{t('guest.explain')}</p>}
           </div>
           <Button
             variant="primary"
@@ -138,7 +141,9 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
           </Button>
         </div>
 
-        {live.length > 0 || filter === 'trash' ? (
+        {signedIn ? <GuestImport /> : null}
+
+        {all.length > 0 || filter !== 'all' ? (
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <div className="relative w-full max-w-xs">
               <Search
@@ -160,6 +165,15 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
               onChange={setFilter}
               options={[
                 { value: 'all', label: t('dashboard.filters.all') },
+                ...(hasShared || hasSpace
+                  ? [{ value: 'mine' as const, label: t('library.filters.mine') }]
+                  : []),
+                ...(hasShared
+                  ? [{ value: 'shared' as const, label: t('library.filters.shared') }]
+                  : []),
+                ...(hasSpace
+                  ? [{ value: 'space' as const, label: t('library.filters.space') }]
+                  : []),
                 {
                   value: 'favorites',
                   label: t('dashboard.filters.favorites'),
@@ -185,13 +199,13 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
           <p className="mt-4 text-ui-sm text-muted">{t('dashboard.trashNotice')}</p>
         ) : null}
 
-        {projects.isPending ? (
+        {projects.isPending || !backend ? (
           <Grid>
             {[0, 1, 2].map((key) => (
               <li key={key} className="h-[272px] animate-pulse rounded-ui-lg bg-surface-2" />
             ))}
           </Grid>
-        ) : live.length === 0 && filter !== 'trash' ? (
+        ) : live.length === 0 && filter === 'all' ? (
           <EmptyState onCreate={() => setCreating(true)} />
         ) : visible.length === 0 ? (
           <p className="mt-16 text-center text-muted">
@@ -210,8 +224,12 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
                 onRename={() => setRenaming(project)}
                 onDuplicate={async () => {
                   const name = t('dashboard.copyName', { name: project.name })
-                  await duplicate.mutateAsync({ id: project.id, name })
-                  toast.success(t('dashboard.toastDuplicated', { name }))
+                  try {
+                    await duplicate.mutateAsync({ id: project.id, name })
+                    toast.success(t('dashboard.toastDuplicated', { name }))
+                  } catch (error) {
+                    toast.error(errorMessage(t, error))
+                  }
                 }}
                 onTrash={async () => {
                   await trash.mutateAsync(project.id)
@@ -243,9 +261,13 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
           if (openNew) void navigate({ to: '/', search: {} })
         }}
         onSubmit={async (name) => {
-          const id = await create.mutateAsync(name)
-          setCreating(false)
-          await open(id as string)
+          try {
+            const id = await create.mutateAsync(name)
+            setCreating(false)
+            await open(id as string)
+          } catch (error) {
+            toast.error(errorMessage(t, error))
+          }
         }}
       />
       <NameDialog
@@ -263,7 +285,7 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
         open={deleting !== null}
         onOpenChange={(value) => !value && setDeleting(null)}
         title={t('dashboard.confirmDeleteTitle', { name: deleting?.name ?? '' })}
-        description={t('dashboard.confirmDeleteText')}
+        description={signedIn ? t('library.confirmDeleteText') : t('dashboard.confirmDeleteText')}
       >
         <div className="flex justify-end gap-2">
           <Button onClick={() => setDeleting(null)}>{t('common.cancel')}</Button>
@@ -327,6 +349,8 @@ function ProjectCard(props: CardProps) {
   const { t } = useTranslation()
   const { project } = props
   const trashed = project.deletedAt !== null
+  const owned = mine(project)
+  const writable = owned || project.access === 'editor'
   return (
     <li className="group relative flex flex-col overflow-hidden rounded-ui-lg border border-border bg-surface shadow-1 transition-[box-shadow,transform,border] duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-2">
       <div
@@ -353,6 +377,15 @@ function ProjectCard(props: CardProps) {
               </button>
             </h3>
           )}
+          {!owned && project.owner ? (
+            <p className="flex min-w-0 items-center gap-1.5 text-ui-sm text-muted">
+              <Avatar id={project.owner.avatar} name={project.owner.displayName} size={18} />
+              <span className="truncate">
+                {t('library.by', { name: project.owner.displayName })}
+                {writable ? '' : ` · ${t('library.readOnly')}`}
+              </span>
+            </p>
+          ) : null}
           <p className="truncate text-ui-sm text-muted">
             {trashed
               ? t('dashboard.deletedOn', { when: props.when })
@@ -393,16 +426,22 @@ function ProjectCard(props: CardProps) {
                 <MenuItem icon={<FolderOpen size={15} />} onSelect={props.onOpen}>
                   {t('dashboard.open', { name: '' }).trim()}
                 </MenuItem>
-                <MenuItem icon={<Pencil size={15} />} onSelect={props.onRename}>
-                  {t('common.rename')}
-                </MenuItem>
+                {writable ? (
+                  <MenuItem icon={<Pencil size={15} />} onSelect={props.onRename}>
+                    {t('common.rename')}
+                  </MenuItem>
+                ) : null}
                 <MenuItem icon={<Copy size={15} />} onSelect={props.onDuplicate}>
                   {t('common.duplicate')}
                 </MenuItem>
-                <MenuSeparator />
-                <MenuItem icon={<Trash2 size={15} />} danger onSelect={props.onTrash}>
-                  {t('common.delete')}
-                </MenuItem>
+                {owned ? (
+                  <>
+                    <MenuSeparator />
+                    <MenuItem icon={<Trash2 size={15} />} danger onSelect={props.onTrash}>
+                      {t('common.delete')}
+                    </MenuItem>
+                  </>
+                ) : null}
               </>
             )}
           </MenuContent>

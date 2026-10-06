@@ -18,10 +18,9 @@ export function profileOf(row: SessionUser | typeof user.$inferSelect) {
     displayName: row.name,
     email: realEmail(row.email),
     avatar: row.avatar ?? null,
-    locale: row.locale === 'fr' || row.locale === 'en' ? row.locale : null,
-    uiMode: row.uiMode === 'junior' || row.uiMode === 'studio' ? row.uiMode : null,
-    theme:
-      row.theme === 'light' || row.theme === 'dark' || row.theme === 'system' ? row.theme : null,
+    locale: oneOf(row.locale, ['fr', 'en'] as const),
+    uiMode: oneOf(row.uiMode, ['junior', 'studio'] as const),
+    theme: oneOf(row.theme, ['light', 'dark', 'system'] as const),
     role: (row.role === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
     isAdmin: isAdmin({ role: row.role ?? null, banned: row.banned ?? null }),
     managedBySpaceId: row.managedBySpaceId ?? null,
@@ -29,6 +28,10 @@ export function profileOf(row: SessionUser | typeof user.$inferSelect) {
 }
 
 export type Profile = ReturnType<typeof profileOf>
+
+function oneOf<const T extends string>(value: string | null | undefined, allowed: readonly T[]) {
+  return (allowed as readonly string[]).includes(value ?? '') ? (value as T) : null
+}
 
 const profilePatch = z.object({
   displayName: displayNameSchema.optional(),

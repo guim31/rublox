@@ -1,38 +1,45 @@
-import { hasProject, type ProjectDoc, setMeta, Y_ROOTS, yDocToProject } from '@rublox/schema'
-import type { IndexeddbPersistence } from 'y-indexeddb'
+import {
+  type Asset,
+  type AssetKind,
+  hasProject,
+  type ProjectDoc,
+  Y_ROOTS,
+  yDocToProject,
+} from '@rublox/schema'
 import * as Y from 'yjs'
-import { loadAssetFile } from '../storage/assets.ts'
-import { getSummary, openProjectDoc, saveSummary, summarize } from '../storage/projects.ts'
+import {
+  type DocSource,
+  GuestSource,
+  type SaveState,
+  ServerSource,
+  SUMMARY_ORIGIN,
+} from './sources.ts'
+
+export type { SaveState } from './sources.ts'
 
 /** Transactions written by the Blockly ⇄ Yjs bridge (undoable, but not echoed back to Blockly). */
 export const BLOCKLY_ORIGIN = { name: 'blockly' }
 
-/** Bookkeeping writes (`updatedAt`): stored, but neither undoable nor counted as an edit. */
-const SUMMARY_ORIGIN = { name: 'summary' }
-
-export type SaveState = 'saved' | 'saving'
-
 /**
- * An open project: its Yjs document stored in IndexedDB, the undo stack (SPEC § 6.4), and a
- * JSON snapshot (`ProjectDoc`) that the interface reads. Every edit goes through the schema
- * operations on `ydoc`.
+ * An open project: its Yjs document (stored in this browser or on the server, see
+ * `sources.ts`), the undo stack (SPEC § 6.4), and a JSON snapshot (`ProjectDoc`) that the
+ * interface reads. Every edit goes through the schema operations on `ydoc`.
  */
 export class ProjectSession {
   readonly undo: Y.UndoManager
+  readonly ydoc: Y.Doc
   private doc: ProjectDoc
   private readonly listeners = new Set<() => void>()
-  private saveState: SaveState = 'saved'
-  private saveTimer?: ReturnType<typeof setTimeout>
-  private summaryTimer?: ReturnType<typeof setTimeout>
   private readonly assetUrls = new Map<string, string>()
   private assetsVersion = 0
   private disposed = false
 
   private constructor(
     readonly id: string,
-    readonly ydoc: Y.Doc,
-    private readonly persistence: IndexeddbPersistence,
+    readonly source: DocSource,
   ) {
+    const ydoc = source.ydoc
+    this.ydoc = ydoc
     this.doc = yDocToProject(ydoc)
     this.undo = new Y.UndoManager(
       [
@@ -49,48 +56,47 @@ export class ProjectSession {
     this.undo.on('stack-item-added', () => this.emit())
     this.undo.on('stack-item-popped', () => this.emit())
     ydoc.on('update', this.onUpdate)
+    source.onChange(() => this.emit())
     void this.loadAssets()
   }
 
-  static async open(id: string): Promise<ProjectSession | null> {
-    const { ydoc, persistence } = await openProjectDoc(id)
-    if (!hasProject(ydoc)) {
-      await persistence.destroy()
-      ydoc.destroy()
+  /**
+   * Opens a project of this browser (`guest`) or of the server. Null when it does not exist
+   * (or, on the server, is not visible to this account).
+   */
+  static async open(id: string, kind: 'guest' | 'server'): Promise<ProjectSession | null> {
+    const source = kind === 'server' ? await ServerSource.open(id) : await GuestSource.open(id)
+    if (!source) return null
+    if (!hasProject(source.ydoc)) {
+      await source.close()
+      source.ydoc.destroy()
       return null
     }
-    return new ProjectSession(id, ydoc, persistence)
+    return new ProjectSession(id, source)
+  }
+
+  /** Viewers and space managers may look and try, not save. */
+  get readOnly(): boolean {
+    return this.source.access !== 'owner' && this.source.access !== 'editor'
   }
 
   private onUpdate = (_update: Uint8Array, origin: unknown) => {
     this.doc = yDocToProject(this.ydoc)
-    if (origin !== this.persistence && origin !== SUMMARY_ORIGIN) {
-      this.saveState = 'saving'
-      clearTimeout(this.saveTimer)
-      // y-indexeddb stores each update right away; show "Saving…" briefly so it is noticed.
-      this.saveTimer = setTimeout(() => {
-        this.saveState = 'saved'
-        this.emit()
-      }, 450)
-      clearTimeout(this.summaryTimer)
-      this.summaryTimer = setTimeout(() => void this.writeSummary(), 600)
-    }
+    if (origin !== this.source.origin && origin !== SUMMARY_ORIGIN) this.source.edited()
     if (Object.keys(this.doc.assets).some((id) => !this.assetUrls.has(id))) void this.loadAssets()
     this.emit()
   }
 
-  private async writeSummary(): Promise<void> {
-    if (this.disposed) return
-    setMeta(this.ydoc, { updatedAt: new Date().toISOString() }, SUMMARY_ORIGIN)
-    const previous = await getSummary(this.id)
-    await saveSummary(summarize(this.doc, previous))
+  /** Keeps a file for the project: in this browser, or sent to the server. */
+  storeAsset(file: File, kind: AssetKind): Promise<Asset> {
+    return this.source.storeAsset(file, kind)
   }
 
   private async loadAssets(): Promise<void> {
     let changed = false
     for (const [id, asset] of Object.entries(this.doc.assets)) {
       if (this.assetUrls.has(id)) continue
-      const blob = await loadAssetFile(asset.sha256)
+      const blob = await this.source.loadAsset(asset.sha256)
       if (blob && !this.disposed) {
         this.assetUrls.set(id, URL.createObjectURL(blob))
         changed = true
@@ -111,7 +117,7 @@ export class ProjectSession {
   async assetBlobs(): Promise<Record<string, Blob>> {
     const result: Record<string, Blob> = {}
     for (const [id, asset] of Object.entries(this.doc.assets)) {
-      const blob = await loadAssetFile(asset.sha256)
+      const blob = await this.source.loadAsset(asset.sha256)
       if (blob) result[id] = blob
     }
     return result
@@ -127,7 +133,7 @@ export class ProjectSession {
   }
 
   getDoc = () => this.doc
-  getSaveState = () => this.saveState
+  getSaveState = (): SaveState => this.source.saveState()
   canUndo = () => this.undo.canUndo()
   canRedo = () => this.undo.canRedo()
 
@@ -137,16 +143,11 @@ export class ProjectSession {
 
   async dispose(): Promise<void> {
     if (this.disposed) return
-    clearTimeout(this.saveTimer)
-    if (this.summaryTimer) {
-      clearTimeout(this.summaryTimer)
-      await this.writeSummary()
-    }
     this.disposed = true
     this.ydoc.off('update', this.onUpdate)
     this.undo.destroy()
     for (const url of this.assetUrls.values()) URL.revokeObjectURL(url)
-    await this.persistence.destroy()
+    await this.source.close()
     this.ydoc.destroy()
     this.listeners.clear()
   }
