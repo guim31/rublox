@@ -95,7 +95,8 @@ export const studio = {
     toastRestored: '« {{name}} » est de retour.',
     toastDuplicated: '« {{name}} » est prêt.',
     confirmDeleteTitle: 'Supprimer « {{name}} » pour de bon ?',
-    confirmDeleteText: 'Le projet, ses écrans, ses blocs et ses images seront effacés de ce navigateur. On ne pourra pas revenir en arrière.',
+    confirmDeleteText:
+      'Le projet, ses écrans, ses blocs et ses images seront effacés de ce navigateur. On ne pourra pas revenir en arrière.',
     time: {
       now: 'à l’instant',
       minutes: 'il y a {{count}} min',
@@ -121,7 +122,8 @@ export const studio = {
     loadError: 'Ce projet n’existe pas dans ce navigateur.',
     loadErrorAction: 'Retour à mes projets',
     smallScreenTitle: 'L’éditeur a besoin d’un écran plus grand',
-    smallScreenText: 'Continue sur un ordinateur ou une tablette en paysage : scanne ce code pour y ouvrir ton projet.',
+    smallScreenText:
+      'Continue sur un ordinateur ou une tablette en paysage : scanne ce code pour y ouvrir ton projet.',
     screens: {
       label: 'Écran',
       app: 'Appli (commun à tous les écrans)',
@@ -168,7 +170,8 @@ export const studio = {
       show: 'Afficher',
       lock: 'Verrouiller',
       unlock: 'Déverrouiller',
-      moveHint: 'Espace pour saisir, flèches pour déplacer, Alt + flèches pour monter ou descendre.',
+      moveHint:
+        'Espace pour saisir, flèches pour déplacer, Alt + flèches pour monter ou descendre.',
       renameHint: 'Double-clic pour renommer',
       nonVisual: 'Composants invisibles',
     },
@@ -176,7 +179,8 @@ export const studio = {
       title: 'Propriétés',
       empty: 'Sélectionne un composant pour voir ses propriétés.',
       name: 'Nom',
-      nameInvalid: 'Un nom commence par une lettre, sans espace ni accent bizarre, et n’est pas déjà pris.',
+      nameInvalid:
+        'Un nom commence par une lettre, sans espace ni accent bizarre, et n’est pas déjà pris.',
       groups: { content: 'Contenu', style: 'Style', layout: 'Disposition', advanced: 'Avancé' },
       moreOptions: 'Plus d’options',
       fewerOptions: 'Moins d’options',
@@ -195,7 +199,14 @@ export const studio = {
         danger: 'Danger',
         success: 'Succès',
       },
-      spacing: { all: 'Partout', sides: 'Par côté', top: 'Haut', right: 'Droite', bottom: 'Bas', left: 'Gauche' },
+      spacing: {
+        all: 'Partout',
+        sides: 'Par côté',
+        top: 'Haut',
+        right: 'Droite',
+        bottom: 'Bas',
+        left: 'Gauche',
+      },
       image: {
         choose: 'Choisir une image',
         upload: 'Envoyer une image',

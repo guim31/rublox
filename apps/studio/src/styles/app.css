@@ -1,0 +1,211 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/nunito";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@rublox/runtime/styles.css";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant junior (&:where([data-mode="junior"], [data-mode="junior"] *));
+@custom-variant studio (&:where([data-mode="studio"], [data-mode="studio"] *));
+
+/*
+ * Design tokens (SPEC § 5.5). Colours per theme, density and type per mode. Components use
+ * the Tailwind names below (bg-surface, text-muted, h-control, rounded-ui…), never raw values.
+ */
+:root {
+  --c-bg: #f5f4fa;
+  --c-surface: #ffffff;
+  --c-surface-2: #efedf7;
+  --c-surface-3: #e5e2f1;
+  --c-border: #dedbec;
+  --c-border-strong: #c6c2da;
+  --c-text: #1c1a2b;
+  --c-muted: #615e75;
+  --c-primary: #5b4bff;
+  --c-primary-hover: #4b3bee;
+  --c-primary-text: #4636e0;
+  --c-primary-soft: #ebe9ff;
+  --c-on-primary: #ffffff;
+  --c-coral: #e8503f;
+  --c-coral-soft: #ffe7e3;
+  --c-yellow: #f5b400;
+  --c-yellow-soft: #fff4d1;
+  --c-mint: #13a27f;
+  --c-mint-soft: #d9f6ee;
+  --c-danger: #c8321f;
+  --c-overlay: rgb(20 16 48 / 0.45);
+  --c-canvas: #e9e7f3;
+  --shadow-1: 0 1px 2px rgb(24 20 60 / 0.06), 0 1px 3px rgb(24 20 60 / 0.08);
+  --shadow-2: 0 6px 20px rgb(24 20 60 / 0.12), 0 2px 6px rgb(24 20 60 / 0.06);
+  --shadow-3: 0 24px 60px rgb(24 20 60 / 0.22);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --c-bg: #100f18;
+  --c-surface: #191823;
+  --c-surface-2: #22212f;
+  --c-surface-3: #2c2b3c;
+  --c-border: #302e43;
+  --c-border-strong: #45435d;
+  --c-text: #eeedf7;
+  --c-muted: #a5a2bb;
+  --c-primary: #5b4bff;
+  --c-primary-hover: #6c5dff;
+  --c-primary-text: #aaa2ff;
+  --c-primary-soft: #2a2552;
+  --c-on-primary: #ffffff;
+  --c-coral: #ff7e6f;
+  --c-coral-soft: #3b211f;
+  --c-yellow: #ffcc4d;
+  --c-yellow-soft: #352c14;
+  --c-mint: #4fd6b2;
+  --c-mint-soft: #13332b;
+  --c-danger: #ff7a68;
+  --c-overlay: rgb(4 3 12 / 0.6);
+  --c-canvas: #0b0a12;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / 0.45);
+  --shadow-3: 0 24px 60px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+:root,
+:root[data-mode="studio"] {
+  --font-ui: "Inter Variable", Inter, system-ui, sans-serif;
+  --fs: 13px;
+  --fs-sm: 12px;
+  --fs-lg: 15px;
+  --fs-xl: 20px;
+  --h-control: 30px;
+  --h-control-sm: 24px;
+  --radius: 7px;
+  --radius-lg: 11px;
+  --weight-strong: 600;
+}
+
+:root[data-mode="junior"] {
+  --font-ui: "Nunito Variable", Nunito, system-ui, sans-serif;
+  --fs: 16px;
+  --fs-sm: 14px;
+  --fs-lg: 18px;
+  --fs-xl: 26px;
+  --h-control: 44px;
+  --h-control-sm: 36px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --weight-strong: 800;
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-surface-3: var(--c-surface-3);
+  --color-border: var(--c-border);
+  --color-border-strong: var(--c-border-strong);
+  --color-text: var(--c-text);
+  --color-muted: var(--c-muted);
+  --color-primary: var(--c-primary);
+  --color-primary-hover: var(--c-primary-hover);
+  --color-primary-text: var(--c-primary-text);
+  --color-primary-soft: var(--c-primary-soft);
+  --color-on-primary: var(--c-on-primary);
+  --color-coral: var(--c-coral);
+  --color-coral-soft: var(--c-coral-soft);
+  --color-yellow: var(--c-yellow);
+  --color-yellow-soft: var(--c-yellow-soft);
+  --color-mint: var(--c-mint);
+  --color-mint-soft: var(--c-mint-soft);
+  --color-danger: var(--c-danger);
+  --color-overlay: var(--c-overlay);
+  --color-canvas: var(--c-canvas);
+  --font-ui: var(--font-ui);
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+  --font-junior: "Nunito Variable", Nunito, system-ui, sans-serif;
+  --text-ui: var(--fs);
+  --text-ui-sm: var(--fs-sm);
+  --text-ui-lg: var(--fs-lg);
+  --text-ui-xl: var(--fs-xl);
+  --spacing-control: var(--h-control);
+  --spacing-control-sm: var(--h-control-sm);
+  --radius-ui: var(--radius);
+  --radius-ui-lg: var(--radius-lg);
+  --shadow-1: var(--shadow-1);
+  --shadow-2: var(--shadow-2);
+  --shadow-3: var(--shadow-3);
+  --font-weight-strong: var(--weight-strong);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-ui);
+  font-size: var(--fs);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--c-primary) 30%, transparent);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border-strong) transparent;
+}
+
+.rx-anim-in {
+  animation: rx-fade-in 180ms ease-out;
+}
+
+@keyframes rx-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes rx-pop {
+  0% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win */
+    animation-duration: 1ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win */
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Blockly inherits the studio's fonts; its widgets follow the theme. */
+.blocklyWidgetDiv .blocklyMenu,
+.blocklyDropDownDiv {
+  font-family: var(--font-ui);
+}
+.blocklyToolbox {
+  font-family: var(--font-ui);
+}

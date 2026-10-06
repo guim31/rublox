@@ -97,7 +97,8 @@ export const studio: Messages['studio'] = {
     toastRestored: '“{{name}}” is back.',
     toastDuplicated: '“{{name}}” is ready.',
     confirmDeleteTitle: 'Delete “{{name}}” for good?',
-    confirmDeleteText: 'The project, its screens, blocks and images will be erased from this browser. This cannot be undone.',
+    confirmDeleteText:
+      'The project, its screens, blocks and images will be erased from this browser. This cannot be undone.',
     time: {
       now: 'just now',
       minutes: '{{count}} min ago',
@@ -123,7 +124,8 @@ export const studio: Messages['studio'] = {
     loadError: 'This project does not exist in this browser.',
     loadErrorAction: 'Back to my projects',
     smallScreenTitle: 'The editor needs a bigger screen',
-    smallScreenText: 'Go on with a computer or a tablet in landscape: scan this code to open your project there.',
+    smallScreenText:
+      'Go on with a computer or a tablet in landscape: scan this code to open your project there.',
     screens: {
       label: 'Screen',
       app: 'App (shared by all screens)',
@@ -197,7 +199,14 @@ export const studio: Messages['studio'] = {
         danger: 'Danger',
         success: 'Success',
       },
-      spacing: { all: 'All sides', sides: 'Per side', top: 'Top', right: 'Right', bottom: 'Bottom', left: 'Left' },
+      spacing: {
+        all: 'All sides',
+        sides: 'Per side',
+        top: 'Top',
+        right: 'Right',
+        bottom: 'Bottom',
+        left: 'Left',
+      },
       image: {
         choose: 'Choose an image',
         upload: 'Upload an image',

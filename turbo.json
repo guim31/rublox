@@ -17,5 +17,6 @@
       "cache": false,
       "persistent": true
     }
-  }
+  },
+  "globalPassThroughEnv": ["E2E_PORT", "E2E_BASE_URL", "PLAYWRIGHT_CHROMIUM_PATH", "CI"]
 }

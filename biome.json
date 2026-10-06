@@ -1,14 +1,18 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["./packages/config/biome.json"],
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
     "includes": [
       "**",
       "!**/routeTree.gen.ts",
-      "!**/drizzle/meta/**",
-      "!docs/screenshots/**",
-      "!**/__snapshots__/**"
+      "!!**/drizzle/meta",
+      "!!docs/screenshots",
+      "!!**/__snapshots__"
     ]
   }
 }

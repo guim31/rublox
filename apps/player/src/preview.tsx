@@ -3,8 +3,8 @@ import {
   Engine,
   isStudioMessage,
   originOf,
-  type PlayerToStudio,
   PlayerApp,
+  type PlayerToStudio,
   readConfig,
   type Scheme,
   type StudioToPlayer,
@@ -54,7 +54,10 @@ export function Preview() {
             )
           }
           if (engine) {
-            setState((previous) => previous && { ...previous, locale: message.locale, scheme: message.scheme })
+            setState(
+              (previous) =>
+                previous && { ...previous, locale: message.locale, scheme: message.scheme },
+            )
             await engine.update(message.doc, message.code)
             return
           }
@@ -70,7 +73,12 @@ export function Preview() {
             },
           })
           engineRef.current = created
-          setState({ engine: created, locale: message.locale, scheme: message.scheme, inspect: false })
+          setState({
+            engine: created,
+            locale: message.locale,
+            scheme: message.scheme,
+            inspect: false,
+          })
           await created.start()
           return
         }
@@ -102,7 +110,9 @@ export function Preview() {
         engine={engine}
         locale={state.locale}
         scheme={state.scheme}
-        assetUrl={(value) => assets.current.get(value) ?? (/^https:\/\//i.test(value) ? value : undefined)}
+        assetUrl={(value) =>
+          assets.current.get(value) ?? (/^https:\/\//i.test(value) ? value : undefined)
+        }
         onInspect={
           state.inspect
             ? (componentId) => {
@@ -137,7 +147,11 @@ function Waiting() {
   const inFrame = window.parent !== window
   return (
     <div className="waiting">
-      {inFrame ? <div className="spinner" aria-label="…" /> : <p>{messages[locale].studio.playerIntro}</p>}
+      {inFrame ? (
+        <div className="spinner" role="status" aria-label="…" />
+      ) : (
+        <p>{messages[locale].studio.playerIntro}</p>
+      )}
     </div>
   )
 }
