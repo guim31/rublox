@@ -26,6 +26,7 @@ import { isDark, usePrefs } from '../../lib/prefs.ts'
 import { useDoc, useSession } from '../context.tsx'
 import { BLOCKLY_ORIGIN, type ProjectSession } from '../session.ts'
 import { useEditor } from '../store.ts'
+import { registerBlockMenu, showBreakpoints } from './block-menu.ts'
 import { askName } from './prompt.tsx'
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
@@ -147,6 +148,7 @@ export function BlocksWorkspace({
     if (!element) return
     setupBlocks(locale)
     patchBlockly()
+    registerBlockMenu()
     const workspace = injectWorkspace(element, {
       mode,
       dark,
@@ -171,6 +173,7 @@ export function BlocksWorkspace({
       queued = true
       requestAnimationFrame(() => {
         queued = false
+        showBreakpoints(workspace, useEditor.getState().slow.breakpoints)
         if (workspace.isDragging()) return
         saveToProject(session, workspaceKey, workspace)
       })
@@ -225,6 +228,21 @@ export function BlocksWorkspace({
     workspace.updateToolbox(buildToolbox(contextRef.current))
     refreshReferences(workspace)
   }, [toolboxKey])
+
+  // Slow motion: the running block lights up; breakpoints are drawn.
+  const step = useEditor((s) => s.slow.step)
+  const breakpoints = useEditor((s) => s.slow.breakpoints)
+  useEffect(() => {
+    const workspace = workspaceRef.current
+    if (!workspace) return
+    const id = step?.workspace === workspaceKey ? step.blockId : null
+    workspace.highlightBlock(id && workspace.getBlockById(id) ? id : null)
+    if (id && step?.paused) workspace.centerOnBlock(id)
+  }, [step, workspaceKey])
+  useEffect(() => {
+    const workspace = workspaceRef.current
+    if (workspace) showBreakpoints(workspace, breakpoints)
+  }, [breakpoints])
 
   // A console error asked to show its block.
   const focusBlock = useEditor((s) => s.focusBlock)

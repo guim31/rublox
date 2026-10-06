@@ -7,6 +7,11 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Mascot } from '../components/brand.tsx'
 import { Button } from '../components/ui/button.tsx'
+import { HelpPanel } from '../help/help-panel.tsx'
+import { BadgeWatcher } from '../learn/badges.tsx'
+import { ChallengePanel } from '../learn/challenge-panel.tsx'
+import { TourRunner } from '../learn/tour.tsx'
+import { TutorialRunner } from '../learn/tutorial-runner.tsx'
 import { errorMessage } from '../lib/errors.ts'
 import { usePrefs } from '../lib/prefs.ts'
 import { useMe } from '../lib/session.ts'
@@ -115,6 +120,11 @@ function Editor({ projectId, tab, screen }: Props) {
         <ConsolePanel open={consoleOpen} projectId={projectId} />
       </div>
       <EditorCommands projectId={projectId} tab={tab} screenId={screenId} />
+      <HelpPanel />
+      <BadgeWatcher />
+      <ChallengePanel projectId={projectId} tab={tab} workspace={workspace} />
+      <TutorialRunner projectId={projectId} tab={tab} workspace={workspace} />
+      <TourRunner tab={tab} />
       <div aria-live="polite" className="sr-only">
         {announcement}
       </div>

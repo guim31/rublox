@@ -315,6 +315,9 @@ importers:
       '@rublox/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@rublox/learn':
+        specifier: workspace:*
+        version: link:../../packages/learn
       '@rublox/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -429,7 +432,7 @@ importers:
     dependencies:
       '@blockly/field-colour':
         specifier: 13.3.0
-        version: 13.3.0(blockly@13.3.0(jsdom@29.1.1))
+        version: 13.3.0(blockly@13.3.0(jsdom@29.1.1(@noble/hashes@2.4.0)))
       '@rublox/catalog':
         specifier: workspace:*
         version: link:../catalog
@@ -441,14 +444,14 @@ importers:
         version: link:../schema
       blockly:
         specifier: 13.3.0
-        version: 13.3.0(jsdom@29.1.1)
+        version: 13.3.0(jsdom@29.1.1(@noble/hashes@2.4.0))
     devDependencies:
       '@rublox/config':
         specifier: workspace:*
         version: link:../config
       jsdom:
         specifier: 29.1.1
-        version: 29.1.1
+        version: 29.1.1(@noble/hashes@2.4.0)
 
   packages/catalog:
     dependencies:
@@ -488,10 +491,10 @@ importers:
         version: link:../i18n
       blockly:
         specifier: 13.3.0
-        version: 13.3.0(jsdom@29.1.1)
+        version: 13.3.0(jsdom@29.1.1(@noble/hashes@2.4.0))
       jsdom:
         specifier: 29.1.1
-        version: 29.1.1
+        version: 29.1.1(@noble/hashes@2.4.0)
 
   packages/runtime:
     dependencies:
@@ -519,7 +522,7 @@ importers:
         version: 19.3.0(@types/react@19.3.0)
       jsdom:
         specifier: 29.1.1
-        version: 29.1.1
+        version: 29.1.1(@noble/hashes@2.4.0)
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -4379,14 +4382,14 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.15':
     optional: true
 
-  '@blockly/field-colour@13.3.0(blockly@13.3.0(jsdom@29.1.1))':
+  '@blockly/field-colour@13.3.0(blockly@13.3.0(jsdom@29.1.1(@noble/hashes@2.4.0)))':
     dependencies:
-      '@blockly/field-grid-dropdown': 13.3.0(blockly@13.3.0(jsdom@29.1.1))
-      blockly: 13.3.0(jsdom@29.1.1)
+      '@blockly/field-grid-dropdown': 13.3.0(blockly@13.3.0(jsdom@29.1.1(@noble/hashes@2.4.0)))
+      blockly: 13.3.0(jsdom@29.1.1(@noble/hashes@2.4.0))
 
-  '@blockly/field-grid-dropdown@13.3.0(blockly@13.3.0(jsdom@29.1.1))':
+  '@blockly/field-grid-dropdown@13.3.0(blockly@13.3.0(jsdom@29.1.1(@noble/hashes@2.4.0)))':
     dependencies:
-      blockly: 13.3.0(jsdom@29.1.1)
+      blockly: 13.3.0(jsdom@29.1.1(@noble/hashes@2.4.0))
 
   '@bramus/specificity@2.4.2':
     dependencies:
@@ -4707,8 +4710,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
-
-  '@exodus/bytes@1.16.0': {}
 
   '@exodus/bytes@1.16.0(@noble/hashes@2.4.0)':
     optionalDependencies:
@@ -6169,10 +6170,6 @@ snapshots:
     dependencies:
       jsdom: 29.1.1(@noble/hashes@2.4.0)
 
-  blockly@13.3.0(jsdom@29.1.1):
-    dependencies:
-      jsdom: 29.1.1
-
   browserslist@4.29.3:
     dependencies:
       baseline-browser-mapping: 2.11.27
@@ -6241,13 +6238,6 @@ snapshots:
       source-map-js: 1.2.2
 
   csstype@3.2.3: {}
-
-  data-urls@7.0.0:
-    dependencies:
-      whatwg-mimetype: 5.0.0
-      whatwg-url: 16.0.1
-    transitivePeerDependencies:
-      - '@noble/hashes'
 
   data-urls@7.0.0(@noble/hashes@2.4.0):
     dependencies:
@@ -6421,12 +6411,6 @@ snapshots:
 
   hono@4.13.13: {}
 
-  html-encoding-sniffer@6.0.0:
-    dependencies:
-      '@exodus/bytes': 1.16.0
-    transitivePeerDependencies:
-      - '@noble/hashes'
-
   html-encoding-sniffer@6.0.0(@noble/hashes@2.4.0):
     dependencies:
       '@exodus/bytes': 1.16.0(@noble/hashes@2.4.0)
@@ -6456,32 +6440,6 @@ snapshots:
   js-tokens@10.0.0: {}
 
   js-tokens@4.0.0: {}
-
-  jsdom@29.1.1:
-    dependencies:
-      '@asamuzakjp/css-color': 5.1.11
-      '@asamuzakjp/dom-selector': 7.1.1
-      '@bramus/specificity': 2.4.2
-      '@csstools/css-syntax-patches-for-csstree': 1.1.15(css-tree@3.2.1)
-      '@exodus/bytes': 1.16.0
-      css-tree: 3.2.1
-      data-urls: 7.0.0
-      decimal.js: 10.6.0
-      html-encoding-sniffer: 6.0.0
-      is-potential-custom-element-name: 1.0.1
-      lru-cache: 11.5.3
-      parse5: 8.0.1
-      saxes: 6.0.0
-      symbol-tree: 3.2.4
-      tough-cookie: 6.0.2
-      undici: 7.30.0
-      w3c-xmlserializer: 5.0.0
-      webidl-conversions: 8.0.1
-      whatwg-mimetype: 5.0.0
-      whatwg-url: 16.0.1
-      xml-name-validator: 5.0.0
-    transitivePeerDependencies:
-      - '@noble/hashes'
 
   jsdom@29.1.1(@noble/hashes@2.4.0):
     dependencies:
@@ -7110,14 +7068,6 @@ snapshots:
   webpack-virtual-modules@0.6.2: {}
 
   whatwg-mimetype@5.0.0: {}
-
-  whatwg-url@16.0.1:
-    dependencies:
-      '@exodus/bytes': 1.16.0
-      tr46: 6.0.0
-      webidl-conversions: 8.0.1
-    transitivePeerDependencies:
-      - '@noble/hashes'
 
   whatwg-url@16.0.1(@noble/hashes@2.4.0):
     dependencies:

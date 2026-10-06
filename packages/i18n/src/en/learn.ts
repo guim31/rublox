@@ -1,10 +1,12 @@
 import type { learning as fr } from '../fr/learn.ts'
 import type { Messages } from '../types.ts'
+import { helpContent } from './help.ts'
 
 type Learning = Pick<Messages['studio'], keyof typeof fr>
 
 /** Strings of the learning experience, the welcome page, the tour and the help (J3). */
 export const learning: Learning = {
+  ...helpContent,
   landing: {
     title: 'Build your own phone apps',
     lead: 'Place buttons, snap blocks together, and your app runs on your phone right away. To learn programming, at 8 or at 80.',

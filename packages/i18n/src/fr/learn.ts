@@ -1,5 +1,8 @@
+import { helpContent } from './help.ts'
+
 /** Strings of the learning experience, the welcome page, the tour and the help (J3). */
 export const learning = {
+  ...helpContent,
   landing: {
     title: 'Fabrique tes propres applis pour téléphone',
     lead: 'Pose des boutons, assemble des blocs, et ton appli tourne tout de suite sur ton téléphone. Pour apprendre à programmer, à 8 ans comme à 80.',

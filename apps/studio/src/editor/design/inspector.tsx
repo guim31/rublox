@@ -106,7 +106,7 @@ export function Inspector({ screenId }: { screenId: ScreenId }) {
               const value = set ? node.props[key] : resolveDefault(prop, doc.meta.locale)
               const fieldId = `prop-${id}-${key}`
               return (
-                <div key={key} className="flex flex-col gap-1">
+                <div key={key} className="flex flex-col gap-1" data-tour={`inspector:${key}`}>
                   <div className="flex items-center justify-between gap-2">
                     <label
                       htmlFor={fieldId}

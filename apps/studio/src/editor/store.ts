@@ -1,4 +1,4 @@
-import type { LogEntry } from '@rublox/runtime'
+import type { LogEntry, StepInfo } from '@rublox/runtime'
 import type { ComponentId } from '@rublox/schema'
 import { create } from 'zustand'
 
@@ -13,7 +13,10 @@ export const DEVICES: Record<Device, { width: number; height: number }> = {
 
 export type ConsoleEntry = LogEntry & { id: number }
 
-export type PreviewControls = { restart(): void; stop(): void }
+export type PreviewControls = { restart(): void; stop(): void; resume(step: boolean): void }
+
+/** Slow motion (SPEC § 4.3): on or off, the block running now, the breakpoints (block ids). */
+export type SlowState = { enabled: boolean; step: StepInfo | null; breakpoints: string[] }
 
 type EditorState = {
   selected: ComponentId | null
@@ -30,6 +33,7 @@ type EditorState = {
   focusBlock: string | null
   /** Live region message for screen readers (drag and drop, additions). */
   announcement: string
+  slow: SlowState
   select(id: ComponentId | null): void
   hover(id: ComponentId | null): void
   set(
@@ -57,6 +61,7 @@ export const useEditor = create<EditorState>()((set) => ({
   preview: null,
   focusBlock: null,
   announcement: '',
+  slow: { enabled: false, step: null, breakpoints: [] },
   select: (selected) => set({ selected }),
   hover: (hovered) => set({ hovered }),
   set: (patch) => set(patch),
@@ -74,5 +79,10 @@ export function resetEditor(): void {
     running: false,
     preview: null,
     focusBlock: null,
+    slow: { enabled: false, step: null, breakpoints: [] },
   })
+}
+
+export function setSlow(patch: Partial<SlowState>): void {
+  useEditor.setState((state) => ({ slow: { ...state.slow, ...patch } }))
 }
