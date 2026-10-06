@@ -187,7 +187,7 @@ function PasswordSection({ managed }: { managed: boolean }) {
   return (
     <Section title={t('account.changePassword')}>
       <form
-        className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+        className="flex flex-col gap-4"
         onSubmit={async (event) => {
           event.preventDefault()
           setError('')
@@ -205,38 +205,45 @@ function PasswordSection({ managed }: { managed: boolean }) {
           toast.success(t('account.passwordChanged'))
         }}
       >
-        <Field id="current-password" label={t('account.currentPassword')}>
-          <Input
-            id="current-password"
-            type="password"
-            autoComplete="current-password"
-            value={current}
-            onChange={(event) => setCurrent(event.target.value)}
-          />
-        </Field>
-        <Field id="next-password" label={t('account.newPassword')} hint={t('invite.passwordHint')}>
-          <Input
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field id="current-password" label={t('account.currentPassword')}>
+            <Input
+              id="current-password"
+              type="password"
+              autoComplete="current-password"
+              value={current}
+              onChange={(event) => setCurrent(event.target.value)}
+            />
+          </Field>
+          <Field
             id="next-password"
-            type="password"
-            autoComplete="new-password"
-            value={next}
-            onChange={(event) => setNext(event.target.value)}
-            aria-describedby={describedBy('next-password', true)}
-          />
-        </Field>
-        <Button
-          type="submit"
-          icon={<KeyRound size={16} />}
-          disabled={!current || next.length < 8}
-          className="sm:mb-[calc(1lh+6px)]"
-        >
-          {t('account.changePassword')}
-        </Button>
+            label={t('account.newPassword')}
+            hint={t('invite.passwordHint')}
+          >
+            <Input
+              id="next-password"
+              type="password"
+              autoComplete="new-password"
+              value={next}
+              onChange={(event) => setNext(event.target.value)}
+              aria-describedby={describedBy('next-password', true)}
+            />
+          </Field>
+        </div>
         {error ? (
-          <p role="alert" className="text-ui-sm text-danger sm:col-span-3">
+          <p role="alert" className="text-ui-sm text-danger">
             {error}
           </p>
         ) : null}
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            icon={<KeyRound size={16} />}
+            disabled={!current || next.length < 8}
+          >
+            {t('account.changePassword')}
+          </Button>
+        </div>
       </form>
     </Section>
   )

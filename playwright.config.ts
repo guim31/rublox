@@ -32,12 +32,12 @@ export default defineConfig({
   projects: [
     {
       name: 'e2e',
-      testIgnore: /screenshots\.spec\.ts/,
+      testIgnore: /screenshots.*\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
     {
       name: 'screenshots',
-      testMatch: /screenshots\.spec\.ts/,
+      testMatch: /screenshots.*\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },

@@ -19,7 +19,7 @@ export interface Services {
   files: FileStore
   settings: SettingsStore
   guard: FailureGuard
-  logger?: Pick<Logger, 'info' | 'warn' | 'error'>
+  logger?: Pick<Logger, 'debug' | 'info' | 'warn' | 'error'>
 }
 
 export function createServices(
@@ -29,7 +29,7 @@ export function createServices(
 ): Services {
   return {
     db,
-    auth: createAuth(db, config),
+    auth: createAuth(db, config, logger),
     config,
     files: new FileStore(config.dataDir),
     settings: new SettingsStore(db, {

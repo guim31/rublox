@@ -1,10 +1,25 @@
 import { useNavigate } from '@tanstack/react-router'
 import { Command as Cmdk } from 'cmdk'
-import { Blocks, Globe, LayoutDashboard, Moon, Plus, Sparkles, Sun, SunMoon } from 'lucide-react'
+import {
+  Blocks,
+  Globe,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Moon,
+  Plus,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  SunMoon,
+  UserRound,
+  UsersRound,
+} from 'lucide-react'
 import { Dialog as Radix } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
 import { type Command, useCommands } from '../lib/commands.ts'
 import { usePrefs } from '../lib/prefs.ts'
+import { signOut, useMe } from '../lib/session.ts'
 import { Kbd } from './ui/kbd.tsx'
 
 const GROUP_ORDER: Command['group'][] = ['editor', 'add', 'project', 'interface']
@@ -15,6 +30,7 @@ export function CommandPalette() {
   const { open, setOpen, page } = useCommands()
   const prefs = usePrefs()
   const navigate = useNavigate()
+  const me = useMe()
 
   const global: Command[] = [
     {
@@ -85,7 +101,57 @@ export function CommandPalette() {
           run: () => prefs.setLocale('fr'),
         },
   ]
-  const commands = [...page, ...global]
+  const user = me.data?.user
+  const account: Command[] = me.isPending
+    ? []
+    : user
+      ? [
+          {
+            id: 'account',
+            group: 'project',
+            label: t('userMenu.account'),
+            icon: <UserRound size={16} />,
+            run: () => void navigate({ to: '/account' }),
+          },
+          {
+            id: 'spaces',
+            group: 'project',
+            label: t('nav.spaces'),
+            icon: <UsersRound size={16} />,
+            run: () => void navigate({ to: '/spaces' }),
+          },
+          ...(user.isAdmin
+            ? [
+                {
+                  id: 'admin',
+                  group: 'project' as const,
+                  label: t('nav.admin'),
+                  icon: <ShieldCheck size={16} />,
+                  run: () => void navigate({ to: '/admin' }),
+                },
+              ]
+            : []),
+          {
+            id: 'sign-out',
+            group: 'project',
+            label: t('userMenu.signOut'),
+            icon: <LogOut size={16} />,
+            run: async () => {
+              await signOut()
+              await navigate({ to: '/login' })
+            },
+          },
+        ]
+      : [
+          {
+            id: 'sign-in',
+            group: 'project',
+            label: t('userMenu.signIn'),
+            icon: <LogIn size={16} />,
+            run: () => void navigate({ to: '/login' }),
+          },
+        ]
+  const commands = [...page, ...global, ...account]
 
   return (
     <Radix.Root open={open} onOpenChange={setOpen}>

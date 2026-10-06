@@ -51,13 +51,19 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 
 - `pnpm install` puis `pnpm dev` : studio sur `localhost:5173`, lecteur sur `127.0.0.1:5174`,
   serveur sur `localhost:3000` (PGlite dans `apps/server/data/`, ni Docker ni base externe).
+  Premier lancement avec un administrateur :
+  `RUBLOX_ADMIN_USERNAME=admin RUBLOX_ADMIN_PASSWORD=admin-password pnpm dev` (créé seulement si la
+  base n'a aucun compte ; repartir de zéro : supprimer `apps/server/data/`).
 - `pnpm check` : Biome (avertissements bloquants), types, tests unitaires, construction. À passer
   avant chaque push.
 - `pnpm test:e2e` : construit puis lance Playwright contre le serveur de production (les deux
-  origines sur un port : `localhost:4310` et `127.0.0.1:4310`). En session cloud :
+  origines sur un port : `localhost:4310` et `127.0.0.1:4310`, base en mémoire, administrateur
+  `admin` / `admin-password` créé au démarrage). En session cloud :
   `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome pnpm test:e2e`.
   Contre les serveurs de dev : `E2E_BASE_URL=http://localhost:5173 npx playwright test --project=e2e`.
-- `pnpm screenshots` : captures de PR dans `docs/screenshots/j0/` (Junior, Studio, clair, sombre).
+- `pnpm screenshots` : captures de PR (Junior, Studio, clair, sombre), une spec par jalon
+  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`). Lancer seulement celle du jalon :
+  `npx playwright test --project=screenshots e2e/screenshots-j1.spec.ts` après `pnpm build`.
 - `pnpm --filter @rublox/blocks test -- -u` : régénérer les instantanés du générateur, puis
   relire le diff du code produit.
 - `pnpm --filter @rublox/server db:generate` : migration Drizzle après un changement de
@@ -71,7 +77,11 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `apps/studio/src/editor/component-icon.tsx`. Ses blocs et son générateur en découlent ; les tests
   de complétude disent ce qui manque. Voir `docs/SPEC.md` § 0.1 pour les contrats.
 - Une chaîne d'interface : `packages/i18n/src/fr/*.ts` puis `en/*.ts` (TypeScript refuse une clé
-  manquante ; `t('…')` est typé).
+  manquante ; `t('…')` est typé). Celles des comptes, espaces et administration sont dans
+  `accounts.ts`.
+- Une route d'API : `apps/server/src/routes/<domaine>.ts`, corps validé par `jsonBody(zod)`,
+  droits par `access.ts`, test sur PGlite avec `test/server.ts` (`createTestServer`, un `Client`
+  par navigateur). Côté studio : `call(api.<route>.$get(…))`.
 
 ## Pièges
 
@@ -106,5 +116,27 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   confiance au proxy (`SELF_SIGNED_CERT_IN_CHAIN`) : tester avec une copie jetable du Dockerfile
   qui ajoute `/root/.ccr/ca-bundle.crt`, ne jamais la commiter. Le premier démarrage de PGlite sur
   disque prend 5 à 9 s.
+- **Doubles copies de Blockly** : `better-auth` amène `@noble/hashes`, pair facultatif de `jsdom`,
+  donc pnpm installe deux variantes de `blockly` (studio et `@rublox/blocks`). Deux copies = deux
+  registres d'espaces de travail (`getWorkspaceById` rend `null`, le glisser casse) : le studio
+  force une copie avec `resolve.dedupe` (`apps/studio/vite.config.ts`). Vérifier
+  `ls node_modules/.pnpm | grep ^blockly` après un ajout de dépendance.
+- **Better Auth 1.7** : `auth.api.*` côté serveur ignore la liste blanche (`AUTH_ROUTES`), qui ne
+  filtre que les requêtes HTTP. Un mauvais mot de passe répond 401, un compte désactivé 403.
+  Le plugin passkey est un paquet à part (`@better-auth/passkey`, client dans `/client`). Sans
+  `logger`, `createAuth` est silencieux (tests). L'adresse IP vient de l'en-tête interne
+  `x-rublox-client-ip`, posé par `handleAuth` (`app.ts`).
+- **Hono + hc** : un `validator` donne au client le type de **sortie** du schéma (un champ avec
+  `.default()` devient obligatoire) : passer par `jsonBody`, qui expose le type d'entrée.
+  `c.header('Set-Cookie', …, { append: true })` pour recopier plusieurs cookies.
+- **`setMeta` (schema)** efface les clés passées à `undefined` (dont `updatedAt`, obligatoire) :
+  ne passer que les champs voulus (`writeMeta` côté serveur).
+- **turbo** ne transmet aux tâches que les variables listées : celles du serveur pour `pnpm dev`
+  sont dans `turbo.json` (`passThroughEnv`).
+- **Proxy Vite du lecteur** : `/assets` est relayé vers le serveur avec `Host: 127.0.0.1:5174`,
+  sinon le serveur croit parler au studio.
+- **Routes TanStack** : un fichier de `routes/` n'exporte que `Route` (découpage du code) ; ce
+  qui est partagé va ailleurs (`spaces/shared.ts`). Deux routes ne partagent pas un nom de
+  paramètre de recherche de types différents (`tab` de l'éditeur, `section` de l'admin).
 - **Shell** : `pkill -f <motif>` ou `pgrep -f vite | xargs kill` tue aussi le shell qui le lance ;
   arrêter les serveurs par PID ou par port.

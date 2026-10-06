@@ -15,7 +15,17 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "passThroughEnv": [
+        "RUBLOX_*",
+        "DATABASE_URL",
+        "DATA_DIR",
+        "STUDIO_URL",
+        "APPS_URL",
+        "TRUST_PROXY",
+        "MAX_UPLOAD_MB",
+        "LOG_LEVEL"
+      ]
     }
   },
   "globalPassThroughEnv": ["E2E_PORT", "E2E_BASE_URL", "PLAYWRIGHT_CHROMIUM_PATH", "CI"]

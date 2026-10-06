@@ -6,6 +6,7 @@ import type { Config } from './config.ts'
 import type { Database } from './db/index.ts'
 import * as schema from './db/schema.ts'
 import { uuidv7 } from './ids.ts'
+import type { Logger } from './logger.ts'
 
 /**
  * Header carrying the client address resolved by Rublox (`X-Real-IP` behind a trusted proxy,
@@ -68,9 +69,23 @@ export const SIGN_IN_ROUTES = new Set([
   'POST /passkey/verify-authentication',
 ])
 
-export function createAuth(db: Database, config: Pick<Config, 'studioUrl' | 'secret'>) {
+type AuthLogger = Pick<Logger, 'debug' | 'info' | 'warn' | 'error'>
+
+export function createAuth(
+  db: Database,
+  config: Pick<Config, 'studioUrl' | 'secret'>,
+  logger?: AuthLogger,
+) {
   const studio = new URL(config.studioUrl)
   return betterAuth({
+    // Better Auth's messages go to the server's JSON logs (silent without a logger: tests).
+    logger: logger
+      ? {
+          level: 'warn',
+          log: (level, message, ...args) =>
+            logger[level]({ auth: args.length ? args : undefined }, `better-auth: ${message}`),
+        }
+      : { disabled: true },
     appName: 'Rublox',
     baseURL: config.studioUrl,
     basePath: '/api/auth',
