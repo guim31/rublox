@@ -1,0 +1,77 @@
+import { errorEvent } from '../common.ts'
+import { defineComponent } from '../component.ts'
+import { event, method, prop } from '../define.ts'
+
+export const Video = defineComponent({
+  type: 'Video',
+  category: 'media',
+  icon: 'video',
+  visible: true,
+  container: false,
+  junior: true,
+  commonDefaults: { width: 'fill', height: 200, radius: 12, background: '#000000' },
+  props: {
+    src: prop.asset({
+      default: '',
+      assetKind: 'video',
+      group: 'content',
+      junior: true,
+      blocks: 'get-set',
+    }),
+    autoplay: prop.boolean({ default: false, group: 'content', junior: true }),
+    loop: prop.boolean({ default: false, group: 'content', blocks: 'get-set' }),
+    muted: prop.boolean({ default: false, group: 'content', blocks: 'get-set' }),
+    controls: prop.boolean({ default: true, group: 'content' }),
+    fit: prop.enum(['contain', 'cover'], { default: 'contain', group: 'style' }),
+    playing: prop.boolean({ default: false, group: 'content', state: true }),
+    position: prop.number({ default: 0, group: 'content', state: true }),
+  },
+  events: { ended: event({ junior: true }), ...errorEvent() },
+  methods: {
+    play: method({ junior: true }),
+    pause: method({ junior: true }),
+    stop: method(),
+  },
+  strings: {
+    fr: {
+      label: 'Vidéo',
+      prefix: 'Video',
+      description: 'Lit une vidéo de ton projet.',
+      help: 'Une vidéo se lit avec ses propres boutons ou avec les blocs « lire », « mettre en pause » et « arrêter ». Sur iPhone, une vidéo ne démarre seule que si elle est muette.',
+      example: 'Quand Bouton1 est cliqué, lire Video1',
+      props: {
+        src: 'vidéo',
+        autoplay: 'lecture automatique',
+        loop: 'en boucle',
+        muted: 'muette',
+        controls: 'boutons de lecture',
+        fit: 'ajustement',
+        playing: 'en lecture',
+        position: 'position (secondes)',
+      },
+      events: { ended: 'quand %1 est finie' },
+      methods: { play: 'lire %1', pause: 'mettre %1 en pause', stop: 'arrêter %1' },
+      enums: { fit: { contain: 'Tout montrer', cover: 'Remplir' } },
+    },
+    en: {
+      label: 'Video',
+      prefix: 'Video',
+      description: 'Plays a video of your project.',
+      help: 'A video plays with its own buttons or with the "play", "pause" and "stop" blocks. On iPhone, a video only starts by itself when it is muted.',
+      example: 'When Button1 is clicked, play Video1',
+      props: {
+        src: 'video',
+        autoplay: 'autoplay',
+        loop: 'loop',
+        muted: 'muted',
+        controls: 'playback buttons',
+        fit: 'fit',
+        playing: 'playing',
+        position: 'position (seconds)',
+      },
+      events: { ended: 'when %1 ends' },
+      methods: { play: 'play %1', pause: 'pause %1', stop: 'stop %1' },
+      enums: { fit: { contain: 'Show all', cover: 'Cover' } },
+    },
+  },
+})

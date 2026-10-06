@@ -5,6 +5,7 @@
  */
 export const catalog = {
   studio: {
+    nonVisual: { title: 'Composants invisibles' },
     list: {
       linesHint: 'Un élément par ligne.',
       item: 'Élément {{n}}',

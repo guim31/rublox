@@ -2,6 +2,7 @@ import type { Messages } from '../types.ts'
 
 export const catalog: Messages['catalog'] = {
   studio: {
+    nonVisual: { title: 'Non-visual components' },
     list: {
       linesHint: 'One item per line.',
       item: 'Item {{n}}',

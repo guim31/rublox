@@ -11,6 +11,7 @@ import { Tooltip } from '../../components/ui/tooltip.tsx'
 import { cn } from '../../lib/cn.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { addComponentOfType, moveComponentTo } from '../actions.ts'
+import { ComponentIcon } from '../component-icon.tsx'
 import { useAssetsVersion, useDoc, useSession } from '../context.tsx'
 import { DEVICES, type Device, useEditor } from '../store.ts'
 import {
@@ -216,7 +217,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
         }}
         onDrop={onDrop}
       >
-        <div className="flex min-h-full min-w-full items-center justify-center p-8">
+        <div className="flex min-h-full min-w-full flex-col items-center justify-center gap-4 p-8">
           <div ref={stageRef} className="relative">
             <PhoneFrame width={width} height={height} scale={scale} dark={appScheme === 'dark'}>
               <AppSurface theme={doc.settings.theme} scheme={appScheme}>
@@ -283,8 +284,58 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
               }
             />
           </div>
+          <NonVisualTray screen={screen} selected={selected} onSelect={select} />
         </div>
       </div>
+    </section>
+  )
+}
+
+/** Non-visual components (timer, sound, sensors…), listed under the phone (SPEC § 3). */
+function NonVisualTray({
+  screen,
+  selected,
+  onSelect,
+}: {
+  screen: Screen
+  selected: ComponentId | null
+  onSelect: (id: ComponentId) => void
+}) {
+  const { t } = useTranslation('catalog')
+  const locale = usePrefs((s) => s.locale)
+  if (!screen.nonVisual.length) return null
+  return (
+    <section
+      aria-label={t('studio.nonVisual.title')}
+      className="flex max-w-[480px] flex-wrap items-center justify-center gap-1.5"
+      data-testid="non-visual-tray"
+    >
+      <span className="w-full text-center text-ui-sm text-muted">
+        {t('studio.nonVisual.title')}
+      </span>
+      {screen.nonVisual.map((id) => {
+        const node = screen.components[id]
+        if (!node) return null
+        return (
+          <button
+            key={id}
+            type="button"
+            data-rx-id={id}
+            aria-pressed={selected === id}
+            title={componentLabel(node.type, locale)}
+            onClick={() => onSelect(id)}
+            className={cn(
+              'inline-flex h-control-sm items-center gap-1.5 rounded-full border bg-surface px-3 text-ui-sm font-strong shadow-1',
+              selected === id
+                ? 'border-primary text-primary-text ring-2 ring-primary/25'
+                : 'border-border hover:border-border-strong',
+            )}
+          >
+            <ComponentIcon type={node.type} size={14} />
+            {node.name}
+          </button>
+        )
+      })}
     </section>
   )
 }

@@ -51,8 +51,12 @@ export function addComponentOfType(
   target?: Target,
 ): ComponentId {
   const doc = session.getDoc()
-  const where = target ?? defaultTarget(doc, screenId, useEditor.getState().selected)
   const node = createComponent(type, doc.meta.locale, componentNames(session.ydoc, screenId))
+  // Non-visual components (timer, sound…) live under the screen, not in its tree.
+  const visible = getComponentDef(type)?.visible !== false
+  const where = visible
+    ? (target ?? defaultTarget(doc, screenId, useEditor.getState().selected))
+    : { parentId: null, index: undefined }
   const id = addComponent(session.ydoc, screenId, node, where.parentId, where.index)
   useEditor.getState().select(id)
   useEditor.getState().announce(`${componentLabel(type, locale)} — ${node.name}`)

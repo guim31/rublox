@@ -8,6 +8,8 @@ export type BehaviorContext = {
   readonly id: ComponentId
   /** The component's name (`Minuteur1`), for messages. */
   readonly name: string
+  /** Its catalog type (`Timer`). */
+  readonly type: string
   /** Language of the messages the engine writes (the interface language). */
   readonly locale: Locale
   /** Identifies the app: stored values are kept under it (SPEC § 6.6). */

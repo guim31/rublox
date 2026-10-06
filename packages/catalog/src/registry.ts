@@ -1,11 +1,50 @@
 import type { Locale, UiMode } from '@rublox/schema'
+import { AudioRecorder } from './components/audio-recorder.ts'
+import { Battery } from './components/battery.ts'
+import { Box } from './components/box.ts'
 import { Button } from './components/button.ts'
+import { Camera } from './components/camera.ts'
+import { CameraView } from './components/camera-view.ts'
+import { Canvas } from './components/canvas.ts'
+import { Checkbox } from './components/checkbox.ts'
+import { Clipboard } from './components/clipboard.ts'
 import { Column } from './components/column.ts'
+import { DataGrid, DataList } from './components/data-list.ts'
+import { DatePicker } from './components/date-picker.ts'
+import { Divider } from './components/divider.ts'
+import { Dropdown } from './components/dropdown.ts'
+import { Grid } from './components/grid.ts'
+import { Icon } from './components/icon.ts'
 import { Image } from './components/image.ts'
+import { ListView } from './components/list-view.ts'
+import { Location } from './components/location.ts'
+import { Lottie } from './components/lottie.ts'
+import { Motion } from './components/motion.ts'
+import { Network } from './components/network.ts'
+import { Notifier } from './components/notifier.ts'
+import { PhotoPicker } from './components/photo-picker.ts'
+import { ProgressBar } from './components/progress-bar.ts'
+import { QrCode } from './components/qr-code.ts'
+import { QrScanner } from './components/qr-scanner.ts'
+import { Rating } from './components/rating.ts'
+import { RichText } from './components/rich-text.ts'
 import { Row } from './components/row.ts'
 import { Screen } from './components/screen.ts'
+import { Share } from './components/share.ts'
+import { Slider } from './components/slider.ts'
+import { Sound } from './components/sound.ts'
+import { Spacer } from './components/spacer.ts'
+import { SpeechRecognition } from './components/speech-recognition.ts'
+import { Spinner } from './components/spinner.ts'
+import { Switch } from './components/switch.ts'
 import { Text } from './components/text.ts'
 import { TextInput } from './components/text-input.ts'
+import { TextToSpeech } from './components/text-to-speech.ts'
+import { TimePicker } from './components/time-picker.ts'
+import { Timer } from './components/timer.ts'
+import { Vibrator } from './components/vibrator.ts'
+import { Video } from './components/video.ts'
+import { WebView } from './components/web-view.ts'
 import {
   CATEGORY_ORDER,
   type ComponentCategory,
@@ -20,10 +59,50 @@ export const COMPONENTS: readonly ComponentDef[] = [
   Screen,
   Column,
   Row,
+  Box,
+  Grid,
+  Spacer,
+  Divider,
   Button,
   Text,
   TextInput,
   Image,
+  Icon,
+  Checkbox,
+  Switch,
+  Slider,
+  Dropdown,
+  DatePicker,
+  TimePicker,
+  Rating,
+  ProgressBar,
+  Spinner,
+  RichText,
+  QrCode,
+  ListView,
+  DataList,
+  DataGrid,
+  Video,
+  Lottie,
+  WebView,
+  CameraView,
+  Canvas,
+  Location,
+  Motion,
+  Battery,
+  Network,
+  Timer,
+  Sound,
+  AudioRecorder,
+  TextToSpeech,
+  SpeechRecognition,
+  Vibrator,
+  Camera,
+  PhotoPicker,
+  Share,
+  Clipboard,
+  Notifier,
+  QrScanner,
 ]
 
 export const SCREEN_TYPE = 'Screen'

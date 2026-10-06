@@ -20,7 +20,9 @@
     "@rublox/i18n": "workspace:*",
     "@rublox/schema": "workspace:*",
     "lucide-react": "1.52.0",
-    "qrcode": "1.5.4"
+    "qrcode": "1.5.4",
+    "lottie-web": "5.13.0",
+    "jsqr": "1.4.0"
   },
   "peerDependencies": {
     "react": "^19.3.0",

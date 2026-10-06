@@ -5,6 +5,8 @@ export type RendererProps = {
   id: string
   /** The component's name (`Bouton1`), for accessibility and tests. */
   name: string
+  /** Its catalog type (`Button`). */
+  type: string
   /** Every property, defaults resolved. */
   props: Record<string, unknown>
   /** Style of the common properties, to put on the root element. */

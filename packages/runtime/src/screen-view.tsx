@@ -62,6 +62,7 @@ export function ScreenView(props: ScreenViewProps): ReactNode {
       <Renderer
         id={id}
         name={node.name}
+        type={node.type}
         props={values}
         style={commonStyle(values, design, node.props)}
         design={design}

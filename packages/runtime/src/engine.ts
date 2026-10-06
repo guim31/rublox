@@ -516,6 +516,7 @@ export class Engine {
       get name() {
         return name()
       },
+      type: this.doc.screens[instance.screenId]?.components[componentId]?.type ?? '',
       locale: this.locale,
       appId: this.appId,
       get: (prop) => this.componentValue(instance, componentId, prop),

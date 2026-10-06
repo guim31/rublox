@@ -319,8 +319,11 @@ describe('one snapshot per block', () => {
     expect(body({ evt: onClick('button', statement as never) })).toMatchSnapshot()
   })
 
+  // Events of the J0 components; every other component has its own module snapshot below.
   it.each(
-    COMPONENTS.flatMap((def) =>
+    COMPONENTS.filter((def) =>
+      ['Screen', 'Button', 'Text', 'TextInput', 'Image'].includes(def.type),
+    ).flatMap((def) =>
       Object.keys(def.events).map(
         (event) => [`rx_${def.type}_on_${event}`, def.type, event] as const,
       ),

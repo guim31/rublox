@@ -2,16 +2,22 @@ import {
   type BlocksContext,
   blocklyTheme,
   buildToolbox,
+  CREATE_APP_VARIABLE,
+  CREATE_STORED_VARIABLE,
   contextFromDoc,
   injectWorkspace,
   refreshReferences,
   setBlocksContext,
   setupBlocks,
+  VARIABLES_CATEGORY,
+  variablesFlyout,
 } from '@rublox/blocks'
+import { messages } from '@rublox/i18n'
 import {
   addVariable,
   allVariableNames,
   type BlocklyJson,
+  isValidName,
   removeVariable,
   setBlockStack,
   updateVariable,
@@ -21,6 +27,7 @@ import {
 } from '@rublox/schema'
 import * as Blockly from 'blockly/core'
 import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import type * as Y from 'yjs'
 import { isDark, usePrefs } from '../../lib/prefs.ts'
 import { useDoc, useSession } from '../context.tsx'
@@ -156,6 +163,27 @@ export function BlocksWorkspace({
     })
     workspaceRef.current = workspace
     setBlocksContext(workspace, () => contextRef.current)
+    // Variables: app ones, then stored ones (kept on the device), each with its button.
+    workspace.registerToolboxCategoryCallback(
+      VARIABLES_CATEGORY,
+      (target) => variablesFlyout(target) as Blockly.utils.toolbox.FlyoutItemInfoArray,
+    )
+    workspace.registerButtonCallback(CREATE_APP_VARIABLE, () =>
+      Blockly.Variables.createVariableButtonHandler(workspace),
+    )
+    workspace.registerButtonCallback(CREATE_STORED_VARIABLE, () => {
+      const strings = messages[locale].catalog.blocks
+      void askName(strings.storedPrompt, '').then((name) => {
+        const trimmed = name?.trim()
+        if (!trimmed) return
+        if (!isValidName(trimmed) || allVariableNames(session.ydoc).includes(trimmed)) {
+          toast.error(strings.nameTaken)
+          return
+        }
+        addVariable(session.ydoc, 'stored', { name: trimmed, initial: 0 })
+        workspace.refreshToolboxSelection()
+      })
+    })
     loadFromProject(session, workspaceKey, workspace)
     workspace.addChangeListener(Blockly.Events.disableOrphans)
 
@@ -219,6 +247,7 @@ export function BlocksWorkspace({
   const toolboxKey = JSON.stringify([
     contextRef.current.components,
     contextRef.current.screens,
+    contextRef.current.appFunctions,
     moreBlocks,
   ])
   // biome-ignore lint/correctness/useExhaustiveDependencies: toolboxKey sums up the context
@@ -270,7 +299,10 @@ function onVariableEvent(
   const id = (event as Blockly.Events.VarBase).varId
   if (!id) return
   const doc = session.getDoc()
-  const declared = doc.variables.app.find((v) => v.id === id)
+  const kind = (['app', 'stored', 'shared'] as const).find((k) =>
+    doc.variables[k].some((v) => v.id === id),
+  )
+  const declared = kind ? doc.variables[kind].find((v) => v.id === id) : undefined
   if (event.type === Blockly.Events.VAR_CREATE) {
     const variable = workspace.getVariableMap().getVariableById(id)
     if (variable && !declared && !allVariableNames(session.ydoc).includes(variable.getName())) {
@@ -278,9 +310,9 @@ function onVariableEvent(
     }
   } else if (event.type === Blockly.Events.VAR_RENAME) {
     const name = (event as Blockly.Events.VarRename).newName
-    if (declared && name && name !== declared.name)
-      updateVariable(session.ydoc, 'app', id, { name }, BLOCKLY_ORIGIN)
-  } else if (event.type === Blockly.Events.VAR_DELETE && declared) {
-    removeVariable(session.ydoc, 'app', id, BLOCKLY_ORIGIN)
+    if (kind && declared && name && name !== declared.name)
+      updateVariable(session.ydoc, kind, id, { name }, BLOCKLY_ORIGIN)
+  } else if (event.type === Blockly.Events.VAR_DELETE && kind && declared) {
+    removeVariable(session.ydoc, kind, id, BLOCKLY_ORIGIN)
   }
 }
