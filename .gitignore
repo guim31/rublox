@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds and caches
+dist/
+build/
+.turbo/
+.vite/
+*.tsbuildinfo
+coverage/
+
+# Tests
+playwright-report/
+test-results/
+blob-report/
+
+# Local data (PGlite database, uploaded assets)
+data/
+.data/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db
