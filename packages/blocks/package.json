@@ -1,0 +1,25 @@
+{
+  "name": "@rublox/blocks",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@blockly/field-colour": "13.3.0",
+    "@rublox/catalog": "workspace:*",
+    "@rublox/i18n": "workspace:*",
+    "@rublox/schema": "workspace:*",
+    "blockly": "13.3.0"
+  },
+  "devDependencies": {
+    "@rublox/config": "workspace:*",
+    "jsdom": "29.1.1"
+  }
+}

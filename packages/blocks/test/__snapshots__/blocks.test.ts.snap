@@ -1,0 +1,310 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generated code > matches the readable module of SPEC § 6.5 1`] = `
+"// Écran « Accueil »
+// Code généré à partir de tes blocs : il se lit, il ne se modifie pas.
+
+export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Texte1 } = components;
+
+  Bouton1.onClick(async () => {
+    Texte1.text = 'Bonjour';
+  });
+}
+"
+`;
+
+exports[`generated code > writes app variables in app, and makes functions async 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  async function double(n) {
+    await rx.tick();
+    return n * 2;
+  }
+
+  Bouton1.onClick(async () => {
+    app.score = await double(app['mon nom']);
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > app start, in the app workspace 1`] = `
+"// Appli : ce qui est commun à tous les écrans
+// Code généré à partir de tes blocs : il se lit, il ne se modifie pas.
+
+export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // Quand l’appli démarre
+  app.score = 0;
+}
+"
+`;
+
+exports[`one snapshot per block > confirm 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Texte1 } = components;
+
+  Bouton1.onClick(async () => {
+    Texte1.text = await ui.confirm('Sûr ?');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > controls_if 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Texte1 } = components;
+
+  Bouton1.onClick(async () => {
+    if (app.score > 10) {
+      Texte1.text = 'Gagné';
+    } else {
+      Texte1.text = 'Encore';
+    }
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > lists_getIndex 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Texte1 } = components;
+
+  Bouton1.onClick(async () => {
+    Texte1.text = ['a', 'b'][0];
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > math_change 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    app.score = (typeof app.score === 'number' ? app.score : 0) + 1;
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > math_random_int 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Texte1 } = components;
+
+  Bouton1.onClick(async () => {
+    Texte1.text = mathRandomInt(1, 6);
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > prompt 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Texte1 } = components;
+
+  Bouton1.onClick(async () => {
+    Texte1.text = await ui.prompt('Nom ?');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Button_on_click 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    rx.log('!');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Button_on_longPress 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onLongPress(async () => {
+    rx.log('!');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Button_set 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    Bouton1.color = '#ff0000';
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Image_on_click 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Image1 } = components;
+
+  Image1.onClick(async () => {
+    rx.log('!');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Screen_on_open 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil } = components;
+
+  Accueil.onOpen(async () => {
+    rx.log('!');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Text_on_click 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Texte1 } = components;
+
+  Texte1.onClick(async () => {
+    rx.log('!');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Text_set 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Texte1 } = components;
+
+  Bouton1.onClick(async () => {
+    Texte1.text = 'Salut';
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_TextInput_call_clear 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Champ1 } = components;
+
+  Bouton1.onClick(async () => {
+    Champ1.clear();
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_TextInput_call_focus 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Champ1 } = components;
+
+  Bouton1.onClick(async () => {
+    Champ1.focus();
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_TextInput_on_change 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Champ1 } = components;
+
+  Champ1.onChange(async () => {
+    rx.log('!');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_TextInput_on_submit 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Champ1 } = components;
+
+  Champ1.onSubmit(async () => {
+    rx.log('!');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_log 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Champ1 } = components;
+
+  Bouton1.onClick(async () => {
+    rx.log(Champ1.text);
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_screen_back 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    screens.back();
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_screen_open 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    screens.open('Ecran2');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_ui_alert 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    await ui.alert('Bravo');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_ui_toast 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    ui.toast('OK');
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_wait 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    await rx.wait(2);
+  });
+}
+"
+`;
+
+exports[`one snapshot per block > text_join 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Bouton1, Champ1, Texte1 } = components;
+
+  Bouton1.onClick(async () => {
+    Texte1.text = 'Bonjour ' + String(Champ1.text);
+  });
+}
+"
+`;

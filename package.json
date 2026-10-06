@@ -14,9 +14,9 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "lint": "biome check .",
+    "lint": "biome check --error-on-warnings .",
     "format": "biome check --write .",
-    "check": "biome check . && turbo run typecheck test build",
+    "check": "biome check --error-on-warnings . && turbo run typecheck test build",
     "test:e2e": "turbo run build && playwright test",
     "screenshots": "turbo run build && playwright test --project=screenshots"
   },

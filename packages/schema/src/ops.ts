@@ -147,7 +147,16 @@ export function renameScreen(ydoc: Y.Doc, screenId: ScreenId, name: string, orig
     const screen = screenMap(ydoc, screenId)
     if (screen.get('name') === name) return
     if (screenNames(ydoc).includes(name)) throw new ProjectOpError(`screen name ${name} is taken`)
+    // The root component carries the screen's name ("when Home opens"): rename both.
+    const rootId = screen.get('rootId') as string
+    const components = screen.get('components') as Y.Map<YMap>
+    for (const [id, component] of components.entries()) {
+      if (id !== rootId && component.get('name') === name) {
+        throw new ProjectOpError(`component name ${name} is taken in this screen`)
+      }
+    }
     screen.set('name', name)
+    components.get(rootId)?.set('name', name)
   }, origin)
 }
 
