@@ -1,0 +1,83 @@
+import { defineComponent } from '../component.ts'
+import { event, prop } from '../define.ts'
+import { SCENE_CHILD_OMIT } from './sprite.ts'
+
+/** A text in a game scene, placed freely: a score, lives, a message. */
+export const SceneText = defineComponent({
+  type: 'SceneText',
+  category: 'game',
+  icon: 'trophy',
+  visible: true,
+  container: false,
+  junior: true,
+  parents: ['GameScene'],
+  omitCommon: SCENE_CHILD_OMIT,
+  props: {
+    text: prop.string({
+      default: { fr: 'Score : 0', en: 'Score: 0' },
+      group: 'content',
+      junior: true,
+      blocks: 'get-set',
+    }),
+    x: prop.number({ default: 180, group: 'layout', junior: true, blocks: 'get-set' }),
+    y: prop.number({ default: 40, group: 'layout', junior: true, blocks: 'get-set' }),
+    rotation: prop.number({ default: 0, group: 'layout', blocks: 'get-set' }),
+    fontSize: prop.number({
+      default: 28,
+      min: 6,
+      max: 400,
+      group: 'style',
+      junior: true,
+      blocks: 'get-set',
+    }),
+    color: prop.color({ default: '#1b1a24', group: 'style', junior: true, blocks: 'get-set' }),
+    bold: prop.boolean({ default: true, group: 'style' }),
+    outline: prop.boolean({ default: true, group: 'style' }),
+    align: prop.enum(['left', 'center', 'right'], { default: 'center', group: 'style' }),
+  },
+  events: { tap: event({ junior: true }) },
+  strings: {
+    fr: {
+      label: 'Texte de scène',
+      prefix: 'Score',
+      description: 'Un texte posé dans la scène : score, vies, message.',
+      help: 'Un texte de scène se place où tu veux dans une scène de jeu, par-dessus les lutins. Change son texte avec des blocs pour afficher le score ou les vies.',
+      example: 'Mettre texte de Score à « Score : » + score',
+      props: {
+        text: 'texte',
+        x: 'x',
+        y: 'y',
+        rotation: 'rotation',
+        fontSize: 'taille',
+        color: 'couleur',
+        bold: 'gras',
+        outline: 'contour clair',
+        align: 'alignement',
+      },
+      events: { tap: 'quand on touche %1' },
+      methods: {},
+      enums: { align: { left: 'Gauche', center: 'Centre', right: 'Droite' } },
+    },
+    en: {
+      label: 'Scene text',
+      prefix: 'Score',
+      description: 'A text in the scene: score, lives, a message.',
+      help: 'A scene text goes anywhere in a game scene, over the sprites. Change its text with blocks to show the score or the lives.',
+      example: 'Set text of Score to "Score: " + score',
+      props: {
+        text: 'text',
+        x: 'x',
+        y: 'y',
+        rotation: 'rotation',
+        fontSize: 'size',
+        color: 'color',
+        bold: 'bold',
+        outline: 'light outline',
+        align: 'alignment',
+      },
+      events: { tap: 'when %1 is tapped' },
+      methods: {},
+      enums: { align: { left: 'Left', center: 'Center', right: 'Right' } },
+    },
+  },
+})

@@ -16,6 +16,8 @@ export type BlockAccess = 'get-set' | 'get' | 'set' | 'none'
  * - `spacing`: one number, or `[top, right, bottom, left]`
  * - `color`: `''` (none), `#rrggbb`, `#rrggbbaa`, or a theme token (`@primary`, `@text`…)
  * - `asset`: an asset id of the project, or an `https:` address
+ * - `images`: a list of images, each an asset id, an `https:` address or an emoji (the
+ *   costumes of a sprite)
  */
 export type PropKind =
   | 'string'
@@ -27,6 +29,7 @@ export type PropKind =
   | 'spacing'
   | 'asset'
   | 'icon'
+  | 'images'
 
 export type SizeValue = 'auto' | 'fill' | number | `${number}%`
 export type SpacingValue = number | [number, number, number, number]
@@ -38,6 +41,8 @@ type PropOptions<T> = {
   /** Shown in Junior without opening "More options". */
   junior?: boolean
   blocks?: BlockAccess
+  /** See `PropDef.live`. */
+  live?: boolean
 }
 
 export type PropDef<T = unknown> = {
@@ -55,6 +60,11 @@ export type PropDef<T = unknown> = {
   multiline?: boolean
   /** Asset kind accepted (asset). */
   assetKind?: 'image' | 'sound' | 'video' | 'lottie'
+  /**
+   * A value that only exists while the app runs (the direction of a joystick): blocks can
+   * read it, the inspector does not show it and projects never store it.
+   */
+  live?: boolean
   /** Turns any value into a valid one, or `undefined` when it cannot. */
   coerce: (value: unknown) => T | undefined
 }
@@ -91,7 +101,18 @@ function defaults<T>(kind: PropKind, options: PropOptions<T>) {
     group: options.group,
     junior: options.junior ?? false,
     blocks: options.blocks ?? 'none',
+    ...(options.live ? { live: true } : {}),
   }
+}
+
+/** The images of an `images` value: kept strings, at most 100 of them. */
+function imageList(value: unknown): string[] | undefined {
+  if (typeof value === 'string') return value.trim() ? [value.trim()] : []
+  if (!Array.isArray(value)) return undefined
+  const items = value
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.trim())
+  return items.filter((item) => item !== '').slice(0, 100)
 }
 
 /** Property builders, used in `defineComponent({ props })`. */
@@ -220,18 +241,64 @@ export const prop = {
       coerce: (value) => (typeof value === 'string' ? value : value == null ? '' : undefined),
     }
   },
+
+  /** A list of images: asset ids, `https:` addresses or emoji. */
+  images(options: PropOptions<string[]>): PropDef<string[]> {
+    return {
+      ...defaults('images', options),
+      assetKind: 'image',
+      coerce: imageList,
+    }
+  },
 }
 
-export type ArgDef = { kind: PropKind }
+/**
+ * A value passed to an event handler or a method. `component` is a component of the screen
+ * of type `componentType`, chosen in a dropdown (a method argument) or received (an event
+ * argument). `default` fills the toolbox's shadow block.
+ */
+export type ArgDef = {
+  kind: PropKind | 'component'
+  componentType?: string
+  default?: unknown
+}
+
+/**
+ * Narrows which occurrences of an event a handler receives, chosen in a dropdown of the
+ * event block (its `%2`): another component of `componentType` ("when Pomme touches
+ * Panier"), or one of `values` ("…touches the bottom edge"). The generated code passes the
+ * choice before the handler, `null` meaning "any": `Pomme.onHit(Panier, async (…) => …)`.
+ */
+export type EventFilter =
+  | { kind: 'component'; componentType: string }
+  | { kind: 'enum'; values: readonly string[] }
 
 export type EventDef = {
   junior: boolean
   /** Values passed to the handler, in order. */
   args: Record<string, ArgDef>
+  filter?: EventFilter
+  /**
+   * A handler still running when the event comes again is not started a second time (the
+   * frames of a game loop).
+   */
+  skipIfBusy?: boolean
 }
 
-export function event(options: { junior?: boolean; args?: Record<string, ArgDef> } = {}): EventDef {
-  return { junior: options.junior ?? false, args: options.args ?? {} }
+export function event(
+  options: {
+    junior?: boolean
+    args?: Record<string, ArgDef>
+    filter?: EventFilter
+    skipIfBusy?: boolean
+  } = {},
+): EventDef {
+  return {
+    junior: options.junior ?? false,
+    args: options.args ?? {},
+    ...(options.filter ? { filter: options.filter } : {}),
+    ...(options.skipIfBusy ? { skipIfBusy: true } : {}),
+  }
 }
 
 export type MethodDef = {
@@ -305,6 +372,10 @@ export type ComponentStrings = {
   methods: Record<string, string>
   /** Labels of enum values: `{ variant: { filled: 'Plein', … } }`. */
   enums: Record<string, Record<string, string>>
+  /** Labels of event arguments, by event: `{ frame: { dt: 'temps écoulé' } }`. */
+  eventArgs?: Record<string, Record<string, string>>
+  /** Labels of event filter choices, by event, with `any`: `{ edge: { any: 'un bord', … } }`. */
+  filters?: Record<string, Record<string, string>>
 }
 
 export type ComponentDef = {
@@ -319,6 +390,21 @@ export type ComponentDef = {
   junior: boolean
   /** Shown in the palette (the screen root is not). */
   palette: boolean
+  /** A container that only accepts these child types. */
+  accepts?: readonly string[]
+  /** Only placed inside a container of one of these types (a sprite in a game scene). */
+  parents?: readonly string[]
+  /**
+   * A container whose children are placed freely, by their `x` and `y` properties, instead
+   * of in a flex layout (the game scene).
+   */
+  freeLayout?: boolean
+  /**
+   * Instances can be copied while the app runs (a sprite's clones). Its event handlers
+   * receive the instance that fired first, under the component's name, so that the same
+   * blocks drive the original and every clone.
+   */
+  clonable?: boolean
   props: Record<string, PropDef>
   events: Record<string, EventDef>
   methods: Record<string, MethodDef>

@@ -1,9 +1,13 @@
 import type { Locale, UiMode } from '@rublox/schema'
 import { Button } from './components/button.ts'
 import { Column } from './components/column.ts'
+import { GameScene } from './components/game-scene.ts'
 import { Image } from './components/image.ts'
+import { Joystick } from './components/joystick.ts'
 import { Row } from './components/row.ts'
+import { SceneText } from './components/scene-text.ts'
 import { Screen } from './components/screen.ts'
+import { Sprite } from './components/sprite.ts'
 import { Text } from './components/text.ts'
 import { TextInput } from './components/text-input.ts'
 import {
@@ -24,6 +28,10 @@ export const COMPONENTS: readonly ComponentDef[] = [
   Text,
   TextInput,
   Image,
+  GameScene,
+  Sprite,
+  SceneText,
+  Joystick,
 ]
 
 export const SCREEN_TYPE = 'Screen'
