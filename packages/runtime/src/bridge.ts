@@ -6,7 +6,7 @@ import type {
   UiMode,
   WorkspaceKey,
 } from '@rublox/schema'
-import type { LogEntry, ModuleCode } from './engine.ts'
+import type { AppEvent, LogEntry, ModuleCode, SlowMotion, StepInfo } from './engine.ts'
 import type { Scheme } from './theme.ts'
 
 /**
@@ -30,15 +30,31 @@ export type StudioToPlayer =
   | { type: 'rx:stop' }
   | { type: 'rx:scheme'; scheme?: Scheme }
   | { type: 'rx:inspect'; enabled: boolean }
+  /** Slow motion (J3): the code sent with `rx:load` must then be the `slow` variant. */
+  | { type: 'rx:slow'; slow: SlowMotion }
+  /** Leaves a pause: runs on (`step: false`) or stops again at the next block. */
+  | { type: 'rx:resume'; step: boolean }
 
 export type PlayerToStudio =
   | { type: 'rx:ready' }
   | { type: 'rx:log'; entry: LogEntry }
   | { type: 'rx:state'; running: boolean; screenId: ScreenId | null }
   | { type: 'rx:select'; screenId: ScreenId; componentId: ComponentId }
+  /** Something happened in the app (a click…): tutorials check what the learner did. */
+  | { type: 'rx:event'; event: AppEvent }
+  /** Slow motion: the block running now (`null` once the code is done), paused or not. */
+  | { type: 'rx:step'; step: StepInfo }
 
-const STUDIO_TYPES = new Set(['rx:load', 'rx:restart', 'rx:stop', 'rx:scheme', 'rx:inspect'])
-const PLAYER_TYPES = new Set(['rx:ready', 'rx:log', 'rx:state', 'rx:select'])
+const STUDIO_TYPES = new Set([
+  'rx:load',
+  'rx:restart',
+  'rx:stop',
+  'rx:scheme',
+  'rx:inspect',
+  'rx:slow',
+  'rx:resume',
+])
+const PLAYER_TYPES = new Set(['rx:ready', 'rx:log', 'rx:state', 'rx:select', 'rx:event', 'rx:step'])
 
 function hasType(data: unknown, types: Set<string>): boolean {
   return (

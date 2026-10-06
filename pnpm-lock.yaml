@@ -468,6 +468,31 @@ importers:
         specifier: workspace:*
         version: link:../config
 
+  packages/learn:
+    dependencies:
+      '@rublox/catalog':
+        specifier: workspace:*
+        version: link:../catalog
+      '@rublox/schema':
+        specifier: workspace:*
+        version: link:../schema
+    devDependencies:
+      '@rublox/blocks':
+        specifier: workspace:*
+        version: link:../blocks
+      '@rublox/config':
+        specifier: workspace:*
+        version: link:../config
+      '@rublox/i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      blockly:
+        specifier: 13.3.0
+        version: 13.3.0(jsdom@29.1.1)
+      jsdom:
+        specifier: 29.1.1
+        version: 29.1.1
+
   packages/runtime:
     dependencies:
       '@rublox/catalog':

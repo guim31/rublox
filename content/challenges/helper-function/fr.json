@@ -1,0 +1,10 @@
+{
+  "title": "Une fonction qui sert deux fois",
+  "goal": "Deux boutons ajoutent 1 ou 10 au score : écris une seule fonction « ajouter » et appelle-la depuis les deux.",
+  "stars": [
+    "Une fonction est définie.",
+    "Les deux boutons l’appellent.",
+    "Le projet tient en 14 blocs au plus."
+  ],
+  "hint": "Donne un paramètre « combien » à la fonction (roue dentée du bloc), elle met à jour la variable et le texte."
+}

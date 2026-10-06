@@ -1,0 +1,37 @@
+{
+  "title": "Deux écrans et une navigation",
+  "summary": "Une appli à deux écrans : un bouton pour y aller, un pour revenir.",
+  "done": "La navigation en pile n’a plus de secret pour toi : « aller à l’écran » empile, « revenir » dépile, et l’état de l’écran précédent est conservé.",
+  "steps": {
+    "welcome": {
+      "text": "Les vraies applis ont plusieurs écrans. On va en relier deux : un bouton pour aller au second, un autre pour revenir."
+    },
+    "next-button": {
+      "text": "Sur l’écran **{{screen.1}}**, ajoute un **Bouton** et écris « Suivant » dans son texte."
+    },
+    "add-screen": {
+      "text": "Ouvre le sélecteur d’écran et choisis **Ajouter un écran**."
+    },
+    "back-button": {
+      "text": "Te voilà sur **{{screen.2}}**. Ajoute-lui un **Bouton** « Retour »."
+    },
+    "go-blocks": {
+      "text": "Ouvre l’onglet **Blocs** : on reste sur {{screen.2}}."
+    },
+    "back-block": {
+      "text": "Ajoute [quand {{Button.2}} est cliqué] puis, depuis **Écrans**, [revenir à l’écran précédent] à l’intérieur."
+    },
+    "switch-screen": {
+      "text": "Passe sur l’écran **{{screen.1}}** avec le sélecteur d’écran."
+    },
+    "open-block": {
+      "text": "Ajoute [quand {{Button}} est cliqué] et, dedans, [aller à l’écran {{screen.2}}]."
+    },
+    "go-there": {
+      "text": "Dans l’aperçu, appuie sur **Suivant** : l’appli passe sur {{screen.2}}."
+    },
+    "come-back": {
+      "text": "Appuie maintenant sur **Retour** pour revenir à {{screen.1}}."
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Pile ou face",
+  "goal": "Le bouton lance une pièce : l’appli affiche « Pile » ou « Face » au hasard.",
+  "stars": [
+    "Un nombre au hasard quand on appuie.",
+    "Un bloc « si » qui choisit selon ce nombre.",
+    "Le texte affiche « Pile » dans un cas, « Face » dans l’autre."
+  ],
+  "hint": "Avec « entier aléatoire entre 1 et 2 » : 1 pour Pile, 2 pour Face. Le bloc « si… sinon » est dans Contrôle."
+}

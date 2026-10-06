@@ -1,0 +1,38 @@
+{
+  "title": "My first button",
+  "summary": "A button that says hello when you tap it. Your very first app!",
+  "done": "You built your first app: a button that answers when you tap it. That is how every app starts!",
+  "steps": {
+    "welcome": {
+      "text": "Hi! I am here to help. Together, we are going to build your first app: a **button** that says hello. Ready?"
+    },
+    "add-button": {
+      "text": "Drag a **Button** from the palette onto the phone screen.",
+      "hint": "You can also select it and press Enter."
+    },
+    "button-text": {
+      "text": "Your button is here! In the **text** box, on the right, write what it shows, for example “Say hello”."
+    },
+    "add-text": {
+      "text": "Now add a **Text**: this is where your app will answer.",
+      "hint": "Drag it below the button, or select it and press Enter."
+    },
+    "go-blocks": {
+      "text": "The screen is ready. To bring it to life, open the **Blocks** tab."
+    },
+    "event-block": {
+      "text": "Click **{{Button}}** in the list on the left, then drag the [when {{Button}} is clicked] block to the middle.",
+      "hint": "“When…” blocks wait for something to happen."
+    },
+    "set-block": {
+      "text": "Click **{{Text}}**, then drag the [set text of {{Text}} to] block **inside** the “when {{Button}} is clicked” block.",
+      "hint": "Bring it close to the notch: it snaps in by itself."
+    },
+    "type-hello": {
+      "text": "Click the white box of the “set” block and type what your app should say, for example “Hello!”."
+    },
+    "try-it": {
+      "text": "Your app is already running in the preview, on the right. Tap your button and see what happens!"
+    }
+  }
+}

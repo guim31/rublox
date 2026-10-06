@@ -1,0 +1,10 @@
+{
+  "title": "Le compte à rebours",
+  "goal": "Quand on appuie sur « Décollage », la fusée compte de 10 à 0, une seconde à la fois.",
+  "stars": [
+    "Une boucle « répéter » dans le bloc du bouton.",
+    "Une attente d’une seconde dans la boucle.",
+    "Le texte change à chaque tour de boucle."
+  ],
+  "hint": "Essaie le ralenti pour voir la boucle tourner bloc après bloc."
+}

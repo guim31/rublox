@@ -1,0 +1,10 @@
+{
+  "title": "Heads or tails",
+  "goal": "The button flips a coin: the app shows “Heads” or “Tails” at random.",
+  "stars": [
+    "A random number when you tap.",
+    "An “if” block that chooses from that number.",
+    "The text shows “Heads” in one case and “Tails” in the other."
+  ],
+  "hint": "With “random integer from 1 to 2”: 1 for Heads, 2 for Tails. The “if… else” block is in Control."
+}

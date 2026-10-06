@@ -1,0 +1,24 @@
+{
+  "id": "heads-tails",
+  "mode": "junior",
+  "order": 3,
+  "accent": "yellow",
+  "icon": "🪙",
+  "requires": ["Button", "Text"],
+  "starter": {
+    "components": [
+      { "type": "Text", "props": { "text": "?", "fontSize": 64, "align": "center" } },
+      { "type": "Button", "props": { "text": { "fr": "Lancer la pièce", "en": "Flip the coin" } } }
+    ]
+  },
+  "stars": [
+    { "kind": "block", "type": "math_random_int", "inside": ["rx_Button_on_click"] },
+    { "kind": "block", "type": "controls_if", "inside": ["rx_Button_on_click"] },
+    {
+      "kind": "block",
+      "type": "rx_Text_set",
+      "inside": ["controls_if", "rx_Button_on_click"],
+      "min": 2
+    }
+  ]
+}

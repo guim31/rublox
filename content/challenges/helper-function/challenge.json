@@ -1,0 +1,25 @@
+{
+  "id": "helper-function",
+  "mode": "studio",
+  "order": 1,
+  "accent": "mint",
+  "icon": "🧩",
+  "requires": ["Button", "Text"],
+  "starter": {
+    "components": [
+      { "type": "Text", "props": { "text": "0" } },
+      { "type": "Button", "props": { "text": "+1" } },
+      { "type": "Button", "props": { "text": "+10" } }
+    ]
+  },
+  "stars": [
+    { "kind": "block", "type": ["procedures_defnoreturn", "procedures_defreturn"] },
+    {
+      "kind": "block",
+      "type": ["procedures_callnoreturn", "procedures_callreturn"],
+      "inside": ["rx_Button_on_click"],
+      "min": 2
+    },
+    { "kind": "blockCount", "max": 14 }
+  ]
+}

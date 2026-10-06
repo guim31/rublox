@@ -1,0 +1,38 @@
+{
+  "title": "The magic dice",
+  "summary": "A dice that lands on a random number every time you roll it.",
+  "done": "Your magic dice is ready! The “random” block is useful in lots of games: drawing a card, picking who starts…",
+  "steps": {
+    "welcome": {
+      "text": "What if your phone became a dice? Let’s build a dice that lands on a **random** number from 1 to 6."
+    },
+    "add-text": {
+      "text": "Put a **Text** on the screen: it will show the number of the dice."
+    },
+    "big-text": {
+      "text": "A dice should be easy to read! Make the text bigger with its **text size**, for example 80."
+    },
+    "add-button": {
+      "text": "Add a **Button** to roll the dice."
+    },
+    "button-text": {
+      "text": "Write “Roll the dice” in the button’s **text**."
+    },
+    "go-blocks": {
+      "text": "Now for the blocks: open the **Blocks** tab."
+    },
+    "event-block": {
+      "text": "In **{{Button}}**, take the [when {{Button}} is clicked] block and drop it in the middle."
+    },
+    "set-block": {
+      "text": "In **{{Text}}**, take [set text of {{Text}} to] and snap it inside the “when…” block."
+    },
+    "random": {
+      "text": "In **Math**, take the [random integer from 1 to 6] block and drop it on the white box of the “set” block.",
+      "hint": "It replaces the white box: let go right on top of it."
+    },
+    "roll": {
+      "text": "Roll your dice in the preview: tap the button three times. Does the number change each time?"
+    }
+  }
+}

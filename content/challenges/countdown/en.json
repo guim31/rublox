@@ -1,0 +1,10 @@
+{
+  "title": "The countdown",
+  "goal": "When you tap “Lift-off”, the rocket counts from 10 down to 0, one second at a time.",
+  "stars": [
+    "A “repeat” loop in the button’s block.",
+    "A one-second wait inside the loop.",
+    "The text changes at each turn of the loop."
+  ],
+  "hint": "Try slow motion to watch the loop run block by block."
+}

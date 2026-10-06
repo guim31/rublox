@@ -1,8 +1,10 @@
 import type { Messages } from '../types.ts'
 import { accounts } from './accounts.ts'
+import { learning } from './learn.ts'
 
 export const studio: Messages['studio'] = {
   ...accounts,
+  ...learning,
   appName: 'Rublox',
   tagline: 'Build real phone apps, with blocks.',
   playerIntro:

@@ -1,0 +1,23 @@
+{
+  "id": "counter",
+  "mode": "junior",
+  "order": 1,
+  "accent": "indigo",
+  "icon": "🔢",
+  "requires": ["Button", "Text"],
+  "starter": {
+    "components": [
+      { "type": "Text", "props": { "text": "0", "fontSize": 64, "align": "center" } },
+      { "type": "Button", "props": { "text": { "fr": "+1", "en": "+1" } } }
+    ]
+  },
+  "stars": [
+    { "kind": "block", "type": "rx_Text_set", "inside": ["rx_Button_on_click"] },
+    {
+      "kind": "block",
+      "type": ["math_change", "variables_set"],
+      "inside": ["rx_Button_on_click"]
+    },
+    { "kind": "preview", "event": "click", "type": "Button", "min": 3 }
+  ]
+}
