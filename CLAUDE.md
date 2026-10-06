@@ -20,8 +20,10 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 
 - Un jalon = une branche `feat/j<N>-<sujet>` = une PR vers `main`. Ne jamais pousser sur `main`.
 - Avant chaque push : `pnpm check` vert en local (Biome, types, tests, construction), et
-  Playwright pour ce qui touche l'interface. Une session cloud ne peut pas lire la CI GitHub :
-  elle doit la rendre verte d'avance.
+  Playwright pour ce qui touche l'interface. Après chaque push, lire la CI de la PR et corriger
+  jusqu'au vert : en session cloud, les outils GitHub du serveur MCP (`mcp__github__actions_list`
+  pour les exécutions et leurs tâches, `mcp__github__get_job_logs` pour les journaux,
+  `mcp__github__pull_request_read` pour l'état de la PR) ne passent pas par le proxy.
 - Code, identifiants, commentaires et commits en anglais ; commits conventionnels (`feat:`,
   `fix:`, `chore:`…). Interface en français, au tutoiement, et en anglais, sans aucune chaîne
   en dur.
@@ -37,9 +39,10 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 ## Environnement des sessions cloud
 
 - Node 22 est installé ; l'image Docker vise Node 24. Déclarer `engines.node` à `>=22`.
-- Le proxy refuse `api.github.com` et `codeload.github.com` : pas de `gh`, et aucune dépendance
-  tirée d'une archive GitHub. Le registre npm passe.
-- La PR brouillon s'ouvre d'elle-même au premier push de la branche.
+- Le proxy refuse `api.github.com` et `codeload.github.com` : pas de `gh` (passer par les outils
+  `mcp__github__*`), et aucune dépendance tirée d'une archive GitHub. Le registre npm passe.
+- La PR brouillon ne s'ouvre pas toute seule : la créer avec `mcp__github__create_pull_request`
+  (`draft: true`) après le premier push.
 - Docker n'est pas supposé disponible : PGlite remplace PostgreSQL en développement et en test.
 - Si Playwright ne peut pas télécharger son navigateur, chercher le Chromium préinstallé
   (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`).
