@@ -1,7 +1,7 @@
 import type { Messages } from '../types.ts'
 import { accounts } from './accounts.ts'
 
-export const studio: Messages['studio'] = {
+export const studio: Omit<Messages['studio'], 'game'> = {
   ...accounts,
   appName: 'Rublox',
   tagline: 'Build real phone apps, with blocks.',

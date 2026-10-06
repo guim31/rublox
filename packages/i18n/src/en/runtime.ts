@@ -1,6 +1,6 @@
 import type { Messages } from '../types.ts'
 
-export const runtime: Messages['runtime'] = {
+export const runtime: Omit<Messages['runtime'], 'game'> = {
   ok: 'OK',
   cancel: 'Cancel',
   yes: 'Yes',

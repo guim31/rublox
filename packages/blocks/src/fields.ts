@@ -88,6 +88,29 @@ export class ComponentField extends ReferenceField {
   }
 }
 
+/**
+ * The filter of an event block: another component of a type ("when Apple touches Basket"),
+ * or `*` for any of them.
+ */
+export class ComponentFilterField extends ComponentField {
+  constructor(
+    componentType: string,
+    readonly anyLabel: () => string,
+  ) {
+    super(componentType)
+    this.setValue(ANY)
+  }
+
+  protected override available(): Option[] {
+    // Called by the parent constructor too, before `anyLabel` exists.
+    const any = this.anyLabel?.() ?? '…'
+    return [[any, ANY], ...super.available()]
+  }
+}
+
+/** The value of a filter or a dropdown that means "any". */
+export const ANY = '*'
+
 /** Screens of the project. */
 export class ScreenField extends ReferenceField {
   protected available(): Option[] {
@@ -170,6 +193,14 @@ export function refreshReferences(workspace: Blockly.Workspace): void {
                 : messages[locale].blocks.missingComponent
           }
         }
+      }
+    }
+    // An event argument outside its own event block (`rx_event_arg`, see definitions.ts).
+    const ref = (block as Blockly.Block & { argRef?: { type: string; event: string } }).argRef
+    if (block.type === 'rx_event_arg' && ref && !block.isInFlyout) {
+      const root = block.getRootBlock()
+      if (root.type !== `rx_${ref.type}_on_${ref.event}`) {
+        warning = messages[locale].blocks.game.eventArgMisplaced
       }
     }
     if ('setWarningText' in block) (block as Blockly.BlockSvg).setWarningText(warning)

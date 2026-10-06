@@ -144,6 +144,27 @@ exports[`one snapshot per block > rx_Button_set 1`] = `
 "
 `;
 
+exports[`one snapshot per block > rx_GameScene_on_frame 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_GameScene_on_start 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_GameScene_on_tap 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
 exports[`one snapshot per block > rx_Image_on_click 1`] = `
 "export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
   const { Image1 } = components;
@@ -155,6 +176,27 @@ exports[`one snapshot per block > rx_Image_on_click 1`] = `
 "
 `;
 
+exports[`one snapshot per block > rx_Joystick_on_move 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Joystick_on_release 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_SceneText_on_tap 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
 exports[`one snapshot per block > rx_Screen_on_open 1`] = `
 "export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
   const { Accueil } = components;
@@ -162,6 +204,48 @@ exports[`one snapshot per block > rx_Screen_on_open 1`] = `
   Accueil.onOpen(async () => {
     rx.log('!');
   });
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Sprite_on_clone 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Sprite_on_drag 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Sprite_on_drop 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Sprite_on_edge 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Sprite_on_hit 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
+}
+"
+`;
+
+exports[`one snapshot per block > rx_Sprite_on_tap 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  // composant supprimé
 }
 "
 `;

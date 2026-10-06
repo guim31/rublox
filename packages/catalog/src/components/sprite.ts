@@ -77,7 +77,7 @@ export const Sprite = defineComponent({
       blocks: 'get-set',
     }),
     solid: prop.boolean({ default: false, group: 'advanced', blocks: 'get-set' }),
-    clone: prop.boolean({ default: false, group: 'advanced', blocks: 'get', live: true }),
+    isClone: prop.boolean({ default: false, group: 'advanced', blocks: 'get', live: true }),
   },
   events: {
     tap: event({ junior: true }),
@@ -144,7 +144,7 @@ export const Sprite = defineComponent({
         edges: 'bords',
         collision: 'forme des collisions',
         solid: 'solide',
-        clone: 'est un clone',
+        isClone: 'est un clone',
       },
       events: {
         tap: 'quand on touche %1',
@@ -215,7 +215,7 @@ export const Sprite = defineComponent({
         edges: 'edges',
         collision: 'collision shape',
         solid: 'solid',
-        clone: 'is a clone',
+        isClone: 'is a clone',
       },
       events: {
         tap: 'when %1 is tapped',

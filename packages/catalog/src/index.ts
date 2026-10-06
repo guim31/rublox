@@ -1,6 +1,6 @@
 export * from './common.ts'
 export * from './component.ts'
+export { SCENE_CHILD_TYPES } from './components/game-scene.ts'
 export * from './define.ts'
 export * from './project.ts'
 export * from './registry.ts'
-export { SCENE_CHILD_TYPES } from './components/game-scene.ts'

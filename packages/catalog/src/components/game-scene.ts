@@ -67,7 +67,8 @@ export const GameScene = defineComponent({
       prefix: 'Scene',
       description: 'Un terrain de jeu où les lutins bougent librement.',
       help: 'La scène de jeu est un terrain de taille fixe, agrandi ou réduit pour remplir sa place sur l’écran. Pose dessus des lutins et des textes, place-les où tu veux, puis fais-les bouger avec des blocs. Le jeu tourne à 60 images par seconde et se met en pause quand l’appli est cachée.',
-      example: 'Quand Scene1 démarre, répéter indéfiniment : créer un clone de Pomme, attendre 1 seconde',
+      example:
+        'Quand Scene1 démarre, répéter indéfiniment : créer un clone de Pomme, attendre 1 seconde',
       props: {
         sceneWidth: 'largeur de la scène',
         sceneHeight: 'hauteur de la scène',
