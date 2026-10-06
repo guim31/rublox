@@ -1,6 +1,8 @@
 import type { Messages } from '../types.ts'
+import { runtimeLearning } from './runtime-learn.ts'
 
 export const runtime: Messages['runtime'] = {
+  ...runtimeLearning,
   ok: 'OK',
   cancel: 'Cancel',
   yes: 'Yes',

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Navigate } from '@tanstack/react-router'
+import type { TFunction } from 'i18next'
 import { Fingerprint, KeyRound, LogOut, MonitorSmartphone, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -306,10 +307,7 @@ function PasskeysSection() {
 }
 
 /** "Firefox on Linux", from the user agent, for the list of devices. */
-function describeAgent(
-  agent: string | null | undefined,
-  t: ReturnType<typeof useTranslation>['t'],
-) {
+function describeAgent(agent: string | null | undefined, t: TFunction) {
   if (!agent) return t('account.unknownDevice')
   const browser = /Edg\//.test(agent)
     ? 'Edge'

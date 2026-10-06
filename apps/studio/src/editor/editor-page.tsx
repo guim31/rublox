@@ -84,7 +84,7 @@ function Editor({ projectId, tab, screen }: Props) {
   const doc = useDoc()
   const screenId = resolveScreen(doc, screen)
   const workspace = tab === 'blocks' ? resolveWorkspace(doc, screen) : screenId
-  const consoleOpen = usePrefs((s) => s.consoleOpen)
+  const consoleOpen = usePrefs((s) => s.consoleOpen[s.mode])
   const announcement = useEditor((s) => s.announcement)
 
   useEffect(() => {

@@ -72,7 +72,7 @@ exports[`one snapshot per block > lists_getIndex 1`] = `
   const { Bouton1, Texte1 } = components;
 
   Bouton1.onClick(async () => {
-    Texte1.text = ['a', 'b'][0];
+    Texte1.text = rx.item(['a', 'b'], 1);
   });
 }
 "

@@ -8,7 +8,12 @@ import {
 } from '@rublox/schema'
 import * as Blockly from 'blockly/core'
 import { type BlocksContext, setBlocksContext } from './context.ts'
-import { type GeneratedCode, RubloxGenerator, workspaceToModule } from './generator.ts'
+import {
+  type GeneratedCode,
+  type GenerateOptions,
+  RubloxGenerator,
+  workspaceToModule,
+} from './generator.ts'
 import { setupBlocks } from './setup.ts'
 
 let generator: RubloxGenerator | undefined
@@ -81,21 +86,30 @@ export function generateWorkspaceCode(
   stacks: Record<string, BlocklyJson>,
   context: BlocksContext,
   variables: { id: string; name: string }[] = [],
+  options: GenerateOptions = {},
 ): GeneratedCode {
   const workspace = headlessWorkspace(stacks, context, variables)
   try {
-    return workspaceToModule(getGenerator(), workspace)
+    return workspaceToModule(getGenerator(), workspace, options)
   } finally {
     workspace.dispose()
   }
 }
 
 /** Generates every module of a project: one per screen, plus `app`. */
-export function generateProjectCode(doc: ProjectDoc): Record<WorkspaceKey, GeneratedCode> {
+export function generateProjectCode(
+  doc: ProjectDoc,
+  options: GenerateOptions = {},
+): Record<WorkspaceKey, GeneratedCode> {
   const variables = [...doc.variables.app, ...doc.variables.stored, ...doc.variables.shared]
   const result: Record<WorkspaceKey, GeneratedCode> = {}
   for (const key of [APP_WORKSPACE, ...doc.screenOrder]) {
-    result[key] = generateWorkspaceCode(doc.blocks[key] ?? {}, contextFromDoc(doc, key), variables)
+    result[key] = generateWorkspaceCode(
+      doc.blocks[key] ?? {},
+      contextFromDoc(doc, key),
+      variables,
+      options,
+    )
   }
   return result
 }

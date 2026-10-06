@@ -7,6 +7,7 @@ import {
   type PlayerToStudio,
   readConfig,
   type Scheme,
+  type SlowMotion,
   type StudioToPlayer,
 } from '@rublox/runtime'
 import type { Locale } from '@rublox/schema'
@@ -34,6 +35,7 @@ export function Preview() {
   const [state, setState] = useState<State | null>(null)
   const engineRef = useRef<Engine | null>(null)
   const assets = useRef(new Map<string, string>())
+  const slow = useRef<SlowMotion>({ enabled: false, delay: 500, breakpoints: [] })
 
   useEffect(() => {
     const onMessage = async (event: MessageEvent) => {
@@ -67,9 +69,12 @@ export function Preview() {
             locale: message.locale,
             mode: message.mode,
             initialScreen: message.screenId,
+            slow: slow.current,
             host: {
               log: (entry) => send({ type: 'rx:log', entry }),
               state: (s) => send({ type: 'rx:state', running: s.running, screenId: s.screenId }),
+              event: (appEvent) => send({ type: 'rx:event', event: appEvent }),
+              step: (step) => send({ type: 'rx:step', step }),
             },
           })
           engineRef.current = created
@@ -90,6 +95,13 @@ export function Preview() {
           return
         case 'rx:scheme':
           setState((previous) => previous && { ...previous, scheme: message.scheme })
+          return
+        case 'rx:slow':
+          slow.current = message.slow
+          engine?.setSlowMotion(message.slow)
+          return
+        case 'rx:resume':
+          engine?.resume(message.step)
           return
         case 'rx:inspect':
           setState((previous) => previous && { ...previous, inspect: message.enabled })
