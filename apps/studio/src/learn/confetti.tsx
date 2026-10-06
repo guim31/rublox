@@ -52,10 +52,8 @@ export function Confetti({ pieces = 120 }: { pieces?: number }) {
     return () => cancelAnimationFrame(frame)
   }, [pieces])
   return (
-    <canvas
-      ref={canvas}
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[70] size-full"
-    />
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[70]">
+      <canvas ref={canvas} className="size-full" />
+    </div>
   )
 }
