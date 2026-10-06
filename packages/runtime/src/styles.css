@@ -1,0 +1,209 @@
+/* Base styles of a running app and of the editor canvas. Scoped to .rx-app. */
+.rx-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--rx-background);
+  color: var(--rx-text);
+  font-family: var(--rx-font);
+  font-size: 16px;
+  line-height: 1.4;
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
+}
+.rx-app[data-scheme="dark"] {
+  color-scheme: dark;
+}
+.rx-app *,
+.rx-app *::before,
+.rx-app *::after {
+  box-sizing: border-box;
+}
+.rx-screen {
+  height: 100%;
+  scrollbar-width: thin;
+}
+.rx-button {
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  line-height: 1.2;
+  transition:
+    transform 120ms ease,
+    filter 120ms ease;
+}
+.rx-button:not([disabled]):hover {
+  filter: brightness(1.06);
+}
+.rx-button:not([disabled]):active {
+  transform: scale(0.97);
+}
+.rx-button:focus-visible,
+.rx-input-field:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--rx-primary) 55%, transparent);
+  outline-offset: 2px;
+}
+.rx-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rx-input {
+  display: flex;
+  overflow: hidden;
+}
+.rx-input-field {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 10px 12px;
+  resize: vertical;
+}
+.rx-input-field:focus {
+  outline: none;
+}
+.rx-input:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rx-primary) 35%, transparent);
+}
+.rx-input-field::placeholder {
+  color: var(--rx-muted);
+}
+.rx-image-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rx-app * {
+    /* biome-ignore lint/complexity/noImportantStyles: must win over component styles */
+    transition: none !important;
+    /* biome-ignore lint/complexity/noImportantStyles: must win over component styles */
+    animation: none !important;
+  }
+}
+
+/* Player chrome: back bar, dialogs, short messages. */
+.rx-player {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.rx-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 52px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--rx-border);
+  background: var(--rx-background);
+}
+.rx-bar-back {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rx-primary);
+  cursor: pointer;
+}
+.rx-bar-back:hover {
+  background: var(--rx-surface);
+}
+.rx-bar-title {
+  font-weight: 700;
+  font-size: 17px;
+  padding-left: 6px;
+}
+.rx-main {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.rx-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10, 8, 30, 0.45);
+  z-index: 10;
+}
+.rx-dialog {
+  width: 100%;
+  max-width: 320px;
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--rx-background);
+  color: var(--rx-text);
+  box-shadow: 0 20px 48px rgba(10, 8, 30, 0.35);
+}
+.rx-dialog-message {
+  margin: 0 0 16px;
+  font-size: 17px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rx-dialog-input {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--rx-border);
+  border-radius: 10px;
+  background: var(--rx-background);
+  color: inherit;
+  font: inherit;
+}
+.rx-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.rx-dialog-button {
+  min-width: 72px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--rx-surface);
+  color: var(--rx-text);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.rx-dialog-primary {
+  background: var(--rx-primary);
+  color: var(--rx-on-primary);
+}
+.rx-toasts {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 11;
+}
+.rx-toast {
+  max-width: 85%;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(20, 18, 34, 0.9);
+  color: #fff;
+  font-size: 15px;
+  animation: rx-toast-in 180ms ease-out;
+}
+@keyframes rx-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

@@ -8,7 +8,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 
 | Jalon | Contenu | État |
 |---|---|---|
-| J0 | Socle et tranche verticale (mode invité) | à faire |
+| J0 | Socle et tranche verticale (mode invité) | fait (PR #1), voir § 0.1 |
 | J1 | Comptes, espaces, invitations, projets côté serveur | à faire |
 | J2 | Catalogue complet des composants et de leurs blocs | à faire |
 | J3 | Expérience Junior et Studio, apprentissage, accueil | à faire |
@@ -17,6 +17,72 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J6 | Galerie, remix, modèles, assistant IA | à faire |
 | J7 | Mode jeu : scène, lutins, physique | à faire |
 | J8 | Finitions : accessibilité, performances, sécurité, mise en production | à faire |
+
+### 0.1 Ce que le J0 a fixé (06/10/2026)
+
+Les jalons suivants s'appuient sur ces contrats ; les changer demande une migration ou une
+mise à jour de ce paragraphe.
+
+**Écarts au cahier des charges, et pourquoi**
+
+- `ProjectDoc.meta.locale` (`fr` ou `en`) s'ajoute à l'esquisse du § 6.4 : c'est la langue de
+  l'appli fabriquée. Les valeurs par défaut traduites (texte d'un bouton…) sont écrites dans le
+  projet à la création du composant, dans cette langue, pour que le projet ne change pas de langue
+  avec l'interface.
+- Les textes des composants (libellé, préfixe de nom, aide, exemple, propriétés, événements,
+  méthodes, valeurs d'énumération) vivent **dans leur déclaration** (`packages/catalog`), en FR et
+  en EN : « une déclaration + un rendu + une fiche d'aide » reste vrai. `packages/i18n` porte les
+  chaînes du studio, des blocs et du lecteur ; le français fait référence et TypeScript exige les
+  mêmes clés en anglais.
+- Glisser-déposer : l'API native HTML5 (palette → canevas ou calques, calques entre eux) plus des
+  déplacements au clavier écrits pour Rublox (Espace pour saisir, flèches, Entrée, Échap ; Alt +
+  flèches), au lieu de dnd-kit : les cibles d'insertion se calculent dans un arbre flex, ce que
+  dnd-kit ne simplifie pas, et le clavier suit l'arbre plutôt que des coordonnées.
+- `packages/ui` n'existe pas encore : les primitives d'interface (Radix + Tailwind, façon
+  shadcn/ui) sont dans `apps/studio/src/components/ui`, le lecteur n'en ayant pas besoin. Les
+  extraire quand un second consommateur apparaît.
+- Miniatures du tableau de bord : l'écran de démarrage rendu en direct (petit `ScreenView`), pas
+  une capture d'image.
+- Motion n'est pas utilisé : animations CSS courtes, désactivées par `prefers-reduced-motion`.
+- L'extension de navigation au clavier de Blockly n'est pas installée (P1) ; Blockly 13 en
+  intègre déjà une partie.
+- Les fonctions (blocs Fonctions) sont propres à un espace de travail ; les fonctions partagées
+  par l'espace « Appli » restent à faire. Les variables stockées et partagées existent dans le
+  format et le code généré (`stored`, `shared`) mais vivent en mémoire jusqu'au J5.
+
+**Contrats pour J1, J2 et J3**
+
+- Format : `packages/schema` (types et Zod `projectDocSchema`, `projectToYDoc` / `yDocToProject`,
+  opérations Yjs dans `ops.ts`, migrations dans `migrations.ts`, `PROJECT_FORMAT_VERSION = 1`).
+  Toute modification passe par une opération de `ops.ts`, en une transaction (une étape
+  d'annulation).
+- Composant : `defineComponent` dans `packages/catalog/src/components/<type>.ts`, enregistré dans
+  `registry.ts` (`COMPONENTS`), rendu dans `packages/runtime/src/components/` et enregistré dans
+  `RENDERERS`, icône dans `apps/studio/src/editor/component-icon.tsx`. Les tests de complétude
+  (catalogue, blocs, rendu) échouent tant qu'il manque une pièce.
+- Blocs : types stables, enregistrés dans les projets (ne jamais renommer) :
+  `rx_<Type>_on_<événement>`, `rx_<Type>_get` et `rx_<Type>_set` (propriété choisie dans une
+  liste), `rx_<Type>_call_<méthode>`, et `rx_app_start`, `rx_forever`, `rx_wait`, `rx_log`,
+  `rx_screen_open`, `rx_screen_back`, `rx_ui_alert`, `rx_ui_toast`, `rx_ui_confirm`,
+  `rx_ui_prompt`. Les champs de composant et d'écran gardent l'**identifiant** (le libellé est le
+  nom courant) : renommer met les blocs à jour, supprimer les signale sans les effacer.
+- Code généré (§ 6.5) : un module par écran plus `app`, paramètres
+  `{ components, app, stored, shared, screens, ui, device, rx }` ; `Bouton1.onClick(async () => …)`,
+  `Texte1.text = …`, `screens.open('Ecran2')`, `screens.back()`, `await rx.wait(1)`,
+  `rx.log(…)`, `await ui.alert(…)`, `await rx.tick()` en tête de chaque boucle. Les variables de
+  l'appli sont `app.<nom>`. Le générateur produit aussi `lineMap` (bloc de chaque ligne), dont le
+  moteur se sert pour rattacher une erreur à son bloc ; le ralenti (J3) remplacera le marqueur
+  d'instruction par `await rx.step('<id>')`.
+- Lecteur : `postMessage` entre origines, messages `rx:load`, `rx:restart`, `rx:stop`,
+  `rx:scheme`, `rx:inspect` (studio → lecteur) et `rx:ready`, `rx:log`, `rx:state`, `rx:select`
+  (lecteur → studio), types dans `packages/runtime/src/bridge.ts`. Le serveur injecte les deux
+  origines dans `<script id="rublox-config" type="application/json">`.
+- Mode invité : liste des projets et fichiers des ressources dans la base IndexedDB `rublox`,
+  document Yjs de chaque projet dans `rublox-project-<id>` (y-indexeddb) :
+  `apps/studio/src/storage/`. Le rapatriement (J1) lit ces deux sources.
+- Serveur : `createApp` dans `apps/server/src/app.ts`, routes d'API dans `api.ts` (type `Api`
+  exporté pour `hc`), base dans `db/` (Drizzle, migrations dans `apps/server/drizzle/`,
+  appliquées au démarrage).
 
 ## 1. En bref
 

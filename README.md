@@ -4,8 +4,20 @@ Build real phone apps with blocks. Rublox is a free, self-hosted take on
 [Thunkable](https://thunkable.com), for kids learning to code and for adults who want
 to build useful apps without writing code.
 
-> **Status: early development.** Nothing is usable yet. The full specification (in
-> French) lives in [`docs/SPEC.md`](docs/SPEC.md).
+> **Status: early development.** The first milestone (J0) works in guest mode: design
+> screens, program them with blocks, see the app run live. Accounts, publishing and the full
+> component catalog come next. The specification (in French) lives in
+> [`docs/SPEC.md`](docs/SPEC.md).
+
+## Try it
+
+```sh
+pnpm install
+pnpm dev   # studio on http://localhost:5173, player on http://127.0.0.1:5174
+```
+
+Node 22 or later and pnpm 12. No Docker or database needed for development. To self-host,
+see [`docker/compose.yaml`](docker/compose.yaml).
 
 ## What it will do
 
