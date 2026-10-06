@@ -1,10 +1,14 @@
 import { serve } from '@hono/node-server'
+import { bootstrapAdmin } from './accounts.ts'
 import { createApp } from './app.ts'
 import { ConfigError, loadConfig } from './config.ts'
 import { openDatabase } from './db/index.ts'
 import { createLogger } from './logger.ts'
+import { purgeTrash } from './routes/projects.ts'
+import { createServices } from './services.ts'
 
 const SHUTDOWN_TIMEOUT_MS = 10_000
+const PURGE_INTERVAL_MS = 6 * 3600 * 1000
 
 async function main() {
   let config: ReturnType<typeof loadConfig>
@@ -19,9 +23,6 @@ async function main() {
   }
 
   const logger = createLogger(config.logLevel)
-  if (!config.secret && config.isProduction) {
-    logger.warn('RUBLOX_SECRET is not set: it will be required from J1 (32 bytes or more)')
-  }
 
   const database = openDatabase({ databaseUrl: config.databaseUrl, dataDir: config.dataDir })
   logger.info(
@@ -33,7 +34,21 @@ async function main() {
   )
   await database.migrate(config.migrationsFolder)
 
-  const app = createApp({ config, ping: database.ping, logger })
+  const services = createServices(database.db, config, logger)
+  await bootstrapAdmin(services, config.admin)
+  const purge = async () => {
+    try {
+      const purged = await purgeTrash(services)
+      if (purged.projects || purged.files) logger.info(purged, 'emptied the trash')
+    } catch (error) {
+      logger.error({ err: error }, 'could not empty the trash')
+    }
+  }
+  void purge()
+  const purgeTimer = setInterval(purge, PURGE_INTERVAL_MS)
+  purgeTimer.unref()
+
+  const app = createApp({ config, services, ping: database.ping, logger })
   const server = serve({ fetch: app.fetch, port: config.port, hostname: config.host }, (info) => {
     logger.info(
       { address: info.address, port: info.port, studio: config.studioUrl, apps: config.appsUrl },
@@ -45,6 +60,7 @@ async function main() {
   const shutdown = (signal: NodeJS.Signals) => {
     if (shuttingDown) return
     shuttingDown = true
+    clearInterval(purgeTimer)
     logger.info({ signal }, 'shutting down')
     const timer = setTimeout(() => {
       logger.error('graceful shutdown timed out')

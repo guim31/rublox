@@ -1,0 +1,87 @@
+import type { Context } from 'hono'
+import { HTTPException } from 'hono/http-exception'
+import { validator } from 'hono/validator'
+import type { z } from 'zod'
+import type { AuthSession } from './auth.ts'
+
+export type SessionUser = AuthSession['user']
+
+/** Hono environment of the `/api` routes: the session read once per request. */
+export type ApiEnv = { Variables: { session: AuthSession | null; clientIp: string } }
+
+/** Error codes the studio translates (`errors.<code>` in `@rublox/i18n`). */
+export type ErrorCode =
+  | 'invalid'
+  | 'signed_out'
+  | 'forbidden'
+  | 'not_found'
+  | 'bad_origin'
+  | 'too_many_attempts'
+  | 'invalid_invite'
+  | 'username_taken'
+  | 'email_taken'
+  | 'last_manager'
+  | 'space_has_accounts'
+  | 'managed_account'
+  | 'self'
+  | 'too_large'
+  | 'unsupported_type'
+  | 'quota_exceeded'
+  | 'invalid_project'
+
+/** Stops the request with a JSON error: `{ error: code }`. */
+export function fail(
+  status: 400 | 401 | 403 | 404 | 409 | 413 | 415 | 429,
+  code: ErrorCode,
+): never {
+  throw new HTTPException(status, { res: Response.json({ error: code }, { status }) })
+}
+
+/**
+ * The signed-in user, or a 401. The studio only calls these routes while signed in (it reads
+ * `/api/me`, which never answers 401), so a 401 means a session revoked elsewhere (SPEC § 6.9).
+ */
+export function requireUser(c: Context<ApiEnv>): SessionUser {
+  const session = c.get('session')
+  if (!session) fail(401, 'signed_out')
+  return session.user
+}
+
+export function isAdmin(user: Pick<SessionUser, 'role' | 'banned'>): boolean {
+  return user.role === 'admin' && !user.banned
+}
+
+export function requireAdmin(c: Context<ApiEnv>): SessionUser {
+  const user = requireUser(c)
+  if (!isAdmin(user)) fail(403, 'forbidden')
+  return user
+}
+
+/** JSON body validated by a Zod schema; its output type flows to the `hc` client. */
+export function jsonBody<T extends z.ZodType>(schema: T) {
+  return validator('json', (value): z.output<T> => {
+    const result = schema.safeParse(value)
+    if (!result.success) fail(400, 'invalid')
+    return result.data
+  })
+}
+
+/** Query string validated by a Zod schema. */
+export function queryParams<T extends z.ZodType>(schema: T) {
+  return validator('query', (value): z.output<T> => {
+    const result = schema.safeParse(value)
+    if (!result.success) fail(400, 'invalid')
+    return result.data
+  })
+}
+
+export function toBase64(bytes: Uint8Array): string {
+  return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64')
+}
+
+export function fromBase64(text: string): Uint8Array {
+  return new Uint8Array(Buffer.from(text, 'base64'))
+}
+
+export const iso = (date: Date | null | undefined): string | null =>
+  date ? date.toISOString() : null

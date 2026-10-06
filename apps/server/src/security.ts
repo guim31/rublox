@@ -20,7 +20,7 @@ export function studioCsp(appsUrl: string): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    "connect-src 'self'",
+    `connect-src 'self' ${appsUrl}`,
     `frame-src ${appsUrl}`,
     "worker-src 'self' blob:",
     "object-src 'none'",
@@ -71,7 +71,10 @@ export function appsSecurityHeaders(studioUrl: string): MiddlewareHandler {
   return async (c, next) => {
     await next()
     commonHeaders(c.res.headers)
-    c.res.headers.set('Content-Security-Policy', csp)
+    // Uploaded files bring their own, stricter policy.
+    if (!c.res.headers.has('Content-Security-Policy')) {
+      c.res.headers.set('Content-Security-Policy', csp)
+    }
     c.res.headers.set('Permissions-Policy', permissions)
   }
 }

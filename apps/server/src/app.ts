@@ -1,8 +1,14 @@
-import { Hono } from 'hono'
+import { eq } from 'drizzle-orm'
+import { type Context, Hono } from 'hono'
 import type { Logger } from 'pino'
 import { createApi } from './api.ts'
+import { AUTH_ROUTES, CLIENT_IP_HEADER, SIGN_IN_ROUTES } from './auth.ts'
+import { getClientIp } from './client-ip.ts'
 import { type Config, normalizeHost } from './config.ts'
+import { assets } from './db/schema.ts'
+import { isSha256 } from './files.ts'
 import { appsSecurityHeaders, studioSecurityHeaders } from './security.ts'
+import type { Services } from './services.ts'
 import { StaticSite } from './static.ts'
 
 /** Path prefixes of the apps origin that later milestones will serve (SPEC § 6.7). */
@@ -10,6 +16,7 @@ export const RESERVED_APPS_PREFIXES = ['/a/', '/live/', '/assets/', '/_rx/'] as 
 
 export interface AppDeps {
   config: Pick<Config, 'studioUrl' | 'appsUrl' | 'appsHost' | 'studioDist' | 'playerDist'>
+  services: Services
   /** Checks that the database answers (`select 1`). */
   ping: () => Promise<void>
   logger?: Pick<Logger, 'warn' | 'error'>
@@ -20,7 +27,7 @@ const notFound = () => Response.json({ error: 'not_found' }, { status: 404 })
 /** Raw (still percent-encoded) path of the request, so it is decoded exactly once. */
 const rawPath = (url: string) => new URL(url).pathname
 
-export function createApp({ config, ping, logger }: AppDeps) {
+export function createApp({ config, services, ping, logger }: AppDeps) {
   const runtimeConfig = { studioUrl: config.studioUrl, appsUrl: config.appsUrl }
   const onWarning = (message: string) => logger?.warn(message)
 
@@ -39,16 +46,18 @@ export function createApp({ config, ping, logger }: AppDeps) {
     onWarning,
   })
 
-  // Studio origin: UI, API (and, from J1, session cookies).
+  // Studio origin: UI, API, session cookies.
   const studio = new Hono()
     .use(studioSecurityHeaders(config.appsUrl))
-    .route('/api', createApi(config))
+    .on(['GET', 'POST'], '/api/auth/*', (c) => handleAuth(services, c.req.raw, c))
+    .route('/api', createApi(services))
     .get('*', (c) => studioSite.serve(rawPath(c.req.url)))
     .all('*', () => notFound())
 
   // Apps origin: player, then published apps, assets and the API relay. Never any studio cookie.
   const apps = new Hono()
     .use(appsSecurityHeaders(config.studioUrl))
+    .get('/assets/:hash', (c) => serveAsset(services, c.req.param('hash')))
     .get('*', (c) => {
       const path = rawPath(c.req.url)
       if (RESERVED_APPS_PREFIXES.some((prefix) => path.startsWith(prefix))) return notFound()
@@ -84,3 +93,58 @@ export function createApp({ config, ping, logger }: AppDeps) {
 }
 
 export type App = ReturnType<typeof createApp>
+
+/**
+ * Better Auth, behind an allowlist of endpoints (`AUTH_ROUTES`). Failed sign-ins count towards
+ * the brute-force limit, and Better Auth reads the client address Rublox resolved, never
+ * `X-Forwarded-For`.
+ */
+async function handleAuth(services: Services, raw: Request, c: Context): Promise<Response> {
+  const path = new URL(raw.url).pathname.replace(/^\/api\/auth/, '')
+  const key = `${raw.method} ${path}`
+  if (!AUTH_ROUTES.has(key)) return notFound()
+  const ip = getClientIp(c, services.config.trustProxy) ?? 'unknown'
+  const signIn = SIGN_IN_ROUTES.has(key)
+  if (signIn) {
+    const wait = services.guard.retryAfter(ip)
+    if (wait > 0) {
+      return Response.json(
+        { error: 'too_many_attempts' },
+        { status: 429, headers: { 'Retry-After': String(wait) } },
+      )
+    }
+  }
+  const headers = new Headers(raw.headers)
+  headers.delete('x-forwarded-for')
+  headers.delete('x-real-ip')
+  headers.set(CLIENT_IP_HEADER, ip)
+  const response = await services.auth.handler(new Request(raw, { headers }))
+  if (signIn && response.status >= 400 && response.status < 500) services.guard.fail(ip)
+  return response
+}
+
+const IMMUTABLE = 'public, max-age=31536000, immutable'
+
+/**
+ * `/assets/<sha256>` on the apps origin: uploaded files, immutable. Readable from the studio
+ * (CORS) for the editor. SVG files never run scripts (SPEC § 6.9).
+ */
+async function serveAsset(services: Services, hash: string): Promise<Response> {
+  if (!isSha256(hash)) return notFound()
+  const [row] = await services.db
+    .select({ mime: assets.mime })
+    .from(assets)
+    .where(eq(assets.sha256, hash))
+    .limit(1)
+  if (!row) return notFound()
+  const bytes = await services.files.read(hash)
+  if (!bytes) return notFound()
+  const headers = new Headers({
+    'Content-Type': row.mime,
+    'Cache-Control': IMMUTABLE,
+    'Access-Control-Allow-Origin': '*',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+  })
+  return new Response(bytes, { headers })
+}

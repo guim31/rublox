@@ -25,6 +25,7 @@
     "vite": "8.3.3"
   },
   "dependencies": {
+    "@better-auth/passkey": "1.7.7",
     "@codemirror/lang-javascript": "6.2.5",
     "@codemirror/language": "6.12.4",
     "@codemirror/state": "6.7.6",
@@ -40,6 +41,7 @@
     "@rublox/schema": "workspace:*",
     "@tanstack/react-query": "5.104.1",
     "@tanstack/react-router": "1.170.41",
+    "better-auth": "1.7.7",
     "blockly": "13.3.0",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",

@@ -3,6 +3,8 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { createApp } from '../src/app.ts'
 import { loadConfig } from '../src/config.ts'
+import { openDatabase } from '../src/db/index.ts'
+import { createServices } from '../src/services.ts'
 
 export const STUDIO = 'http://studio.example.com'
 export const APPS = 'http://apps.example.com'
@@ -55,7 +57,10 @@ export function testApp(
     STUDIO_DIST: dist.studioDist,
     PLAYER_DIST: dist.playerDist,
   })
-  return createApp({ config, ping: options.ping ?? (async () => {}) })
+  // Routing tests never reach the database: an unmigrated in-memory one is enough.
+  const database = openDatabase({ databaseUrl: 'memory://', dataDir: dist.studioDist })
+  const services = createServices(database.db, config)
+  return createApp({ config, services, ping: options.ping ?? (async () => {}) })
 }
 
 /** Issues a request with an explicit `Host` header. */

@@ -58,7 +58,12 @@ export default defineConfig({
           STUDIO_URL: `http://localhost:${port}`,
           APPS_URL: `http://127.0.0.1:${port}`,
           DATABASE_URL: 'memory://',
+          DATA_DIR: 'test-results/data',
           LOG_LEVEL: 'warn',
+          // Test-only values (SPEC § 6.10): the first administrator of the empty database.
+          RUBLOX_SECRET: 'e2e-secret-e2e-secret-e2e-secret-e2e-secret',
+          RUBLOX_ADMIN_USERNAME: 'admin',
+          RUBLOX_ADMIN_PASSWORD: 'admin-password',
         },
       },
 })
