@@ -64,6 +64,8 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:3000',
       '/healthz': 'http://localhost:3000',
+      // Project documents (Hocuspocus); the server checks Host and Origin, kept as they are.
+      '/ws': { target: 'ws://localhost:3000', ws: true },
     },
   },
   preview: { host: 'localhost', port: 5173, strictPort: true },

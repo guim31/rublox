@@ -12,6 +12,7 @@ import {
 } from '@rublox/runtime'
 import type { Locale } from '@rublox/schema'
 import { useEffect, useRef, useState } from 'react'
+import { Stopped } from './run.tsx'
 
 const config = readConfig()
 const studioOrigin = originOf(config.studioUrl)
@@ -137,21 +138,6 @@ export function Preview() {
       />
       <Stopped engine={engine} locale={state.locale} />
     </>
-  )
-}
-
-function Stopped({ engine, locale }: { engine: Engine; locale: Locale }) {
-  const [running, setRunning] = useState(engine.getSnapshot().running)
-  useEffect(() => engine.subscribe(() => setRunning(engine.getSnapshot().running)), [engine])
-  if (running) return null
-  const strings = messages[locale].runtime
-  return (
-    <div className="stopped" role="status">
-      <p>{strings.stopped}</p>
-      <button type="button" onClick={() => void engine.restart()}>
-        {strings.restart}
-      </button>
-    </div>
   )
 }
 
