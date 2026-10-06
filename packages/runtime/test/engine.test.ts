@@ -253,3 +253,103 @@ describe('engine', () => {
     engine.dispose()
   })
 })
+
+describe('engine, J2 mechanisms', () => {
+  it('keeps stored variables on the device, per app', async () => {
+    const { doc, home } = project()
+    doc.variables.stored.push({ id: 's1', name: 'courses', initial: 0 })
+    doc.blocks[home] = {
+      evt: onClick('button', {
+        type: 'math_change',
+        fields: { VAR: { id: 's1' } },
+        inputs: { DELTA: { block: num(1) } },
+      }),
+      show: {
+        type: 'rx_Text_on_click',
+        x: 0,
+        y: 300,
+        fields: { COMPONENT: 'text' },
+        inputs: {
+          DO: {
+            block: setText('text', { type: 'variables_get', fields: { VAR: { id: 's1' } } }),
+          },
+        },
+      },
+    }
+    const data = new Map<string, string>()
+    const storage = {
+      getItem: (key: string) => data.get(key) ?? null,
+      setItem: (key: string, value: string) => void data.set(key, value),
+    }
+    const first = engineFor(doc, { storage }).engine
+    await first.start()
+    first.emit('button', 'click')
+    first.emit('button', 'click')
+    await flush()
+    first.dispose()
+    expect(JSON.parse(data.get('rublox:p:stored') ?? '{}')).toEqual({ courses: 2 })
+    const second = engineFor(doc, { storage }).engine
+    await second.start()
+    second.emit('text', 'click')
+    await flush()
+    expect(value(second, 'text', 'text')).toBe('2')
+    second.dispose()
+  })
+
+  it('shares the functions of the app workspace with every screen', async () => {
+    const { doc, home } = project()
+    doc.blocks.app = {
+      fn: {
+        type: 'procedures_defreturn',
+        x: 0,
+        y: 0,
+        extraState: { params: [{ name: 'n', id: 'p1' }] },
+        fields: { NAME: 'triple' },
+        inputs: {
+          RETURN: {
+            block: {
+              type: 'math_arithmetic',
+              fields: { OP: 'MULTIPLY' },
+              inputs: {
+                A: { block: { type: 'variables_get', fields: { VAR: { id: 'p1' } } } },
+                B: { block: num(3) },
+              },
+            },
+          },
+        },
+      },
+    }
+    doc.blocks[home] = {
+      evt: onClick(
+        'button',
+        setText('text', {
+          type: 'rx_app_call_value',
+          fields: { FUNCTION: 'triple' },
+          extraState: { params: ['n'] },
+          inputs: { ARG0: { block: num(5) } },
+        }),
+      ),
+    }
+    const { engine, logs } = engineFor(doc)
+    await engine.start()
+    engine.emit('button', 'click')
+    await sleep(10)
+    expect(value(engine, 'text', 'text')).toBe('15')
+    expect(logs).toEqual([])
+    engine.dispose()
+  })
+
+  it('runs component methods through their behavior', async () => {
+    const { doc, home } = project()
+    doc.blocks[home] = {
+      evt: onClick('button', { type: 'rx_TextInput_call_clear', fields: { COMPONENT: 'input' } }),
+    }
+    const { engine } = engineFor(doc)
+    await engine.start()
+    engine.setValue('input', 'text', 'abc')
+    engine.emit('button', 'click')
+    await flush()
+    expect(value(engine, 'input', 'text')).toBe('')
+    engine.dispose()
+  })
+})

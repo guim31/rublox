@@ -34,9 +34,10 @@ const ALIGN: Record<string, CSSProperties['alignSelf']> = {
 
 /**
  * The style of the common properties (SPEC § 4.4). In design mode an invisible component
- * stays on the canvas, faded, so that it can still be selected.
+ * stays on the canvas, faded, so that it can still be selected. `own` holds the values set
+ * on the component itself, to tell an explicit radius from the default one.
  */
-export function commonStyle(props: Props, design: boolean): CSSProperties {
+export function commonStyle(props: Props, design: boolean, own: Props = {}): CSSProperties {
   const style: CSSProperties = { boxSizing: 'border-box', minWidth: 0 }
   const width = size(props.width)
   const height = size(props.height)
@@ -56,7 +57,9 @@ export function commonStyle(props: Props, design: boolean): CSSProperties {
   if (typeof props.borderWidth === 'number' && props.borderWidth > 0) {
     style.border = `${props.borderWidth}px solid ${cssColor(props.borderColor) ?? 'var(--rx-border)'}`
   }
-  if (typeof props.radius === 'number' && props.radius > 0) style.borderRadius = props.radius
+  // A rounded component follows the theme's corners unless its own radius was set (§ 4.1).
+  if (typeof props.radius === 'number' && props.radius > 0)
+    style.borderRadius = 'radius' in own ? props.radius : 'var(--rx-radius)'
   if (typeof props.shadow === 'string' && SHADOWS[props.shadow])
     style.boxShadow = SHADOWS[props.shadow]
   if (typeof props.opacity === 'number' && props.opacity < 100) style.opacity = props.opacity / 100

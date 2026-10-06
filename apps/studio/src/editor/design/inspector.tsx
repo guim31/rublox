@@ -40,7 +40,7 @@ export function Inspector({ screenId }: { screenId: ScreenId }) {
   const isRoot = id === screen.rootId
   const essential = mode === 'studio' || more
 
-  const entries = Object.entries(def.props)
+  const entries = Object.entries(def.props).filter(([, prop]) => !prop.state)
   const grouped = PROP_GROUPS.map((group) => ({
     group,
     props: entries.filter(([, prop]) => prop.group === group && (essential || prop.junior)),

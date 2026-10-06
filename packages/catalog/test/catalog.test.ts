@@ -37,8 +37,11 @@ describe('catalog completeness', () => {
           expect(strings.enums[key]?.[value], `${locale}.enums.${key}.${value}`).toBeTruthy()
         }
       }
-      for (const key of Object.keys(def.events)) {
+      for (const [key, info] of Object.entries(def.events)) {
         expect(strings.events[key], `${locale}.events.${key}`).toContain('%1')
+        for (const arg of Object.keys(info.args)) {
+          expect(strings.args?.[arg], `${locale}.args.${arg}`).toBeTruthy()
+        }
       }
       for (const [key, method] of Object.entries(def.methods)) {
         const text = strings.methods[key] ?? ''
@@ -64,6 +67,16 @@ describe('catalog completeness', () => {
         for (const value of values) {
           expect(propDef.coerce(value), `${def.type}.${key}`).toEqual(value)
         }
+      }
+    }
+  })
+
+  it('keeps state properties out of the project and the inspector', () => {
+    for (const def of COMPONENTS) {
+      for (const [key, propDef] of Object.entries(def.props)) {
+        if (!propDef.state) continue
+        expect(propDef.blocks, `${def.type}.${key}`).not.toMatch(/set/)
+        expect(stripDefaults(def.type, { [key]: 'x' }), `${def.type}.${key}`).toEqual({})
       }
     }
   })
@@ -147,5 +160,30 @@ describe('coercion', () => {
     expect(color.coerce('url(x)')).toBeUndefined()
     const variant = prop.enum(['a', 'b'], { default: 'a', group: 'style' })
     expect(variant.coerce('c')).toBeUndefined()
+  })
+
+  it('reads lists, dates and times', () => {
+    const list = prop.list({ default: [], group: 'content' })
+    expect(list.coerce('rouge, vert, bleu')).toEqual(['rouge', 'vert', 'bleu'])
+    expect(list.coerce('a, b\nc')).toEqual(['a, b', 'c'])
+    expect(list.coerce([1, true, 'x'])).toEqual(['1', 'true', 'x'])
+    expect(list.coerce(null)).toEqual([])
+    expect(list.coerce({})).toBeUndefined()
+    const items = prop.list({
+      default: [],
+      group: 'content',
+      itemFields: { title: 'string', image: 'asset' },
+    })
+    expect(items.coerce(['Chat', { title: 'Chien', image: 'x', other: 1 }])).toEqual([
+      { title: 'Chat', image: '' },
+      { title: 'Chien', image: 'x' },
+    ])
+    const date = prop.date({ default: '', group: 'content' })
+    expect(date.coerce('2026-10-06')).toBe('2026-10-06')
+    expect(date.coerce('2026-02-30')).toBeUndefined()
+    expect(date.coerce(new Date(2026, 0, 5))).toBe('2026-01-05')
+    const time = prop.time({ default: '', group: 'content' })
+    expect(time.coerce('9:05')).toBe('09:05')
+    expect(time.coerce('24:00')).toBeUndefined()
   })
 })

@@ -1,8 +1,8 @@
-import { COMPONENTS, type ComponentDef, type PropKind } from '@rublox/catalog'
+import { COMPONENTS, type ComponentDef, getComponentDef, type PropKind } from '@rublox/catalog'
 import { messages } from '@rublox/i18n'
 import * as Blockly from 'blockly/core'
-import { getBlocksLocale } from './context.ts'
-import { ComponentField, PropertyField } from './fields.ts'
+import { contextOf, getBlocksLocale } from './context.ts'
+import { AppFunctionField, ComponentField, EventArgField, PropertyField } from './fields.ts'
 
 /**
  * Block types are saved in projects: never rename one. Component blocks are named
@@ -20,6 +20,9 @@ export const BLOCK_TYPES = {
   toast: 'rx_ui_toast',
   confirm: 'rx_ui_confirm',
   prompt: 'rx_ui_prompt',
+  eventValue: 'rx_event_value',
+  appCall: 'rx_app_call',
+  appCallValue: 'rx_app_call_value',
 } as const
 
 export const eventBlockType = (type: string, event: string) => `rx_${type}_on_${event}`
@@ -202,7 +205,84 @@ function defineComponentBlocks(def: ComponentDef): void {
   }
 }
 
+const EVENT_BLOCK = /^rx_([A-Za-z0-9]+)_on_([A-Za-z0-9]+)$/
+
+/** Arguments of the event block a block sits in (none outside of an event). */
+export function eventArgsOf(block: Blockly.Block): string[] {
+  const match = EVENT_BLOCK.exec(block.getRootBlock().type)
+  if (!match) return []
+  return Object.keys(getComponentDef(match[1] ?? '')?.events[match[2] ?? '']?.args ?? {})
+}
+
+type AppCallBlock = Blockly.Block & { params_: string[]; updateArgs_(params: string[]): void }
+
+/** A call to a function of the `app` workspace: its inputs follow the function's parameters. */
+function appCallBlock(value: boolean): Partial<AppCallBlock> & ThisType<AppCallBlock> {
+  return {
+    init(this: AppCallBlock) {
+      this.params_ = []
+      const field = new AppFunctionField()
+      const strings = messages[getBlocksLocale()].catalog.blocks
+      this.appendDummyInput('TOP')
+        .appendField(value ? strings.appCallValue : strings.appCall)
+        .appendField(asField(field), 'FUNCTION')
+      field.setValidator((name) => {
+        const fn = contextOf(this.workspace).appFunctions?.find((f) => f.name === name)
+        if (fn) this.updateArgs_(fn.params)
+        return name
+      })
+      this.setInputsInline(true)
+      if (value) this.setOutput(true, null)
+      else {
+        this.setPreviousStatement(true)
+        this.setNextStatement(true)
+      }
+      this.setStyle('procedure_blocks')
+      this.setTooltip(() => messages[getBlocksLocale()].catalog.blocks.appCallTooltip)
+    },
+    updateArgs_(this: AppCallBlock, params: string[]) {
+      for (let index = 0; this.getInput(`ARG${index}`); index++) {
+        if (index >= params.length) this.removeInput(`ARG${index}`)
+      }
+      params.forEach((param, index) => {
+        const input = this.getInput(`ARG${index}`) ?? this.appendValueInput(`ARG${index}`)
+        const label = input.fieldRow[0]
+        if (label) label.setValue(param)
+        else input.appendField(param)
+      })
+      this.params_ = [...params]
+    },
+    saveExtraState(this: AppCallBlock) {
+      return { params: this.params_ }
+    },
+    loadExtraState(this: AppCallBlock, state: { params?: string[] }) {
+      this.updateArgs_(state.params ?? [])
+    },
+  }
+}
+
 function defineGeneralBlocks(): void {
+  Blockly.Blocks[BLOCK_TYPES.eventValue] = {
+    init(this: Blockly.Block) {
+      const strings = messages[getBlocksLocale()].catalog.blocks
+      appendMessage(this, strings.eventValue, {
+        1: (_, input) => input.appendField(asField(new EventArgField()), 'ARG'),
+      })
+      this.setOutput(true, null)
+      this.setStyle('rx_event_blocks')
+      this.setTooltip(() => messages[getBlocksLocale()].catalog.blocks.eventValueTooltip)
+    },
+    onchange(this: Blockly.BlockSvg, event: Blockly.Events.Abstract) {
+      if (this.isInFlyout || event.isUiEvent || !('setWarningText' in this)) return
+      const inside = eventArgsOf(this).includes(this.getFieldValue('ARG'))
+      this.setWarningText(
+        inside ? null : messages[getBlocksLocale()].catalog.blocks.eventValueOutside,
+      )
+    },
+  }
+  Blockly.Blocks[BLOCK_TYPES.appCall] = appCallBlock(false)
+  Blockly.Blocks[BLOCK_TYPES.appCallValue] = appCallBlock(true)
+
   jsonBlock(BLOCK_TYPES.appStart, () => ({
     message0: t().appStart,
     message1: '%1',

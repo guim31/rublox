@@ -70,6 +70,7 @@ export function Preview() {
             mode: message.mode,
             initialScreen: message.screenId,
             slow: slow.current,
+            assetUrl: (value) => assets.current.get(value),
             host: {
               log: (entry) => send({ type: 'rx:log', entry }),
               state: (s) => send({ type: 'rx:state', running: s.running, screenId: s.screenId }),

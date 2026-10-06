@@ -19,6 +19,7 @@ import { errorMessage } from '../../lib/errors.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { MAX_IMAGE_BYTES } from '../../storage/assets.ts'
 import { useDoc, useSession } from '../context.tsx'
+import { DateEditor, IconEditor, ListEditor, MediaAssetEditor, TimeEditor } from './editors-j2.tsx'
 
 export type EditorProps<T = unknown> = {
   id: string
@@ -401,7 +402,12 @@ export function SpacingEditor({ id, value, onChange }: EditorProps<SpacingValue>
 }
 
 /** An image of the project (stored in this browser in guest mode) or an https: address. */
-export function AssetEditor({ id, value, onChange, def }: EditorProps<string>) {
+export function AssetEditor(props: EditorProps<string>) {
+  if ((props.def.assetKind ?? 'image') !== 'image') return <MediaAssetEditor {...props} />
+  return <ImageAssetEditor {...props} />
+}
+
+function ImageAssetEditor({ id, value, onChange, def }: EditorProps<string>) {
   const { t } = useTranslation()
   const session = useSession()
   const doc = useDoc()
@@ -518,5 +524,9 @@ export const EDITORS: Record<PropDef['kind'], (props: EditorProps<never>) => Rea
   size: SizeEditor as never,
   spacing: SpacingEditor as never,
   asset: AssetEditor as never,
-  icon: StringEditor as never,
+  icon: IconEditor as never,
+  list: ListEditor as never,
+  date: DateEditor as never,
+  time: TimeEditor as never,
+  any: StringEditor as never,
 }

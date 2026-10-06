@@ -18,7 +18,9 @@
   "dependencies": {
     "@rublox/catalog": "workspace:*",
     "@rublox/i18n": "workspace:*",
-    "@rublox/schema": "workspace:*"
+    "@rublox/schema": "workspace:*",
+    "lucide-react": "1.52.0",
+    "qrcode": "1.5.4"
   },
   "peerDependencies": {
     "react": "^19.3.0",
@@ -31,6 +33,7 @@
     "@types/react-dom": "19.3.0",
     "jsdom": "29.1.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "@types/qrcode": "1.5.6"
   }
 }

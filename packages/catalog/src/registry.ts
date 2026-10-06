@@ -73,7 +73,7 @@ export function stripDefaults(
   return Object.fromEntries(
     Object.entries(props).filter(([key, value]) => {
       const propDef = def.props[key]
-      if (!propDef) return false
+      if (!propDef || propDef.state) return false
       if (isLocalized(propDef.default)) return true
       return JSON.stringify(value) !== JSON.stringify(propDef.default)
     }),

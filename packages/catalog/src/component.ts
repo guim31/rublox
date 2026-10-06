@@ -1,4 +1,4 @@
-import { COMMON_STRINGS, commonProps } from './common.ts'
+import { COMMON_STRINGS, commonProps, DEVICE_STRINGS } from './common.ts'
 import type { ComponentDef, ComponentInput, Localized, PropDef } from './define.ts'
 
 /**
@@ -19,11 +19,21 @@ export function defineComponent(input: ComponentInput): ComponentDef {
   const strings = Object.fromEntries(
     Object.entries(input.strings).map(([locale, own]) => {
       const shared = COMMON_STRINGS[locale as keyof typeof COMMON_STRINGS]
+      const device = DEVICE_STRINGS[locale as keyof typeof DEVICE_STRINGS]
+      const propKeys = [...Object.keys(common), ...Object.keys(input.props)]
+      const eventKeys = Object.keys(input.events ?? {})
+      const argKeys = Object.values(input.events ?? {}).flatMap((e) => Object.keys(e.args))
       return [
         locale,
         {
           ...own,
-          props: { ...pick(shared.props, Object.keys(common)), ...own.props },
+          props: {
+            ...pick(shared.props, Object.keys(common)),
+            ...pick(device.props, propKeys),
+            ...own.props,
+          },
+          events: { ...pick(device.events, eventKeys), ...own.events },
+          args: { ...pick(device.args, argKeys), ...own.args },
           enums: { ...pick(shared.enums, Object.keys(common)), ...own.enums },
         },
       ]

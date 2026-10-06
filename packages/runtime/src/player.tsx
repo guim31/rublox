@@ -2,6 +2,7 @@ import { messages } from '@rublox/i18n'
 import type { Locale } from '@rublox/schema'
 import { type ReactNode, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { Engine } from './engine.ts'
+import { OVERLAYS } from './overlays/registry.ts'
 import { AppSurface, ScreenView } from './screen-view.tsx'
 import { resolveScheme, type Scheme } from './theme.ts'
 
@@ -76,15 +77,20 @@ export function PlayerApp(props: PlayerAppProps): ReactNode {
               locale={doc.meta.locale}
               mode="run"
               overrides={screen.overrides}
-              emit={(id, event) => {
+              emit={(id, event, args) => {
                 if (props.onInspect && event === 'click') props.onInspect(id)
-                else engine.emit(id, event)
+                else engine.emit(id, event, args)
               }}
               setValue={(id, prop, value) => engine.setValue(id, prop, value)}
-              assetUrl={props.assetUrl}
+              expose={(id, handle) => engine.expose(screen.key, id, handle)}
+              assetUrl={(value) => props.assetUrl?.(value) ?? engine.resolveAsset(value)}
             />
           ) : null}
         </main>
+        {snapshot.overlays.map((overlay) => {
+          const View = OVERLAYS[overlay.kind]
+          return View ? <View key={overlay.id} overlay={overlay} locale={props.locale} /> : null
+        })}
         {snapshot.dialogs[0] ? (
           <DialogView key={snapshot.dialogs[0].id} engine={engine} locale={props.locale} />
         ) : null}
