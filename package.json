@@ -1,0 +1,32 @@
+{
+  "name": "rublox",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Build real phone apps with blocks.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check": "biome check . && turbo run typecheck test build",
+    "test:e2e": "turbo run build && playwright test",
+    "screenshots": "turbo run build && playwright test --project=screenshots"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@biomejs/biome": "2.5.15",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.19.1",
+    "turbo": "2.11.7",
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}
