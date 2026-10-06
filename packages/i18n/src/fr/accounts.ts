@@ -331,6 +331,10 @@ export const accounts = {
     unsupported_type: 'Ce type de fichier n’est pas accepté.',
     quota_exceeded: 'Ton espace de stockage est plein.',
     invalid_project: 'Ce projet est abîmé : il n’a pas pu être enregistré.',
+    slug_taken: 'Cette adresse est déjà prise par une autre appli.',
+    missing_asset: 'Un fichier du projet manque sur le serveur : envoie-le à nouveau.',
+    publish_forbidden: 'Ton espace ne permet pas encore de publier : demande à ton responsable.',
+    in_trash: 'Ce projet est dans la corbeille : restaure-le d’abord.',
     unknown: 'Quelque chose s’est mal passé. Réessaie.',
   },
 }

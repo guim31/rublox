@@ -7,9 +7,10 @@ import { getClientIp } from './client-ip.ts'
 import { type Config, normalizeHost } from './config.ts'
 import { assets } from './db/schema.ts'
 import { isSha256 } from './files.ts'
+import { PublishedApps } from './published.ts'
 import { appsSecurityHeaders, studioSecurityHeaders } from './security.ts'
 import type { Services } from './services.ts'
-import { StaticSite } from './static.ts'
+import { HASHED_PREFIX, StaticSite } from './static.ts'
 
 /** Path prefixes of the apps origin that later milestones will serve (SPEC § 6.7). */
 export const RESERVED_APPS_PREFIXES = ['/a/', '/live/', '/assets/', '/_rx/'] as const
@@ -20,6 +21,19 @@ export interface AppDeps {
   /** Checks that the database answers (`select 1`). */
   ping: () => Promise<void>
   logger?: Pick<Logger, 'warn' | 'error'>
+}
+
+/** `/a/<slug>` and `/a/<slug>/<file>`: one level only (`install`, `app.json`, icons…). */
+const APP_PATH = /^\/a\/([a-z0-9-]{3,40})(?:\/([a-z0-9.-]*))?$/
+const LIVE_PATH = /^\/live\/([A-Za-z0-9_-]+)\/?$/
+export const PLAYER_KIT_PATH = '/_rx/kit.json'
+
+/** Lets the studio read a file of the apps origin (`fetch` with CORS); never with cookies. */
+function withStudioCors(response: Response, studioUrl: string): Response {
+  const copy = new Response(response.body, response)
+  copy.headers.set('Access-Control-Allow-Origin', studioUrl)
+  copy.headers.append('Vary', 'Origin')
+  return copy
 }
 
 const notFound = () => Response.json({ error: 'not_found' }, { status: 404 })
@@ -54,12 +68,27 @@ export function createApp({ config, services, ping, logger }: AppDeps) {
     .get('*', (c) => studioSite.serve(rawPath(c.req.url)))
     .all('*', () => notFound())
 
+  const published = new PublishedApps(services, config.playerDist, runtimeConfig)
+
   // Apps origin: player, then published apps, assets and the API relay. Never any studio cookie.
   const apps = new Hono()
     .use(appsSecurityHeaders(config.studioUrl))
     .get('/assets/:hash', (c) => serveAsset(services, c.req.param('hash')))
-    .get('*', (c) => {
+    .get('*', async (c) => {
       const path = rawPath(c.req.url)
+      // Published apps (SPEC § 4.6) and live test links (§ 4.3).
+      const app = APP_PATH.exec(path)
+      if (app?.[1]) {
+        if (app[2] === undefined) return c.redirect(`/a/${app[1]}/`, 301)
+        return published.serveApp(app[1], app[2])
+      }
+      const live = LIVE_PATH.exec(path)
+      if (live?.[1]) return published.serveLive(live[1])
+      // The built player, read by the studio to export an app as a website.
+      if (path === PLAYER_KIT_PATH) return withStudioCors(await published.kit(), config.studioUrl)
+      if (path.startsWith(HASHED_PREFIX) || path === '/favicon.svg') {
+        return withStudioCors(await playerSite.serve(path), config.studioUrl)
+      }
       if (RESERVED_APPS_PREFIXES.some((prefix) => path.startsWith(prefix))) return notFound()
       return playerSite.serve(path)
     })
