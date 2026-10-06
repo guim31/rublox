@@ -86,7 +86,14 @@ export function createProject(input: NewProject): ProjectDoc {
       [screenId]: {
         name: screenName,
         rootId,
-        components: { [rootId]: { type: SCREEN_TYPE, name: screenName, props: {}, children: [] } },
+        components: {
+          [rootId]: {
+            type: SCREEN_TYPE,
+            name: screenName,
+            props: {},
+            children: [],
+          },
+        },
         nonVisual: [],
       },
     },

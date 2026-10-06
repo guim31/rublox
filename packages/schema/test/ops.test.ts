@@ -75,7 +75,10 @@ describe('component operations', () => {
     renameComponent(ydoc, 's1', 'btn', 'Valider')
     expect(() => renameComponent(ydoc, 's1', 'txt', 'Valider')).toThrow(ProjectOpError)
     const btn = valid(ydoc).screens.s1!.components.btn!
-    expect(btn).toMatchObject({ name: 'Valider', props: { variant: 'outline' } })
+    expect(btn).toMatchObject({
+      name: 'Valider',
+      props: { variant: 'outline' },
+    })
   })
 })
 
@@ -119,7 +122,9 @@ describe('blocks and variables', () => {
     setBlockStack(ydoc, 'app', 'top', { type: 'rx_app_start', id: 'top' })
     setBlockStack(ydoc, 's1', 'b1', null)
     const doc = valid(ydoc)
-    expect(doc.blocks.app).toEqual({ top: { type: 'rx_app_start', id: 'top' } })
+    expect(doc.blocks.app).toEqual({
+      top: { type: 'rx_app_start', id: 'top' },
+    })
     expect(doc.blocks.s1).toEqual({})
   })
 

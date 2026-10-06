@@ -3,3 +3,7 @@ packages:
   - packages/*
 minimumReleaseAgeExclude:
   - nanoid@6.0.2
+
+# Dependencies allowed to run install scripts (pnpm blocks them by default).
+allowBuilds:
+  esbuild: true

@@ -37,7 +37,9 @@ export const Image = defineComponent({
       props: { src: 'image', fit: 'ajustement', alt: 'description' },
       events: { click: 'quand %1 est cliquée' },
       methods: {},
-      enums: { fit: { cover: 'Remplir', contain: 'Tout montrer', fill: 'Étirer' } },
+      enums: {
+        fit: { cover: 'Remplir', contain: 'Tout montrer', fill: 'Étirer' },
+      },
     },
     en: {
       label: 'Image',

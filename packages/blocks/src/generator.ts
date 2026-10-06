@@ -300,7 +300,10 @@ export type GeneratedCode = {
  * the last marker above it that is not more indented, so the `}` closing a handler belongs to
  * the handler, not to its last statement.
  */
-export function stripMarkers(raw: string): { lines: string[]; ids: (string | null)[] } {
+export function stripMarkers(raw: string): {
+  lines: string[]
+  ids: (string | null)[]
+} {
   const lines: string[] = []
   const ids: (string | null)[] = []
   const stack: { indent: number; id: string }[] = []

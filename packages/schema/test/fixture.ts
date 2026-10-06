@@ -30,7 +30,12 @@ export function fixture(): ProjectDoc {
         name: 'Accueil',
         rootId: 'r1',
         components: {
-          r1: { type: 'Screen', name: 'Accueil', props: {}, children: ['row', 'txt'] },
+          r1: {
+            type: 'Screen',
+            name: 'Accueil',
+            props: {},
+            children: ['row', 'txt'],
+          },
           row: { type: 'Row', name: 'Ligne1', props: {}, children: ['btn'] },
           btn: { type: 'Button', name: 'Bouton1', props: { text: 'Bouton' } },
           txt: { type: 'Text', name: 'Texte1', props: { text: 'Texte' } },
@@ -40,7 +45,9 @@ export function fixture(): ProjectDoc {
       s2: {
         name: 'Ecran2',
         rootId: 'r2',
-        components: { r2: { type: 'Screen', name: 'Ecran2', props: {}, children: [] } },
+        components: {
+          r2: { type: 'Screen', name: 'Ecran2', props: {}, children: [] },
+        },
         nonVisual: [],
       },
     },
@@ -53,7 +60,11 @@ export function fixture(): ProjectDoc {
         },
       },
     },
-    variables: { app: [{ id: 'v1', name: 'score', initial: 0 }], stored: [], shared: [] },
+    variables: {
+      app: [{ id: 'v1', name: 'score', initial: 0 }],
+      stored: [],
+      shared: [],
+    },
     assets: {},
     data: { tables: {}, apis: {} },
   }

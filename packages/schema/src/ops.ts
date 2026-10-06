@@ -132,7 +132,9 @@ export function addScreen(ydoc: Y.Doc, input: NewScreen, index?: number, origin?
     const screen: Screen = {
       name,
       rootId,
-      components: { [rootId]: { ...input.root, children: input.root.children ?? [] } },
+      components: {
+        [rootId]: { ...input.root, children: input.root.children ?? [] },
+      },
       nonVisual: [],
     }
     yScreens(ydoc).set(id, screenToY(screen))
@@ -217,7 +219,10 @@ export function duplicateScreen(ydoc: Y.Doc, screenId: ScreenId, origin?: Origin
       components: Object.fromEntries(
         Object.entries(source.components).map(([old, node]) => [
           ids.get(old),
-          { ...node, children: node.children?.map((child) => ids.get(child) ?? child) },
+          {
+            ...node,
+            children: node.children?.map((child) => ids.get(child) ?? child),
+          },
         ]),
       ) as Screen['components'],
       nonVisual: source.nonVisual.map((old) => ids.get(old) ?? old),

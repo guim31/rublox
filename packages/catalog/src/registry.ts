@@ -96,7 +96,10 @@ export function enumLabel(type: string, key: string, value: string, locale: Loca
   return componentStrings(type, locale)?.enums[key]?.[value] ?? value
 }
 
-export type PaletteCategory = { category: ComponentCategory; components: ComponentDef[] }
+export type PaletteCategory = {
+  category: ComponentCategory
+  components: ComponentDef[]
+}
 
 /** Palette content for a mode: Junior only gets components marked `junior`. */
 export function paletteFor(mode: UiMode): PaletteCategory[] {

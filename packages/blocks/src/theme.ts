@@ -45,7 +45,10 @@ export function blocklyTheme(mode: UiMode, dark: boolean): Blockly.Theme {
   if (cached) return cached
   const blockStyles: Record<string, Partial<Blockly.Theme.BlockStyle>> = {}
   const categoryStyles: Record<string, Blockly.Theme.CategoryStyle> = {}
-  for (const [style, category] of Object.entries({ ...BUILTIN_STYLES, ...OWN_STYLES })) {
+  for (const [style, category] of Object.entries({
+    ...BUILTIN_STYLES,
+    ...OWN_STYLES,
+  })) {
     const colour = CATEGORY_COLORS[category]
     blockStyles[`${style}_blocks`] = {
       colourPrimary: colour,
@@ -89,8 +92,16 @@ export function blocklyTheme(mode: UiMode, dark: boolean): Blockly.Theme {
         },
     fontStyle:
       mode === 'junior'
-        ? { family: '"Nunito Variable", Nunito, system-ui, sans-serif', weight: '700', size: 12 }
-        : { family: '"Inter Variable", Inter, system-ui, sans-serif', weight: '500', size: 11 },
+        ? {
+            family: '"Nunito Variable", Nunito, system-ui, sans-serif',
+            weight: '700',
+            size: 12,
+          }
+        : {
+            family: '"Inter Variable", Inter, system-ui, sans-serif',
+            weight: '500',
+            size: 11,
+          },
     startHats: mode === 'junior',
   })
   themes.set(name, theme)
@@ -123,7 +134,12 @@ export function injectWorkspace(element: Element, options: InjectOptions): Block
     comments: true,
     collapse: true,
     disable: true,
-    grid: { spacing: 24, length: 2, colour: options.dark ? '#2b2a38' : '#dedbea', snap: true },
+    grid: {
+      spacing: 24,
+      length: 2,
+      colour: options.dark ? '#2b2a38' : '#dedbea',
+      snap: true,
+    },
     move: { scrollbars: true, drag: true, wheel: true },
     zoom: {
       controls: true,

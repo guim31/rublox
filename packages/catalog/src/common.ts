@@ -3,9 +3,24 @@ import { type Localized, type PropDef, prop } from './define.ts'
 /** Properties every visible component has (SPEC § 4.4). */
 export function commonProps(): Record<string, PropDef> {
   return {
-    visible: prop.boolean({ default: true, group: 'layout', junior: true, blocks: 'get-set' }),
-    width: prop.size({ default: 'auto', group: 'layout', junior: true, blocks: 'get-set' }),
-    height: prop.size({ default: 'auto', group: 'layout', junior: true, blocks: 'get-set' }),
+    visible: prop.boolean({
+      default: true,
+      group: 'layout',
+      junior: true,
+      blocks: 'get-set',
+    }),
+    width: prop.size({
+      default: 'auto',
+      group: 'layout',
+      junior: true,
+      blocks: 'get-set',
+    }),
+    height: prop.size({
+      default: 'auto',
+      group: 'layout',
+      junior: true,
+      blocks: 'get-set',
+    }),
     grow: prop.boolean({ default: false, group: 'layout' }),
     alignSelf: prop.enum(['auto', 'start', 'center', 'end', 'stretch'], {
       default: 'auto',
@@ -17,7 +32,10 @@ export function commonProps(): Record<string, PropDef> {
     borderWidth: prop.number({ default: 0, min: 0, max: 32, group: 'style' }),
     borderColor: prop.color({ default: '@border', group: 'style' }),
     radius: prop.number({ default: 0, min: 0, max: 999, group: 'style' }),
-    shadow: prop.enum(['none', 'small', 'medium', 'large'], { default: 'none', group: 'style' }),
+    shadow: prop.enum(['none', 'small', 'medium', 'large'], {
+      default: 'none',
+      group: 'style',
+    }),
     opacity: prop.number({
       default: 100,
       min: 0,
@@ -78,7 +96,12 @@ export const COMMON_STRINGS: Localized<{
       wrap: 'retour à la ligne',
     },
     enums: {
-      alignItems: { start: 'Début', center: 'Centre', end: 'Fin', stretch: 'Étirer' },
+      alignItems: {
+        start: 'Début',
+        center: 'Centre',
+        end: 'Fin',
+        stretch: 'Étirer',
+      },
       justify: {
         start: 'Au début',
         center: 'Au centre',
@@ -93,7 +116,12 @@ export const COMMON_STRINGS: Localized<{
         end: 'Fin',
         stretch: 'Étirer',
       },
-      shadow: { none: 'Aucune', small: 'Légère', medium: 'Moyenne', large: 'Forte' },
+      shadow: {
+        none: 'Aucune',
+        small: 'Légère',
+        medium: 'Moyenne',
+        large: 'Forte',
+      },
     },
   },
   en: {
@@ -117,7 +145,12 @@ export const COMMON_STRINGS: Localized<{
       wrap: 'wrap',
     },
     enums: {
-      alignItems: { start: 'Start', center: 'Center', end: 'End', stretch: 'Stretch' },
+      alignItems: {
+        start: 'Start',
+        center: 'Center',
+        end: 'End',
+        stretch: 'Stretch',
+      },
       justify: {
         start: 'At the start',
         center: 'In the center',
@@ -132,7 +165,12 @@ export const COMMON_STRINGS: Localized<{
         end: 'End',
         stretch: 'Stretch',
       },
-      shadow: { none: 'None', small: 'Small', medium: 'Medium', large: 'Large' },
+      shadow: {
+        none: 'None',
+        small: 'Small',
+        medium: 'Medium',
+        large: 'Large',
+      },
     },
   },
 }

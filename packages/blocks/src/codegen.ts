@@ -37,7 +37,10 @@ export function contextFromDoc(
           type: node.type,
         }))
       : [],
-    screens: doc.screenOrder.map((id) => ({ id, name: doc.screens[id]?.name ?? id })),
+    screens: doc.screenOrder.map((id) => ({
+      id,
+      name: doc.screens[id]?.name ?? id,
+    })),
   }
 }
 

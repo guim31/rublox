@@ -19,7 +19,9 @@ type BlockItem = Blockly.utils.toolbox.BlockInfo
 const block = (type: string, extra: Partial<BlockItem> = {}): BlockItem =>
   ({ kind: 'block', type, ...extra }) as BlockItem
 
-const textShadow = (value = '') => ({ shadow: { type: 'text', fields: { TEXT: value } } })
+const textShadow = (value = '') => ({
+  shadow: { type: 'text', fields: { TEXT: value } },
+})
 const numberShadow = (value: number) => ({
   shadow: { type: 'math_number', fields: { NUM: value } },
 })
@@ -110,7 +112,11 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
         ? [
             block('controls_whileUntil'),
             block('controls_for', {
-              inputs: { FROM: numberShadow(1), TO: numberShadow(10), BY: numberShadow(1) },
+              inputs: {
+                FROM: numberShadow(1),
+                TO: numberShadow(10),
+                BY: numberShadow(1),
+              },
             }),
             block('controls_forEach'),
             block('controls_flow_statements'),
@@ -138,8 +144,12 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
     categorystyle: 'math_category',
     contents: [
       block('math_number', { fields: { NUM: 0 } }),
-      block('math_arithmetic', { inputs: { A: numberShadow(1), B: numberShadow(1) } }),
-      block('math_random_int', { inputs: { FROM: numberShadow(1), TO: numberShadow(6) } }),
+      block('math_arithmetic', {
+        inputs: { A: numberShadow(1), B: numberShadow(1) },
+      }),
+      block('math_random_int', {
+        inputs: { FROM: numberShadow(1), TO: numberShadow(6) },
+      }),
       ...(all
         ? [
             block('math_single', { inputs: { NUM: numberShadow(9) } }),
@@ -147,9 +157,15 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
             block('math_modulo', {
               inputs: { DIVIDEND: numberShadow(64), DIVISOR: numberShadow(10) },
             }),
-            block('math_number_property', { inputs: { NUMBER_TO_CHECK: numberShadow(0) } }),
+            block('math_number_property', {
+              inputs: { NUMBER_TO_CHECK: numberShadow(0) },
+            }),
             block('math_constrain', {
-              inputs: { VALUE: numberShadow(50), LOW: numberShadow(1), HIGH: numberShadow(100) },
+              inputs: {
+                VALUE: numberShadow(50),
+                LOW: numberShadow(1),
+                HIGH: numberShadow(100),
+              },
             }),
             block('math_random_float'),
             block('math_on_list'),
@@ -175,7 +191,11 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
             block('text_changeCase', { inputs: { TEXT: textShadow('abc') } }),
             block('text_trim', { inputs: { TEXT: textShadow(' abc ') } }),
             block('text_replace', {
-              inputs: { FROM: textShadow('a'), TO: textShadow('b'), TEXT: textShadow('abc') },
+              inputs: {
+                FROM: textShadow('a'),
+                TO: textShadow('b'),
+                TEXT: textShadow('abc'),
+              },
             }),
           ]
         : []),
@@ -237,7 +257,9 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
       categorystyle: 'rx_screen_category',
       contents: [
         block(BLOCK_TYPES.screenOpen, {
-          fields: { SCREEN: context.screens.find((s) => s.id !== context.workspace)?.id ?? '' },
+          fields: {
+            SCREEN: context.screens.find((s) => s.id !== context.workspace)?.id ?? '',
+          },
         }),
         block(BLOCK_TYPES.screenBack),
       ],
@@ -249,12 +271,20 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
     name: t.interface,
     categorystyle: 'rx_interface_category',
     contents: [
-      block(BLOCK_TYPES.alert, { inputs: { MESSAGE: textShadow(samples.alert) } }),
-      block(BLOCK_TYPES.toast, { inputs: { MESSAGE: textShadow(samples.toast) } }),
+      block(BLOCK_TYPES.alert, {
+        inputs: { MESSAGE: textShadow(samples.alert) },
+      }),
+      block(BLOCK_TYPES.toast, {
+        inputs: { MESSAGE: textShadow(samples.toast) },
+      }),
       ...(all
         ? [
-            block(BLOCK_TYPES.confirm, { inputs: { MESSAGE: textShadow(samples.confirm) } }),
-            block(BLOCK_TYPES.prompt, { inputs: { MESSAGE: textShadow(samples.prompt) } }),
+            block(BLOCK_TYPES.confirm, {
+              inputs: { MESSAGE: textShadow(samples.confirm) },
+            }),
+            block(BLOCK_TYPES.prompt, {
+              inputs: { MESSAGE: textShadow(samples.prompt) },
+            }),
           ]
         : []),
     ],

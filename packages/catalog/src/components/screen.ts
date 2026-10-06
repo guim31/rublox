@@ -28,7 +28,12 @@ export const Screen = defineComponent({
   ],
   commonDefaults: { padding: 16, background: '@background' },
   props: {
-    title: prop.string({ default: '', group: 'content', junior: true, blocks: 'get-set' }),
+    title: prop.string({
+      default: '',
+      group: 'content',
+      junior: true,
+      blocks: 'get-set',
+    }),
     ...containerProps('column'),
     scroll: prop.boolean({ default: true, group: 'advanced' }),
   },

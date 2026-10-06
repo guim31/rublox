@@ -96,7 +96,11 @@ describe('creation', () => {
 
   it('names components with the localized prefix and writes localized defaults', () => {
     const button = createComponent('Button', 'fr', ['Bouton1'])
-    expect(button).toEqual({ type: 'Button', name: 'Bouton2', props: { text: 'Bouton' } })
+    expect(button).toEqual({
+      type: 'Button',
+      name: 'Bouton2',
+      props: { text: 'Bouton' },
+    })
     expect(createComponent('TextInput', 'en', []).name).toBe('Input1')
     expect(createComponent('Row', 'fr', []).children).toEqual([])
   })
@@ -114,7 +118,12 @@ describe('creation', () => {
 
   it('resolves and strips defaults', () => {
     const full = resolveProps('Button', { text: 'OK' }, 'fr')
-    expect(full).toMatchObject({ text: 'OK', variant: 'filled', visible: true, radius: 12 })
+    expect(full).toMatchObject({
+      text: 'OK',
+      variant: 'filled',
+      visible: true,
+      radius: 12,
+    })
     expect(stripDefaults('Button', full)).toEqual({ text: 'OK' })
   })
 })

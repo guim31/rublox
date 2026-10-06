@@ -21,10 +21,25 @@ export const Button = defineComponent({
       group: 'style',
       junior: true,
     }),
-    color: prop.color({ default: '@primary', group: 'style', junior: true, blocks: 'get-set' }),
+    color: prop.color({
+      default: '@primary',
+      group: 'style',
+      junior: true,
+      blocks: 'get-set',
+    }),
     textColor: prop.color({ default: '', group: 'style', blocks: 'get-set' }),
-    fontSize: prop.number({ default: 16, min: 8, max: 96, group: 'style', blocks: 'get-set' }),
-    disabled: prop.boolean({ default: false, group: 'advanced', blocks: 'get-set' }),
+    fontSize: prop.number({
+      default: 16,
+      min: 8,
+      max: 96,
+      group: 'style',
+      blocks: 'get-set',
+    }),
+    disabled: prop.boolean({
+      default: false,
+      group: 'advanced',
+      blocks: 'get-set',
+    }),
   },
   events: {
     click: event({ junior: true }),
@@ -45,9 +60,14 @@ export const Button = defineComponent({
         fontSize: 'taille du texte',
         disabled: 'désactivé',
       },
-      events: { click: 'quand %1 est cliqué', longPress: 'quand %1 est appuyé longtemps' },
+      events: {
+        click: 'quand %1 est cliqué',
+        longPress: 'quand %1 est appuyé longtemps',
+      },
       methods: {},
-      enums: { variant: { filled: 'Plein', outline: 'Contour', ghost: 'Discret' } },
+      enums: {
+        variant: { filled: 'Plein', outline: 'Contour', ghost: 'Discret' },
+      },
     },
     en: {
       label: 'Button',
@@ -63,9 +83,14 @@ export const Button = defineComponent({
         fontSize: 'text size',
         disabled: 'disabled',
       },
-      events: { click: 'when %1 is clicked', longPress: 'when %1 is long pressed' },
+      events: {
+        click: 'when %1 is clicked',
+        longPress: 'when %1 is long pressed',
+      },
       methods: {},
-      enums: { variant: { filled: 'Filled', outline: 'Outline', ghost: 'Ghost' } },
+      enums: {
+        variant: { filled: 'Filled', outline: 'Outline', ghost: 'Ghost' },
+      },
     },
   },
 })

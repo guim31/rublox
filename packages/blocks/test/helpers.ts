@@ -2,8 +2,17 @@ import { createComponent, createProject } from '@rublox/catalog'
 import type { BlocklyJson, ProjectDoc } from '@rublox/schema'
 
 /** A project with one screen holding Bouton1, Texte1 and Champ1, plus a second screen. */
-export function project(): { doc: ProjectDoc; screen: string; ids: Record<string, string> } {
-  const doc = createProject({ name: 'Test', locale: 'fr', mode: 'junior', id: 'p' })
+export function project(): {
+  doc: ProjectDoc
+  screen: string
+  ids: Record<string, string>
+} {
+  const doc = createProject({
+    name: 'Test',
+    locale: 'fr',
+    mode: 'junior',
+    id: 'p',
+  })
   const screen = doc.screenOrder[0]!
   const s = doc.screens[screen]!
   // Fixed ids, so that several calls describe the same project.
@@ -31,14 +40,22 @@ export function project(): { doc: ProjectDoc; screen: string; ids: Record<string
   doc.screens.second = {
     name: 'Ecran2',
     rootId: 'r2',
-    components: { r2: { type: 'Screen', name: 'Ecran2', props: {}, children: [] } },
+    components: {
+      r2: { type: 'Screen', name: 'Ecran2', props: {}, children: [] },
+    },
     nonVisual: [],
   }
   return { doc, screen, ids }
 }
 
-export const text = (value: string): BlocklyJson => ({ type: 'text', fields: { TEXT: value } })
-export const num = (value: number): BlocklyJson => ({ type: 'math_number', fields: { NUM: value } })
+export const text = (value: string): BlocklyJson => ({
+  type: 'text',
+  fields: { TEXT: value },
+})
+export const num = (value: number): BlocklyJson => ({
+  type: 'math_number',
+  fields: { NUM: value },
+})
 
 export function setText(component: string, value: BlocklyJson, next?: BlocklyJson): BlocklyJson {
   return {

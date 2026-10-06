@@ -117,7 +117,11 @@ export const projectDocSchema = z
   .superRefine((doc, ctx) => {
     const order = new Set(doc.screenOrder)
     if (order.size !== doc.screenOrder.length) {
-      ctx.addIssue({ code: 'custom', path: ['screenOrder'], message: 'duplicate screen id' })
+      ctx.addIssue({
+        code: 'custom',
+        path: ['screenOrder'],
+        message: 'duplicate screen id',
+      })
     }
     for (const screenId of doc.screenOrder) {
       if (!doc.screens[screenId]) {
@@ -147,11 +151,19 @@ export const projectDocSchema = z
     const screenNames = new Set<string>()
     for (const [screenId, screen] of Object.entries(doc.screens)) {
       if (screenNames.has(screen.name)) {
-        ctx.addIssue({ code: 'custom', path: ['screens', screenId, 'name'], message: 'duplicate' })
+        ctx.addIssue({
+          code: 'custom',
+          path: ['screens', screenId, 'name'],
+          message: 'duplicate',
+        })
       }
       screenNames.add(screen.name)
       checkTree(screen, (message, path) =>
-        ctx.addIssue({ code: 'custom', path: ['screens', screenId, ...path], message }),
+        ctx.addIssue({
+          code: 'custom',
+          path: ['screens', screenId, ...path],
+          message,
+        }),
       )
     }
   })

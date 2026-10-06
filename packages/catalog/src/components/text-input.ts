@@ -10,7 +10,12 @@ export const TextInput = defineComponent({
   junior: true,
   commonDefaults: { radius: 10, borderWidth: 1 },
   props: {
-    text: prop.string({ default: '', group: 'content', junior: true, blocks: 'get-set' }),
+    text: prop.string({
+      default: '',
+      group: 'content',
+      junior: true,
+      blocks: 'get-set',
+    }),
     placeholder: prop.string({
       default: { fr: 'Écris ici…', en: 'Type here…' },
       group: 'content',
@@ -23,7 +28,11 @@ export const TextInput = defineComponent({
       junior: true,
     }),
     fontSize: prop.number({ default: 16, min: 8, max: 64, group: 'style' }),
-    disabled: prop.boolean({ default: false, group: 'advanced', blocks: 'get-set' }),
+    disabled: prop.boolean({
+      default: false,
+      group: 'advanced',
+      blocks: 'get-set',
+    }),
   },
   events: {
     change: event({ junior: true }),

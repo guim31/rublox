@@ -116,7 +116,11 @@ export const prop = {
   },
 
   number(
-    options: PropOptions<number> & { min?: number; max?: number; step?: number },
+    options: PropOptions<number> & {
+      min?: number
+      max?: number
+      step?: number
+    },
   ): PropDef<number> {
     return {
       ...defaults('number', options),
@@ -199,7 +203,9 @@ export const prop = {
   },
 
   asset(
-    options: PropOptions<string> & { assetKind: NonNullable<PropDef['assetKind']> },
+    options: PropOptions<string> & {
+      assetKind: NonNullable<PropDef['assetKind']>
+    },
   ): PropDef<string> {
     return {
       ...defaults('asset', options),

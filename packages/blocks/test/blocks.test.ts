@@ -73,14 +73,19 @@ describe('catalog completeness', () => {
 
 describe('generated code', () => {
   it('matches the readable module of SPEC § 6.5', () => {
-    const { code } = generate({ evt: onClick('button', setText('text', text('Bonjour'))) })
+    const { code } = generate({
+      evt: onClick('button', setText('text', text('Bonjour'))),
+    })
     expect(code).toMatchSnapshot()
     compile(code)
   })
 
   it('maps each line to the block that produced it', () => {
     const { code, lineMap } = generate({
-      evt: onClick('button', { ...setText('text', text('Bonjour')), id: 'set1' }),
+      evt: onClick('button', {
+        ...setText('text', text('Bonjour')),
+        id: 'set1',
+      }),
     })
     const lines = code.split('\n')
     expect(lineMap).toHaveLength(lines.length)
@@ -92,7 +97,10 @@ describe('generated code', () => {
   it('ignores loose blocks and disabled stacks', () => {
     const code = body({
       loose: { ...setText('text', text('X')), x: 300, y: 300 },
-      off: { ...onClick('button', setText('text', text('Y')), 'off'), enabled: false },
+      off: {
+        ...onClick('button', setText('text', text('Y')), 'off'),
+        enabled: false,
+      },
     })
     expect(code).not.toContain("'X'")
     expect(code).not.toContain("'Y'")
@@ -110,12 +118,18 @@ describe('generated code', () => {
       {
         type: 'controls_whileUntil',
         fields: { MODE: 'WHILE' },
-        inputs: { BOOL: { block: { type: 'logic_boolean', fields: { BOOL: 'TRUE' } } } },
+        inputs: {
+          BOOL: { block: { type: 'logic_boolean', fields: { BOOL: 'TRUE' } } },
+        },
       },
       {
         type: 'controls_for',
         fields: { VAR: { id: 'v1' } },
-        inputs: { FROM: { block: num(1) }, TO: { block: num(5) }, BY: { block: num(1) } },
+        inputs: {
+          FROM: { block: num(1) },
+          TO: { block: num(5) },
+          BY: { block: num(1) },
+        },
       },
       {
         type: 'controls_forEach',
@@ -149,7 +163,12 @@ describe('generated code', () => {
               type: 'math_arithmetic',
               fields: { OP: 'MULTIPLY' },
               inputs: {
-                A: { block: { type: 'variables_get', fields: { VAR: { id: 'p1' } } } },
+                A: {
+                  block: {
+                    type: 'variables_get',
+                    fields: { VAR: { id: 'p1' } },
+                  },
+                },
                 B: { block: num(2) },
               },
             },
@@ -164,7 +183,14 @@ describe('generated code', () => {
             block: {
               type: 'procedures_callreturn',
               extraState: { name: 'double', params: ['n'] },
-              inputs: { ARG0: { block: { type: 'variables_get', fields: { VAR: { id: 'v2' } } } } },
+              inputs: {
+                ARG0: {
+                  block: {
+                    type: 'variables_get',
+                    fields: { VAR: { id: 'v2' } },
+                  },
+                },
+              },
             },
           },
         },
@@ -182,23 +208,48 @@ describe('one snapshot per block', () => {
     rx_Button_set: {
       type: 'rx_Button_set',
       fields: { COMPONENT: 'button', PROP: 'color' },
-      inputs: { VALUE: { block: { type: 'colour_picker', fields: { COLOUR: '#ff0000' } } } },
+      inputs: {
+        VALUE: {
+          block: { type: 'colour_picker', fields: { COLOUR: '#ff0000' } },
+        },
+      },
     },
-    rx_TextInput_call_clear: { type: 'rx_TextInput_call_clear', fields: { COMPONENT: 'input' } },
-    rx_TextInput_call_focus: { type: 'rx_TextInput_call_focus', fields: { COMPONENT: 'input' } },
-    [BLOCK_TYPES.wait]: { type: BLOCK_TYPES.wait, inputs: { SECONDS: { block: num(2) } } },
+    rx_TextInput_call_clear: {
+      type: 'rx_TextInput_call_clear',
+      fields: { COMPONENT: 'input' },
+    },
+    rx_TextInput_call_focus: {
+      type: 'rx_TextInput_call_focus',
+      fields: { COMPONENT: 'input' },
+    },
+    [BLOCK_TYPES.wait]: {
+      type: BLOCK_TYPES.wait,
+      inputs: { SECONDS: { block: num(2) } },
+    },
     [BLOCK_TYPES.log]: {
       type: BLOCK_TYPES.log,
       inputs: {
         VALUE: {
-          block: { type: 'rx_TextInput_get', fields: { COMPONENT: 'input', PROP: 'text' } },
+          block: {
+            type: 'rx_TextInput_get',
+            fields: { COMPONENT: 'input', PROP: 'text' },
+          },
         },
       },
     },
-    [BLOCK_TYPES.screenOpen]: { type: BLOCK_TYPES.screenOpen, fields: { SCREEN: 'second' } },
+    [BLOCK_TYPES.screenOpen]: {
+      type: BLOCK_TYPES.screenOpen,
+      fields: { SCREEN: 'second' },
+    },
     [BLOCK_TYPES.screenBack]: { type: BLOCK_TYPES.screenBack },
-    [BLOCK_TYPES.alert]: { type: BLOCK_TYPES.alert, inputs: { MESSAGE: { block: text('Bravo') } } },
-    [BLOCK_TYPES.toast]: { type: BLOCK_TYPES.toast, inputs: { MESSAGE: { block: text('OK') } } },
+    [BLOCK_TYPES.alert]: {
+      type: BLOCK_TYPES.alert,
+      inputs: { MESSAGE: { block: text('Bravo') } },
+    },
+    [BLOCK_TYPES.toast]: {
+      type: BLOCK_TYPES.toast,
+      inputs: { MESSAGE: { block: text('OK') } },
+    },
     confirm: setText('text', {
       type: BLOCK_TYPES.confirm,
       inputs: { MESSAGE: { block: text('Sûr ?') } },
@@ -217,7 +268,12 @@ describe('one snapshot per block', () => {
       extraState: { itemCount: 2 },
       inputs: {
         ADD0: { block: text('Bonjour ') },
-        ADD1: { block: { type: 'rx_TextInput_get', fields: { COMPONENT: 'input', PROP: 'text' } } },
+        ADD1: {
+          block: {
+            type: 'rx_TextInput_get',
+            fields: { COMPONENT: 'input', PROP: 'text' },
+          },
+        },
       },
     }),
     lists_getIndex: setText('text', {
@@ -243,7 +299,9 @@ describe('one snapshot per block', () => {
             type: 'logic_compare',
             fields: { OP: 'GT' },
             inputs: {
-              A: { block: { type: 'variables_get', fields: { VAR: { id: 'v1' } } } },
+              A: {
+                block: { type: 'variables_get', fields: { VAR: { id: 'v1' } } },
+              },
               B: { block: num(10) },
             },
           },
@@ -269,9 +327,13 @@ describe('one snapshot per block', () => {
     ),
   )('%s', (type, componentType) => {
     const id =
-      { Screen: 'root', Button: 'button', Text: 'text', TextInput: 'input', Image: 'image' }[
-        componentType
-      ] ?? 'missing'
+      {
+        Screen: 'root',
+        Button: 'button',
+        Text: 'text',
+        TextInput: 'input',
+        Image: 'image',
+      }[componentType] ?? 'missing'
     const code = body({
       evt: {
         type,
@@ -279,7 +341,12 @@ describe('one snapshot per block', () => {
         y: 0,
         fields: { COMPONENT: id },
         inputs: {
-          DO: { block: { type: BLOCK_TYPES.log, inputs: { VALUE: { block: text('!') } } } },
+          DO: {
+            block: {
+              type: BLOCK_TYPES.log,
+              inputs: { VALUE: { block: text('!') } },
+            },
+          },
         },
       },
     })
@@ -336,7 +403,9 @@ describe('string escaping', () => {
 
   it('keeps a trap a string once the module runs', async () => {
     const trap = `'); globalThis.hacked = true; ('</script>`
-    const { code } = generate({ evt: onClick('button', setText('text', text(trap))) })
+    const { code } = generate({
+      evt: onClick('button', setText('text', text(trap))),
+    })
     const handlers: (() => Promise<void>)[] = []
     const values: unknown[] = []
     const components = {
@@ -357,7 +426,9 @@ describe('string escaping', () => {
 describe('project code', () => {
   it('generates one module per screen plus app', () => {
     const { doc, screen } = project()
-    doc.blocks[screen] = { evt: onClick('button', setText('text', text('Bonjour'))) as never }
+    doc.blocks[screen] = {
+      evt: onClick('button', setText('text', text('Bonjour'))) as never,
+    }
     const code = generateProjectCode(doc)
     expect(Object.keys(code).sort()).toEqual(['app', screen, 'second'].sort())
     for (const module of Object.values(code)) compile(module.code)

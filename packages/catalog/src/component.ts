@@ -50,7 +50,13 @@ export function containerStrings(): Localized<{
 }> {
   const keys = ['gap', 'alignItems', 'justify', 'wrap']
   return {
-    fr: { props: pick(COMMON_STRINGS.fr.props, keys), enums: pick(COMMON_STRINGS.fr.enums, keys) },
-    en: { props: pick(COMMON_STRINGS.en.props, keys), enums: pick(COMMON_STRINGS.en.enums, keys) },
+    fr: {
+      props: pick(COMMON_STRINGS.fr.props, keys),
+      enums: pick(COMMON_STRINGS.fr.enums, keys),
+    },
+    en: {
+      props: pick(COMMON_STRINGS.en.props, keys),
+      enums: pick(COMMON_STRINGS.en.enums, keys),
+    },
   }
 }

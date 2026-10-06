@@ -5,6 +5,7 @@ export const runtime: Messages['runtime'] = {
   cancel: 'Cancel',
   yes: 'Yes',
   no: 'No',
+  back: 'Back',
   imagePlaceholder: 'Image',
   stopped: 'The app is stopped.',
   restart: 'Restart',

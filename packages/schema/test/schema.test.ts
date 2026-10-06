@@ -26,7 +26,11 @@ describe('projectDocSchema', () => {
 
   it('rejects orphan and duplicated components', () => {
     const orphan = fixture()
-    orphan.screens.s1!.components.lost = { type: 'Text', name: 'Perdu', props: {} }
+    orphan.screens.s1!.components.lost = {
+      type: 'Text',
+      name: 'Perdu',
+      props: {},
+    }
     expect(projectDocSchema.safeParse(orphan).success).toBe(false)
 
     const twice = fixture()
@@ -100,14 +104,20 @@ describe('migrateProject', () => {
 
   it('runs the steps in order up to the target', () => {
     const steps = [
-      { from: 1, description: 'add a', up: (d: Record<string, unknown>) => ({ ...d, a: 1 }) },
+      {
+        from: 1,
+        description: 'add a',
+        up: (d: Record<string, unknown>) => ({ ...d, a: 1 }),
+      },
       {
         from: 2,
         description: 'a to b',
         up: ({ a, ...d }: Record<string, unknown>) => ({ ...d, b: a }),
       },
     ]
-    const result = migrateProject(fixture(), steps, 3) as ProjectDoc & { b?: number }
+    const result = migrateProject(fixture(), steps, 3) as ProjectDoc & {
+      b?: number
+    }
     expect(result.formatVersion).toBe(3)
     expect(result.b).toBe(1)
     expect(() => migrateProject(fixture(), steps.slice(1), 3)).toThrow(ProjectFormatError)

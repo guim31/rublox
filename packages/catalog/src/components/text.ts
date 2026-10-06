@@ -24,8 +24,18 @@ export const Text = defineComponent({
       junior: true,
       blocks: 'get-set',
     }),
-    color: prop.color({ default: '@text', group: 'style', junior: true, blocks: 'get-set' }),
-    bold: prop.boolean({ default: false, group: 'style', junior: true, blocks: 'get-set' }),
+    color: prop.color({
+      default: '@text',
+      group: 'style',
+      junior: true,
+      blocks: 'get-set',
+    }),
+    bold: prop.boolean({
+      default: false,
+      group: 'style',
+      junior: true,
+      blocks: 'get-set',
+    }),
     italic: prop.boolean({ default: false, group: 'style' }),
     align: prop.enum(['start', 'center', 'end'], {
       default: 'start',
@@ -53,7 +63,9 @@ export const Text = defineComponent({
       },
       events: { click: 'quand %1 est cliqué' },
       methods: {},
-      enums: { align: { start: 'À gauche', center: 'Centré', end: 'À droite' } },
+      enums: {
+        align: { start: 'À gauche', center: 'Centré', end: 'À droite' },
+      },
     },
     en: {
       label: 'Text',

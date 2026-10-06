@@ -3,6 +3,7 @@ export const runtime = {
   cancel: 'Annuler',
   yes: 'Oui',
   no: 'Non',
+  back: 'Retour',
   imagePlaceholder: 'Image',
   stopped: 'L’appli est arrêtée.',
   restart: 'Relancer',

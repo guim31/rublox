@@ -46,8 +46,11 @@ export function contextOf(workspace: Blockly.Workspace | null | undefined): Bloc
     if (get) return get()
     const parent: Blockly.Workspace | null =
       current.targetWorkspace ??
-      (current as unknown as { options?: { parentWorkspace?: Blockly.Workspace } }).options
-        ?.parentWorkspace ??
+      (
+        current as unknown as {
+          options?: { parentWorkspace?: Blockly.Workspace }
+        }
+      ).options?.parentWorkspace ??
       null
     current = parent as typeof current
   }
