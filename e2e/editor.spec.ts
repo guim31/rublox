@@ -136,12 +136,17 @@ test('an endless loop freezes nothing and Stop ends it', async ({ page }) => {
 
   const app = preview(page)
   await expect(page.getByTestId('preview-state')).toHaveText(/En marche/)
-  await app.locator('[data-rx-name="Bouton1"]').click()
-  // The app keeps drawing: the text changes while the loop runs.
+  // Start the loop (retry while the preview receives the latest code).
+  const text = app.locator('[data-rx-name="Texte1"]')
+  await expect(async () => {
+    await app.locator('[data-rx-name="Bouton1"]').dispatchEvent('click')
+    await expect(text).toHaveText(/^[1-6]$/, { timeout: 500 })
+  }).toPass({ timeout: 10_000 })
+  // The app keeps drawing: the text keeps changing while the loop runs.
   const seen = new Set<string>()
-  for (let i = 0; i < 12 && seen.size < 2; i++) {
-    seen.add((await app.locator('[data-rx-name="Texte1"]').textContent()) ?? '')
-    await page.waitForTimeout(80)
+  for (let i = 0; i < 40 && seen.size < 3; i++) {
+    seen.add((await text.textContent()) ?? '')
+    await page.waitForTimeout(50)
   }
   expect(seen.size).toBeGreaterThan(1)
   // The editor answers too.
@@ -151,9 +156,9 @@ test('an endless loop freezes nothing and Stop ends it', async ({ page }) => {
 
   await page.getByTestId('preview-stop').click()
   await expect(page.getByTestId('preview-state')).toHaveText(/Arrêtée/)
-  const after = await app.locator('[data-rx-name="Texte1"]').textContent()
+  const after = await text.textContent()
   await page.waitForTimeout(300)
-  await expect(app.locator('[data-rx-name="Texte1"]')).toHaveText(after ?? '')
+  await expect(text).toHaveText(after ?? '')
   await expect(app.getByRole('status')).toContainText('arrêtée')
 })
 

@@ -6,6 +6,8 @@ import { addComponent, newProject, openBlocks, usePrefs } from './helpers.ts'
 for (const mode of ['junior', 'studio'] as const) {
   for (const theme of ['light', 'dark'] as const) {
     test(`axe: ${mode}, ${theme}`, async ({ page }) => {
+      // No fade-in while axe measures contrasts.
+      await page.emulateMedia({ reducedMotion: 'reduce' })
       await usePrefs(page, { mode, theme, locale: 'fr' })
       const check = async () => {
         const results = await new AxeBuilder({ page })
