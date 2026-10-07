@@ -65,7 +65,9 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j2/`, `j3/`, `j4/`). Lancer seulement celle du jalon :
   `npx playwright test --project=screenshots e2e/screenshots-j1.spec.ts` après `pnpm build`.
 - `cd packages/blocks && npx vitest run -u` : régénérer les instantanés du générateur, puis
-  relire le diff du code produit (`pnpm --filter … test -- -u` n'écrit que les nouveaux).
+  relire le diff du code produit (`pnpm --filter … test -- -u` n'écrit que les nouveaux). En CI
+  (`CI=true`), Vitest échoue aussi sur un instantané **obsolète** : après une fusion, lancer
+  `CI=true npx vitest run` dans le paquet, le cache de turbo masquant l'échec en local.
 - Mode jeu : `npx playwright test --project=e2e e2e/game.spec.ts` (la démo jouée, le designer) et
   `npx playwright test --project=perf --no-deps` (50 lutins : débit d'images et JavaScript par
   image, processeur ralenti ×4 ; les chiffres s'affichent dans la sortie). Le projet `perf`
