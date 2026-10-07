@@ -62,7 +62,7 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome pnpm test:e2e`.
   Contre les serveurs de dev : `E2E_BASE_URL=http://localhost:5173 npx playwright test --project=e2e`.
 - `pnpm screenshots` : captures de PR (Junior, Studio, clair, sombre), une spec par jalon
-  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j2/`, `j3/`). Lancer seulement celle du jalon :
+  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j2/`, `j3/`, `j4/`). Lancer seulement celle du jalon :
   `npx playwright test --project=screenshots e2e/screenshots-j1.spec.ts` après `pnpm build`.
 - `pnpm --filter @rublox/blocks test -- -u` : régénérer les instantanés du générateur, puis
   relire le diff du code produit.
@@ -97,6 +97,23 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   par navigateur). Côté studio : `call(api.<route>.$get(…))`.
 
 ## Pièges
+
+- **TS2589 (« Type instantiation is excessively deep »)** : quand les chaînes grossissent, un
+  paramètre typé `ReturnType<typeof useTranslation>['t']` devient trop profond ; le typer
+  `TFunction` (`i18next`).
+- **pnpm add** écrit parfois `^x.y.z` malgré `save-exact` : vérifier `package.json` après un ajout.
+- **WebSockets** : tout passe par `Upgrades` (`apps/server/src/upgrades.ts`), un seul écouteur
+  `upgrade`. L'authentification d'une socket est asynchrone : un client est « entré » à son
+  premier message (`phones` pour l'éditeur du test en direct), pas à `open`.
+- **Service worker** : `navigator.serviceWorker.ready` répond dès l'état `activating` ; attendre
+  `activated` avant de couper le réseau (`context.setOffline`). Le service worker d'une appli ne
+  s'enregistre qu'en production (`import.meta.env.PROD`) : en développement, `/a/<slug>/` vient
+  de Vite et `/_app/` n'existe pas.
+- **Playwright et deux pages** : `Escape` n'atteint pas toujours un dialogue Radix quand une autre
+  page (le téléphone émulé) a été ouverte entre-temps ; cliquer « Fermer ». `devices['iPhone 13']`
+  donne l'agent utilisateur d'un iPhone même dans Chromium.
+- **Captures avec un compte** : le profil l'emporte sur les préférences du navigateur
+  (`useProfileSync`) ; un compte par capture, son profil réglé par `PATCH /api/me`.
 
 - **TypeScript 7** (`tsc` natif) fonctionne avec tout l'outillage du dépôt ; aucun outil n'a
   besoin de l'API JavaScript de TypeScript.

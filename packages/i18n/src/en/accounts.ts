@@ -334,6 +334,10 @@ export const accounts = {
     unsupported_type: 'This kind of file is not accepted.',
     quota_exceeded: 'Your storage is full.',
     invalid_project: 'This project is damaged: it could not be saved.',
+    slug_taken: 'This address is already taken by another app.',
+    missing_asset: 'A file of the project is missing on the server: upload it again.',
+    publish_forbidden: 'Your space does not allow publishing yet: ask your manager.',
+    in_trash: 'This project is in the trash: restore it first.',
     unknown: 'Something went wrong. Try again.',
   },
 }

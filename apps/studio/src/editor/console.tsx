@@ -4,6 +4,7 @@ import {
   CircleAlert,
   Info,
   MessageSquareText,
+  Smartphone,
   Terminal,
   Trash2,
   TriangleAlert,
@@ -106,6 +107,12 @@ export function ConsolePanel({ open, projectId }: { open: boolean; projectId: st
                     second: '2-digit',
                   })}
                 </time>
+                {entry.source ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-soft px-1.5 font-ui text-[11px] font-strong text-primary-text">
+                    <Smartphone size={11} aria-hidden="true" />
+                    {entry.source}
+                  </span>
+                ) : null}
                 <span className="min-w-0 flex-1 break-words whitespace-pre-wrap">
                   {entry.message}
                 </span>

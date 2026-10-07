@@ -340,3 +340,63 @@ export const assets = pgTable(
     index('assets_owner_idx').on(t.ownerId),
   ],
 )
+
+// ---- Publication and live test (J4, SPEC § 4.3, § 4.6) -------------------------------------
+
+/**
+ * A project's published app, at `/a/<slug>/` on the apps origin. The slug stays with the
+ * project, even unpublished, so that the address never changes from one version to the next.
+ */
+export const publications = pgTable('publications', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id')
+    .notNull()
+    .unique()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  slug: text('slug').notNull().unique(),
+  /** The version served at the address; null while unpublished. */
+  currentVersionId: text('current_version_id'),
+  createdAt: createdAt(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/**
+ * A frozen version of a published app: its settings (name, icon, colours), the project and the
+ * code generated from it, and the icons drawn for it (files of the `FileStore`).
+ */
+export const publicationVersions = pgTable(
+  'publication_versions',
+  {
+    id: text('id').primaryKey(),
+    publicationId: text('publication_id')
+      .notNull()
+      .references(() => publications.id, { onDelete: 'cascade' }),
+    number: integer('number').notNull(),
+    settings: jsonb('settings').notNull(),
+    bundle: jsonb('bundle').notNull(),
+    /** SHA-256 of the generated PNG icons, by name (`192`, `512`, `maskable`, `apple`). */
+    icons: jsonb('icons').notNull(),
+    createdById: text('created_by_id').references(() => user.id, { onDelete: 'set null' }),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('pubv_number_idx').on(t.publicationId, t.number)],
+)
+
+/** Temporary, revocable links of "Test on my phone": only a keyed hash of the token is kept. */
+export const liveLinks = pgTable(
+  'live_links',
+  {
+    id: text('id').primaryKey(),
+    tokenHash: text('token_hash').notNull().unique(),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    createdById: text('created_by_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index('live_links_project_idx').on(t.projectId)],
+)

@@ -1,7 +1,8 @@
 import type { Messages } from '../types.ts'
 import { blocks } from './blocks.ts'
 import { catalog } from './catalog.ts'
+import { player } from './publish.ts'
 import { runtime } from './runtime.ts'
 import { studio } from './studio.ts'
 
-export const en: Messages = { studio, blocks, runtime, catalog }
+export const en: Messages = { studio, blocks, runtime, catalog, player }

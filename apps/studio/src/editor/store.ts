@@ -11,7 +11,8 @@ export const DEVICES: Record<Device, { width: number; height: number }> = {
   tablet: { width: 820, height: 1180 },
 }
 
-export type ConsoleEntry = LogEntry & { id: number }
+/** `source`: the phone a message comes from (live test), none for the preview. */
+export type ConsoleEntry = LogEntry & { id: number; source?: string }
 
 export type PreviewControls = { restart(): void; stop(): void; resume(step: boolean): void }
 
@@ -47,7 +48,7 @@ type EditorState = {
       Omit<EditorState, 'select' | 'toggle' | 'hover' | 'set' | 'log' | 'clearLogs' | 'announce'>
     >,
   ): void
-  log(entry: LogEntry): void
+  log(entry: LogEntry & { source?: string }): void
   clearLogs(): void
   announce(message: string): void
 }

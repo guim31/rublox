@@ -12,6 +12,15 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/assets': { target: 'http://localhost:3000', headers: { host: '127.0.0.1:5174' } },
+      // Live test socket (J4).
+      '/_rx': { target: 'http://localhost:3000', headers: { host: '127.0.0.1:5174' }, ws: true },
+      // Published apps: their files come from the server, their page from Vite.
+      '/a/': {
+        target: 'http://localhost:3000',
+        headers: { host: '127.0.0.1:5174' },
+        bypass: (request) =>
+          request.headers.accept?.includes('text/html') ? '/index.html' : undefined,
+      },
     },
   },
   preview: { host: '127.0.0.1', port: 5174, strictPort: true },

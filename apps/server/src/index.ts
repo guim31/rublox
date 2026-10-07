@@ -1,3 +1,4 @@
+import type { Server } from 'node:http'
 import { serve } from '@hono/node-server'
 import { bootstrapAdmin } from './accounts.ts'
 import { createApp } from './app.ts'
@@ -6,6 +7,7 @@ import { openDatabase } from './db/index.ts'
 import { createLogger } from './logger.ts'
 import { purgeTrash } from './routes/projects.ts'
 import { createServices } from './services.ts'
+import { Upgrades } from './upgrades.ts'
 
 const SHUTDOWN_TIMEOUT_MS = 10_000
 const PURGE_INTERVAL_MS = 6 * 3600 * 1000
@@ -56,11 +58,17 @@ async function main() {
     )
   })
 
+  // WebSockets: the live test of a project on a phone (`/ws/live`, `/_rx/live`).
+  const upgrades = new Upgrades()
+  for (const route of services.live.routes()) upgrades.add(route)
+  upgrades.attach(server as Server)
+
   let shuttingDown = false
   const shutdown = (signal: NodeJS.Signals) => {
     if (shuttingDown) return
     shuttingDown = true
     clearInterval(purgeTimer)
+    services.live.close()
     logger.info({ signal }, 'shutting down')
     const timer = setTimeout(() => {
       logger.error('graceful shutdown timed out')

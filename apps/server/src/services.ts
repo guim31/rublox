@@ -4,6 +4,7 @@ import type { Config } from './config.ts'
 import type { Database } from './db/index.ts'
 import { FileStore } from './files.ts'
 import { FailureGuard } from './guard.ts'
+import { LiveHub } from './live.ts'
 import { MB, SettingsStore } from './settings.ts'
 
 export type ServiceConfig = Pick<
@@ -19,6 +20,8 @@ export interface Services {
   files: FileStore
   settings: SettingsStore
   guard: FailureGuard
+  /** "Test on my phone": the relay between editors and phones (J4). */
+  live: LiveHub
   logger?: Pick<Logger, 'debug' | 'info' | 'warn' | 'error'>
 }
 
@@ -27,9 +30,10 @@ export function createServices(
   config: ServiceConfig,
   logger?: Services['logger'],
 ): Services {
+  const auth = createAuth(db, config, logger)
   return {
     db,
-    auth: createAuth(db, config, logger),
+    auth,
     config,
     files: new FileStore(config.dataDir),
     settings: new SettingsStore(db, {
@@ -41,6 +45,7 @@ export function createServices(
       storageQuotaMb: 500,
     }),
     guard: new FailureGuard(),
+    live: new LiveHub({ db, auth, config, logger }),
     logger,
   }
 }
