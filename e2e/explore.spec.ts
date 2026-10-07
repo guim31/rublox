@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-import { preview } from './helpers.ts'
+import { ADMIN, createAccount, preview, signIn } from './helpers.ts'
 
 /**
  * J9 — apps to take apart: every level opens from the learning page and runs without an
@@ -138,4 +138,26 @@ test('the first level has no "what\'s new", and the copy is the learner\'s', asy
   // The copy is among the guest's projects.
   await page.goto('/')
   await expect(page.getByText('My Piggy Bank · level 1').first()).toBeVisible()
+})
+
+test('with an account, the copy is a project of the account, and its tour comes back', async ({
+  page,
+}) => {
+  await prefs(page, 'fr')
+  await signIn(page, ADMIN.username, ADMIN.password)
+  const learner = await createAccount(page, 'Sacha')
+  await page.context().clearCookies()
+  await signIn(page, learner.username, learner.password)
+  await openLevel(page, 'brick-breaker', 3)
+  const bubble = page.getByTestId('explore-bubble')
+  await bubble.getByTestId('explore-next').click()
+  await expect(bubble).toContainText('Étape 2 sur')
+  const url = page.url()
+  // The project lives on the server: reloading reopens it, at the same step of the tour.
+  await page.reload()
+  await expect(page.getByTestId('explore-bubble')).toContainText('Étape 2 sur')
+  await expect(page.getByTestId('whats-new')).toBeVisible()
+  expect(page.url()).toBe(url)
+  await page.goto('/')
+  await expect(page.getByText('Casse-briques · niveau 3').first()).toBeVisible()
 })
