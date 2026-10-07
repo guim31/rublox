@@ -25,6 +25,7 @@ export type StarterSpec = {
  * - `toolbox:<Type>`: the toolbox category of the first component of that type
  * - `toolbox-category:<key>`: a general category (`control`, `math`, `interface`…)
  * - `workspace`: the blocks workspace
+ * - `block:<id>`: a stack of blocks of the workspace shown, by the id of a block (J9)
  * - `tab:data`, and in the Data tab (J5) `data:add-table`, `data:add-api`, `data:mode`,
  *   `data:grid`, `data:add-row`, `data:base-url`, `data:params`, `data:try`, `data:response`
  */

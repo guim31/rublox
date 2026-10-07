@@ -138,11 +138,13 @@
                   "en": "When it opens: the balance."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -196,9 +198,9 @@
                         "fr": "« × 1 » change le texte tapé en nombre.",
                         "en": "“× 1” turns the typed text into a number."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
                     }
                   },
                   "next": {
@@ -233,11 +235,13 @@
                   "en": "Add what is typed."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 222
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 222
           },
           {
@@ -299,11 +303,13 @@
                   "en": "Writes the balance in big."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 496
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 496
           }
         ]

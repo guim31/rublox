@@ -2,6 +2,7 @@ import {
   type BadgeId,
   type ChallengeProgress,
   EMPTY_PROGRESS,
+  type ExploreProgress,
   type LearningProgress,
   type ProgressStore,
   type TutorialProgress,
@@ -38,6 +39,7 @@ function promisify<T>(request: IDBRequest<T>): Promise<T> {
 async function read(key: string): Promise<LearningProgress> {
   const db = await open()
   const value = await promisify(db.transaction(STORE, 'readonly').objectStore(STORE).get(key))
+  // Records written before J9 have no `explore`.
   return { ...structuredClone(EMPTY_PROGRESS), ...(value as Partial<LearningProgress>) }
 }
 
@@ -68,6 +70,12 @@ export function browserProgressStore(key = 'guest'): ProgressStore {
     saveChallenge: async (entry: ChallengeProgress) => {
       await update((progress) => {
         progress.challenges[entry.id] = entry
+        return true
+      })
+    },
+    saveExplore: async (entry: ExploreProgress) => {
+      await update((progress) => {
+        progress.explore[entry.id] = entry
         return true
       })
     },

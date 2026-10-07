@@ -283,9 +283,9 @@
                         "fr": "Les questions, dans l’ordre.",
                         "en": "The questions, in order."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
                     }
                   },
                   "next": {
@@ -365,9 +365,9 @@
                             "fr": "Les 3 réponses possibles, séparées par |",
                             "en": "The 3 possible answers, split by |"
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       },
                       "next": {
@@ -447,9 +447,9 @@
                                 "fr": "La bonne réponse de chaque question.",
                                 "en": "The right answer of each question."
                               },
-                              "pinned": true,
-                              "width": 240,
-                              "height": 64
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
                             }
                           },
                           "next": {
@@ -499,11 +499,13 @@
                   "en": "When it opens: the questions, then the first one."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -623,9 +625,9 @@
                             "fr": "« 6|8|10 » devient une liste de 3 textes.",
                             "en": "“6|8|10” becomes a list of 3 texts."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       },
                       "next": {
@@ -855,11 +857,13 @@
                   "en": "Writes question number “index” and its 3 answers."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 406
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 406
           },
           {
@@ -910,11 +914,13 @@
                   "en": "We remember the text of the button tapped."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 864
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 864
           },
           {
@@ -965,11 +971,13 @@
                   "en": "Same for button B…"
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 1092
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1092
           },
           {
@@ -1020,11 +1028,13 @@
                   "en": "… and for button C."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 1320
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1320
           },
           {
@@ -1232,9 +1242,9 @@
                         "fr": "Le choix est-il la bonne réponse ?",
                         "en": "Is the choice the right answer?"
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
                     }
                   }
                 }
@@ -1248,11 +1258,13 @@
                   "en": "Compares the choice with the right answer."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1548
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1548
           },
           {
@@ -1348,9 +1360,9 @@
                             "fr": "Après la dernière, on recommence.",
                             "en": "After the last one, start again."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       },
                       "next": {
@@ -1378,11 +1390,13 @@
                   "en": "index + 1: the following question."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1914
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1914
           }
         ]

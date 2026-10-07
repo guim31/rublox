@@ -20,7 +20,16 @@ export type Block = {
   inputs?: Record<string, { block: Block }>
   extraState?: Record<string, unknown>
   next?: { block: Block }
-  icons?: { comment: { text: Text; pinned: boolean; width: number; height: number } }
+  icons?: {
+    comment: {
+      text: Text
+      pinned: boolean
+      width: number
+      height: number
+      x?: number
+      y?: number
+    }
+  }
   x?: number
   y?: number
 }
@@ -237,9 +246,15 @@ export const put = (id: string, name: string, at: Value, value: Value): Block =>
     fields: { MODE: 'SET', WHERE: 'FROM_START' },
     inputs: { LIST: { block: v(name) }, AT: { block: at }, TO: { block: value } },
   })
-/** A short comment on a block, shown open beside it. */
-export function note<T extends Block>(block: T, text: Text, width = 240, height = 64): T {
-  return { ...block, icons: { comment: { text: t(text), pinned: true, width, height } } }
+/**
+ * A short comment on a block. On the top block of a stack, it is shown open in the margin, at
+ * the left of the stack (`stamp`); on a block inside, it is folded behind the block's "?" icon.
+ */
+export function note<T extends Block>(block: T, text: Text, width = 0, height = 0): T {
+  return {
+    ...block,
+    icons: { comment: { text: t(text), pinned: false, width: width || 230, height: height || 0 } },
+  }
 }
 
 function chainInput(name: string, body: Block[]): Record<string, { block: Block }> {
@@ -288,19 +303,59 @@ export const fnResult = (id: string, name: Text, body: Block[], value: Value): B
     inputs: { ...chainInput('STACK', body), RETURN: { block: value } },
   })
 
+/** Room for the comments in the margin, at the left of the stacks. */
+const MARGIN = 300
+const NOTE_WIDTH = 260
+
+/** Height of a comment's bubble for its longest translation (about 30 letters a line). */
+function noteHeight(text: Text): number {
+  const longest = typeof text === 'string' ? text.length : Math.max(text.fr.length, text.en.length)
+  return 28 + 20 * Math.ceil(longest / 30)
+}
+
 /**
  * Gives every value block an id from its parent's, and checks that statements have theirs.
- * Stacks are laid out in a column, in their order.
+ * Stacks are laid out in a column, in their order; the comment of a stack's top block is
+ * shown open, in the margin at its left.
  */
-export function stamp(stacks: Block[], x = 40): Block[] {
+export function stamp(stacks: Block[]): Block[] {
   let y = 40
   return stacks.map((stack) => {
     const done = visit(stack, undefined, '')
-    done.x = stack.x ?? x
+    done.x = stack.x ?? MARGIN
     done.y = stack.y ?? y
-    y = (done.y as number) + 90 + 46 * size(done)
+    const comment = done.icons?.comment
+    let height = 0
+    if (comment) {
+      height = noteHeight(comment.text)
+      done.icons = {
+        comment: { ...comment, pinned: true, width: NOTE_WIDTH, height, x: 16, y: done.y },
+      }
+    }
+    for (const inner of innerBlocks(done)) {
+      const note = inner.icons?.comment
+      if (note) inner.icons = { comment: { ...note, height: note.height || noteHeight(note.text) } }
+    }
+    y = (done.y as number) + Math.max(90 + 46 * size(done), height + 40)
     return done
   })
+}
+
+/** Every block of a stack but its top one. */
+function innerBlocks(block: Block): Block[] {
+  const found: Block[] = []
+  const walk = (current: Block) => {
+    for (const { block: child } of Object.values(current.inputs ?? {})) {
+      found.push(child)
+      walk(child)
+    }
+    if (current.next) {
+      found.push(current.next.block)
+      walk(current.next.block)
+    }
+  }
+  walk(block)
+  return found
 }
 
 function visit(block: Block, parent: string | undefined, input: string): Block {

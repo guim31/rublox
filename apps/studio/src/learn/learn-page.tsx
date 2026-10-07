@@ -8,7 +8,7 @@ import {
 } from '@rublox/learn'
 import { useNavigate } from '@tanstack/react-router'
 import { Check, Clock, Eye, EyeOff, Play, RotateCcw, Sparkles, Star } from 'lucide-react'
-import { type ReactNode, useEffect, useState } from 'react'
+import { lazy, type ReactNode, Suspense, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Page } from '../components/app-header.tsx'
@@ -20,6 +20,9 @@ import { usePrefs } from '../lib/prefs.ts'
 import { relativeTime } from '../lib/time.ts'
 import { openChallenge, resumeTutorial, startChallenge, startTutorial } from './start.ts'
 import { ensureProgress, useLearn } from './store.ts'
+
+// J9: the apps to take apart carry their levels: loaded after the rest of the page.
+const ExploreSection = lazy(() => import('./explore-section.tsx'))
 
 const ACCENTS: Record<Accent, string> = {
   indigo: 'bg-primary-soft',
@@ -55,6 +58,10 @@ export function LearnPage() {
           </div>
         ))}
       </section>
+
+      <Suspense fallback={null}>
+        <ExploreSection />
+      </Suspense>
 
       <section aria-labelledby="learn-challenges" className="mt-10">
         <h2 id="learn-challenges" className="text-ui-lg font-strong">

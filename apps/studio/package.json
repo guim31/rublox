@@ -38,6 +38,7 @@
     "@lezer/highlight": "1.2.5",
     "@rublox/blocks": "workspace:*",
     "@rublox/catalog": "workspace:*",
+    "@rublox/explore": "workspace:*",
     "@rublox/i18n": "workspace:*",
     "@rublox/learn": "workspace:*",
     "@rublox/runtime": "workspace:*",

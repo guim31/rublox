@@ -183,11 +183,13 @@
                   "en": "When it opens: the balance."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -251,9 +253,9 @@
                         "fr": "On note le mouvement dans la liste.",
                         "en": "We write the movement in the list."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
                     }
                   },
                   "next": {
@@ -288,11 +290,13 @@
                   "en": "Add what is typed."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 222
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 222
           },
           {
@@ -376,9 +380,9 @@
                         "fr": "Une dépense est un nombre négatif.",
                         "en": "Spending is a negative number."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
                     }
                   },
                   "next": {
@@ -413,11 +417,13 @@
                   "en": "Spend: we write the amount as a minus."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 496
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 496
           },
           {
@@ -453,9 +459,9 @@
                         "fr": "On recompte depuis 0…",
                         "en": "Count again from 0…"
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
                     }
                   },
                   "next": {
@@ -502,9 +508,9 @@
                             "fr": "… en ajoutant chaque mouvement de la liste.",
                             "en": "… adding each movement of the list."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       },
                       "next": {
@@ -582,11 +588,13 @@
                   "en": "The balance is never kept: it is computed again."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 770
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 770
           }
         ]

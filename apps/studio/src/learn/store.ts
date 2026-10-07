@@ -3,6 +3,7 @@ import {
   badgesFromProgress,
   type ChallengeProgress,
   EMPTY_PROGRESS,
+  type ExploreProgress,
   type LearningProgress,
   type PreviewEvent,
   type ProgressStore,
@@ -24,11 +25,27 @@ export type ActiveTutorial = {
 
 export type ActiveChallenge = { id: string; projectId: string; collapsed: boolean }
 
+/**
+ * The level of an app to take apart being explored (J9): its guided tour, then its
+ * modification challenges.
+ */
+export type ActiveExplore = {
+  app: string
+  level: number
+  projectId: string
+  /** `tour`: the bubble of step `step`; `challenges`: the panel of challenges. */
+  view: 'tour' | 'challenges'
+  step: number
+  paused: boolean
+  collapsed: boolean
+}
+
 type LearnState = {
   progress: LearningProgress
   loaded: boolean
   tutorial: ActiveTutorial | null
   challenge: ActiveChallenge | null
+  explore: ActiveExplore | null
   /** Events from the preview since the current step (or the challenge) started. */
   events: PreviewEvent[]
   /** The screen the preview shows. */
@@ -49,6 +66,7 @@ export function setProgressStore(next: ProgressStore): void {
     progress: structuredClone(EMPTY_PROGRESS),
     tutorial: null,
     challenge: null,
+    explore: null,
   })
   void loadProgress()
 }
@@ -58,6 +76,7 @@ export const useLearn = create<LearnState>()(() => ({
   loaded: false,
   tutorial: null,
   challenge: null,
+  explore: null,
   events: [],
   previewScreen: null,
   dismissed: [],
@@ -101,6 +120,14 @@ export async function saveChallenge(entry: ChallengeProgress): Promise<void> {
     },
   }))
   await store.saveChallenge(entry)
+  awardProgressBadges()
+}
+
+export async function saveExplore(entry: ExploreProgress): Promise<void> {
+  useLearn.setState((state) => ({
+    progress: { ...state.progress, explore: { ...state.progress.explore, [entry.id]: entry } },
+  }))
+  await store.saveExplore(entry)
   awardProgressBadges()
 }
 

@@ -127,11 +127,13 @@
                   "en": "At the start: the wall, then the ball."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -212,9 +214,9 @@
                             "fr": "Un peu à gauche ou à droite, au hasard.",
                             "en": "A little left or right, at random."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       },
                       "next": {
@@ -242,9 +244,9 @@
                                 "fr": "Vers le bas : y grandit.",
                                 "en": "Downwards: y grows."
                               },
-                              "pinned": true,
-                              "width": 240,
-                              "height": 64
+                              "pinned": false,
+                              "width": 230,
+                              "height": 48
                             }
                           }
                         }
@@ -262,11 +264,13 @@
                   "en": "Puts the ball in the middle and serves it."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 268
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 268
           },
           {
@@ -301,9 +305,9 @@
                         "fr": "Repart vers le haut.",
                         "en": "Goes back up."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
                     }
                   },
                   "next": {
@@ -373,9 +377,9 @@
                             "fr": "Touchée sur le côté : elle part de côté.",
                             "en": "Hit on the side: it goes sideways."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       }
                     }
@@ -391,11 +395,13 @@
                   "en": "The ball bounces off the paddle."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 542
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 542
           },
           {
@@ -426,11 +432,13 @@
                   "en": "Missed: serve again."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 770
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 770
           },
           {
@@ -469,11 +477,13 @@
                   "en": "The paddle follows your finger, staying at the bottom."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 952
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 952
           },
           {
@@ -659,9 +669,9 @@
                               "fr": "Pour chaque rangée, 7 colonnes : 4 × 7 = 28 briques.",
                               "en": "For each row, 7 columns: 4 × 7 = 28 bricks."
                             },
-                            "pinned": true,
+                            "pinned": false,
                             "width": 260,
-                            "height": 64
+                            "height": 68
                           }
                         }
                       }
@@ -674,9 +684,9 @@
                         "fr": "Une boucle dans une boucle !",
                         "en": "A loop inside a loop!"
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
                     }
                   }
                 }
@@ -690,11 +700,13 @@
                   "en": "Moves the hidden brick, then copies it."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1134
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1134
           },
           {
@@ -733,11 +745,13 @@
                   "en": "Each copy shows itself."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 1454
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1454
           },
           {
@@ -800,9 +814,9 @@
                             "fr": "0 − vitesse : elle repart dans l’autre sens.",
                             "en": "0 − speed: it goes the other way."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       }
                     }
@@ -818,11 +832,13 @@
                   "en": "Here, “Brick” is the brick that was hit."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1636
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1636
           }
         ]

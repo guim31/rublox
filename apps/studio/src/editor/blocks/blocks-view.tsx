@@ -14,6 +14,7 @@ import { Preview } from '../preview/preview.tsx'
 import { useEditor } from '../store.ts'
 import { CodeView } from './code-view.tsx'
 import { PromptDialog } from './prompt.tsx'
+import { WhatsNew } from './whats-new.tsx'
 import { BlocksWorkspace } from './workspace.tsx'
 
 const GENERATE_DELAY_MS = 120
@@ -92,12 +93,14 @@ export default function BlocksView({
                 {t('editor.blocks.showCode')}
               </label>
               <div className="flex-1" />
+              <WhatsNew workspace={workspace} />
               <ExplainScreenButton workspace={workspace} />
             </div>
           ) : null}
           <div className="relative min-h-0 flex-1">
             {mode === 'studio' ? (
-              <div className="absolute top-2 right-3 z-10">
+              <div className="absolute top-2 right-3 z-10 flex items-center gap-2">
+                <WhatsNew workspace={workspace} />
                 <ExplainScreenButton workspace={workspace} />
               </div>
             ) : null}

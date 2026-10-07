@@ -167,11 +167,13 @@
                   "en": "We remember the text of the button tapped."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -222,11 +224,13 @@
                   "en": "Same for button B…"
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 268
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 268
           },
           {
@@ -277,11 +281,13 @@
                   "en": "… and for button C."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 496
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 496
           },
           {
@@ -447,9 +453,9 @@
                         "fr": "Le choix est-il la bonne réponse ?",
                         "en": "Is the choice the right answer?"
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
                     }
                   }
                 }
@@ -463,11 +469,13 @@
                   "en": "Compares the choice with the right answer."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 724
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 724
           }
         ]

@@ -116,11 +116,13 @@
                   "en": "At the start, a star falls."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -182,9 +184,9 @@
                         "fr": "En haut, à un endroit au hasard.",
                         "en": "At the top, somewhere at random."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
                     }
                   },
                   "next": {
@@ -231,9 +233,9 @@
                                 "fr": "Vitesse vers le bas (y augmente).",
                                 "en": "Speed downwards (y grows)."
                               },
-                              "pinned": true,
-                              "width": 240,
-                              "height": 64
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
                             }
                           }
                         }
@@ -251,11 +253,13 @@
                   "en": "Puts the star back at the top and lets it fall."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 222
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 222
           },
           {
@@ -286,11 +290,13 @@
                   "en": "Caught! Another star falls."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 496
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 496
           },
           {
@@ -321,11 +327,13 @@
                   "en": "Missed: it touches the bottom."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 678
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 678
           },
           {
@@ -364,11 +372,13 @@
                   "en": "The basket follows your finger, but stays on the ground."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 860
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 860
           }
         ]

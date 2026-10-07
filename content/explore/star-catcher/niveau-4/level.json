@@ -294,11 +294,13 @@
                   "en": "At the start: all to zero, the rain begins."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -328,11 +330,13 @@
                   "en": "Each star is a clone of the hidden star."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 452
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 452
           },
           {
@@ -391,9 +395,9 @@
                         "fr": "En haut, à un endroit au hasard.",
                         "en": "At the top, somewhere at random."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
                     }
                   },
                   "next": {
@@ -480,9 +484,9 @@
                                 "fr": "Plus le score monte, plus ça tombe vite !",
                                 "en": "The higher the score, the faster!"
                               },
-                              "pinned": true,
-                              "width": 240,
-                              "height": 64
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
                             }
                           }
                         }
@@ -500,11 +504,13 @@
                   "en": "Here, “Star” means the new clone."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 634
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 634
           },
           {
@@ -534,11 +540,13 @@
                   "en": "Each time the timer rings: one more star."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 908
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 908
           },
           {
@@ -644,11 +652,13 @@
                   "en": "Writes the numbers at the top of the scene."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1090
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1090
           },
           {
@@ -717,11 +727,13 @@
                   "en": "Caught: one point, and the star goes."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1318
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1318
           },
           {
@@ -802,11 +814,13 @@
                   "en": "It hit the ground: one life less."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1638
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1638
           },
           {
@@ -845,11 +859,13 @@
                   "en": "The basket follows your finger, but stays on the ground."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2004
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 2004
           },
           {
@@ -969,9 +985,9 @@
                                       "fr": "Un record ? On le garde.",
                                       "en": "A record? Keep it."
                                     },
-                                    "pinned": true,
-                                    "width": 240,
-                                    "height": 64
+                                    "pinned": false,
+                                    "width": 230,
+                                    "height": 48
                                   }
                                 },
                                 "next": {
@@ -1002,11 +1018,13 @@
                   "en": "No lives left: the game stops."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2186
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 2186
           }
         ]
@@ -1196,11 +1214,13 @@
                   "en": "The end screen shows the score."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -1227,11 +1247,13 @@
                   "en": "Opens the game again: all starts from zero."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 268
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 268
           }
         ]

@@ -48,6 +48,10 @@ type EditorState = {
   selection: ComponentId[]
   /** The Data tab's selection (J5). */
   dataItem: DataItem | null
+  /** Blocks lit in the workspace (J9): what a level adds or changes. */
+  marks: Record<string, 'added' | 'changed'>
+  /** A block to scroll into view, without selecting it (J9: the tour, "what's new"). */
+  reveal: string | null
   select(id: ComponentId | null): void
   /** Adds a component to the selection, or takes it out (Shift or Ctrl + click, Studio). */
   toggle(id: ComponentId): void
@@ -81,6 +85,8 @@ export const useEditor = create<EditorState>()((set) => ({
   inspectorTab: 'screen',
   selection: [],
   dataItem: null,
+  marks: {},
+  reveal: null,
   select: (selected) => set({ selected, selection: selected ? [selected] : [] }),
   toggle: (id) =>
     set((state) => {
@@ -113,6 +119,8 @@ export function resetEditor(): void {
     focusBlock: null,
     slow: { enabled: false, step: null, breakpoints: [] },
     dataItem: null,
+    marks: {},
+    reveal: null,
   })
 }
 

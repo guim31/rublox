@@ -219,11 +219,13 @@
                   "en": "At the start: all to zero, the rain begins."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -253,11 +255,13 @@
                   "en": "Each star is a clone of the hidden star."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 406
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 406
           },
           {
@@ -316,9 +320,9 @@
                         "fr": "En haut, à un endroit au hasard.",
                         "en": "At the top, somewhere at random."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
                     }
                   },
                   "next": {
@@ -365,9 +369,9 @@
                                 "fr": "Vitesse vers le bas (y augmente).",
                                 "en": "Speed downwards (y grows)."
                               },
-                              "pinned": true,
-                              "width": 240,
-                              "height": 64
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
                             }
                           }
                         }
@@ -385,11 +389,13 @@
                   "en": "Here, “Star” means the new clone."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 588
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 588
           },
           {
@@ -419,11 +425,13 @@
                   "en": "Each time the timer rings: one more star."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 862
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 862
           },
           {
@@ -488,11 +496,13 @@
                   "en": "Writes the numbers at the top of the scene."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1044
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1044
           },
           {
@@ -552,11 +562,13 @@
                   "en": "Caught: one point, and the star goes."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1226
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1226
           },
           {
@@ -584,11 +596,13 @@
                   "en": "Missed: it touches the bottom."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 1500
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1500
           },
           {
@@ -627,11 +641,13 @@
                   "en": "The basket follows your finger, but stays on the ground."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1682
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1682
           }
         ]

@@ -186,11 +186,13 @@
                   "en": "Choose the speed, then play."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -237,11 +239,13 @@
                   "en": "Speed 300."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 268
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 268
           },
           {
@@ -288,11 +292,13 @@
                   "en": "Speed 380."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 496
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 496
           }
         ]
@@ -501,11 +507,13 @@
                   "en": "At the start, a new game."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -682,11 +690,13 @@
                   "en": "Reset everything, build the wall, serve the ball."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 222
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 222
           },
           {
@@ -792,11 +802,13 @@
                   "en": "Writes the score and the lives."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 818
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 818
           },
           {
@@ -896,9 +908,9 @@
                                 "fr": "Un peu à gauche ou à droite, au hasard.",
                                 "en": "A little left or right, at random."
                               },
-                              "pinned": true,
-                              "width": 240,
-                              "height": 64
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
                             }
                           },
                           "next": {
@@ -926,9 +938,9 @@
                                     "fr": "Vers le bas : y grandit.",
                                     "en": "Downwards: y grows."
                                   },
-                                  "pinned": true,
-                                  "width": 240,
-                                  "height": 64
+                                  "pinned": false,
+                                  "width": 230,
+                                  "height": 48
                                 }
                               }
                             }
@@ -948,11 +960,13 @@
                   "en": "Puts the ball in the middle and serves it."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1046
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1046
           },
           {
@@ -1007,9 +1021,9 @@
                         "fr": "Repart vers le haut.",
                         "en": "Goes back up."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
                     }
                   },
                   "next": {
@@ -1079,9 +1093,9 @@
                             "fr": "Touchée sur le côté : elle part de côté.",
                             "en": "Hit on the side: it goes sideways."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       }
                     }
@@ -1097,11 +1111,13 @@
                   "en": "The ball bounces off the paddle."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1366
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1366
           },
           {
@@ -1270,11 +1286,13 @@
                   "en": "Missed: one life less."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 1594
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 1594
           },
           {
@@ -1313,11 +1331,13 @@
                   "en": "The paddle follows your finger, staying at the bottom."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2098
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 2098
           },
           {
@@ -1523,9 +1543,9 @@
                               "fr": "Pour chaque rangée, 7 colonnes : 4 × 7 = 28 briques.",
                               "en": "For each row, 7 columns: 4 × 7 = 28 bricks."
                             },
-                            "pinned": true,
+                            "pinned": false,
                             "width": 260,
-                            "height": 64
+                            "height": 68
                           }
                         }
                       }
@@ -1538,9 +1558,9 @@
                         "fr": "Une boucle dans une boucle !",
                         "en": "A loop inside a loop!"
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
                     }
                   }
                 }
@@ -1554,11 +1574,13 @@
                   "en": "Moves the hidden brick, then copies it."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2280
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 2280
           },
           {
@@ -1597,11 +1619,13 @@
                   "en": "Each copy shows itself."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 2646
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 2646
           },
           {
@@ -1664,9 +1688,9 @@
                             "fr": "0 − vitesse : elle repart dans l’autre sens.",
                             "en": "0 − speed: it goes the other way."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       },
                       "next": {
@@ -1838,9 +1862,9 @@
                                                 "fr": "Plus de briques : gagné !",
                                                 "en": "No bricks left: you win!"
                                               },
-                                              "pinned": true,
-                                              "width": 240,
-                                              "height": 64
+                                              "pinned": false,
+                                              "width": 230,
+                                              "height": 48
                                             }
                                           }
                                         }
@@ -1866,11 +1890,13 @@
                   "en": "Here, “Brick” is the brick that was hit."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2828
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 2828
           },
           {
@@ -1954,11 +1980,13 @@
                   "en": "End of the game: the ball stops."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 3516
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 3516
           },
           {
@@ -1988,11 +2016,13 @@
                   "en": "Tap the message: play again."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 3790
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 3790
           },
           {
@@ -2019,11 +2049,13 @@
                   "en": "Now and then, a bonus heart falls."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 3972
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 3972
           },
           {
@@ -2122,7 +2154,7 @@
               }
             },
             "id": "gift-appear",
-            "x": 40,
+            "x": 300,
             "y": 4154
           },
           {
@@ -2182,11 +2214,13 @@
                   "en": "Caught: one more life!"
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 4428
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 4428
           }
         ]

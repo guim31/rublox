@@ -336,6 +336,9 @@ importers:
       '@rublox/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
+      '@rublox/explore':
+        specifier: workspace:*
+        version: link:../../packages/explore
       '@rublox/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

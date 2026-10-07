@@ -99,11 +99,13 @@
                   "en": "At the start, we serve the ball."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 40
           },
           {
@@ -184,9 +186,9 @@
                             "fr": "Un peu à gauche ou à droite, au hasard.",
                             "en": "A little left or right, at random."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       },
                       "next": {
@@ -214,9 +216,9 @@
                                 "fr": "Vers le bas : y grandit.",
                                 "en": "Downwards: y grows."
                               },
-                              "pinned": true,
-                              "width": 240,
-                              "height": 64
+                              "pinned": false,
+                              "width": 230,
+                              "height": 48
                             }
                           }
                         }
@@ -234,11 +236,13 @@
                   "en": "Puts the ball in the middle and serves it."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 222
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 222
           },
           {
@@ -273,9 +277,9 @@
                         "fr": "Repart vers le haut.",
                         "en": "Goes back up."
                       },
-                      "pinned": true,
-                      "width": 240,
-                      "height": 64
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
                     }
                   },
                   "next": {
@@ -345,9 +349,9 @@
                             "fr": "Touchée sur le côté : elle part de côté.",
                             "en": "Hit on the side: it goes sideways."
                           },
-                          "pinned": true,
-                          "width": 240,
-                          "height": 64
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
                         }
                       }
                     }
@@ -363,11 +367,13 @@
                   "en": "The ball bounces off the paddle."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 496
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 496
           },
           {
@@ -398,11 +404,13 @@
                   "en": "Missed: serve again."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 724
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 724
           },
           {
@@ -441,11 +449,13 @@
                   "en": "The paddle follows your finger, staying at the bottom."
                 },
                 "pinned": true,
-                "width": 240,
-                "height": 64
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 906
               }
             },
-            "x": 40,
+            "x": 300,
             "y": 906
           }
         ]
