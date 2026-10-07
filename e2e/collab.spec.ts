@@ -8,7 +8,11 @@ import { ADMIN, addComponent, signIn, unique, usePrefs } from './helpers.ts'
 
 type Person = { page: Page; username: string; name: string }
 
-async function person(browser: Browser, name: string, mode: 'junior' | 'studio' = 'studio') {
+async function person(
+  browser: Browser,
+  name: string,
+  mode: 'junior' | 'studio' = 'studio',
+): Promise<Person> {
   const username = `${name
     .toLowerCase()
     .normalize('NFD')
