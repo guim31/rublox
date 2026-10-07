@@ -1,19 +1,20 @@
 import * as Y from 'yjs'
 import { newId, uniqueName } from './names.ts'
-import type {
-  Asset,
-  BlocklyJson,
-  ComponentId,
-  ComponentNode,
-  NavItem,
-  ProjectMeta,
-  ProjectSettings,
-  Screen,
-  ScreenId,
-  Theme,
-  VarDecl,
-  VarKind,
-  WorkspaceKey,
+import {
+  APP_WORKSPACE,
+  type Asset,
+  type BlocklyJson,
+  type ComponentId,
+  type ComponentNode,
+  type NavItem,
+  type ProjectMeta,
+  type ProjectSettings,
+  type Screen,
+  type ScreenId,
+  type Theme,
+  type VarDecl,
+  type VarKind,
+  type WorkspaceKey,
 } from './project.ts'
 import {
   componentToY,
@@ -143,6 +144,8 @@ export function addScreen(ydoc: Y.Doc, input: NewScreen, index?: number, origin?
     yScreens(ydoc).set(id, screenToY(screen))
     const order = yScreenOrder(ydoc)
     order.insert(Math.min(index ?? order.length, order.length), [id])
+    // Created with the screen: see `ensureBlockMaps`.
+    yBlocks(ydoc).set(id, new Y.Map<BlocklyJson>())
   }, origin)
   return id
 }
@@ -240,7 +243,7 @@ export function duplicateScreen(ydoc: Y.Doc, screenId: ScreenId, origin?: Origin
     const order = yScreenOrder(ydoc)
     order.insert(order.toArray().indexOf(screenId) + 1, [id])
     const stacks = yBlocks(ydoc).get(screenId)?.toJSON() as Record<string, BlocklyJson> | undefined
-    if (stacks) yBlocks(ydoc).set(id, mapFrom(remapIds(stacks, ids)) as Y.Map<BlocklyJson>)
+    yBlocks(ydoc).set(id, mapFrom(remapIds(stacks ?? {}, ids)) as Y.Map<BlocklyJson>)
   }, origin)
   return id
 }
@@ -410,6 +413,22 @@ export function setComponentFlag(
 // Blocks
 
 /** Writes (or with `null` deletes) one stack of blocks. */
+/**
+ * Gives every workspace (each screen, and `app`) its map of stacks, and says whether one was
+ * missing. Two people placing the first blocks of a screen at the same time would otherwise
+ * each create that map, and the merge keeps only one of them, with its blocks: the server
+ * calls this when it loads a project, before anyone edits it.
+ */
+export function ensureBlockMaps(ydoc: Y.Doc, origin?: Origin): boolean {
+  const blocks = yBlocks(ydoc)
+  const missing = [...yScreens(ydoc).keys(), APP_WORKSPACE].filter((key) => !blocks.has(key))
+  if (missing.length === 0) return false
+  ydoc.transact(() => {
+    for (const key of missing) blocks.set(key, new Y.Map<BlocklyJson>())
+  }, origin)
+  return true
+}
+
 export function setBlockStack(
   ydoc: Y.Doc,
   workspace: WorkspaceKey,

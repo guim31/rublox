@@ -1,5 +1,6 @@
 import type { IncomingMessage } from 'node:http'
 import { Hocuspocus } from '@hocuspocus/server'
+import { ensureBlockMaps } from '@rublox/schema'
 import { type WebSocket, WebSocketServer } from 'ws'
 import type * as Y from 'yjs'
 import { canWrite, projectAccess } from './access.ts'
@@ -17,8 +18,24 @@ export const COLLAB_PATH = '/ws/collab'
 /** Why a connection to a document was refused, as the studio reads it (`reason`). */
 export type CollabRefusal = 'signed-out' | 'not-found'
 
+/**
+ * Who a connection is, as the other editors of the project see it in the presence (SPEC
+ * § 4.9). Written by the server into each awareness state: a client cannot pass for someone
+ * else.
+ */
+export interface PresenceUser {
+  id: string
+  name: string
+  avatar: string | null
+  /** A viewer or a space manager: present, but cannot change anything. */
+  readOnly: boolean
+}
+
 interface CollabContext {
   userId: string
+  user?: PresenceUser
+  /** A visitor of a gallery project (J6): not one of its editors, never in the presence. */
+  visitor?: boolean
 }
 
 interface CollabDeps {
@@ -52,12 +69,43 @@ export class Collab {
         const found = await projectAccess(db, session.user.id, documentName)
         if (!found) throw refusal('not-found')
         connectionConfig.readOnly = !canWrite(found.access) || found.project.deletedAt !== null
-        return { userId: session.user.id }
+        const user = session.user as typeof session.user & { avatar?: string | null }
+        return {
+          userId: user.id,
+          visitor: found.access === 'gallery',
+          user: {
+            id: user.id,
+            name: user.name,
+            avatar: user.avatar ?? null,
+            readOnly: connectionConfig.readOnly,
+          },
+        } satisfies CollabContext
       },
       onLoadDocument: async ({ documentName }) => {
         const stored = await loadStoredDoc(db, documentName)
         if (!stored) throw refusal('not-found')
         return stored
+      },
+      // Before anyone edits: each workspace gets its map of stacks (see `ensureBlockMaps`).
+      afterLoadDocument: async ({ document }) => {
+        ensureBlockMaps(document, SERVER_ORIGIN)
+      },
+      // Presence: the identity in each state is the session's, and a connection only speaks
+      // for its own clients (it cannot rewrite or remove the state of another editor).
+      beforeHandleAwareness: async ({ states, context, connection, document }) => {
+        if (!context?.user || !connection) return
+        if (context.visitor) {
+          states.clear()
+          return
+        }
+        const others = new Set<number>()
+        for (const [other, { clients }] of document.connections) {
+          if (other !== connection) for (const client of clients) others.add(client)
+        }
+        for (const [clientId, state] of states) {
+          if (others.has(clientId)) states.delete(clientId)
+          else state.user = context.user
+        }
       },
       onStoreDocument: async ({ documentName, document, lastContext }) => {
         await this.store(documentName, document, lastContext?.userId || null)

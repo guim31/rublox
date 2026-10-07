@@ -5,7 +5,7 @@ import { publish } from './publish.ts'
 
 export const studio: Omit<
   Messages['studio'],
-  'game' | 'data' | 'blockSheets' | 'gallery' | 'templates' | 'ai'
+  'game' | 'data' | 'blockSheets' | 'gallery' | 'templates' | 'ai' | 'collab'
 > &
   Pick<typeof learning, 'blockSheets'> = {
   ...accounts,

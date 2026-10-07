@@ -60,6 +60,7 @@ import type { EditorTab } from '../routes/p.$projectId.tsx'
 import { addNewScreen } from './actions.ts'
 import { useDoc, useSaveState, useSession, useUndoState } from './context.tsx'
 import { useEditorNavigate } from './nav.ts'
+import { PresenceAvatars } from './presence-ui.tsx'
 import { LiveButton } from './publish/live-dialog.tsx'
 import { PublishDialog } from './publish/publish-dialog.tsx'
 import { TransferMenu } from './publish/transfer-menu.tsx'
@@ -143,6 +144,7 @@ export function TopBar({ projectId, tab, screenId }: Props) {
       </div>
       <SaveIndicator />
       <div className="flex-1" />
+      <PresenceAvatars projectId={projectId} />
       <IconButton
         label={t('commands.open')}
         shortcut="Mod+K"
@@ -200,7 +202,7 @@ function ShareButton() {
           aria-label={t('editor.share')}
           onClick={() => setOpen(true)}
         >
-          <span className="hidden xl:inline">{t('editor.share')}</span>
+          <span className="rx-bar-label">{t('editor.share')}</span>
         </Button>
       </Tooltip>
       {open ? <ShareDialog open onClose={() => setOpen(false)} /> : null}
@@ -221,7 +223,7 @@ function PublishButton() {
           onClick={() => setOpen(true)}
           data-testid="publish-open"
         >
-          <span className="hidden xl:inline">{t('editor.publish')}</span>
+          <span className="rx-bar-label">{t('editor.publish')}</span>
         </Button>
       </Tooltip>
       {open ? <PublishDialog open onClose={() => setOpen(false)} /> : null}
@@ -263,7 +265,7 @@ function Soon({
         aria-label={text}
         className="cursor-not-allowed opacity-45 active:scale-100"
       >
-        <span className="hidden xl:inline">{text}</span>
+        <span className="rx-bar-label">{text}</span>
       </Button>
     </Tooltip>
   )
@@ -381,7 +383,7 @@ function SaveIndicator() {
             state === 'offline' && 'text-coral',
           )}
         />
-        {label}
+        <span className="rx-save-label">{label}</span>
       </span>
     </Tooltip>
   )

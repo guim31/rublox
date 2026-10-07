@@ -20,7 +20,7 @@ import { Input, Select } from '../../components/ui/input.tsx'
 import { cn } from '../../lib/cn.ts'
 import { errorMessage } from '../../lib/errors.ts'
 import { ASSET_ACCEPT, ASSET_MAX_BYTES, assetKindOf } from '../../storage/asset-kinds.ts'
-import { useDoc, useSession } from '../context.tsx'
+import { useAssetUrl, useDoc, useSession } from '../context.tsx'
 import type { EditorProps } from './editors.tsx'
 
 const TEXTAREA =
@@ -342,6 +342,7 @@ export function MediaAssetEditor({ id, value, onChange, def }: EditorProps<strin
   const { t } = useTranslation('catalog')
   const { t: tStudio } = useTranslation()
   const session = useSession()
+  const assetUrl = useAssetUrl()
   const doc = useDoc()
   const inputId = useId()
   const kind = (def.assetKind ?? 'sound') as Exclude<AssetKind, 'font' | 'file'>
@@ -382,7 +383,7 @@ export function MediaAssetEditor({ id, value, onChange, def }: EditorProps<strin
       </Select>
       {doc.assets[current] && kind === 'sound' ? (
         // biome-ignore lint/a11y/useMediaCaption: a sound chosen by the user, heard to check it
-        <audio src={session.assetUrl(current)} controls className="h-9 w-full" />
+        <audio src={assetUrl(current)} controls className="h-9 w-full" />
       ) : null}
       <label
         htmlFor={inputId}

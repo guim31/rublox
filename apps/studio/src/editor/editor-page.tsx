@@ -25,6 +25,7 @@ import { SessionProvider, useDoc, useSaveState, useSession } from './context.tsx
 import { DesignView } from './design/design-view.tsx'
 import { EditorCommands } from './editor-commands.tsx'
 import { resolveScreen, resolveWorkspace } from './nav.ts'
+import { PresenceSync } from './presence-ui.tsx'
 import { ProjectSession } from './session.ts'
 import { resetEditor, useEditor } from './store.ts'
 import { TopBar } from './top-bar.tsx'
@@ -115,6 +116,7 @@ function Editor({ projectId, tab, screen }: Props) {
   return (
     <div className="flex h-full flex-col bg-bg">
       <TopBar projectId={projectId} tab={tab} screenId={workspace} />
+      <PresenceSync tab={tab} workspace={workspace} />
       <ReadOnlyBanner />
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="min-h-0 flex-1">

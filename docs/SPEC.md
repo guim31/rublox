@@ -12,7 +12,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J1 | Comptes, espaces, invitations, projets côté serveur | fait (PR #2, complément PR #3), voir § 0.2 |
 | J2 | Catalogue complet des composants et de leurs blocs | fait (PR #4), voir § 0.4 ; essai sur téléphones à faire (`docs/compatibilite.md`) |
 | J3 | Expérience Junior et Studio, apprentissage, accueil | fait (PR #7), voir § 0.3 |
-| J4 | Collaboration, test sur téléphone, publication PWA, export | fait sauf l’édition à plusieurs (PR #6), voir § 0.5 |
+| J4 | Collaboration, test sur téléphone, publication PWA, export | fait (PR #6, édition à plusieurs : PR #9), voir § 0.5 et § 0.9 |
 | J5 | Données et services : tables, variables, API web, cartes, graphiques | fait (PR #8), voir § 0.8 ; essai sur téléphones à faire (`docs/compatibilite.md`) |
 | J6 | Galerie, remix, modèles, assistant IA | fait (PR #10), voir § 0.7 |
 | J7 | Mode jeu : scène, lutins, physique | fait (PR #5), voir § 0.6 |
@@ -342,7 +342,7 @@ composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
 - Chaînes du J2 : `packages/i18n/src/{fr,en}/catalog.ts`, espace `catalog` (`useTranslation('catalog')`
   côté studio, `messages[locale].catalog` ailleurs).
 - J4 : coller dans un projet d'un autre propriétaire ne recopie pas les fichiers des ressources
-  sur le serveur (seulement leur description) ; le service worker des applis publiées doit
+  sur le serveur (seulement leur description) *(fait au J4b, § 0.9)* ; le service worker des applis publiées doit
   relayer `showNotification` ; `appId` des variables stockées.
 - J5 : la Liste de données et la Grille de données se brancheront sur une table (même propriété
   `items`, mêmes champs `image`, `title`, `subtitle`) ; les variables partagées reprennent le
@@ -352,8 +352,8 @@ composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
 
 **Écarts au cahier des charges, et pourquoi**
 
-- **Édition à plusieurs (§ 4.9) pas faite** : elle repose sur la persistance Hocuspocus du
-  complément du J1 (PR #3), pas encore fusionnée à la fin du jalon. Tout le reste du J4 est fait.
+- **Édition à plusieurs (§ 4.9)** : livrée à part (J4b, PR #9, voir § 0.9), sur la persistance
+  Hocuspocus du complément du J1 (PR #3).
 - Le **code des applis est généré par le studio** (le même générateur que l'aperçu), envoyé avec
   le projet au test en direct et à la publication. Le serveur valide le projet
   (`projectDocSchema`) et la forme du code, pas son contenu : Blockly côté serveur demanderait un
@@ -553,7 +553,6 @@ d'usage, consignes adaptées aux enfants ; badge « premier remix ».
   pour tout ce qui touche l'IA ; `createDemoProject({ ai })`. Chaînes du J6 :
   `packages/i18n/src/{fr,en}/gallery.ts` (`gallery`, `templates`, `ai` dans `studio`, `ai` dans
   `runtime`).
-
 ### 0.8 Ce que le J5 a fixé (07/10/2026)
 
 **Fait** : onglet Données (tables éditables comme un tableur, colonnes typées, mode local ou
@@ -645,6 +644,85 @@ Google (P2), tutoriels La météo, Carnet d'adresses, Carte de mes lieux et Tcha
   `data:*` (`data-tour`).
 - Modèles et IA (J6) : une recette `AppSpec` ne décrit pas encore de tables ni de connexions ;
   les y ajouter demande de les déclarer dans `appSpecSchema` et le constructeur.
+
+### 0.9 Ce que le J4b a fixé (07/10/2026)
+
+**Fait** : présence (avatars des présents dans la barre du haut, une couleur par personne, écran
+et onglet de chacun, « Aller voir »), sélection des autres sur le canevas et dans les blocs,
+blocs synchronisés par pile sans déplacer la vue, conflit sur une pile signalé (qui l'a
+emporté), annuler et rétablir limités à ses propres modifications, fusion des modifications
+faites hors ligne par plusieurs personnes, lecture seule vérifiée côté serveur (aussi pour la
+présence), fichiers des ressources recopiés quand on colle dans un autre projet. Tests :
+`apps/server/test/collab.test.ts`, `packages/schema/test/conflicts.test.ts`,
+`e2e/collab.spec.ts`.
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Conflit sur une pile** (« le dernier enregistrement l'emporte ») : seul celui dont la
+  version est perdue est prévenu (« Pile modifiée par Sacha »), avec un bouton « Montrer » et la
+  pile qui s'allume. Deux cas : (1) pendant qu'on glisse un bloc, les modifications des autres
+  attendent ; si l'autre a changé la même pile entre-temps, il a enregistré le premier : sa
+  version est gardée, la nôtre abandonnée ; (2) deux enregistrements qui se croisent sur le réseau :
+  Yjs garde l'un des deux, le même partout, et l'autre est prévenu. Une modification faite **en
+  connaissant** celle de l'autre (il a vu la pile, puis l'a changée) n'est pas un conflit et
+  n'affiche rien. Un conflit n'est signalé que si sa propre écriture de la pile date de moins
+  de 15 s.
+- **Supprimer une pile** que quelqu'un d'autre modifie au même moment : Yjs garde la
+  modification (une écriture concurrente l'emporte sur une suppression). Supprimer une pile que
+  l'autre venait de changer le prévient (« quelqu'un », l'auteur d'une suppression n'étant pas
+  connu de Yjs).
+- **Lecture seule** : un lecteur apparaît dans la présence (œil, « Regarde seulement ») ; il
+  peut toujours essayer dans son onglet sans rien enregistrer (§ 0.2), le serveur refusant toute
+  mise à jour (`connectionConfig.readOnly`).
+- **Plusieurs onglets d'un même compte** ne s'affichent pas comme quelqu'un d'autre.
+- **Visiteurs d'un projet de la galerie** (J6, accès `gallery`) : ils ne sont pas des
+  éditeurs du projet et n'apparaissent pas dans sa présence (le serveur ignore leur état) ; leur
+  studio n'affiche pas non plus la présence. Le protocole leur envoie tout de même l'état des
+  éditeurs présents (Hocuspocus ne filtre pas l'awareness par connexion) : nom, avatar, écran.
+- **Barre du haut de Junior** : à 1 440 px, elle débordait déjà (le menu des préférences était
+  coupé) ; les libellés de « Tester », « Partager » et « Publier » ne s'affichent en Junior
+  qu'à partir de 1 536 px (icône et infobulle en dessous), comme le mot de l'état
+  d'enregistrement (gardé pour les lecteurs d'écran) depuis l'onglet Données du J5. Le nom du
+  projet y reste écrasé à 1 440 px (antérieur, à reprendre au J8).
+
+**Défauts antérieurs corrigés au passage**
+
+- Un changement de droits (`Collab.reconnect` : partage, corbeille…) laissait l'éditeur du
+  propriétaire « Hors ligne » pour toujours : Hocuspocus ferme le document mais garde la
+  socket, et le provider ne le rouvrait pas. Le studio le rouvre (`ServerSource`).
+- Les images d'un projet du serveur restaient des silhouettes sur le canevas : le React
+  Compiler mémorisait le canevas sur `session.assetUrl`, qui ne change jamais. `useAssetUrl()`
+  donne une fonction qui change à l'arrivée d'un fichier.
+- Le test axe « accounts » se connectait au même `admin` dans ses quatre variantes en
+  parallèle : toutes recevaient le thème et le mode du profil de ce compte (le profil
+  l'emporte), fixés par la première connectée ; la variante « sombre » pouvait s'afficher en
+  clair (vérifié). Chaque variante a désormais son administrateur, et vérifie son thème et son
+  mode avant chaque mesure. `slow.test.ts` attendait des délais fixes (20 à 60 ms) des étapes
+  minutées : il attend l'état du moteur (en pause, bloc allumé, valeur écrite). Les deux
+  passent 20 fois de suite (80 passages pour les quatre variantes d'axe).
+
+**Contrats pour les jalons suivants**
+
+- **Présence** : `awareness` du provider, état `PresenceState` (`apps/studio/src/editor/presence.ts`) :
+  `user` (écrit **par le serveur** depuis la session, `beforeHandleAwareness` dans
+  `collab.ts` : `id`, `name`, `avatar`, `readOnly` ; un client ne peut ni se faire passer pour un
+  autre, ni modifier l'état d'une autre connexion), `view` (`tab`, `screen`), `selection`
+  (composants), `block` (bloc choisi). `session.presence` (`Presence`, nul en mode invité),
+  `usePeers()`, `usePeople()`, `assignColors` (une couleur par personne, la même partout).
+  Un nouvel élément à partager s'ajoute à `PresenceState` et se publie par
+  `presence.set({...})`.
+- **Blocs** : le pont Blockly ⇄ Yjs (`editor/blocks/workspace.tsx`) garde, pile par pile, le
+  JSON qu'il a chargé ou enregistré (`Known`) : il n'écrit que les piles changées ici, ne charge
+  que celles changées ailleurs. `StackConflicts` et `entryWriter` (`@rublox/schema`, `conflicts.ts`).
+- **Cartes des piles** : chaque écran et `app` ont leur `Y.Map` de piles dès le chargement par le
+  serveur (`ensureBlockMaps`) et dès la création d'un écran (`addScreen`, `duplicateScreen`) :
+  ne jamais créer une carte partagée paresseusement, deux créations concurrentes en perdent une.
+- **Annulation** : `createUndoManager(ydoc, origines)` (`@rublox/schema`) ne suit que les
+  transactions de l'éditeur (origine `null` et celles passées), jamais le serveur ni le cache.
+- **Ressources** : afficher une ressource passe par `useAssetUrl()` (`editor/context.tsx`), pas
+  par `session.assetUrl` ; coller des composants recopie les fichiers manquants dans le projet
+  (`clipboard.ts`), un fichier pas encore arrivé est recherché à nouveau (1 s, 2 s…, 5 fois).
+- Chaînes du J4b : `packages/i18n/src/{fr,en}/collab.ts`, espace `studio`, préfixe `collab.`.
 
 ## 1. En bref
 

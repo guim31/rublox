@@ -18,7 +18,7 @@ import { cn } from '../../lib/cn.ts'
 import { errorMessage } from '../../lib/errors.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { MAX_IMAGE_BYTES } from '../../storage/assets.ts'
-import { useDoc, useSession } from '../context.tsx'
+import { useAssetUrl, useDoc, useSession } from '../context.tsx'
 import { BindingEditor } from '../data/binding-editor.tsx'
 import { CostumesEditor } from './costumes-editor.tsx'
 import { DateEditor, IconEditor, ListEditor, MediaAssetEditor, TimeEditor } from './editors-j2.tsx'
@@ -412,6 +412,7 @@ export function AssetEditor(props: EditorProps<string>) {
 function ImageAssetEditor({ id, value, onChange, def }: EditorProps<string>) {
   const { t } = useTranslation()
   const session = useSession()
+  const assetUrl = useAssetUrl()
   const doc = useDoc()
   const inputId = useId()
   const current = String(value ?? '')
@@ -436,10 +437,10 @@ function ImageAssetEditor({ id, value, onChange, def }: EditorProps<string>) {
 
   return (
     <div className="flex flex-col gap-2">
-      {current && session.assetUrl(current) ? (
+      {current && assetUrl(current) ? (
         <div className="relative overflow-hidden rounded-ui border border-border bg-surface-2">
           <img
-            src={session.assetUrl(current)}
+            src={assetUrl(current)}
             alt={asset?.name ?? ''}
             className="h-24 w-full object-contain"
           />
@@ -473,11 +474,7 @@ function ImageAssetEditor({ id, value, onChange, def }: EditorProps<string>) {
                 assetId === current ? 'border-primary' : 'border-border hover:border-border-strong',
               )}
             >
-              <img
-                src={session.assetUrl(assetId)}
-                alt={a.name}
-                className="size-full object-cover"
-              />
+              <img src={assetUrl(assetId)} alt={a.name} className="size-full object-cover" />
             </button>
           ))}
         </div>

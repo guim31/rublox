@@ -1,12 +1,14 @@
 import {
   type Asset,
   type AssetKind,
+  createUndoManager,
   hasProject,
   type ProjectDoc,
-  Y_ROOTS,
   yDocToProject,
 } from '@rublox/schema'
-import * as Y from 'yjs'
+import type * as Y from 'yjs'
+import { currentUserId } from '../lib/session.ts'
+import { Presence } from './presence.ts'
 import {
   type DocSource,
   GuestSource,
@@ -16,6 +18,9 @@ import {
 } from './sources.ts'
 
 export type { SaveState } from './sources.ts'
+
+/** How many times a missing asset file is looked for again (1 s, 2 s… apart). */
+const ASSET_RETRIES = 5
 
 /** Transactions written by the Blockly ⇄ Yjs bridge (undoable, but not echoed back to Blockly). */
 export const BLOCKLY_ORIGIN = { name: 'blockly' }
@@ -28,6 +33,8 @@ export const BLOCKLY_ORIGIN = { name: 'blockly' }
 export class ProjectSession {
   readonly undo: Y.UndoManager
   readonly ydoc: Y.Doc
+  /** Who else has the project open (server projects only, SPEC § 4.9). */
+  readonly presence: Presence | null
   private doc: ProjectDoc
   private readonly listeners = new Set<() => void>()
   private readonly assetUrls = new Map<string, string>()
@@ -41,19 +48,14 @@ export class ProjectSession {
     const ydoc = source.ydoc
     this.ydoc = ydoc
     this.doc = yDocToProject(ydoc)
-    this.undo = new Y.UndoManager(
-      [
-        ydoc.getMap(Y_ROOTS.meta),
-        ydoc.getMap(Y_ROOTS.settings),
-        ydoc.getArray(Y_ROOTS.screenOrder),
-        ydoc.getMap(Y_ROOTS.screens),
-        ydoc.getMap(Y_ROOTS.blocks),
-        ydoc.getMap(Y_ROOTS.variables),
-        ydoc.getMap(Y_ROOTS.assets),
-        ydoc.getMap(Y_ROOTS.data),
-      ],
-      { captureTimeout: 400, trackedOrigins: new Set([null, BLOCKLY_ORIGIN]) },
-    )
+    // Only this tab's edits: the others' (provider, cache) are not taken back.
+    this.undo = createUndoManager(ydoc, [BLOCKLY_ORIGIN])
+    // Visitors of a gallery project (J6) are not among its editors: no presence for them.
+    const awareness =
+      source instanceof ServerSource && source.access !== 'gallery'
+        ? source.provider.awareness
+        : null
+    this.presence = awareness ? new Presence(awareness, currentUserId()) : null
     this.undo.on('stack-item-added', () => this.emit())
     this.undo.on('stack-item-popped', () => this.emit())
     ydoc.on('update', this.onUpdate)
@@ -84,7 +86,12 @@ export class ProjectSession {
   private onUpdate = (_update: Uint8Array, origin: unknown) => {
     this.doc = yDocToProject(this.ydoc)
     if (!this.source.isOwnOrigin(origin) && origin !== SUMMARY_ORIGIN) this.source.edited()
-    if (Object.keys(this.doc.assets).some((id) => !this.assetUrls.has(id))) void this.loadAssets()
+    const ids = Object.keys(this.doc.assets)
+    if (ids.some((id) => !this.assetUrls.has(id))) {
+      // A new asset: its file gets a fresh round of tries.
+      if (ids.some((id) => !this.seenAssets.has(id))) this.assetTries = 0
+      void this.loadAssets()
+    }
     this.emit()
   }
 
@@ -93,21 +100,44 @@ export class ProjectSession {
     return this.source.storeAsset(file, kind)
   }
 
+  /** The file of an asset, wherever this project keeps it. */
+  loadAssetBlob(asset: Asset): Promise<Blob | undefined> {
+    return this.source.loadAsset(asset.sha256)
+  }
+
+  /** Looks again for the files of assets that had none (copied in after a paste). */
+  reloadAssets(): Promise<void> {
+    return this.loadAssets()
+  }
+
   private async loadAssets(): Promise<void> {
     let changed = false
+    let missing = false
     for (const [id, asset] of Object.entries(this.doc.assets)) {
+      this.seenAssets.add(id)
       if (this.assetUrls.has(id)) continue
       const blob = await this.source.loadAsset(asset.sha256)
       if (blob && !this.disposed) {
         this.assetUrls.set(id, URL.createObjectURL(blob))
         changed = true
-      }
+      } else missing = true
     }
     if (changed) {
       this.assetsVersion += 1
       this.emit()
     }
+    // Someone else's new asset can reach the document before its file reaches the server
+    // (it is being sent): look again a few times.
+    clearTimeout(this.assetRetry)
+    if (missing && !this.disposed && this.assetTries < ASSET_RETRIES) {
+      this.assetTries += 1
+      this.assetRetry = setTimeout(() => void this.loadAssets(), 1000 * this.assetTries)
+    } else if (!missing) this.assetTries = 0
   }
+
+  private assetRetry?: ReturnType<typeof setTimeout>
+  private assetTries = 0
+  private readonly seenAssets = new Set<string>()
 
   /** URL of an image property: an asset of the project, or an https: address. */
   assetUrl = (value: string): string | undefined => {
@@ -145,8 +175,10 @@ export class ProjectSession {
   async dispose(): Promise<void> {
     if (this.disposed) return
     this.disposed = true
+    clearTimeout(this.assetRetry)
     this.ydoc.off('update', this.onUpdate)
     this.undo.destroy()
+    this.presence?.dispose()
     for (const url of this.assetUrls.values()) URL.revokeObjectURL(url)
     await this.source.close()
     this.ydoc.destroy()

@@ -1,5 +1,5 @@
 import type { ProjectDoc, Screen, ScreenId } from '@rublox/schema'
-import { createContext, type ReactNode, useContext, useSyncExternalStore } from 'react'
+import { createContext, type ReactNode, useContext, useMemo, useSyncExternalStore } from 'react'
 import type { ProjectSession } from './session.ts'
 
 const SessionContext = createContext<ProjectSession | null>(null)
@@ -45,4 +45,19 @@ export function useUndoState() {
 export function useAssetsVersion() {
   const session = useSession()
   return useSyncExternalStore(session.subscribe, session.getAssetsVersion)
+}
+
+/**
+ * `session.assetUrl` as a value that changes when a file arrives (loaded after the document
+ * named it): components memoised by the React Compiler then draw it. Read asset URLs in
+ * rendering through this, never through `session.assetUrl` directly. The function reads
+ * `version` for real: the compiler keeps only the dependencies a memo actually uses.
+ */
+export function useAssetUrl(): (value: string) => string | undefined {
+  const session = useSession()
+  const version = useAssetsVersion()
+  return useMemo(
+    () => (value: string) => (version >= 0 ? session.assetUrl(value) : undefined),
+    [session, version],
+  )
 }

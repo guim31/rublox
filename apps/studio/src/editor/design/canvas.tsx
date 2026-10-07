@@ -12,8 +12,9 @@ import { cn } from '../../lib/cn.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { addComponentOfType, moveComponentTo } from '../actions.ts'
 import { ComponentIcon } from '../component-icon.tsx'
-import { useAssetsVersion, useDoc, useSession } from '../context.tsx'
+import { useAssetUrl, useDoc, useSession } from '../context.tsx'
 import { useCanvasTableRows } from '../data/rows.ts'
+import { PeerSelections } from '../presence-ui.tsx'
 import { DEVICES, type Device, useEditor } from '../store.ts'
 import {
   axisOf,
@@ -41,7 +42,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
   const doc = useDoc()
   const session = useSession()
   const tableRows = useCanvasTableRows()
-  useAssetsVersion()
+  const assetUrl = useAssetUrl()
   const screen = doc.screens[screenId]
   const { device, landscape, zoom, appScheme, selected, hovered, set, select, hover } = useEditor()
   const { locale, mode } = usePrefs()
@@ -99,6 +100,8 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     const s = stage.getBoundingClientRect()
     return { left: r.left - s.left, top: r.top - s.top, width: r.width, height: r.height }
   }, [])
+
+  const peerBoxOf = useCallback((id: ComponentId) => boxOf(elementOf(id)), [boxOf, elementOf])
 
   /** A game scene's stage on screen: its rectangle, scale, and pointer → scene units. */
   const sceneGeometry = useCallback(
@@ -415,7 +418,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
                       screen={screen}
                       locale={doc.meta.locale}
                       mode="design"
-                      assetUrl={session.assetUrl}
+                      assetUrl={assetUrl}
                       tableRows={tableRows}
                       decorateChildren={(parentId, children) =>
                         children.length
@@ -440,6 +443,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
                 />
               </div>
             ) : null}
+            <PeerSelections screenId={screenId} boxOf={peerBoxOf} />
             <Overlay
               boxes={boxes}
               drop={drop?.line}

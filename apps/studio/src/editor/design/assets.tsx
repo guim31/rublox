@@ -5,12 +5,13 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { errorMessage } from '../../lib/errors.ts'
 import { MAX_IMAGE_BYTES } from '../../storage/assets.ts'
-import { useAssetsVersion, useDoc, useSession } from '../context.tsx'
+import { useAssetsVersion, useAssetUrl, useDoc, useSession } from '../context.tsx'
 
 /** The project's images: in this browser in guest mode, on the server with an account. */
 export function AssetsPanel() {
   const { t } = useTranslation()
   const session = useSession()
+  const assetUrl = useAssetUrl()
   const doc = useDoc()
   useAssetsVersion()
   const inputId = useId()
@@ -69,7 +70,7 @@ export function AssetsPanel() {
             className="group relative aspect-square overflow-hidden rounded-ui border border-border bg-surface-2"
           >
             <img
-              src={session.assetUrl(id)}
+              src={assetUrl(id)}
               alt={asset.name}
               title={asset.name}
               className="size-full object-cover"

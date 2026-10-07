@@ -9,7 +9,7 @@ import { Input } from '../../components/ui/input.tsx'
 import { cn } from '../../lib/cn.ts'
 import { errorMessage } from '../../lib/errors.ts'
 import { MAX_IMAGE_BYTES } from '../../storage/assets.ts'
-import { useDoc, useSession } from '../context.tsx'
+import { useAssetUrl, useDoc, useSession } from '../context.tsx'
 import type { EditorProps } from './editors.tsx'
 
 /** Emoji that make good costumes, offered as one-click ideas. */
@@ -59,6 +59,7 @@ const IDEAS = [
 export function CostumesEditor({ id, value, onChange }: EditorProps<string[]>) {
   const { t } = useTranslation()
   const session = useSession()
+  const assetUrl = useAssetUrl()
   const doc = useDoc()
   const list = Array.isArray(value) ? value : []
   const [open, setOpen] = useState(false)
@@ -101,7 +102,7 @@ export function CostumesEditor({ id, value, onChange }: EditorProps<string[]>) {
       {list.length ? (
         <ol id={id} className="flex flex-wrap gap-1.5" aria-label={t('game.costumes.title')}>
           {list.map((costume, index) => {
-            const src = session.assetUrl(costume)
+            const src = assetUrl(costume)
             const n = index + 1
             return (
               // biome-ignore lint/suspicious/noArrayIndexKey: costumes may repeat; the position is the identity
@@ -216,11 +217,7 @@ export function CostumesEditor({ id, value, onChange }: EditorProps<string[]>) {
                       onClick={() => add(assetId)}
                       className="size-10 overflow-hidden rounded-md border-2 border-border hover:border-primary"
                     >
-                      <img
-                        src={session.assetUrl(assetId)}
-                        alt=""
-                        className="size-full object-cover"
-                      />
+                      <img src={assetUrl(assetId)} alt="" className="size-full object-cover" />
                     </button>
                   ))}
                 </div>

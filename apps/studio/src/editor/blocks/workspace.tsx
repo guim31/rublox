@@ -19,8 +19,10 @@ import {
   addVariable,
   allVariableNames,
   type BlocklyJson,
+  entryWriter,
   isValidName,
   removeVariable,
+  StackConflicts,
   setBlockStack,
   updateVariable,
   type WorkspaceKey,
@@ -28,11 +30,13 @@ import {
   yVariables,
 } from '@rublox/schema'
 import * as Blockly from 'blockly/core'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type * as Y from 'yjs'
 import { isDark, usePrefs } from '../../lib/prefs.ts'
 import { useDoc, useSession } from '../context.tsx'
+import { type Peer, peerStyle, usePeers } from '../presence.ts'
 import { BLOCKLY_ORIGIN, type ProjectSession } from '../session.ts'
 import { useEditor } from '../store.ts'
 import { registerBlockMenu, showBreakpoints } from './block-menu.ts'
@@ -63,56 +67,137 @@ function storedStacks(session: ProjectSession, key: WorkspaceKey): Record<string
   return (yBlocks(session.ydoc).get(key)?.toJSON() ?? {}) as Record<string, BlocklyJson>
 }
 
-/** Writes the workspace's stacks into the project: one entry per top block (SPEC § 6.4). */
+const serialize = (block: Blockly.Block) =>
+  Blockly.serialization.blocks.save(block, { addCoordinates: true }) as BlocklyJson | null
+
+/**
+ * What a workspace last agreed with the project, stack by stack (the JSON it loaded or
+ * saved). Saving writes only the stacks that changed here since then, and loading only those
+ * that changed in the project: an edit received while one drags a block is never written
+ * back over, and a stack one has not touched is never reverted (SPEC § 4.9).
+ */
+type Known = Map<string, BlocklyJson>
+
+/**
+ * Writes the stacks changed in the workspace into the project: one entry per top block. A
+ * stack changed in the project since this workspace last saw it is left alone: that save came
+ * first (see `overruled`).
+ */
 function saveToProject(
   session: ProjectSession,
   key: WorkspaceKey,
   workspace: Blockly.WorkspaceSvg,
+  known: Known,
 ): void {
   const stored = storedStacks(session, key)
+  const unseen = (id: string) => known.has(id) && !same(stored[id], known.get(id))
   const tops = workspace.getTopBlocks(false).filter((block) => !block.isInsertionMarker())
   session.ydoc.transact(() => {
     for (const block of tops) {
-      const json = Blockly.serialization.blocks.save(block, {
-        addCoordinates: true,
-      }) as BlocklyJson | null
-      if (json && !same(json, stored[block.id]))
+      const json = serialize(block)
+      if (json && !same(json, known.get(block.id)) && !unseen(block.id)) {
         setBlockStack(session.ydoc, key, block.id, json, BLOCKLY_ORIGIN)
+        known.set(block.id, json)
+      }
     }
     const ids = new Set(tops.map((block) => block.id))
-    for (const id of Object.keys(stored)) {
-      if (!ids.has(id)) setBlockStack(session.ydoc, key, id, null, BLOCKLY_ORIGIN)
+    for (const id of [...known.keys()]) {
+      if (ids.has(id) || unseen(id)) continue
+      setBlockStack(session.ydoc, key, id, null, BLOCKLY_ORIGIN)
+      known.delete(id)
     }
   }, BLOCKLY_ORIGIN)
 }
 
-/** Brings the workspace to what the project holds (after an undo, or at load). */
+/**
+ * The stacks changed both here (not saved yet: one was dragging) and in the project: the
+ * other person saved first, their version wins (SPEC § 4.9). One's version is dropped from
+ * the workspace, so that loading brings theirs. `busy` (the stack one types in) waits.
+ */
+function overruled(
+  session: ProjectSession,
+  key: WorkspaceKey,
+  workspace: Blockly.WorkspaceSvg,
+  known: Known,
+  busy: string | null,
+): string[] {
+  const stored = storedStacks(session, key)
+  const lost: string[] = []
+  Blockly.Events.disable()
+  try {
+    for (const [id, json] of [...known]) {
+      if (id === busy || same(stored[id], json)) continue
+      const block = workspace.getBlockById(id)
+      const current = block ? serialize(block) : null
+      if (same(current, json)) continue // only changed there: loading brings it
+      lost.push(id)
+      block?.dispose(false)
+      known.delete(id)
+    }
+  } finally {
+    Blockly.Events.enable()
+  }
+  return lost
+}
+
+/**
+ * Brings the workspace to what the project holds (at load, after an undo, or an edit of
+ * someone else), stack by stack, without moving the view; `busy` stacks (one is typing in
+ * them) wait. Returns whether some stack had to wait.
+ */
 function loadFromProject(
   session: ProjectSession,
   key: WorkspaceKey,
   workspace: Blockly.WorkspaceSvg,
-): void {
+  known: Known,
+  busy: string | null = null,
+): boolean {
   const stored = storedStacks(session, key)
+  const selected = Blockly.getSelected()
+  const selectedId = selected instanceof Blockly.BlockSvg ? selected.id : null
+  let waiting = false
   Blockly.Events.disable()
   try {
     syncVariables(session, workspace)
     for (const block of workspace.getTopBlocks(false)) {
+      if (block.isInsertionMarker()) continue
       const json = stored[block.id]
-      const current = Blockly.serialization.blocks.save(block, { addCoordinates: true })
-      if (!json || !same(json, current)) block.dispose(false)
+      if (json && same(json, known.get(block.id))) continue
+      if (!json && !known.has(block.id)) continue // new here, not saved yet
+      if (block.id === busy) {
+        waiting = true
+        continue
+      }
+      if (json && same(json, serialize(block))) {
+        known.set(block.id, json)
+        continue
+      }
+      block.dispose(false)
+      known.delete(block.id)
     }
     for (const [id, json] of Object.entries(stored)) {
       if (workspace.getBlockById(id)) continue
       try {
         Blockly.serialization.blocks.append(json as Blockly.serialization.blocks.State, workspace)
+        known.set(id, json)
       } catch (error) {
         console.warn('Rublox: skipped a stack of blocks', error)
       }
     }
+    // The selected block keeps its selection when its stack was replaced.
+    const again = selectedId ? workspace.getBlockById(selectedId) : null
+    if (again && Blockly.getSelected() !== again) again.select()
   } finally {
     Blockly.Events.enable()
   }
   refreshReferences(workspace)
+  return waiting
+}
+
+/** The top block of the stack a block id belongs to. */
+function stackOf(workspace: Blockly.Workspace, id: string | null | undefined): string | null {
+  const block = id ? workspace.getBlockById(id) : null
+  return block ? block.getRootBlock().id : null
 }
 
 /** Project variables (all kinds) → the workspace's variable map. */
@@ -140,6 +225,9 @@ export function BlocksWorkspace({
 }) {
   const session = useSession()
   const doc = useDoc()
+  const { t } = useTranslation()
+  const tRef = useRef(t)
+  tRef.current = t
   const { mode, locale, theme, moreBlocks } = usePrefs()
   const host = useRef<HTMLElement>(null)
   const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null)
@@ -193,11 +281,40 @@ export function BlocksWorkspace({
     workspace.registerButtonCallback(CREATE_SHARED_VARIABLE, () =>
       createVariable('shared', messages[locale].studio.data.sharedPrompt),
     )
-    loadFromProject(session, workspaceKey, workspace)
+    const known: Known = new Map()
+    loadFromProject(session, workspaceKey, workspace, known)
     workspace.addChangeListener(Blockly.Events.disableOrphans)
+
+    // Someone else's edits wait while one drags blocks (and the stack one types in waits
+    // until the field closes); one's own pending changes are saved first, so that the last
+    // save wins.
+    let pending = false
+    let retry: ReturnType<typeof setTimeout> | undefined
+    const editing = () =>
+      Blockly.WidgetDiv.isVisible() || Blockly.DropDownDiv.isVisible()
+        ? stackOf(workspace, (Blockly.getSelected() as Blockly.BlockSvg | null)?.id)
+        : null
+    const sync = () => {
+      clearTimeout(retry)
+      if (workspace.isDragging()) {
+        pending = true
+        retry = setTimeout(sync, 250)
+        return
+      }
+      const busy = editing()
+      for (const stack of overruled(session, workspaceKey, workspace, known, busy)) {
+        notifyConflict(stack, authors.get(stack) ?? null)
+      }
+      saveToProject(session, workspaceKey, workspace, known)
+      pending = loadFromProject(session, workspaceKey, workspace, known, busy)
+      if (pending) retry = setTimeout(sync, 250)
+    }
 
     let queued = false
     const onChange = (event: Blockly.Events.Abstract) => {
+      if (event.type === Blockly.Events.SELECTED) {
+        session.presence?.set({ block: (event as Blockly.Events.Selected).newElementId ?? null })
+      }
       if (event.isUiEvent || !Blockly.Events.isEnabled()) return
       if (
         event.type === Blockly.Events.VAR_CREATE ||
@@ -212,15 +329,61 @@ export function BlocksWorkspace({
         queued = false
         showBreakpoints(workspace, useEditor.getState().slow.breakpoints)
         if (workspace.isDragging()) return
-        saveToProject(session, workspaceKey, workspace)
+        if (pending) sync()
+        else saveToProject(session, workspaceKey, workspace, known)
       })
     }
     workspace.addChangeListener(onChange)
 
+    const conflicts = new StackConflicts()
+    /** Who wrote each stack last, from the others' edits (conflict notices). */
+    const authors = new Map<string, number | null>()
     const blocks = yBlocks(session.ydoc)
-    const onRemote = (_events: Y.YEvent<Y.AbstractType<unknown>>[], transaction: Y.Transaction) => {
-      if (transaction.origin === BLOCKLY_ORIGIN) return
-      loadFromProject(session, workspaceKey, workspace)
+    const onRemote = (events: Y.YEvent<Y.AbstractType<unknown>>[], transaction: Y.Transaction) => {
+      const stacks = blocks.get(workspaceKey)
+      const mine = events.filter((event) => event.target === stacks) as Y.YMapEvent<unknown>[]
+      if (transaction.origin === BLOCKLY_ORIGIN) {
+        for (const event of mine) conflicts.wrote(event)
+        return
+      }
+      const replaced = events.some(
+        (event) =>
+          event.target === blocks && (event as Y.YMapEvent<unknown>).keysChanged.has(workspaceKey),
+      )
+      if (!replaced && mine.length === 0) return
+      if (!transaction.local) {
+        for (const event of mine) {
+          for (const [stack, change] of event.changes.keys) {
+            authors.set(stack, change.action === 'delete' ? null : entryWriter(event.target, stack))
+          }
+          for (const { stack, client } of conflicts.lost(event)) notifyConflict(stack, client)
+        }
+      }
+      // Observers run inside the transaction's cleanup: write back once it is over.
+      queueMicrotask(sync)
+    }
+    const notifyConflict = (stack: string, client: number | null) => {
+      const strings = tRef.current
+      const name =
+        (client !== null ? session.presence?.userOf(client)?.name : null) ??
+        strings('collab.conflict.someone')
+      toast.warning(strings('collab.conflict.title', { name }), {
+        id: `conflict-${stack}`,
+        description: strings('collab.conflict.text', { name }),
+        action: {
+          label: strings('collab.conflict.show'),
+          onClick: () => {
+            const block = workspace.getBlockById(stack)
+            if (!block) return
+            workspace.centerOnBlock(stack)
+            flash(block as Blockly.BlockSvg)
+          },
+        },
+      })
+      setTimeout(() => {
+        const block = workspace.getBlockById(stack)
+        if (block) flash(block as Blockly.BlockSvg)
+      }, 0)
     }
     blocks.observeDeep(onRemote)
     const variables = yVariables(session.ydoc)
@@ -234,14 +397,15 @@ export function BlocksWorkspace({
       }
     }
     variables.observeDeep(onVariables)
-
     const resize = new ResizeObserver(() => Blockly.svgResize(workspace))
     resize.observe(element)
     return () => {
       resize.disconnect()
+      clearTimeout(retry)
       blocks.unobserveDeep(onRemote)
       variables.unobserveDeep(onVariables)
-      saveToProject(session, workspaceKey, workspace)
+      session.presence?.set({ block: null })
+      saveToProject(session, workspaceKey, workspace, known)
       workspace.dispose()
       workspaceRef.current = null
     }
@@ -298,9 +462,120 @@ export function BlocksWorkspace({
     useEditor.getState().set({ focusBlock: null })
   }, [focusBlock])
 
-  return (
-    <section ref={host} className="size-full" aria-label={label} data-testid="blockly-workspace" />
+  // The others' selected blocks on this workspace, in their colour (SPEC § 4.9).
+  const peers = usePeers()
+  const peersHere = useMemo(
+    () =>
+      peers.filter(
+        (peer) => peer.view?.tab === 'blocks' && peer.view.screen === workspaceKey && peer.block,
+      ),
+    [peers, workspaceKey],
   )
+  useEffect(() => {
+    const workspace = workspaceRef.current
+    if (!workspace || doc === null) return
+    const marked: SVGElement[] = []
+    for (const peer of peersHere) {
+      const block = peer.block ? workspace.getBlockById(peer.block) : null
+      if (!(block instanceof Blockly.BlockSvg)) continue
+      const root = block.getSvgRoot()
+      root.classList.add('rx-peer-block')
+      root.style.setProperty('--peer', peer.color)
+      root.setAttribute('data-peer', peer.user.name)
+      marked.push(root)
+    }
+    return () => {
+      for (const root of marked) {
+        root.classList.remove('rx-peer-block')
+        root.style.removeProperty('--peer')
+        root.removeAttribute('data-peer')
+      }
+    }
+  }, [peersHere, doc])
+
+  return (
+    <div className="relative size-full">
+      <section
+        ref={host}
+        className="size-full"
+        aria-label={label}
+        data-testid="blockly-workspace"
+      />
+      <PeerBlockLabels workspace={workspaceRef} peers={peersHere} />
+    </div>
+  )
+}
+
+/** The names of the others next to the block they selected, following scroll and zoom. */
+function PeerBlockLabels({
+  workspace,
+  peers,
+}: {
+  workspace: React.RefObject<Blockly.WorkspaceSvg | null>
+  peers: Peer[]
+}) {
+  const { t } = useTranslation()
+  const ref = useRef<HTMLDivElement>(null)
+  const [labels, setLabels] = useState<{ peer: Peer; left: number; top: number }[]>([])
+  useEffect(() => {
+    if (peers.length === 0) {
+      setLabels([])
+      return
+    }
+    let frame = 0
+    let last = ''
+    const loop = () => {
+      const area = ref.current?.getBoundingClientRect()
+      const next = area
+        ? peers.flatMap((peer) => {
+            const block = peer.block ? workspace.current?.getBlockById(peer.block) : null
+            if (!(block instanceof Blockly.BlockSvg)) return []
+            const box = block.getSvgRoot().getBoundingClientRect()
+            const visible =
+              box.bottom > area.top &&
+              box.top < area.bottom &&
+              box.right > area.left &&
+              box.left < area.right
+            return visible
+              ? [{ peer, left: box.right - area.left + 6, top: box.top - area.top }]
+              : []
+          })
+        : []
+      const key = JSON.stringify(next.map((label) => [label.peer.clientId, label.left, label.top]))
+      if (key !== last) {
+        last = key
+        setLabels(next)
+      }
+      frame = requestAnimationFrame(loop)
+    }
+    frame = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(frame)
+  }, [peers, workspace])
+  return (
+    <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden">
+      {labels.map(({ peer, left, top }) => (
+        <span
+          key={peer.clientId}
+          style={{ ...peerStyle(peer.color), left, top }}
+          className="absolute flex h-5 items-center rounded-md bg-(--peer) px-1.5 text-[11px] font-semibold whitespace-nowrap text-white shadow-1"
+          title={t('collab.presence.onBlock', { name: peer.user.name })}
+          data-testid="peer-block-label"
+        >
+          {peer.user.name}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+/** Draws attention to a stack (a conflict on it). */
+function flash(block: Blockly.BlockSvg) {
+  const root = block.getSvgRoot()
+  root.classList.remove('rx-flash')
+  // Restart the animation.
+  void root.getBoundingClientRect()
+  root.classList.add('rx-flash')
+  setTimeout(() => root.classList.remove('rx-flash'), 2400)
 }
 
 function onVariableEvent(

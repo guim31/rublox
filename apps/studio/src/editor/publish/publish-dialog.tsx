@@ -30,7 +30,7 @@ import { toBase64 } from '../../lib/base64.ts'
 import { cn } from '../../lib/cn.ts'
 import { config } from '../../lib/config.ts'
 import { errorMessage } from '../../lib/errors.ts'
-import { useDoc, useSession } from '../context.tsx'
+import { useAssetUrl, useDoc, useSession } from '../context.tsx'
 import { buildBundle } from './bundle.ts'
 import { drawIcons, ICON_COLORS, ICON_EMOJIS } from './icons.ts'
 import { appAddress, defaultAppSettings } from './settings.ts'
@@ -308,7 +308,7 @@ function SettingsForm({
   disabled: boolean
 }) {
   const { t } = useTranslation()
-  const session = useSession()
+  const assetUrl = useAssetUrl()
   const doc = useDoc()
   const images = Object.entries(doc.assets).filter(([, asset]) => asset.kind === 'image')
   const set = (patch: Partial<AppSettings>) => setForm({ ...form, ...patch })
@@ -480,7 +480,7 @@ function SettingsForm({
                         'ring-2 ring-primary ring-offset-2 ring-offset-surface',
                     )}
                   >
-                    <img src={session.assetUrl(id)} alt="" className="size-full object-cover" />
+                    <img src={assetUrl(id)} alt="" className="size-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -562,7 +562,7 @@ function ColorPicker({
 /** The icon and name as a phone's home screen shows them. */
 function IconPreview({ form }: { form: AppSettings }) {
   const { t } = useTranslation()
-  const session = useSession()
+  const assetUrl = useAssetUrl()
   return (
     <div className="flex flex-col gap-2" aria-label={t('publish.iconPreview')} role="img">
       <span className="text-ui-sm font-strong">{t('publish.iconPreview')}</span>
@@ -583,11 +583,7 @@ function IconPreview({ form }: { form: AppSettings }) {
             {form.icon.kind === 'emoji' ? (
               <span className="text-[40px] leading-none">{form.icon.emoji}</span>
             ) : (
-              <img
-                src={session.assetUrl(form.icon.assetId)}
-                alt=""
-                className="size-full object-cover"
-              />
+              <img src={assetUrl(form.icon.assetId)} alt="" className="size-full object-cover" />
             )}
           </div>
           <span className="max-w-[110px] truncate text-[12px] font-strong text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">

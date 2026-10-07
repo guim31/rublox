@@ -119,6 +119,9 @@ const CONNECT_TIMEOUT = 6000
 /** How long closing waits for the last edits to reach the server. */
 const CLOSE_TIMEOUT = 3000
 
+/** Why Hocuspocus closes a document whose rights changed (`ResetConnection`). */
+const RESET_REASON = 'Reset Connection'
+
 /** Address of the project documents (Hocuspocus, SPEC § 6.7), on the studio origin. */
 function collabUrl() {
   return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/collab`
@@ -153,6 +156,13 @@ export class ServerSource implements DocSource {
       this.refresh()
     })
     provider.on('authenticationFailed', ({ reason }: { reason: string }) => this.refused(reason))
+    // A change of rights (sharing, trash…) closes the document on the server
+    // (`Collab.reconnect`) but keeps the socket: open it again there, which authenticates again.
+    provider.on('close', ({ event }: { event?: { reason?: string } }) => {
+      if (event?.reason === RESET_REASON) setTimeout(() => socket.attach(provider), 0)
+      // The provider is no longer synced once its own close handler ran.
+      setTimeout(this.refresh, 0)
+    })
     window.addEventListener('beforeunload', this.onBeforeUnload)
     // An open socket notices a lost network only after its ping times out (30 s): follow the
     // browser instead, and connect again as soon as it is back.
@@ -167,6 +177,10 @@ export class ServerSource implements DocSource {
   }
 
   private onOnline = () => {
+    // The socket dropped when the network went may still be closing (its closing handshake
+    // waits for the network): `connect()` does nothing then, so ask to connect again once it
+    // has closed.
+    this.socket.shouldConnect = true
     void this.socket.connect()
   }
 
@@ -250,7 +264,9 @@ export class ServerSource implements DocSource {
   }
 
   private refresh = () => {
-    const connected = this.provider.isSynced && this.provider.isAuthenticated
+    // Without a network the socket only closes once its closing handshake gives up: the
+    // browser's own state says it at once.
+    const connected = navigator.onLine && this.provider.isSynced && this.provider.isAuthenticated
     const next: SaveState = this.readOnly
       ? 'readonly'
       : !connected

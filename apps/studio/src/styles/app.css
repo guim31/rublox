@@ -326,3 +326,59 @@ svg[display="none"] {
     font-family: var(--font-ui);
   }
 }
+
+/* Presence (J4b): a person's colour, filled (white text) or as a line, lifted in the dark theme. */
+[style*="--peer"] {
+  --peer-line: var(--peer);
+}
+:root[data-theme="dark"] [style*="--peer"] {
+  --peer-line: color-mix(in srgb, var(--peer) 55%, white);
+}
+
+/* A stack someone else changed at the same time (J4b): it glows twice. */
+.blocklySvg .rx-flash > .blocklyPath {
+  animation: rx-flash 1.2s ease-in-out 2;
+}
+@keyframes rx-flash {
+  50% {
+    filter: drop-shadow(0 0 6px var(--c-coral)) drop-shadow(0 0 2px var(--c-coral));
+  }
+}
+
+/* The block someone else selected (J4b), outlined in their colour. */
+.blocklySvg .rx-peer-block > .blocklyPath {
+  filter: drop-shadow(0 0 1px var(--peer-line)) drop-shadow(0 0 1px var(--peer-line))
+    drop-shadow(0 0 1px var(--peer-line));
+}
+
+/* Labels of the top bar's buttons (Test, Share, Publish): shown from 1280 px, from 1536 px in
+   Junior, whose controls are bigger (the bar also holds the people present, J4b). */
+.rx-bar-label {
+  display: none;
+}
+@media (min-width: 80rem) {
+  .rx-bar-label {
+    display: inline;
+  }
+  :root[data-mode="junior"] .rx-bar-label {
+    display: none;
+  }
+}
+@media (min-width: 96rem) {
+  :root[data-mode="junior"] .rx-bar-label {
+    display: inline;
+  }
+}
+
+/* The save state's words in the top bar: in Junior below 1536 px, only its icon shows (the
+   words stay for screen readers, the tooltip says them), as the tabs take more room. */
+@media (max-width: 95.99rem) {
+  :root[data-mode="junior"] .rx-save-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
