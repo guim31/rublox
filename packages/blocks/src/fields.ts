@@ -88,6 +88,29 @@ export class ComponentField extends ReferenceField {
   }
 }
 
+/**
+ * The filter of an event block: another component of a type ("when Apple touches Basket"),
+ * or `*` for any of them.
+ */
+export class ComponentFilterField extends ComponentField {
+  constructor(
+    componentType: string,
+    readonly anyLabel: () => string,
+  ) {
+    super(componentType)
+    this.setValue(ANY)
+  }
+
+  protected override available(): Option[] {
+    // Called by the parent constructor too, before `anyLabel` exists.
+    const any = this.anyLabel?.() ?? '…'
+    return [[any, ANY], ...super.available()]
+  }
+}
+
+/** The value of a filter or a dropdown that means "any". */
+export const ANY = '*'
+
 /** Screens of the project. */
 export class ScreenField extends ReferenceField {
   protected available(): Option[] {

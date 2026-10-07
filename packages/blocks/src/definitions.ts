@@ -1,8 +1,23 @@
-import { COMPONENTS, type ComponentDef, getComponentDef, type PropKind } from '@rublox/catalog'
+import {
+  type ArgDef,
+  COMPONENTS,
+  type ComponentDef,
+  componentStrings,
+  type EventFilter,
+  getComponentDef,
+  type PropKind,
+} from '@rublox/catalog'
 import { messages } from '@rublox/i18n'
 import * as Blockly from 'blockly/core'
 import { contextOf, getBlocksLocale } from './context.ts'
-import { AppFunctionField, ComponentField, EventArgField, PropertyField } from './fields.ts'
+import {
+  ANY,
+  AppFunctionField,
+  ComponentField,
+  ComponentFilterField,
+  EventArgField,
+  PropertyField,
+} from './fields.ts'
 
 /**
  * Block types are saved in projects: never rename one. Component blocks are named
@@ -113,14 +128,37 @@ function propertyKeys(def: ComponentDef, access: 'get' | 'set') {
     .map(([key, prop]) => ({ key, junior: prop.junior }))
 }
 
+/** The dropdown of an event's filter: a component of a type, or one of a few values. */
+function filterField(def: ComponentDef, event: string, filter: EventFilter): Blockly.Field {
+  const label = (value: string) =>
+    componentStrings(def.type, getBlocksLocale())?.filters?.[event]?.[value] ?? value
+  if (filter.kind === 'component') {
+    return asField(new ComponentFilterField(filter.componentType, () => label('any')))
+  }
+  const field = new Blockly.FieldDropdown(() => [
+    [label('any'), ANY],
+    ...filter.values.map((value): [string, string] => [label(value), value]),
+  ])
+  return asField(field)
+}
+
+/** Is a method or event argument chosen in a dropdown (a component) rather than plugged in? */
+export function isFieldArg(arg: ArgDef | undefined): boolean {
+  return arg?.kind === 'component'
+}
+
 function defineComponentBlocks(def: ComponentDef): void {
-  for (const [event] of Object.entries(def.events)) {
+  for (const [event, info] of Object.entries(def.events)) {
     Blockly.Blocks[eventBlockType(def.type, event)] = {
       init(this: Blockly.Block) {
         const strings = def.strings[getBlocksLocale()]
-        appendMessage(this, strings.events[event] ?? event, {
+        const filter = info.filter
+        const fill: Record<number, Builder> = {
           1: (_, input) => input.appendField(asField(new ComponentField(def.type)), 'COMPONENT'),
-        })
+        }
+        if (filter)
+          fill[2] = (_, input) => input.appendField(filterField(def, event, filter), 'FILTER')
+        appendMessage(this, strings.events[event] ?? event, fill)
         this.appendStatementInput('DO')
         this.setStyle('rx_event_blocks')
         this.setTooltip(() => t().tooltips.event)
@@ -186,11 +224,18 @@ function defineComponentBlocks(def: ComponentDef): void {
         const strings = def.strings[getBlocksLocale()]
         const template = strings.methods[name] ?? name
         const pieces = parts(template)
+        const args = Object.values(method.args)
         let input: Blockly.Input = this.appendDummyInput()
         for (const part of pieces) {
           if (part === 1) input.appendField(asField(new ComponentField(def.type)), 'COMPONENT')
           else if (typeof part === 'number') {
-            input = this.appendValueInput(`ARG${part - 2}`)
+            const arg = args[part - 2]
+            if (isFieldArg(arg)) {
+              input.appendField(
+                asField(new ComponentField(arg?.componentType ?? def.type)),
+                `ARG${part - 2}`,
+              )
+            } else input = this.appendValueInput(`ARG${part - 2}`)
           } else input.appendField(part)
         }
         this.setInputsInline(true)

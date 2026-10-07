@@ -12,6 +12,9 @@ import {
 import { BEHAVIORS } from './behaviors/registry.ts'
 import type { BehaviorContext } from './behaviors/types.ts'
 import { friendlyError, listItem, StopSignal } from './errors.ts'
+import { FrameClock } from './game/clock.ts'
+import { GameInstance } from './game/instance.ts'
+import { type Body, isWorldType, type World } from './game/world.ts'
 
 /** A generated module and the block of each of its lines (see `@rublox/blocks`). */
 export type ModuleCode = { code: string; lineMap: (string | null)[] }
@@ -68,6 +71,8 @@ export type EngineOptions = {
   loadModule?: ModuleLoader
   /** Screen to show first instead of the start screen (the editor's current screen). */
   initialScreen?: ScreenId
+  /** Frames of the game scenes (tests drive one by hand). */
+  clock?: FrameClock
   /** Slow motion; the code must then be generated with `slow: true`. */
   slow?: SlowMotion
   /** Stored variables are kept under this id (SPEC § 6.6); the project id by default. */
@@ -80,8 +85,15 @@ export type EngineOptions = {
 
 // biome-ignore lint/suspicious/noExplicitAny: generated code passes any value
 type Value = any
-type Handler = (event: Record<string, unknown>) => Promise<void> | void
+type Handler = (...args: Value[]) => Promise<void> | void
+type EventArgs = Record<string, unknown>
 
+/** A registered handler, with the filter chosen in its block (`null`: any). */
+type HandlerEntry = { fn: Handler; filter: string | null; busy: boolean }
+
+/** What a component proxy designates, for filters and component arguments. */
+const TARGET = Symbol('rx.target')
+type Target = { componentId: ComponentId; body?: Body }
 /** What a generated module receives (SPEC § 6.5). */
 export type ModuleApi = {
   components: Record<string, Value>
@@ -112,8 +124,12 @@ type Instance = {
   key: number
   screenId: ScreenId
   overrides: Map<ComponentId, Record<string, unknown>>
-  handlers: Map<ComponentId, Map<string, Handler[]>>
+  handlers: Map<ComponentId, Map<string, HandlerEntry[]>>
   alive: boolean
+  /** Game scenes of the screen (J7). */
+  game?: GameInstance
+  /** Proxy of a scene body (a clone), set when the screen's module runs. */
+  proxyOf?: (body: Body) => Value
   /** What renderers exposed (`useExpose`), by component. */
   handles: Map<ComponentId, unknown>
   /** Behavior contexts, created when the screen opens or a method is first called. */
@@ -231,6 +247,12 @@ export class Engine {
   private snapshot: EngineSnapshot
   private notifyQueued = false
   private initialScreen?: ScreenId
+  private readonly clock: FrameClock
+  /**
+   * The frame during which a game scene last changed something visible: loops running in
+   * that frame give way until the next one.
+   */
+  private redrawFrame = -1
   private slow: SlowMotion = { enabled: false, delay: 500, breakpoints: [] }
   private readonly breakpoints = new Set<string>()
   /** Waiting at a breakpoint: resolves (go on) or rejects (stop). */
@@ -247,6 +269,7 @@ export class Engine {
     this.mode = options.mode ?? options.doc.meta.mode
     this.loadModule = options.loadModule ?? loadBlobModule
     this.initialScreen = options.initialScreen
+    this.clock = options.clock ?? new FrameClock()
     if (options.slow) this.setSlowMotion(options.slow)
     this.appId = options.appId ?? options.doc.meta.id
     this.storage = options.storage === undefined ? defaultStorage() : options.storage
@@ -323,6 +346,7 @@ export class Engine {
     this.running = false
     this.generation += 1
     for (const instance of this.stack) this.disposeInstance(instance)
+    this.clock.release()
     for (const instance of this.roots.values()) this.disposeInstance(instance)
     this.roots.clear()
     for (const entry of this.timers) {
@@ -381,6 +405,11 @@ export class Engine {
       }
     }
     this.initVariables()
+    for (const instance of this.stack) {
+      const screen = doc.screens[instance.screenId]
+      if (screen && instance.game) instance.game.sync(screen)
+      this.mountWorlds(instance)
+    }
     const restarts: Promise<void>[] = []
     this.stack.forEach((instance, index) => {
       if (previous[instance.screenId]?.code !== code[instance.screenId]?.code) {
@@ -393,6 +422,7 @@ export class Engine {
 
   dispose(): void {
     this.stop()
+    this.clock.dispose()
     this.listeners.clear()
     for (const loaded of this.modules.values())
       loaded.then(
@@ -448,7 +478,7 @@ export class Engine {
   }
 
   private newInstance(screenId: ScreenId): Instance {
-    return {
+    const instance: Instance = {
       key: this.nextKey++,
       screenId,
       overrides: new Map(),
@@ -458,10 +488,21 @@ export class Engine {
       contexts: new Map(),
       cleanups: [],
     }
+    const screen = this.doc.screens[screenId]
+    if (screen && GameInstance.needed(screen)) {
+      instance.game = new GameInstance(
+        screen,
+        this.doc.meta.locale,
+        this.worldHost(instance),
+        this.clock,
+      )
+    }
+    return instance
   }
 
   private async push(screenId: ScreenId): Promise<void> {
     const instance = this.newInstance(screenId)
+    this.stack.at(-1)?.game?.deactivate()
     if (this.stack.length === 0 && this.isTopLevel(screenId)) this.roots.set(screenId, instance)
     this.stack.push(instance)
     this.notify()
@@ -477,6 +518,7 @@ export class Engine {
     const instance = this.newInstance(old.screenId)
     // What the renderers exposed stays valid: they are not redrawn for a code change.
     for (const [id, handle] of old.handles) instance.handles.set(id, handle)
+    this.mountWorlds(instance)
     this.stack[index] = instance
     if (this.roots.get(old.screenId) === old) this.roots.set(old.screenId, instance)
     await this.runModule(instance.screenId, instance)
@@ -484,10 +526,11 @@ export class Engine {
     if (this.stack.at(-1) === instance) this.fireOpen(instance)
   }
 
-  /** Ends a screen instance: its behaviors stop (timers, sensors, sounds). */
+  /** Ends a screen instance: its behaviors stop (timers, sensors, sounds), its game too. */
   private disposeInstance(instance: Instance): void {
     if (!instance.alive) return
     instance.alive = false
+    instance.game?.dispose()
     for (const cleanup of instance.cleanups.splice(0)) {
       try {
         cleanup()
@@ -566,8 +609,19 @@ export class Engine {
   expose(instanceKey: number, componentId: ComponentId, handle: unknown): void {
     const instance = this.stack.find((entry) => entry.key === instanceKey)
     if (!instance) return
-    if (handle === null || handle === undefined) instance.handles.delete(componentId)
-    else instance.handles.set(componentId, handle)
+    if (handle === null || handle === undefined) {
+      instance.handles.delete(componentId)
+      instance.game?.worlds.get(componentId)?.unmount()
+    } else instance.handles.set(componentId, handle)
+    this.mountWorlds(instance)
+  }
+
+  /** Draws each game scene into the stage its renderer exposed (`{ stage }`). */
+  private mountWorlds(instance: Instance): void {
+    for (const [id, world] of instance.game?.worlds ?? []) {
+      const stage = (instance.handles.get(id) as { stage?: HTMLElement } | undefined)?.stage
+      if (stage && world.stage !== stage) world.mount(stage, (value) => this.resolveAsset(value))
+    }
   }
 
   private overlay(kind: string, data: unknown): Promise<unknown> {
@@ -591,6 +645,7 @@ export class Engine {
   private fireOpen(instance: Instance): void {
     const rootId = this.doc.screens[instance.screenId]?.rootId
     if (rootId) this.fire(instance, rootId, 'open')
+    if (instance.alive) instance.game?.activate()
   }
 
   openScreen(name: string): void {
@@ -623,6 +678,7 @@ export class Engine {
     if (!this.running || !this.doc.screens[screenId]) return
     const [root, ...above] = this.stack
     if (root?.screenId === screenId && above.length === 0) return
+    root?.game?.deactivate()
     for (const instance of above) this.disposeInstance(instance)
     if (root && !this.roots.has(root.screenId)) this.disposeInstance(root)
     const kept = this.roots.get(screenId)
@@ -732,19 +788,82 @@ export class Engine {
     this.writeProp(instance, componentId, prop, value)
   }
 
+  /**
+   * Runs the handlers of an event. `filter` is matched against the filter of each handler
+   * (`Pomme.onHit(Panier, …)` only hears about Panier).
+   */
   private fire(
     instance: Instance,
     componentId: ComponentId,
     event: string,
-    args: Record<string, unknown> = {},
+    args: EventArgs = {},
+    filter?: string,
+    self?: Value,
   ): void {
     if (!this.running || !instance.alive) return
-    for (const handler of instance.handlers.get(componentId)?.get(event) ?? []) {
+    const entries = instance.handlers.get(componentId)?.get(event)
+    if (!entries?.length) return
+    const skipIfBusy = this.eventDef(instance, componentId, event)?.skipIfBusy === true
+    for (const entry of entries) {
+      if (entry.filter !== null && entry.filter !== filter) continue
+      if (skipIfBusy && entry.busy) continue
+      entry.busy = true
       this.lastYield = now()
-      void this.track(() => Promise.resolve(args).then(handler)).catch((error) =>
-        this.report(error),
+      void this.track(() =>
+        Promise.resolve().then(() => (self === undefined ? entry.fn(args) : entry.fn(self, args))),
       )
+        .catch((error) => this.report(error))
+        .finally(() => {
+          entry.busy = false
+        })
     }
+  }
+
+  private eventDef(instance: Instance, componentId: ComponentId, event: string) {
+    const node = this.doc.screens[instance.screenId]?.components[componentId]
+    return node ? getComponentDef(node.type)?.events[event] : undefined
+  }
+
+  /** How the game scenes of an instance reach its handlers. */
+  private worldHost(instance: Instance) {
+    return {
+      fire: (
+        self: Body | null,
+        componentId: ComponentId,
+        event: string,
+        args: EventArgs,
+        filter?: string,
+      ) => {
+        const proxy = (value: unknown) =>
+          value && typeof value === 'object' && 'key' in value && 'values' in value
+            ? instance.proxyOf?.(value as Body)
+            : value
+        const node = this.doc.screens[instance.screenId]?.components[componentId]
+        const clonable = Boolean(node && getComponentDef(node.type)?.clonable)
+        const values = Object.fromEntries(Object.entries(args).map(([k, v]) => [k, proxy(v)]))
+        this.fire(
+          instance,
+          componentId,
+          event,
+          values,
+          filter,
+          clonable && self ? proxy(self) : undefined,
+        )
+      },
+      listens: (componentId: ComponentId, event: string) =>
+        (instance.handlers.get(componentId)?.get(event)?.length ?? 0) > 0,
+      redraw: () => {
+        this.redrawFrame = this.clock.frames
+      },
+      warn: (key: 'tooManyClones', values: Record<string, unknown>) =>
+        this.log('warn', format(messages[this.locale].runtime.game[key], values)),
+    }
+  }
+
+  /** The world of a game scene of the visible screen, for its renderer. */
+  live(screenKey: number, componentId: ComponentId): World | undefined {
+    const instance = this.stack.find((entry) => entry.key === screenKey)
+    return instance?.game?.worlds.get(componentId)
   }
 
   // Values
@@ -769,14 +888,7 @@ export class Engine {
     if (!node || !propDef) return
     const coerced = propDef.coerce(value)
     if (coerced === undefined) {
-      this.log(
-        'warn',
-        format(messages[this.locale].runtime.errors.invalidValue, {
-          value: display(value),
-          component: node.name,
-          property: prop,
-        }),
-      )
+      this.invalid(node.name, prop, value)
       return
     }
     const current = instance.overrides.get(componentId) ?? {}
@@ -839,10 +951,22 @@ export class Engine {
     const generation = this.generation
     const screen = instance ? this.doc.screens[instance.screenId] : undefined
 
-    const componentProxy = (componentId: ComponentId) => {
+    /** A component, or with `clone` one of its clones in a game scene. */
+    const componentProxy = (componentId: ComponentId, clone?: Body) => {
       const target = {}
+      // The body behind a game component (the original, or the clone).
+      const bodyOf = (): { world: World; body: Body } | undefined => {
+        if (!instance?.game) return undefined
+        const found = instance.game.bodyOf(componentId)
+        if (!found) return undefined
+        if (!clone) return found
+        // A deleted clone stops the blocks that still use it (like Scratch).
+        if (clone.deleted) throw new StopSignal()
+        return { world: found.world, body: clone }
+      }
       return new Proxy(target, {
         get: (_, key) => {
+          if (key === TARGET) return { componentId, body: bodyOf()?.body } satisfies Target
           if (typeof key !== 'string' || !instance) return undefined
           const node = this.doc.screens[instance.screenId]?.components[componentId]
           const def = node && getComponentDef(node.type)
@@ -852,16 +976,30 @@ export class Engine {
           if (/^on[A-Z]/.test(key)) {
             const event = key.charAt(2).toLowerCase() + key.slice(3)
             if (def.events[event]) {
-              return (handler: Handler) => {
-                const byEvent = instance.handlers.get(componentId) ?? new Map<string, Handler[]>()
-                byEvent.set(event, [...(byEvent.get(event) ?? []), handler])
+              // `onClick(handler)`, or with a filter `onHit(Panier, handler)`.
+              return (...args: unknown[]) => {
+                const fn = args.at(-1)
+                if (typeof fn !== 'function') return
+                const filter = args.length > 1 ? filterKey(args[0]) : null
+                const byEvent =
+                  instance.handlers.get(componentId) ?? new Map<string, HandlerEntry[]>()
+                byEvent.set(event, [
+                  ...(byEvent.get(event) ?? []),
+                  { fn: fn as Handler, filter, busy: false },
+                ])
                 instance.handlers.set(componentId, byEvent)
               }
             }
           }
-          if (def.methods[key])
+          const live = isWorldType(node.type) ? bodyOf() : undefined
+          if (def.methods[key]) {
+            if (live) return (...args: unknown[]) => callInWorld(live.world, live.body, key, args)
             return (...args: unknown[]) => this.callMethod(instance, componentId, key, args)
-          if (def.props[key]) return this.componentValue(instance, componentId, key)
+          }
+          if (def.props[key]) {
+            if (live) return live.world.get(live.body, key)
+            return this.componentValue(instance, componentId, key)
+          }
           if (key === 'then' || key === 'toJSON') return undefined
           this.log(
             'warn',
@@ -886,17 +1024,72 @@ export class Engine {
             )
             return true
           }
+          const live = node && isWorldType(node.type) ? bodyOf() : undefined
+          if (live && node && def) {
+            const coerced = def.props[key]?.coerce(value)
+            if (coerced === undefined || def.props[key]?.state) this.invalid(node.name, key, value)
+            else live.world.set(live.body, key, coerced)
+            return true
+          }
           this.writeProp(instance, componentId, key, value)
           return true
         },
       })
     }
 
+    /** A filter given before a handler: a component (its id), a value, or `null` for any. */
+    const filterKey = (value: unknown): string | null => {
+      if (value === null || value === undefined) return null
+      if (typeof value === 'object') {
+        const target = (value as { [TARGET]?: Target })[TARGET]
+        return target?.componentId ?? null
+      }
+      return String(value)
+    }
+
+    /** A method of a game component: sync, except a glide that the code awaits. */
+    const callInWorld = (world: World, body: Body, method: string, args: unknown[]) => {
+      check()
+      const values = args.map((arg) =>
+        arg && typeof arg === 'object'
+          ? ((arg as { [TARGET]?: Target })[TARGET]?.body ?? arg)
+          : arg,
+      )
+      const result = world.call(body, method, values)
+      if (result instanceof Promise) {
+        return result.then(() => {
+          this.lastYield = now()
+          check()
+        })
+      }
+      return result
+    }
+
+    if (instance) {
+      const proxies = new WeakMap<Body, Value>()
+      instance.proxyOf = (body) => {
+        let proxy = proxies.get(body)
+        if (!proxy) {
+          proxy = componentProxy(body.componentId, body.clone ? body : undefined)
+          proxies.set(body, proxy)
+        }
+        return proxy
+      }
+    }
+
+    const named = new Map<string, Value>()
     const components = new Proxy({} as Record<string, Value>, {
       get: (_, key) => {
         if (typeof key !== 'string' || !screen) return undefined
         const entry = Object.entries(screen.components).find(([, node]) => node.name === key)
-        return entry ? componentProxy(entry[0]) : undefined
+        if (!entry) return undefined
+        // One proxy per component, so that a handler's filter can recognize it.
+        let proxy = named.get(entry[0])
+        if (!proxy) {
+          proxy = componentProxy(entry[0])
+          named.set(entry[0], proxy)
+        }
+        return proxy
       },
     })
 
@@ -970,7 +1163,12 @@ export class Engine {
       rx: {
         tick: async () => {
           check()
-          if (now() - this.lastYield >= TICK_BUDGET_MS) {
+          // In a game, a loop that moved something waits for the next frame (like Scratch).
+          if (this.redrawFrame === this.clock.frames) {
+            await this.clock.nextFrame()
+            this.lastYield = now()
+            check()
+          } else if (now() - this.lastYield >= TICK_BUDGET_MS) {
             await yieldToBrowser()
             this.lastYield = now()
             check()
@@ -1005,6 +1203,17 @@ export class Engine {
     const run = node && BEHAVIORS[node.type]?.methods?.[method]
     if (!run) return undefined
     return run(this.contextOf(instance, componentId), ...args)
+  }
+
+  private invalid(component: string, property: string, value: unknown): void {
+    this.log(
+      'warn',
+      format(messages[this.locale].runtime.errors.invalidValue, {
+        value: display(value),
+        component,
+        property,
+      }),
+    )
   }
 
   private dialog(kind: Dialog['kind'], message: unknown): Promise<unknown> {

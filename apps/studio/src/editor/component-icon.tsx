@@ -12,9 +12,12 @@ import {
   Clock,
   Columns3,
   FileText,
+  Gamepad2,
+  Ghost,
   Globe,
   Image as ImageIcon,
   Images,
+  Joystick,
   LayoutGrid,
   ListCollapse,
   List as ListIcon,
@@ -44,6 +47,7 @@ import {
   TextCursorInput,
   Timer,
   ToggleRight,
+  Trophy,
   Type,
   Vibrate,
   Video as VideoIcon,
@@ -100,6 +104,10 @@ const ICONS: Record<string, LucideIcon> = {
   vibrate: Vibrate,
   video: VideoIcon,
   wifi: Wifi,
+  'gamepad-2': Gamepad2,
+  ghost: Ghost,
+  trophy: Trophy,
+  joystick: Joystick,
 }
 
 export function ComponentIcon({

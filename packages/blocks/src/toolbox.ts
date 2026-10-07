@@ -1,4 +1,4 @@
-import { getComponentDef, resolveDefault, SCREEN_TYPE } from '@rublox/catalog'
+import { getComponentDef, type PropKind, resolveDefault, SCREEN_TYPE } from '@rublox/catalog'
 import { messages } from '@rublox/i18n'
 import { APP_WORKSPACE } from '@rublox/schema'
 import type * as Blockly from 'blockly/core'
@@ -7,6 +7,7 @@ import {
   BLOCK_TYPES,
   eventBlockType,
   getterBlockType,
+  isFieldArg,
   methodBlockType,
   propertyKeys,
   setterBlockType,
@@ -26,18 +27,28 @@ const numberShadow = (value: number) => ({
   shadow: { type: 'math_number', fields: { NUM: value } },
 })
 
+/** Another component of `type` than `id`, to preset a dropdown ("…touches Basket"). */
+function otherOf(context: BlocksContext, type: string | undefined, id: string): string | undefined {
+  const others = context.components.filter((c) => c.type === type)
+  return (others.find((c) => c.id !== id) ?? others[0])?.id
+}
+
 /** Blocks of one component: its events, then a setter and a getter per property. */
-function componentItems(id: string, type: string, all: boolean): Item[] {
+function componentItems(id: string, type: string, all: boolean, context: BlocksContext): Item[] {
   const def = getComponentDef(type)
   if (!def) return []
   const items: Item[] = []
   for (const [event, info] of Object.entries(def.events)) {
-    if (all || info.junior) {
-      items.push(block(eventBlockType(type, event), { fields: { COMPONENT: id } }))
-      // What the event brings, ready to drop inside it.
-      for (const arg of Object.keys(info.args)) {
-        items.push(block(BLOCK_TYPES.eventValue, { fields: { ARG: arg } }))
-      }
+    if (!(all || info.junior)) continue
+    const fields: Record<string, string> = { COMPONENT: id }
+    if (info.filter?.kind === 'component') {
+      const other = otherOf(context, info.filter.componentType, id)
+      if (other && other !== id) fields.FILTER = other
+    }
+    items.push(block(eventBlockType(type, event), { fields }))
+    // The values the handler receives, right under their event.
+    for (const arg of Object.keys(info.args)) {
+      items.push(block(BLOCK_TYPES.eventValue, { fields: { ARG: arg } }))
     }
   }
   const setters = propertyKeys(def, 'set').filter((entry) => all || entry.junior)
@@ -55,8 +66,24 @@ function componentItems(id: string, type: string, all: boolean): Item[] {
     )
   }
   for (const [method, info] of Object.entries(def.methods)) {
-    if (all || info.junior)
-      items.push(block(methodBlockType(type, method), { fields: { COMPONENT: id } }))
+    if (!(all || info.junior)) continue
+    const fields: Record<string, string> = { COMPONENT: id }
+    const inputs: Record<string, unknown> = {}
+    Object.values(info.args).forEach((arg, index) => {
+      if (isFieldArg(arg)) {
+        const other = otherOf(context, arg.componentType, id)
+        if (other) fields[`ARG${index}`] = other
+        return
+      }
+      const shadow = shadowFor(arg.kind as PropKind, arg.default)
+      if (shadow) inputs[`ARG${index}`] = { shadow }
+    })
+    items.push(
+      block(methodBlockType(type, method), {
+        fields,
+        ...(Object.keys(inputs).length ? { inputs } : {}),
+      } as Partial<BlockItem>),
+    )
   }
   const getters = propertyKeys(def, 'get').filter((entry) => all || entry.junior)
   for (const { key } of getters) {
@@ -84,7 +111,7 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
         kind: 'category',
         name: component.name,
         categorystyle: 'rx_component_category',
-        contents: componentItems(component.id, component.type, all),
+        contents: componentItems(component.id, component.type, all, context),
       }))
       .filter((category) => category.contents.length > 0) as Item[]
     contents.push({

@@ -1,4 +1,4 @@
-import { COMPONENTS } from '@rublox/catalog'
+import { COMPONENTS, type ComponentDef } from '@rublox/catalog'
 import { format, messages } from '@rublox/i18n'
 import { APP_WORKSPACE, isValidName } from '@rublox/schema'
 import type * as Blockly from 'blockly/core'
@@ -9,9 +9,11 @@ import {
   eventArgsOf,
   eventBlockType,
   getterBlockType,
+  isFieldArg,
   methodBlockType,
   setterBlockType,
 } from './definitions.ts'
+import { ANY } from './fields.ts'
 import { registerColourBlocks } from './setup.ts'
 
 /** Parameters every generated module receives (SPEC § 6.5). */
@@ -305,14 +307,27 @@ function installBlockGenerators(generator: Gen): void {
   f.procedures_callreturn = call
   f.procedures_callnoreturn = (block, g) => `${call(block, g)[0]};\n`
 
+  f[BLOCK_TYPES.eventValue] = (block) => {
+    const arg = block.getFieldValue('ARG')
+    return eventArgsOf(block).includes(arg)
+      ? [`event.${arg}`, Order.MEMBER]
+      : ['undefined', Order.ATOMIC]
+  }
+
   for (const def of COMPONENTS) {
     for (const event of Object.keys(def.events)) {
-      const params = Object.keys(def.events[event]?.args ?? {}).length ? 'event' : ''
       f[eventBlockType(def.type, event)] = (block, g) => {
         const name = g.componentName(block.getFieldValue('COMPONENT'))
-        const body = g.statementToCode(block, 'DO')
         if (!name) return `// ${g.missing()}\n`
-        return `${name}.on${capitalize(event)}(async (${params}) => {\n${body}});\n`
+        const filter = eventFilterCode(def, event, block, g)
+        if (filter === null) return `// ${g.missing()}\n`
+        const body = g.statementToCode(block, 'DO')
+        // A clone's handlers get the clone itself, under the component's name.
+        const params = [
+          ...(def.clonable ? [name] : []),
+          ...(Object.keys(def.events[event]?.args ?? {}).length ? ['event'] : []),
+        ]
+        return `${name}.on${capitalize(event)}(${filter}async (${params.join(', ')}) => {\n${body}});\n`
       }
     }
     f[getterBlockType(def.type)] = (block, g) => {
@@ -329,8 +344,10 @@ function installBlockGenerators(generator: Gen): void {
     for (const [method, info] of Object.entries(def.methods)) {
       f[methodBlockType(def.type, method)] = (block, g) => {
         const name = g.componentName(block.getFieldValue('COMPONENT'))
-        const args = Object.keys(info.args).map(
-          (_, index) => g.valueToCode(block, `ARG${index}`, Order.NONE) || 'null',
+        const args = Object.values(info.args).map((arg, index) =>
+          isFieldArg(arg)
+            ? (g.componentName(block.getFieldValue(`ARG${index}`)) ?? 'null')
+            : g.valueToCode(block, `ARG${index}`, Order.NONE) || 'null',
         )
         const call = `${info.async ? 'await ' : ''}${name}.${method}(${args.join(', ')})`
         if (info.returns)
@@ -341,6 +358,25 @@ function installBlockGenerators(generator: Gen): void {
       }
     }
   }
+}
+
+/**
+ * The filter passed before an event handler, followed by `, `: `Panier, `, `'bottom', `,
+ * `null, ` for any, `''` without a filter, and `null` when the chosen component was deleted.
+ */
+function eventFilterCode(
+  def: ComponentDef,
+  event: string,
+  block: Blockly.Block,
+  g: Gen,
+): string | null {
+  const filter = def.events[event]?.filter
+  if (!filter) return ''
+  const value = String(block.getFieldValue('FILTER') ?? ANY)
+  if (value === ANY || value === '') return 'null, '
+  if (filter.kind === 'enum') return filter.values.includes(value) ? `${quote(value)}, ` : 'null, '
+  const name = g.componentName(value)
+  return name ? `${name}, ` : null
 }
 
 export type GenerateOptions = {

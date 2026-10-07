@@ -106,6 +106,7 @@ export function pastePayload(
 ): ComponentId[] {
   const doc = session.getDoc()
   const target = defaultTarget(doc, screenId, useEditor.getState().selected)
+  if (!target) return []
   let pasted: ComponentId[] = []
   session.ydoc.transact(() => {
     for (const [id, asset] of Object.entries(payload.assets)) {

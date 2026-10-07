@@ -39,10 +39,25 @@ describe('catalog completeness', () => {
           expect(strings.enums[key]?.[value], `${locale}.enums.${key}.${value}`).toBeTruthy()
         }
       }
-      for (const [key, info] of Object.entries(def.events)) {
+      for (const [key, eventDef] of Object.entries(def.events)) {
         expect(strings.events[key], `${locale}.events.${key}`).toContain('%1')
-        for (const arg of Object.keys(info.args)) {
+        for (const arg of Object.keys(eventDef.args)) {
           expect(strings.args?.[arg], `${locale}.args.${arg}`).toBeTruthy()
+        }
+        const filter = eventDef.filter
+        if (filter) {
+          expect(strings.events[key], `${locale}.events.${key} filter`).toContain('%2')
+          expect(strings.filters?.[key]?.any, `${locale}.filters.${key}.any`).toBeTruthy()
+          const values = filter.kind === 'enum' ? filter.values : []
+          for (const value of values) {
+            expect(
+              strings.filters?.[key]?.[value],
+              `${locale}.filters.${key}.${value}`,
+            ).toBeTruthy()
+          }
+          if (filter.kind === 'component') {
+            expect(getComponentDef(filter.componentType)).toBeDefined()
+          }
         }
       }
       for (const [key, method] of Object.entries(def.methods)) {
@@ -55,6 +70,19 @@ describe('catalog completeness', () => {
       // No stray strings for things that do not exist.
       for (const key of Object.keys(strings.props)) expect(def.props[key], key).toBeDefined()
       for (const key of Object.keys(strings.events)) expect(def.events[key], key).toBeDefined()
+    }
+    // A component reaches its handlers, methods and properties by name: they cannot clash.
+    const members = [
+      ...Object.keys(def.events).map((key) => `on${key.charAt(0).toUpperCase()}${key.slice(1)}`),
+      ...Object.keys(def.methods),
+      ...Object.keys(def.props),
+    ]
+    expect(new Set(members).size, 'member names').toBe(members.length)
+    for (const type of [...(def.accepts ?? []), ...(def.parents ?? [])]) {
+      expect(getComponentDef(type), type).toBeDefined()
+    }
+    for (const parent of def.parents ?? []) {
+      expect(getComponentDef(parent)?.accepts ?? [], parent).toContain(def.type)
     }
   })
 
@@ -71,6 +99,14 @@ describe('catalog completeness', () => {
         }
       }
     }
+  })
+
+  it('includes the game components', () => {
+    for (const type of ['GameScene', 'Sprite', 'SceneText', 'Joystick']) {
+      expect(getComponentDef(type)?.category, type).toBe('game')
+    }
+    expect(getComponentDef('GameScene')?.freeLayout).toBe(true)
+    expect(getComponentDef('Sprite')?.clonable).toBe(true)
   })
 
   it('keeps state properties out of the project and the inspector', () => {
@@ -144,6 +180,13 @@ describe('creation', () => {
 })
 
 describe('coercion', () => {
+  it('keeps lists of images', () => {
+    const images = prop.images({ default: [], group: 'content' })
+    expect(images.coerce('🍎')).toEqual(['🍎'])
+    expect(images.coerce(['🍎', 3, ' ', 'a1'])).toEqual(['🍎', 'a1'])
+    expect(images.coerce(42)).toBeUndefined()
+  })
+
   it('validates values written by the generated code', () => {
     const text = prop.string({ default: '', group: 'content' })
     expect(text.coerce(3)).toBe('3')

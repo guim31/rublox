@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`game blocks > passes the clone itself and the event values to handlers 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Panier, Pomme, Scene1 } = components;
+
+  Pomme.onHit(Panier, async (Pomme, event) => {
+    Pomme.delete();
+    rx.log(event.other);
+  });
+
+  Pomme.onEdge('bottom', async (Pomme, event) => {
+    Pomme.delete();
+  });
+
+  Scene1.onFrame(async (event) => {
+    Panier.rotation = event.dt;
+  });
+}
+"
+`;

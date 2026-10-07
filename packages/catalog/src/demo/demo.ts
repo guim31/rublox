@@ -273,6 +273,12 @@ export function createDemoProject(input: {
     c('snapshot', 'Image', { height: 100, fit: 'contain' }),
     c('canvas', 'Canvas', { height: 200 }),
     button('clear', L.clear, { variant: 'ghost' }),
+    // Game mode (J7): a small scene with a sprite to tap and a joystick to steer it.
+    c('scene', 'GameScene', { height: 240, grow: false, sceneWidth: 360, sceneHeight: 240 }, [
+      c('ball', 'Sprite', { costumes: ['⚽', '🏀'], x: 180, y: 110, edges: 'stop' }),
+      c('sceneText', 'SceneText', { x: 180, y: 28 }),
+      c('stick', 'Joystick', { x: 70, y: 170, size: 100 }),
+    ]),
   ])
 
   const deviceButtons: [string, string][] = [
@@ -461,6 +467,10 @@ export function createDemoProject(input: {
       call('Canvas', 'canvas', 'drawCircle', [eventValue('x'), eventValue('y'), num(12)]),
     ]),
     on('Button', 'click', 'clear', [call('Canvas', 'canvas', 'clear')]),
+    on('Sprite', 'tap', 'ball', [call('Sprite', 'ball', 'nextCostume')]),
+    on('Joystick', 'move', 'stick', [
+      call('Sprite', 'ball', 'moveBy', [eventValue('dx'), eventValue('dy')]),
+    ]),
     on('Video', 'ended', 'video', [log(text('video'))]),
     on('Lottie', 'complete', 'lottie', [log(text('lottie'))]),
     on('WebView', 'load', 'web', [log(get('WebView', 'web', 'url'))]),

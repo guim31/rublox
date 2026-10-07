@@ -64,8 +64,15 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - `pnpm screenshots` : captures de PR (Junior, Studio, clair, sombre), une spec par jalon
   (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j2/`, `j3/`, `j4/`). Lancer seulement celle du jalon :
   `npx playwright test --project=screenshots e2e/screenshots-j1.spec.ts` après `pnpm build`.
-- `pnpm --filter @rublox/blocks test -- -u` : régénérer les instantanés du générateur, puis
-  relire le diff du code produit.
+- `cd packages/blocks && npx vitest run -u` : régénérer les instantanés du générateur, puis
+  relire le diff du code produit (`pnpm --filter … test -- -u` n'écrit que les nouveaux). En CI
+  (`CI=true`), Vitest échoue aussi sur un instantané **obsolète** : après une fusion, lancer
+  `CI=true npx vitest run` dans le paquet, le cache de turbo masquant l'échec en local.
+- Mode jeu : `npx playwright test --project=e2e e2e/game.spec.ts` (la démo jouée, le designer) et
+  `npx playwright test --project=perf --no-deps` (50 lutins : débit d'images et JavaScript par
+  image, processeur ralenti ×4 ; les chiffres s'affichent dans la sortie). Le projet `perf`
+  attend la fin des autres tests (`dependencies`) : mesurer sous charge ne veut rien dire. Captures :
+  `npx playwright test --project=screenshots e2e/screenshots-j7.spec.ts` → `docs/screenshots/j7/`.
 - `pnpm --filter @rublox/server db:generate` : migration Drizzle après un changement de
   `apps/server/src/db/schema.ts`.
 - `docker build -f docker/Dockerfile .` et `docker compose -f docker/compose.yaml up`.
@@ -94,6 +101,10 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   blocs et le glossaire dans `help.ts` (tout nouveau bloc général demande sa fiche).
 - Une écriture du serveur dans un projet : `services.collab.edit(id, userId, fn)` (jamais
   directement dans `project_docs`, que Hocuspocus réécrirait).
+- Un composant de jeu : comme ci-dessus, avec `parents: ['GameScene']` (et l'ajouter aux
+  `accepts` de la scène) ; son dessin à l'exécution va dans `World` (`runtime/src/game/`), pas
+  dans React. Une démo : `packages/catalog/src/demos/` (blocs écrits en JSON avec
+  `blocks-json.ts`), puis une entrée dans `apps/studio/src/storage/demos.ts`.
 - Une route d'API : `apps/server/src/routes/<domaine>.ts`, corps validé par `jsonBody(zod)`,
   droits par `access.ts`, test sur PGlite avec `test/server.ts` (`createTestServer`, un `Client`
   par navigateur). Côté studio : `call(api.<route>.$get(…))`.
@@ -207,5 +218,14 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **Aucun 401** : une route protégée répond `fail(403, 'signed_out')` (`requireUser`) ; le studio
   réagit au code `signed_out`, pas au statut. `markSignedOut` retire les requêtes au lieu de les
   invalider (sinon elles redemandent des routes protégées).
+- **Mesurer le jeu** : le Chromium du conteneur n'a pas de GPU ; dès qu'un seul pixel bouge,
+  l'aperçu plafonne vers 45 à 50 images par seconde, jeu ou pas (même un `<canvas>`). Comparer au
+  plafond mesuré à côté, et juger le jeu sur son temps JavaScript par image (profileur CDP sur
+  l'iframe, `newCDPSession(frame)`), comme `e2e/game-perf.spec.ts`.
+- **Tests du moteur de jeu** : passer `clock: new FrameClock(() => () => {})` à `Engine` et
+  avancer avec `clock.step(1 / 60)` puis `await flush()` ; sans horloge manuelle, le moteur
+  tourne sur `requestAnimationFrame` (ou `setTimeout` sous Node).
+- **Playwright** : importer une spec depuis une autre y enregistre ses tests ; ce qui est partagé
+  va dans `e2e/helpers.ts`. Le canevas de l'aperçu n'existe que dans la vue Blocs.
 - **Shell** : `pkill -f <motif>` ou `pgrep -f vite | xargs kill` tue aussi le shell qui le lance ;
   arrêter les serveurs par PID ou par port.

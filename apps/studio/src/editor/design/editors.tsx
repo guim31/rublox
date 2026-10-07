@@ -19,6 +19,7 @@ import { errorMessage } from '../../lib/errors.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { MAX_IMAGE_BYTES } from '../../storage/assets.ts'
 import { useDoc, useSession } from '../context.tsx'
+import { CostumesEditor } from './costumes-editor.tsx'
 import { DateEditor, IconEditor, ListEditor, MediaAssetEditor, TimeEditor } from './editors-j2.tsx'
 
 export type EditorProps<T = unknown> = {
@@ -529,4 +530,5 @@ export const EDITORS: Record<PropDef['kind'], (props: EditorProps<never>) => Rea
   date: DateEditor as never,
   time: TimeEditor as never,
   any: StringEditor as never,
+  images: CostumesEditor as never,
 }

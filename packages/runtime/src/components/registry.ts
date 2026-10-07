@@ -15,6 +15,7 @@ import {
   RichTextRenderer,
   SpinnerRenderer,
 } from './display.tsx'
+import { GameSceneRenderer, JoystickRenderer, SceneTextRenderer, SpriteRenderer } from './game.tsx'
 import { IconRenderer } from './icon.tsx'
 import { ImageRenderer } from './image.tsx'
 import {
@@ -83,4 +84,8 @@ export const RENDERERS: Record<string, Renderer> = {
   Clipboard: NonVisualRenderer,
   Notifier: NonVisualRenderer,
   QrScanner: NonVisualRenderer,
+  GameScene: GameSceneRenderer,
+  Sprite: SpriteRenderer,
+  SceneText: SceneTextRenderer,
+  Joystick: JoystickRenderer,
 }

@@ -24,6 +24,8 @@ import {
   startDrag,
   validTarget,
 } from './dnd.ts'
+import { type FreeBox, FreeFrame } from './free-frame.tsx'
+import { freeAbilities, freeParent, isFreeLayout, setProps, valuesOf } from './free-layout.ts'
 import { touchDrag } from './touch-drag.ts'
 
 type Box = { left: number; top: number; width: number; height: number }
@@ -46,8 +48,15 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
   const stageRef = useRef<HTMLDivElement>(null)
   const screenRef = useRef<HTMLDivElement>(null)
   const [fit, setFit] = useState(1)
-  const [drop, setDrop] = useState<(DropTarget & { line: Box }) | null>(null)
-  const [boxes, setBoxes] = useState<{ selected?: Box; hovered?: Box; others?: Box[] }>({})
+  const [drop, setDrop] = useState<
+    (DropTarget & { line: Box; point?: { x: number; y: number } }) | null
+  >(null)
+  const [boxes, setBoxes] = useState<{
+    selected?: Box
+    hovered?: Box
+    others?: Box[]
+    free?: FreeBox
+  }>({})
 
   const size = DEVICES[device]
   const width = landscape ? size.height : size.width
@@ -89,13 +98,58 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     return { left: r.left - s.left, top: r.top - s.top, width: r.width, height: r.height }
   }, [])
 
+  /** A game scene's stage on screen: its rectangle, scale, and pointer → scene units. */
+  const sceneGeometry = useCallback(
+    (sceneId: ComponentId) => {
+      const stageEl = elementOf(sceneId)?.querySelector('[data-rx-stage]')
+      const current = doc.screens[screenId]
+      if (!stageEl || !current) return null
+      const rect = stageEl.getBoundingClientRect()
+      const width = Number(valuesOf(current, sceneId, doc.meta.locale).sceneWidth) || 360
+      const k = rect.width / width || 1
+      return {
+        rect,
+        k,
+        toScene: (clientX: number, clientY: number) => ({
+          x: Math.round((clientX - rect.left) / k),
+          y: Math.round((clientY - rect.top) / k),
+        }),
+      }
+    },
+    [elementOf, doc, screenId],
+  )
+
+  // The frame of a component placed freely: turned with it, sized in scene units.
+  const freeBoxOf = useCallback(
+    (id: ComponentId | null): FreeBox | undefined => {
+      const current = doc.screens[screenId]
+      const scene = current && freeParent(current, id)
+      const element = elementOf(id)
+      const geometry = scene ? sceneGeometry(scene) : null
+      const stage = stageRef.current
+      if (!current || !id || !element || !geometry || !stage) return undefined
+      const r = element.getBoundingClientRect()
+      const s = stage.getBoundingClientRect()
+      return {
+        cx: r.left + r.width / 2 - s.left,
+        cy: r.top + r.height / 2 - s.top,
+        width: element.offsetWidth * geometry.k,
+        height: element.offsetHeight * geometry.k,
+        rotation: Number(valuesOf(current, id, doc.meta.locale).rotation) || 0,
+      }
+    },
+    [doc, screenId, elementOf, sceneGeometry],
+  )
+
   // Keep the overlay boxes in sync with the drawn components (layout changes, fonts, images).
   useEffect(() => {
     let frame = 0
     let last = ''
     const loop = () => {
+      const free = freeBoxOf(selected)
       const next = {
-        selected: boxOf(elementOf(selected)),
+        selected: free ? undefined : boxOf(elementOf(selected)),
+        free,
         hovered: hovered !== selected ? boxOf(elementOf(hovered)) : undefined,
         others: selection
           .filter((id) => id !== selected)
@@ -111,7 +165,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     }
     frame = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(frame)
-  }, [selected, hovered, selection, boxOf, elementOf])
+  }, [selected, hovered, selection, boxOf, elementOf, freeBoxOf])
 
   if (!screen) return null
 
@@ -122,7 +176,9 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     return id
   }
 
-  const computeDrop = (event: React.DragEvent): (DropTarget & { line: Box }) | null => {
+  const computeDrop = (
+    event: React.DragEvent,
+  ): (DropTarget & { line: Box; point?: { x: number; y: number } }) | null => {
     const payload = currentDrag()
     if (!payload) return null
     let id = componentAt(event.target) ?? screen.rootId
@@ -143,6 +199,24 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     const index = indexAt(rects, point, axis)
     const target = { parentId, index }
     if (!validTarget(screen, payload, target)) return null
+    // A game scene: the component lands where the pointer is, shown by a small cross.
+    if (isFreeLayout(screen, parentId)) {
+      const geometry = sceneGeometry(parentId)
+      const stage = stageRef.current?.getBoundingClientRect()
+      if (!geometry || !stage) return null
+      const size = 18
+      return {
+        parentId,
+        index: children.length,
+        point: geometry.toScene(event.clientX, event.clientY),
+        line: {
+          left: event.clientX - stage.left - size / 2,
+          top: event.clientY - stage.top - size / 2,
+          width: size,
+          height: size,
+        },
+      }
+    }
     // The insertion line, between two children (or inside an empty container).
     const parentBox = boxOf(parentEl)
     if (!parentBox) return null
@@ -183,15 +257,103 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     endDrag()
     if (!payload || !target) return
     const where = { parentId: target.parentId, index: target.index }
-    if (payload.kind === 'new') addComponentOfType(session, screenId, payload.type, locale, where)
-    else {
-      moveComponentTo(session, screenId, payload.id, where)
+    const point = target.point
+    if (payload.kind === 'new') {
+      addComponentOfType(session, screenId, payload.type, locale, where, point)
+    } else {
+      session.ydoc.transact(() => {
+        if (freeParent(screen, payload.id) !== target.parentId) {
+          moveComponentTo(session, screenId, payload.id, where)
+        }
+        if (point) setProps(session, screenId, payload.id, point)
+      })
       select(payload.id)
     }
   }
 
   const selectedNode = selected ? screen.components[selected] : undefined
   const canEditBox = selectedNode && selected !== screen.rootId && !selectedNode.locked
+  const freeScene = freeParent(screen, selected)
+  const abilities = selectedNode ? freeAbilities(selectedNode.type) : null
+
+  /** Drags a component of a game scene with the pointer (it follows in scene units). */
+  const startFreeMove = (event: React.PointerEvent) => {
+    if (event.button !== 0) return
+    const id = componentAt(event.target)
+    const scene = id ? freeParent(screen, id) : undefined
+    const geometry = scene ? sceneGeometry(scene) : null
+    if (!id || !geometry) return
+    event.preventDefault()
+    select(id)
+    const values = valuesOf(screen, id, doc.meta.locale)
+    const start = { x: Number(values.x) || 0, y: Number(values.y) || 0 }
+    const origin = { x: event.clientX, y: event.clientY }
+    let moved = false
+    const move = (e: PointerEvent) => {
+      const dx = (e.clientX - origin.x) / geometry.k
+      const dy = (e.clientY - origin.y) / geometry.k
+      if (!moved && Math.hypot(e.clientX - origin.x, e.clientY - origin.y) < 3) return
+      moved = true
+      setProps(session, screenId, id, { x: start.x + dx, y: start.y + dy })
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
+  /** The selected free component, its center on screen, and its local frame. */
+  const freeHandle = () => {
+    if (!selected || !freeScene) return null
+    const geometry = sceneGeometry(freeScene)
+    if (!geometry) return null
+    const values = valuesOf(screen, selected, doc.meta.locale)
+    const n = (key: string) => Number(values[key]) || 0
+    const center = {
+      x: geometry.rect.left + n('x') * geometry.k,
+      y: geometry.rect.top + n('y') * geometry.k,
+    }
+    // SceneText is anchored by its alignment: use the drawn center instead.
+    const element = elementOf(selected)?.getBoundingClientRect()
+    if (element) center.x = element.left + element.width / 2
+    if (element) center.y = element.top + element.height / 2
+    return { id: selected, geometry, center, n }
+  }
+
+  const onFreeResize = (clientX: number, clientY: number, shift: boolean) => {
+    const handle = freeHandle()
+    if (!handle || !abilities?.resize) return
+    const { id, geometry, center, n } = handle
+    const angle = (n('rotation') * Math.PI) / 180
+    const dx = clientX - center.x
+    const dy = clientY - center.y
+    const lx = Math.abs(dx * Math.cos(angle) + dy * Math.sin(angle))
+    const ly = Math.abs(-dx * Math.sin(angle) + dy * Math.cos(angle))
+    if (abilities.resize === 'size') {
+      setProps(session, screenId, id, { size: Math.max(8, (2 * Math.max(lx, ly)) / geometry.k) })
+      return
+    }
+    let width = Math.max(4, (2 * lx) / geometry.k)
+    let height = Math.max(4, (2 * ly) / geometry.k)
+    if (shift && n('width') && n('height')) {
+      const ratio = Math.max(width / n('width'), height / n('height'))
+      width = n('width') * ratio
+      height = n('height') * ratio
+    }
+    setProps(session, screenId, id, { width, height })
+  }
+
+  const onFreeRotate = (clientX: number, clientY: number, shift: boolean) => {
+    const handle = freeHandle()
+    if (!handle) return
+    const { id, center } = handle
+    let degrees = (Math.atan2(clientY - center.y, clientX - center.x) * 180) / Math.PI + 90
+    if (degrees > 180) degrees -= 360
+    if (shift) degrees = Math.round(degrees / 15) * 15
+    setProps(session, screenId, id, { rotation: degrees })
+  }
 
   return (
     <section
@@ -233,6 +395,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
                     ref={screenRef}
                     className="min-h-0 flex-1"
                     data-testid="canvas-screen"
+                    onPointerDown={startFreeMove}
                     onClick={(event) => {
                       const id = componentAt(event.target) ?? screen.rootId
                       // Studio: Shift or Ctrl/Cmd + click builds a multiple selection.
@@ -262,9 +425,22 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
                 </div>
               </AppSurface>
             </PhoneFrame>
+            {boxes.free && selectedNode ? (
+              <div className="pointer-events-none absolute inset-0 z-10">
+                <FreeFrame
+                  box={boxes.free}
+                  label={selectedNode.name}
+                  resize={canEditBox ? (abilities?.resize ?? null) : null}
+                  rotate={Boolean(canEditBox && abilities?.rotate)}
+                  onResize={onFreeResize}
+                  onRotate={onFreeRotate}
+                />
+              </div>
+            ) : null}
             <Overlay
               boxes={boxes}
               drop={drop?.line}
+              dropPoint={Boolean(drop?.point)}
               selectedLabel={selectedNode ? `${selectedNode.name}` : ''}
               canMove={Boolean(canEditBox)}
               canResize={Boolean(canEditBox)}
@@ -397,6 +573,8 @@ function EmptyHint({ root }: { root: boolean }) {
 function Overlay(props: {
   boxes: { selected?: Box; hovered?: Box; others?: Box[] }
   drop?: Box
+  /** The drop lands at a point (a game scene) rather than between two components. */
+  dropPoint?: boolean
   selectedLabel: string
   hoveredLabel: string
   canMove: boolean
@@ -515,7 +693,13 @@ function Overlay(props: {
           />
         </div>
       ) : null}
-      {props.drop ? (
+      {props.drop && props.dropPoint ? (
+        <div
+          className="absolute rounded-full border-[3px] border-coral bg-coral/25 shadow-[0_0_0_2px_white]"
+          style={props.drop}
+          data-testid="drop-indicator"
+        />
+      ) : props.drop ? (
         <div
           className="absolute rounded-full bg-coral shadow-[0_0_0_2px_white]"
           style={props.drop}

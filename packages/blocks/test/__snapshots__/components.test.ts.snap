@@ -422,6 +422,50 @@ exports[`generated code of each component > Dropdown 1`] = `
 "
 `;
 
+exports[`generated code of each component > GameScene 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Scene1 } = components;
+
+  Accueil.onOpen(async () => {
+    Scene1.visible = true;
+    Scene1.width = 120;
+    Scene1.height = 120;
+    Scene1.background = '#ff6b5c';
+    Scene1.opacity = 2;
+    Scene1.backgroundImage = 'https://example.com/a.png';
+    Scene1.edges = 'x';
+    Scene1.paused = true;
+    Scene1.pause();
+    Scene1.resume();
+    Scene1.deleteClones();
+    rx.log(Scene1.visible);
+    rx.log(Scene1.width);
+    rx.log(Scene1.height);
+    rx.log(Scene1.background);
+    rx.log(Scene1.opacity);
+    rx.log(Scene1.sceneWidth);
+    rx.log(Scene1.sceneHeight);
+    rx.log(Scene1.backgroundImage);
+    rx.log(Scene1.edges);
+    rx.log(Scene1.paused);
+  });
+
+  Scene1.onStart(async () => {
+    rx.log('abc');
+  });
+
+  Scene1.onFrame(async (event) => {
+    rx.log(event.dt);
+  });
+
+  Scene1.onTap(async (event) => {
+    rx.log(event.x);
+    rx.log(event.y);
+  });
+}
+"
+`;
+
 exports[`generated code of each component > Grid 1`] = `
 "export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
   const { Accueil, Grille1 } = components;
@@ -494,6 +538,35 @@ exports[`generated code of each component > Image 1`] = `
   });
 
   Image1.onClick(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Joystick 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Joystick1 } = components;
+
+  Accueil.onOpen(async () => {
+    Joystick1.visible = true;
+    Joystick1.opacity = 2;
+    Joystick1.x = 2;
+    Joystick1.y = 2;
+    rx.log(Joystick1.visible);
+    rx.log(Joystick1.opacity);
+    rx.log(Joystick1.x);
+    rx.log(Joystick1.y);
+    rx.log(Joystick1.dx);
+    rx.log(Joystick1.dy);
+  });
+
+  Joystick1.onMove(async (event) => {
+    rx.log(event.dx);
+    rx.log(event.dy);
+  });
+
+  Joystick1.onRelease(async () => {
     rx.log('abc');
   });
 }
@@ -820,6 +893,36 @@ exports[`generated code of each component > Row 1`] = `
 "
 `;
 
+exports[`generated code of each component > SceneText 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Score1 } = components;
+
+  Accueil.onOpen(async () => {
+    Score1.visible = true;
+    Score1.opacity = 2;
+    Score1.text = 'abc';
+    Score1.x = 2;
+    Score1.y = 2;
+    Score1.rotation = 2;
+    Score1.fontSize = 2;
+    Score1.color = '#ff6b5c';
+    rx.log(Score1.visible);
+    rx.log(Score1.opacity);
+    rx.log(Score1.text);
+    rx.log(Score1.x);
+    rx.log(Score1.y);
+    rx.log(Score1.rotation);
+    rx.log(Score1.fontSize);
+    rx.log(Score1.color);
+  });
+
+  Score1.onTap(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
 exports[`generated code of each component > Share 1`] = `
 "export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
   const { Accueil, Partage1 } = components;
@@ -959,6 +1062,63 @@ exports[`generated code of each component > Spinner 1`] = `
     rx.log(Chargement1.opacity);
     rx.log(Chargement1.color);
     rx.log(Chargement1.spinning);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Sprite 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Lutin1 } = components;
+
+  Accueil.onOpen(async () => {
+    Lutin1.visible = true;
+    Lutin1.opacity = 2;
+    Lutin1.costume = 2;
+    Lutin1.x = 2;
+    Lutin1.y = 2;
+    Lutin1.width = 2;
+    Lutin1.height = 2;
+    Lutin1.rotation = 2;
+    Lutin1.draggable = true;
+    Lutin1.vx = 2;
+    Lutin1.vy = 2;
+    Lutin1.gravity = 2;
+    Lutin1.bounce = 2;
+    Lutin1.edges = 'x';
+    Lutin1.collision = 'x';
+    Lutin1.solid = true;
+    Lutin1.moveForward(2);
+    Lutin1.moveBy(2, 2);
+    Lutin1.goTo(2, 2);
+    await Lutin1.glideTo(2, 2, 2);
+    Lutin1.turn(2);
+    Lutin1.pointTowards(null);
+  });
+
+  Lutin1.onTap(async (Lutin1) => {
+    rx.log('abc');
+  });
+
+  Lutin1.onHit(null, async (Lutin1, event) => {
+    rx.log(event.other);
+  });
+
+  Lutin1.onEdge(null, async (Lutin1, event) => {
+    rx.log(event.edge);
+  });
+
+  Lutin1.onClone(async (Lutin1) => {
+    rx.log('abc');
+  });
+
+  Lutin1.onDrag(async (Lutin1, event) => {
+    rx.log(event.x);
+    rx.log(event.y);
+  });
+
+  Lutin1.onDrop(async (Lutin1) => {
+    rx.log('abc');
   });
 }
 "

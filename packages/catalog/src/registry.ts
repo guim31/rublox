@@ -13,9 +13,11 @@ import { DataGrid, DataList } from './components/data-list.ts'
 import { DatePicker } from './components/date-picker.ts'
 import { Divider } from './components/divider.ts'
 import { Dropdown } from './components/dropdown.ts'
+import { GameScene } from './components/game-scene.ts'
 import { Grid } from './components/grid.ts'
 import { Icon } from './components/icon.ts'
 import { Image } from './components/image.ts'
+import { Joystick } from './components/joystick.ts'
 import { ListView } from './components/list-view.ts'
 import { Location } from './components/location.ts'
 import { Lottie } from './components/lottie.ts'
@@ -29,6 +31,7 @@ import { QrScanner } from './components/qr-scanner.ts'
 import { Rating } from './components/rating.ts'
 import { RichText } from './components/rich-text.ts'
 import { Row } from './components/row.ts'
+import { SceneText } from './components/scene-text.ts'
 import { Screen } from './components/screen.ts'
 import { Share } from './components/share.ts'
 import { Slider } from './components/slider.ts'
@@ -36,6 +39,7 @@ import { Sound } from './components/sound.ts'
 import { Spacer } from './components/spacer.ts'
 import { SpeechRecognition } from './components/speech-recognition.ts'
 import { Spinner } from './components/spinner.ts'
+import { Sprite } from './components/sprite.ts'
 import { Switch } from './components/switch.ts'
 import { Text } from './components/text.ts'
 import { TextInput } from './components/text-input.ts'
@@ -103,6 +107,10 @@ export const COMPONENTS: readonly ComponentDef[] = [
   Clipboard,
   Notifier,
   QrScanner,
+  GameScene,
+  Sprite,
+  SceneText,
+  Joystick,
 ]
 
 export const SCREEN_TYPE = 'Screen'

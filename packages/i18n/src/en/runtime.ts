@@ -1,7 +1,7 @@
 import type { Messages } from '../types.ts'
 import { runtimeLearning } from './runtime-learn.ts'
 
-export const runtime: Messages['runtime'] = {
+export const runtime: Omit<Messages['runtime'], 'game'> = {
   ...runtimeLearning,
   ok: 'OK',
   cancel: 'Cancel',

@@ -15,7 +15,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J4 | Collaboration, test sur téléphone, publication PWA, export | fait sauf l’édition à plusieurs (PR #6), voir § 0.5 |
 | J5 | Données et services : tables, variables, API web, cartes, graphiques | à faire |
 | J6 | Galerie, remix, modèles, assistant IA | à faire |
-| J7 | Mode jeu : scène, lutins, physique | à faire |
+| J7 | Mode jeu : scène, lutins, physique | fait (PR #5), voir § 0.6 |
 | J8 | Finitions : accessibilité, performances, sécurité, mise en production | à faire |
 
 ### 0.1 Ce que le J0 a fixé (06/10/2026)
@@ -414,6 +414,66 @@ composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
   `publish`, `transfer` dans `studio`, et l'espace `player` pour les pages du lecteur).
 - J6 (galerie, « Essayer ») : afficher l'appli publiée dans un `iframe` vers `/a/<slug>/` ; le
   bouton « Installer » ne s'y montre pas.
+
+### 0.6 Ce que le J7 a fixé (07/10/2026)
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Rendu de la scène** : transformations CSS écrites directement dans le DOM par `World`
+  (`packages/runtime/src/game/world.ts`), sans React à chaque image ; un élément par lutin, ce qui
+  garde le toucher natif (`pointer-events`), les sélecteurs de test et l'accessibilité. Un
+  `<canvas>` ne dessinait pas plus vite dans le conteneur sans GPU où la mesure a été faite (voir
+  la PR #5), et le placement libre du designer réutilise les mêmes fonctions de dessin
+  (`game/draw.ts`).
+- **Boucles et images** : dans un écran qui a une scène, une boucle qui a modifié quelque chose
+  de visible dans la scène attend l'image suivante à son `rx.tick()` (comme Scratch : « avancer de
+  2 » dans « répéter indéfiniment » déplace de 2 par image). Sans scène, la règle du § 6.5
+  (céder après 16 ms) ne change pas.
+- **Clones** : les gestionnaires d'un composant `clonable` reçoivent l'instance qui déclenche
+  l'événement en premier paramètre, sous le nom du composant : `Pomme.onHit(Panier, async (Pomme,
+  event) => …)` ; les mêmes blocs pilotent l'original et chaque clone. Supprimer l'original le
+  cache ; toucher un clone supprimé arrête silencieusement le bloc qui le fait. Un clone sorti
+  de la scène disparaît tout seul ; au plus 300 clones par scène.
+- **Événements filtrés** : « quand Pomme touche Panier », « quand Pomme touche le bord du bas » :
+  `EventDef.filter` (un composant d'un type, ou une valeur d'une liste), choisi dans le bloc
+  (`%2`, champ `FILTER`, `*` pour « n'importe lequel ») et passé avant le gestionnaire
+  (`null` pour n'importe lequel). Un événement ne se déclenche qu'au début du contact.
+- **Collisions** : boîtes (sans tenir compte de la rotation) ou cercles ; les lutins cachés ne
+  touchent rien ; deux lutins `solid` se repoussent et rebondissent (rebond en %).
+- Bords : réglés sur la scène (arrêtent, font rebondir, laissent sortir), et lutin par lutin
+  (« comme la scène » par défaut).
+- Coordonnées : repère logique de la scène (360 × 640 par défaut), y vers le bas, rotation en
+  degrés dans le sens horaire, 0 = le costume tel qu'il est dessiné ; « avancer » suit la
+  rotation.
+- **Costumes** : propriété `images` (nouveau genre de propriété) : une liste d'identifiants de
+  ressources, d'adresses `https:` ou d'émojis ; « numéro du costume » commence à 1.
+- Tutoriel « Mon premier jeu » : le moteur de tutoriels du J3 n'est pas fusionné ; le jeu est
+  livré comme **démo** chargeable depuis la palette de commandes (« Ouvrir la démo de jeu :
+  Attrape les fruits »), construite uniquement avec des blocs (`packages/catalog/src/demos/`).
+  Une seconde démo, « 50 lutins qui rebondissent », sert à la mesure de performance.
+- Sons des jeux : ceux du composant Son du J2 ; aucun bloc de son propre au jeu.
+
+**Contrats pour les jalons suivants**
+
+- Catalogue : `ComponentDef.accepts` (types d'enfants admis), `parents` (types de parents
+  admis), `freeLayout` (enfants placés par `x`/`y`), `clonable` ; `EventDef.filter` et
+  `skipIfBusy` (un gestionnaire encore en cours n'est pas relancé : « à chaque image ») ;
+  `ArgDef.kind: 'component'` (un argument de méthode choisi dans une liste de composants,
+  `componentType`) et `ArgDef.default` (valeur des blocs fantômes de la boîte à outils) ;
+  `strings.filters[event]` (avec `any`). Valeurs d'événement et propriétés `state` : forme du J2.
+- Lecteur : la scène expose sa zone de dessin par `useExpose` (`{ stage }`, forme du J2) ; le
+  moteur y monte le `World` de la scène (`Engine.mountWorlds`) et le démonte quand elle quitte la
+  page (onglets). `Engine.live(clé d'instance, id)` rend le `World` (tests).
+  Les méthodes des composants de jeu passent par le `World`, pas par `BEHAVIORS`.
+- Moteur : `FrameClock` (`game/clock.ts`), une par moteur (`EngineOptions.clock` pour les tests,
+  qui avancent image par image avec `clock.step`), en pause quand la page est cachée ;
+  `GameInstance` par écran ouvert, mis en pause quand un autre écran le recouvre.
+- Designer : `design/free-layout.ts` (`freeParent`, `freeKey`, `setProps`) et
+  `design/free-frame.tsx` pour tout futur conteneur à placement libre (zone de dessin).
+- Blocs de jeu : types `rx_GameScene_*`, `rx_Sprite_*`, `rx_SceneText_*`, `rx_Joystick_*` ;
+  « nombre aléatoire entre » est le `math_random_int` de Blockly, déjà présent.
+- Démos : `catchGameDemo(locale)` et `bouncingDemo(locale)` dans `@rublox/catalog` ; le J3 peut
+  en tirer le tutoriel « Mon premier jeu » (identifiants fixes : `CATCH_GAME_IDS`).
 
 ## 1. En bref
 

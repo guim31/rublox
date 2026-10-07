@@ -58,6 +58,11 @@ export const helpContent: Sheets<typeof fr> = {
       text: 'Asks to type an answer. The block is the text typed (or nothing when cancelled).',
       example: 'set name to answer to the question "What is your name?"',
     },
+    rx_event_value: {
+      title: '… of the event',
+      text: 'A value the event brings: the time since the previous frame, where the finger touched, the other sprite touched… The block only works inside its own "when …" block.',
+      example: 'when Garden is tapped: glide Basket to x (finger x of the event) y 590 in 0.25 s',
+    },
     controls_if: {
       title: 'if … do',
       text: 'Runs the blocks only when the condition is true. With the gear, add “else if” and “else”.',
