@@ -91,3 +91,46 @@ for (const mode of ['junior', 'studio'] as const) {
     })
   }
 }
+
+/** Axe on the J3 pages: welcome, learning, a tutorial bubble, the help panel and slow motion. */
+for (const mode of ['junior', 'studio'] as const) {
+  for (const theme of ['light', 'dark'] as const) {
+    test(`axe, learning: ${mode}, ${theme}`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await usePrefs(page, { mode, theme, locale: 'fr', welcomed: false })
+      const check = async () => {
+        const results = await new AxeBuilder({ page })
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+          .exclude('.injectionDiv')
+          .exclude('[data-testid=preview-frame]')
+          .exclude('[data-testid=canvas-screen]')
+          .analyze()
+        expect(
+          results.violations.map(
+            (v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`,
+          ),
+        ).toEqual([])
+      }
+      await page.goto('/')
+      await expect(page.getByTestId('try-guest')).toBeVisible()
+      await check()
+      await page.goto('/learn')
+      await expect(page.getByTestId('tutorial-first-button')).toBeVisible()
+      await check()
+      await page
+        .getByTestId('tutorial-first-button')
+        .getByRole('button', { name: /^Commencer/ })
+        .click()
+      await expect(page.getByTestId('tutorial-bubble')).toBeVisible()
+      await check()
+      await page.getByTestId('help-button').click()
+      await expect(page.getByTestId('help-panel')).toBeVisible()
+      await check()
+      await page.getByTestId('help-button').click()
+      await openBlocks(page)
+      await page.getByTestId('slow-motion').click()
+      await expect(page.getByTestId('slow-motion-bar')).toBeVisible()
+      await check()
+    })
+  }
+}

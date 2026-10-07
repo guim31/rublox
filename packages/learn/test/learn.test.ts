@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { setupBlocks } from '@rublox/blocks'
+import { buildToolbox, setupBlocks } from '@rublox/blocks'
 import { getComponentDef } from '@rublox/catalog'
 import { messages } from '@rublox/i18n'
 import type { BlocklyJson, ProjectDoc } from '@rublox/schema'
@@ -120,6 +120,35 @@ describe('content', () => {
       expect(challenge.stars.filter((star) => evaluate(star, state(doc)))).toEqual([])
     })
   }
+
+  it('has a help sheet for every general block of the toolbox, in both languages', () => {
+    const types = new Set<string>()
+    const visit = (items: unknown[]) => {
+      for (const item of items as { kind: string; type?: string; contents?: unknown[] }[]) {
+        if (item.kind === 'block' && item.type) types.add(item.type)
+        if (item.contents) visit(item.contents)
+      }
+    }
+    for (const workspace of ['app', 'screen'])
+      visit(
+        (
+          buildToolbox({
+            workspace,
+            locale: 'fr',
+            mode: 'studio',
+            showAll: true,
+            components: [],
+            screens: [],
+          }) as { contents: unknown[] }
+        ).contents,
+      )
+    const general = [...types].filter((type) => !/^rx_[A-Z]/.test(type))
+    expect(general.length).toBeGreaterThan(40)
+    for (const locale of ['fr', 'en'] as const) {
+      const sheets = messages[locale].studio.blockSheets as Record<string, unknown>
+      expect(general.filter((type) => !sheets[type])).toEqual([])
+    }
+  })
 
   it('has texts for every badge, in both languages', () => {
     for (const badge of BADGES) {

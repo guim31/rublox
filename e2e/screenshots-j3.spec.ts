@@ -102,6 +102,10 @@ for (const [mode, theme] of VARIANTS) {
       .click()
     await addComponent(page, 'Button')
     await addComponent(page, 'Text')
+    // The selected component's name sits outside the phone (J0 review).
+    await page.getByTestId('layer-Bouton1').click()
+    await expect(page.getByTestId('selection-label')).toBeVisible()
+    await shot(page, name('selection'))
     await openBlocks(page)
     await openCategory(page, 'Bouton1')
     const event = await dropEvent(page, /est\scliqué/, 'rx_Button_on_click')

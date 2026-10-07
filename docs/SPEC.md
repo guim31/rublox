@@ -11,7 +11,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J0 | Socle et tranche verticale (mode invité) | fait (PR #1), voir § 0.1 |
 | J1 | Comptes, espaces, invitations, projets côté serveur | fait (PR #2), voir § 0.2 |
 | J2 | Catalogue complet des composants et de leurs blocs | à faire |
-| J3 | Expérience Junior et Studio, apprentissage, accueil | à faire |
+| J3 | Expérience Junior et Studio, apprentissage, accueil | fait (PR #7), voir § 0.3 |
 | J4 | Collaboration, test sur téléphone, publication PWA, export | à faire |
 | J5 | Données et services : tables, variables, API web, cartes, graphiques | à faire |
 | J6 | Galerie, remix, modèles, assistant IA | à faire |
@@ -163,6 +163,74 @@ mise à jour de ce paragraphe.
   projets du serveur ; appliquer `membersCanPublish`.
 - J3 : les comptes créés par un espace démarrent en Junior (`uiMode`) ; `Avatar` et la mascotte
   sont réutilisables ; la progression d'apprentissage se rattache à `user.id`.
+
+### 0.3 Ce que le J3 a fixé (07/10/2026)
+
+**Écarts au cahier des charges, et pourquoi**
+
+- Tutoriels livrés : Mon premier bouton, Le dé magique, Le quiz (Junior) et Deux écrans et une
+  navigation (Studio), en FR et EN. Les autres tutoriels du § 4.10 dépendent de composants du J2
+  (Son, Minuteur, Zone de dessin, Liste…) ou du J5 (API, tables, variables partagées) : le moteur
+  les accepte tels quels (dossier dans `content/tutorials/`), et un tutoriel dont un composant
+  manque au catalogue (`requires`) est masqué. Le P0 « 4 Junior et 2 Studio » sera donc atteint
+  avec le J2 (La boîte à sons, Le chrono) et le J5 (La météo, Carnet d'adresses).
+- Défis : 4 (Le compteur, Le compte à rebours, Pile ou face, Une fonction qui sert deux fois),
+  chacun avec un projet de départ et trois étoiles vérifiées en direct.
+- Progression (tutoriels, défis, badges) : rangée derrière `ProgressStore` (`@rublox/learn`),
+  dans IndexedDB (`rublox-learning`, un enregistrement par compte, `guest` sans compte). Les
+  tables du § 6.8 (`learning_progress`, `badges`) ne sont pas créées : le J4 ajoute en parallèle
+  la migration `0002` et une seconde migration aurait été en conflit. Il suffira d'écrire un
+  `ProgressStore` qui parle au serveur et de le choisir dans `learn/sync.ts`.
+- Badges « première publication » et « premier remix » : définis et affichés « bientôt »,
+  gagnables quand le J4 et le J6 appelleront `awardBadge`.
+- Ralenti : vitesse de 100 à 1 500 ms par bloc, points d'arrêt par clic droit (tenus par
+  l'éditeur, pas par le projet) ; en pause, « Continuer » ou « Bloc suivant ». Le bloc en cours
+  est allumé avec `highlightBlock` de Blockly. Le code de l'aperçu est la variante lente ; la vue
+  du code garde la variante lisible.
+- Erreurs pour enfants : `RxError` (code + valeurs) et `rx.item(liste, n)`, appelé par le bloc
+  « élément n° … de la liste » (`FROM_START`) pour dire « La liste n'a que 3 éléments, et ce
+  bloc demande le 5ᵉ ». Les autres positions (`FROM_END`, `RANDOM`…) gardent le code de Blockly.
+- Sons de Junior synthétisés par Web Audio (aucun fichier), désactivables dans le panneau
+  d'aide ; confettis dessinés sur un `canvas` (pas de `canvas-confetti`).
+- La mascotte reste sans nom (§ 10) ; elle a cinq humeurs (`happy`, `wave`, `think`, `cheer`,
+  `oops`).
+- Page d'accueil : montrée sur `/` à un visiteur non connecté qui n'a pas encore choisi
+  « Essayer sans compte » (`usePrefs.welcomed`).
+- Glisser-déposer au doigt : repli par évènements de pointeur (`editor/design/touch-drag.ts`),
+  appui long de 280 ms dans la palette, immédiat sur la poignée du canevas ; il rejoue
+  `dragover` / `drop` sur l'élément visé, si bien que canevas et calques n'ont pas changé. Testé
+  dans Chromium avec des évènements tactiles simulés, **pas encore sur un vrai iPad ni un vrai
+  téléphone Android**.
+- Console repliée par défaut en Junior (préférence par mode), réduite à une ligne quand elle est
+  vide ; le nom du composant sélectionné est à gauche du téléphone, hors de l'écran de l'appli.
+
+**Contrats pour les jalons suivants**
+
+- `@rublox/learn` (`packages/learn`) : types `Tutorial`, `Challenge`, `Condition` (vérifications
+  en données : `component`, `prop`, `block` avec `inside` et `filled`, `preview`,
+  `previewScreen`, `tab`, `workspace`, `screens`, `blockCount`, `variables`, `slowMotion`,
+  `all`/`any`/`not`, `manual`), `evaluate(condition, LearnState)`, `badgesFromProject`,
+  `badgesFromProgress`, `buildStarter`, `fillNames` (`{{Button}}`, `{{Text.2}}`,
+  `{{screen.2}}`), `ProgressStore`.
+- Contenus : `content/tutorials/<id>/{tutorial,fr,en}.json` et
+  `content/challenges/<id>/{challenge,fr,en}.json`, déclarés dans
+  `packages/learn/src/content.ts` ; un test vérifie les deux langues, les types de blocs et de
+  composants cités, et que chaque dossier est déclaré. Les cibles de la bulle (`target`) sont
+  décrites dans `packages/learn/src/model.ts` et résolues par `apps/studio/src/learn/targets.ts`
+  (attributs `data-tour`).
+- Lecteur : messages `rx:slow` (`SlowMotion`) et `rx:resume` (studio → lecteur), `rx:event`
+  (`AppEvent`, chaque évènement d'un composant) et `rx:step` (`StepInfo`) (lecteur → studio).
+  `ModuleApi.rx` gagne `step(id)` (ralenti) et `item(liste, n)`.
+- Générateur : `generateProjectCode(doc, { slow: true })` insère `await rx.step('<id>')` avant
+  chaque instruction (sauf devant un bloc d'évènement ou une définition de fonction).
+- Badges : `awardBadge(id)` (`apps/studio/src/learn/store.ts`) les enregistre et les annonce.
+- Aide : fiches des blocs généraux et glossaire dans `packages/i18n/src/{fr,en}/help.ts`
+  (`blockSheets`, `glossary`) ; les blocs de composants prennent `help` et `example` du
+  catalogue. Un nouveau bloc général demande sa fiche (test dans `@rublox/learn`).
+- Chaînes du J3 : `packages/i18n/src/{fr,en}/learn.ts` et `help.ts` (espace `studio`),
+  `runtime-learn.ts` (espace `runtime`).
+- Préférences ajoutées à `usePrefs` (version 2) : `consoleOpen` par mode, `sounds`,
+  `showBadges`, `toursSeen`, `welcomed`, `slowDelay`.
 
 ## 1. En bref
 
