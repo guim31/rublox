@@ -22,6 +22,7 @@ import {
   systemResolve,
 } from './address.ts'
 import type { DataSource } from './credentials.ts'
+import { DenyList, type SelfAddresses } from './deny.ts'
 
 export class RelayFailure extends Error {
   override name = 'RelayFailure'
@@ -45,6 +46,10 @@ export type RelayOptions = {
   resolve?: Resolve
   /** Which resolved addresses may be called: public ones only, except in tests. */
   allowAddress?: (address: string) => boolean
+  /** `RUBLOX_RELAY_DENY`: names and ranges refused on top of the private ones. */
+  deny?: DenyList
+  /** The addresses of the instance itself, always refused (even in tests). */
+  self?: SelfAddresses
   timeoutMs?: number
   maxResponseBytes?: number
   perMinute?: number
@@ -87,7 +92,23 @@ export class Relay {
     private readonly options: RelayOptions = {},
   ) {
     this.resolve = options.resolve ?? systemResolve
-    this.allow = options.allowAddress ?? isPublicAddress
+    const base = options.allowAddress ?? isPublicAddress
+    const deny = options.deny ?? new DenyList()
+    this.allow = (address) =>
+      base(address) && !deny.deniesAddress(address) && !options.self?.has(address)
+  }
+
+  /** A name refused before any resolution: the instance's own names and the deny list. */
+  private deniesName(host: string): boolean {
+    const name = host.toLowerCase().replace(/\.$/, '')
+    return (
+      (this.options.deny?.deniesName(name) ?? false) ||
+      (this.options.self?.hosts.some((own) => own.toLowerCase() === name) ?? false)
+    )
+  }
+
+  close() {
+    this.options.self?.close()
   }
 
   private now() {
@@ -174,6 +195,8 @@ export class Relay {
 
   /** One call, following at most a few redirects, each one checked again. */
   async fetch(outgoing: Outgoing, redirectAllowed?: (url: URL) => boolean): Promise<Fetched> {
+    // The instance's addresses are known before the first call goes out.
+    await this.options.self?.ready
     let current = outgoing
     const deadline = this.now() + (this.options.timeoutMs ?? RELAY_LIMITS.timeoutMs)
     for (let hop = 0; ; hop++) {
@@ -214,7 +237,7 @@ export class Relay {
     const host = url.hostname.replace(/^\[|\]$/g, '')
     if (isIP(host)) {
       if (!this.allow(host)) return Promise.reject(new RelayFailure('blocked_address'))
-    } else if (isBlockedHostName(host) && !this.allow(host)) {
+    } else if ((isBlockedHostName(host) && !this.allow(host)) || this.deniesName(host)) {
       return Promise.reject(new RelayFailure('blocked_address'))
     }
     const remaining = deadline - this.now()

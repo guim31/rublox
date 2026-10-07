@@ -1,5 +1,6 @@
 import { resolve } from 'node:path'
 import { z } from 'zod'
+import { DenyList } from './data/deny.ts'
 import { defaultPlayerDist, defaultStudioDist, migrationsFolder } from './paths.ts'
 
 /** Special `DATABASE_URL` value selecting an in-memory PGlite database (tests). */
@@ -61,6 +62,8 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: optionalString,
   RUBLOX_AI_MODEL: optionalString,
   RUBLOX_AI_FAST_MODEL: optionalString,
+  /** Names (suffixes) and CIDR ranges the API relay refuses, separated by commas (J5). */
+  RUBLOX_RELAY_DENY: optionalString,
   STUDIO_DIST: optionalString,
   PLAYER_DIST: optionalString,
 })
@@ -92,6 +95,8 @@ export interface Config {
   logLevel: LogLevel
   /** The AI assistant: absent without `ANTHROPIC_API_KEY` (no trace of it in the studio). */
   ai: AiConfig | undefined
+  /** `RUBLOX_RELAY_DENY`, one entry per name suffix or range (checked at start). */
+  relayDeny: string[]
   studioDist: string
   playerDist: string
   migrationsFolder: string
@@ -163,6 +168,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     )
   }
 
+  const relayDeny = (e.RUBLOX_RELAY_DENY ?? '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+  try {
+    new DenyList(relayDeny)
+  } catch (error) {
+    throw new ConfigError(
+      `Invalid configuration: RUBLOX_RELAY_DENY has an ${(error as Error).message}`,
+    )
+  }
+
   return {
     nodeEnv: e.NODE_ENV,
     isProduction: e.NODE_ENV === 'production',
@@ -188,6 +205,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
           fastModel: e.RUBLOX_AI_FAST_MODEL ?? DEFAULT_AI_FAST_MODEL,
         }
       : undefined,
+    relayDeny,
     studioDist: e.STUDIO_DIST ? resolve(e.STUDIO_DIST) : defaultStudioDist,
     playerDist: e.PLAYER_DIST ? resolve(e.PLAYER_DIST) : defaultPlayerDist,
     migrationsFolder,

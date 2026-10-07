@@ -28,6 +28,12 @@ services:
       RUBLOX_ADMIN_PASSWORD: change-me-too
       # Set to true only behind a reverse proxy that sets X-Real-IP.
       TRUST_PROXY: "false"
+      # Optional: what the API relay of the apps must never call, on top of private addresses
+      # and of this instance's own addresses (always refused). Comma-separated name suffixes
+      # (example.com also refuses *.example.com) and IPv4 or IPv6 ranges in CIDR notation.
+      # Self-hosting behind a home router: list your other services' domains and your public
+      # address range, so that no app can reach them from inside.
+      # RUBLOX_RELAY_DENY: example.com,203.0.113.0/24,2001:db8::/32
       # Optional: the AI assistant (it costs per use). Without a key, the studio shows no AI.
       # ANTHROPIC_API_KEY: your-key
       # RUBLOX_AI_MODEL: claude-opus-5-5

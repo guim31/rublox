@@ -5,7 +5,9 @@ import { AiService } from './ai/service.ts'
 import { type Auth, createAuth } from './auth.ts'
 import { Collab } from './collab.ts'
 import type { Config } from './config.ts'
+import { systemResolve } from './data/address.ts'
 import { type DataSource, resolveCredential } from './data/credentials.ts'
+import { DenyList, SelfAddresses } from './data/deny.ts'
 import { Relay, type RelayOptions } from './data/relay.ts'
 import { SecretStore, Tickets } from './data/secrets.ts'
 import { SharedData, SharedHub } from './data/shared.ts'
@@ -19,7 +21,7 @@ export type ServiceConfig = Pick<
   Config,
   'studioUrl' | 'appsUrl' | 'secret' | 'trustProxy' | 'maxUploadBytes' | 'dataDir'
 > &
-  Partial<Pick<Config, 'ai'>>
+  Partial<Pick<Config, 'ai' | 'relayDeny'>>
 
 /** What the routes share: database, Better Auth, files, settings, brute-force guard. */
 export interface Services {
@@ -80,7 +82,17 @@ export function createServices(
     collab,
     secrets,
     tickets,
-    relay: new Relay((projectId, names) => secrets.values(projectId, names), options.relay),
+    relay: new Relay((projectId, names) => secrets.values(projectId, names), {
+      deny: new DenyList(config.relayDeny),
+      // The instance's own addresses: behind a home router, a call to its public address
+      // comes back with a local source address (NAT hairpin).
+      self: new SelfAddresses(
+        [new URL(config.studioUrl).hostname, new URL(config.appsUrl).hostname],
+        options.relay?.resolve ?? systemResolve,
+        (host, error) => logger?.warn({ host, err: error }, 'cannot resolve the instance name'),
+      ),
+      ...options.relay,
+    }),
     shared,
     sharedHub: new SharedHub(shared, resolveData, config.appsUrl, logger),
     resolveData,

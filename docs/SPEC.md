@@ -597,7 +597,8 @@ Google (P2), tutoriels La météo, Carnet d'adresses, Carte de mes lieux et Tcha
   chemin ne peut pas sortir de l'adresse de base. Les en-têtes de la connexion ne suivent pas
   une redirection vers une autre origine. Limites : 10 s, 2 Mo (décompressé), 120 appels par
   minute et par projet, 4 redirections. Le résolveur de noms vérifie **toutes** les adresses
-  d'un nom et la connexion se fait sur l'adresse vérifiée (pas de « DNS rebinding »).
+  d'un nom et la connexion se fait sur l'adresse vérifiée (pas de « DNS rebinding »). Il
+  refuse aussi les adresses de l'instance elle-même et `RUBLOX_RELAY_DENY` (§ 6.9).
 - **Ticket de l'éditeur** : l'aperçu (origine des applis, sans cookie) reçoit du studio un
   ticket HMAC valable 12 h, demandé par `POST /api/projects/:id/data/ticket` (droit de lecture)
   et passé dans `rx:load`. Il n'est revérifié que par sa signature et la corbeille : retirer un
@@ -1230,6 +1231,17 @@ En plus des tables de Better Auth (`user`, `session`, `account`, `verification`,
   une appli publiée ; refuse les adresses privées, de bouclage, locales au lien et de
   métadonnées, **après** résolution DNS et à chaque redirection ; délai, taille de réponse et
   débit plafonnés ; injecte les secrets côté serveur.
+- Le relais refuse aussi **l'instance elle-même** : les adresses vers lesquelles résolvent les
+  noms de `STUDIO_URL` et `APPS_URL` (résolues au démarrage puis toutes les 5 minutes ; un nom
+  qui ne résout plus garde ses dernières adresses), et ces noms. Derrière un routeur domestique,
+  le nom public résout vers l'adresse publique du routeur, et un appel vers elle revient par le
+  NAT (« hairpin ») avec une adresse source **locale** : sans ce refus, une appli joindrait
+  tous les services publiés sur la même adresse en passant pour le réseau local (listes
+  blanches, bannissements qui ignorent le réseau local).
+- **`RUBLOX_RELAY_DENY`** : ce que l'administrateur interdit en plus, séparé par des virgules :
+  suffixes de noms (`example.com` refuse aussi `*.example.com`), vérifiés avant résolution, et
+  plages CIDR IPv4 ou IPv6 (ou adresses seules), vérifiées après résolution (formes IPv4 dans
+  IPv6 comprises), à chaque redirection. Une entrée invalide empêche le démarrage.
 - Envois : taille maximale réglable, type vérifié sur le contenu, SVG servis sans exécution de
   script, quota par compte.
 - Comptes membres : un responsable n'agit que sur les membres de ses espaces ; vérifié côté
@@ -1244,7 +1256,8 @@ En plus des tables de Better Auth (`user`, `session`, `account`, `verification`,
 - Variables d'environnement : `DATABASE_URL`, `STUDIO_URL`, `APPS_URL`, `RUBLOX_SECRET` (32 octets
   ou plus), `RUBLOX_ADMIN_USERNAME` et `RUBLOX_ADMIN_PASSWORD` (premier démarrage seulement),
   `DATA_DIR` (ressources), `TRUST_PROXY`, `MAX_UPLOAD_MB`, `ANTHROPIC_API_KEY` (facultative),
-  `RUBLOX_AI_MODEL`, `RUBLOX_AI_FAST_MODEL`.
+  `RUBLOX_AI_MODEL`, `RUBLOX_AI_FAST_MODEL`, `RUBLOX_RELAY_DENY` (facultative, § 6.9 : les
+  autres services auto-hébergés à ne jamais laisser joindre par le relais).
 - CI GitHub Actions (dépôt public, minutes gratuites) : sur chaque PR, Biome, types, tests
   unitaires, construction, Playwright (Chromium), construction de l'image sans la pousser ; sur
   `main`, image `:edge` ; sur une étiquette `v*`, images `:x.y.z` et `:latest`. Une seule

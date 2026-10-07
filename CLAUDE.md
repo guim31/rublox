@@ -261,7 +261,9 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **Relais et tests** : il refuse 127.0.0.1, donc un serveur de test local ; `Relay` prend
   `resolve` (faux DNS) et `allowAddress` pour les tests (`test/relay.test.ts`), jamais par une
   variable d'environnement. En e2e, `context.route('**/_rx/proxy')` intercepte aussi les appels
-  de l'aperçu (iframe d'une autre origine) : pas de dépendance au réseau.
+  de l'aperçu (iframe d'une autre origine) : pas de dépendance au réseau. `SelfAddresses`
+  (adresses de l'instance) et `DenyList` (`RUBLOX_RELAY_DENY`) s'appliquent **par-dessus**
+  `allowAddress` : un test qui autorise 127.0.0.1 les vérifie quand même.
 - **Session cloud** : `tiles.openfreemap.org` et `api.open-meteo.com` sont refusés par le proxy ;
   la carte affiche alors « ne peut pas s'afficher ici » (attendu), le canevas montre une esquisse.
 - **MapLibre 6** cherche son worker à côté de son module : le bundle le déplace, d'où

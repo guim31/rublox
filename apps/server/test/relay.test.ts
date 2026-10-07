@@ -5,8 +5,9 @@ import { createProject } from '@rublox/catalog'
 import { addApi, type ProjectDoc, projectToYDoc, RELAY_PATH, yDocToProject } from '@rublox/schema'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import * as Y from 'yjs'
-import { isPublicAddress } from '../src/data/address.ts'
+import { isPublicAddress, type Resolve } from '../src/data/address.ts'
 import type { DataSource } from '../src/data/credentials.ts'
+import { DenyList, SelfAddresses } from '../src/data/deny.ts'
 import { isPublishedSheet, Relay, RelayFailure } from '../src/data/relay.ts'
 import { projectSecrets } from '../src/db/schema.ts'
 import { APPS } from './helpers.ts'
@@ -150,6 +151,93 @@ describe('the relay refuses private addresses (SPEC § 6.9)', () => {
   })
 })
 
+describe('the relay refuses the instance itself and RUBLOX_RELAY_DENY', () => {
+  const names = new Map<string, { address: string; family: number }[]>([
+    ['rublox.example.com', [{ address: '93.184.215.14', family: 4 }]],
+    ['apps.example.org', [{ address: '2606:2800:220:1::1', family: 6 }]],
+    // Another name served by the same router: same public address.
+    ['photos.example.net', [{ address: '93.184.215.14', family: 4 }]],
+    ['cdn.example.net', [{ address: '93.184.1.2', family: 4 }]],
+  ])
+  const asked: string[] = []
+  const resolve: Resolve = async (host) => {
+    asked.push(host)
+    const found = names.get(host)
+    if (found) return found
+    throw Object.assign(new Error('not found'), { code: 'ENOTFOUND' })
+  }
+  const call = (relay: Relay, base: string) => {
+    const { doc, apiId } = projectWith(base)
+    return refusal(relay.call(source(doc), { api: apiId, method: 'GET', path: '' }))
+  }
+
+  it("refuses the instance's public address, whatever the name used to reach it", async () => {
+    const self = new SelfAddresses(['rublox.example.com', 'apps.example.org'], resolve, () => {}, 0)
+    const relay = new Relay(noSecrets, { resolve, self })
+    for (const base of [
+      'https://rublox.example.com',
+      'https://photos.example.net',
+      'http://93.184.215.14:8080',
+      'http://[::ffff:93.184.215.14]',
+      'http://[2606:2800:220:1::1]',
+    ]) {
+      expect(await call(relay, base), base).toBe('blocked_address')
+    }
+  })
+
+  it('follows a new address of the instance, and keeps the last one if DNS fails', async () => {
+    const self = new SelfAddresses(['rublox.example.com'], resolve, () => {}, 0)
+    await self.ready
+    expect(self.has('93.184.215.14')).toBe(true)
+    names.set('rublox.example.com', [{ address: '93.184.215.99', family: 4 }])
+    await self.refresh()
+    expect(self.has('93.184.215.99')).toBe(true)
+    expect(self.has('93.184.215.14')).toBe(false)
+    names.delete('rublox.example.com')
+    const errors: string[] = []
+    const failing = new SelfAddresses(
+      ['rublox.example.com'],
+      resolve,
+      (host) => errors.push(host),
+      0,
+    )
+    await failing.ready
+    expect(errors).toEqual(['rublox.example.com'])
+    expect(self.has('93.184.215.99')).toBe(true)
+    await self.refresh()
+    expect(self.has('93.184.215.99')).toBe(true)
+    names.set('rublox.example.com', [{ address: '93.184.215.14', family: 4 }])
+  })
+
+  it('refuses a listed name suffix with its subdomains, before resolving it', async () => {
+    const deny = new DenyList(['corp.example.com', '*.intra.example.org'])
+    expect(deny.deniesName('corp.example.com')).toBe(true)
+    expect(deny.deniesName('git.corp.example.com.')).toBe(true)
+    expect(deny.deniesName('a.b.intra.example.org')).toBe(true)
+    expect(deny.deniesName('notcorp.example.com')).toBe(false)
+    const relay = new Relay(noSecrets, { resolve, deny })
+    asked.length = 0
+    expect(await call(relay, 'https://git.corp.example.com/api')).toBe('blocked_address')
+    expect(asked).toEqual([])
+  })
+
+  it('refuses a listed range, IPv4 or IPv6, after resolution and in mapped form', async () => {
+    const deny = new DenyList(['93.184.0.0/16', '2606:2800::/32'])
+    expect(deny.deniesAddress('93.184.1.2')).toBe(true)
+    expect(deny.deniesAddress('::ffff:93.184.1.2')).toBe(true)
+    expect(deny.deniesAddress('2606:2800:220:1::1')).toBe(true)
+    expect(deny.deniesAddress('94.1.1.1')).toBe(false)
+    const relay = new Relay(noSecrets, { resolve, deny })
+    for (const base of [
+      'https://cdn.example.net',
+      'http://93.184.1.2',
+      'https://apps.example.org',
+    ]) {
+      expect(await call(relay, base), base).toBe('blocked_address')
+    }
+  })
+})
+
 describe('the relay calls an API', () => {
   let remote: Server
   let base: string
@@ -160,6 +248,10 @@ describe('the relay calls an API', () => {
       seen.push({ url: request.url ?? '', key: request.headers['x-key'] as string | undefined })
       if (request.url?.startsWith('/redirect-private')) {
         response.writeHead(302, { location: 'http://10.0.0.1/' }).end()
+      } else if (request.url?.startsWith('/redirect-denied-name')) {
+        response.writeHead(302, { location: 'http://git.corp.example.com/' }).end()
+      } else if (request.url?.startsWith('/redirect-denied-range')) {
+        response.writeHead(302, { location: 'http://93.184.1.2/' }).end()
       } else if (request.url?.startsWith('/redirect-here')) {
         response.writeHead(302, { location: '/v1/hello' }).end()
       } else if (request.url?.startsWith('/v1/big')) {
@@ -222,6 +314,21 @@ describe('the relay calls an API', () => {
       path: '/redirect-here',
     })
     expect(followed.body).toEqual({ current: { temperature: 21.5 } })
+  })
+
+  it('applies RUBLOX_RELAY_DENY at each redirect', async () => {
+    const denying = new Relay(noSecrets, {
+      // 93.184.x.x counts as public here: only the deny list refuses it.
+      allowAddress: (address) => address === '127.0.0.1' || address.startsWith('93.184.'),
+      deny: new DenyList(['corp.example.com', '93.184.0.0/16']),
+    })
+    const { doc, apiId } = projectWith(base)
+    for (const path of ['/redirect-denied-name', '/redirect-denied-range']) {
+      expect(
+        await refusal(denying.call(source(doc), { api: apiId, method: 'GET', path })),
+        path,
+      ).toBe('blocked_address')
+    }
   })
 
   it('caps the size of the answer (compressed or not) and the time', async () => {

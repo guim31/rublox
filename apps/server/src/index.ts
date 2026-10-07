@@ -74,6 +74,7 @@ async function main() {
     services.live.close()
     services.collab.close()
     services.sharedHub.close()
+    services.relay.close()
     logger.info({ signal }, 'shutting down')
     const timer = setTimeout(() => {
       logger.error('graceful shutdown timed out')

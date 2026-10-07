@@ -40,7 +40,7 @@ for (const [network, prefix] of [
 }
 
 /** The IPv4 address inside an IPv4-mapped (`::ffff:a.b.c.d`) or NAT64 IPv6 address. */
-function embeddedIpv4(address: string): string | null {
+export function embeddedIpv4(address: string): string | null {
   const lower = address.toLowerCase()
   const mapped = /^(?:::ffff:(?:0:)?|64:ff9b::)(\d+\.\d+\.\d+\.\d+)$/.exec(lower)
   if (mapped?.[1]) return mapped[1]

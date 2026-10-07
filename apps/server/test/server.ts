@@ -87,6 +87,7 @@ export async function createTestServer(
       await services.collab.flush()
       services.live.close()
       services.sharedHub.close()
+      services.relay.close()
       if (listening) {
         const { server } = await listening
         server.closeAllConnections()
