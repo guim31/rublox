@@ -16,6 +16,11 @@ export const BADGE_IDS = [
   'three-stars',
   'first-publish',
   'first-remix',
+  // J9: one per app to take apart, its four levels done.
+  'explore-star-catcher',
+  'explore-brick-breaker',
+  'explore-big-quiz',
+  'explore-piggy-bank',
 ] as const
 
 export type BadgeId = (typeof BADGE_IDS)[number]
@@ -43,7 +48,22 @@ export const BADGES: readonly Badge[] = [
   { id: 'three-stars', icon: '⭐', accent: 'yellow', available: true },
   { id: 'first-publish', icon: '🌍', accent: 'indigo', available: true },
   { id: 'first-remix', icon: '🎨', accent: 'coral', available: true },
+  { id: 'explore-star-catcher', icon: '🌟', accent: 'indigo', available: true },
+  { id: 'explore-brick-breaker', icon: '🧱', accent: 'coral', available: true },
+  { id: 'explore-big-quiz', icon: '❓', accent: 'yellow', available: true },
+  { id: 'explore-piggy-bank', icon: '🐷', accent: 'mint', available: true },
 ]
+
+/** Levels of each app to take apart (J9), all needed for its badge. */
+export const EXPLORE_LEVELS = 4
+
+/** The badge of each app to take apart (J9), by app id. */
+export const EXPLORE_BADGES: Record<string, BadgeId> = {
+  'star-catcher': 'explore-star-catcher',
+  'brick-breaker': 'explore-brick-breaker',
+  'big-quiz': 'explore-big-quiz',
+  'piggy-bank': 'explore-piggy-bank',
+}
 
 const LOOPS = [
   'controls_repeat_ext',
@@ -88,5 +108,9 @@ export function badgesFromProgress(progress: LearningProgress): BadgeId[] {
   if (done >= 1) earned.push('first-tutorial')
   if (done >= 5) earned.push('five-tutorials')
   if (Object.values(progress.challenges).some((c) => c.stars >= 3)) earned.push('three-stars')
+  for (const [app, badge] of Object.entries(EXPLORE_BADGES)) {
+    const levels = Array.from({ length: EXPLORE_LEVELS }, (_, index) => index + 1)
+    if (levels.every((level) => progress.explore?.[`${app}/${level}`]?.done)) earned.push(badge)
+  }
   return earned
 }

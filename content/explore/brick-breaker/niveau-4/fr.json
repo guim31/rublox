@@ -1,0 +1,46 @@
+{
+  "title": "Vitesses et bonus",
+  "summary": "Un menu pour choisir sa vitesse, et un cœur bonus qui tombe.",
+  "done": "Tu as vu un menu sur un autre écran, une variable de vitesse et un bonus.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 4, un écran **Menu** pour choisir la vitesse, et des cœurs bonus."
+    },
+    "menu": {
+      "text": "Choisis l’écran **Menu** : chaque bouton met la variable **vitesse**, puis ouvre le jeu. Reviens ensuite sur **Jeu**."
+    },
+    "speed": {
+      "text": "La balle prend la vitesse choisie dans le menu, au lieu de 260."
+    },
+    "gift": {
+      "text": "Le minuteur **Cadeau** fait tomber un cœur bonus toutes les 6 secondes."
+    },
+    "catch": {
+      "text": "Attrape-le avec la raquette : une vie de plus !"
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Attends le cœur : [créer un clone de Bonus] s’allume.",
+      "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
+    },
+    "fast": {
+      "text": "Arrête le ralenti pour jouer à vitesse normale."
+    }
+  },
+  "challenges": {
+    "easy": {
+      "text": "Rends « Facile » encore plus facile : 180 ou moins.",
+      "hint": "C’est sur l’écran Menu."
+    },
+    "often": {
+      "text": "Fais tomber un bonus toutes les 4 secondes.",
+      "hint": "C’est l’intervalle de Cadeau, dans « nouvelle partie »."
+    },
+    "grow": {
+      "text": "Le bonus fait aussi grandir la raquette.",
+      "hint": "Mets la largeur de Raquette à 130 quand on attrape le bonus."
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "title": "Trois vies",
+  "summary": "Une étoile qui touche le sol coûte une vie. Plus de vies : un écran de fin.",
+  "done": "Tu as vu les vies, le test « si » et l’écran de fin.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 3, tu as 3 vies. Laisse tomber 3 étoiles dans l’aperçu pour voir l’écran de fin."
+    },
+    "start": {
+      "text": "Au départ, la variable **vies** vaut 3."
+    },
+    "miss": {
+      "text": "Une étoile touche le bas : une vie en moins, on l’affiche, puis on vérifie si c’est perdu."
+    },
+    "check": {
+      "text": "Le bloc [si] pose une question : « vies ≤ 0 ? ». Seulement si c’est vrai, on arrête la pluie, on efface les clones et on ouvre l’écran Fin."
+    },
+    "end": {
+      "text": "L’écran **Fin** a ses propres blocs : choisis-le ici pour les voir, puis reviens sur Jeu."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** : les blocs vont s’allumer un par un pendant que le jeu tourne."
+    },
+    "watch": {
+      "text": "Regarde : [modifier vies de -1] s’allume quand une étoile tombe par terre. Laisse-en tomber une !",
+      "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
+    },
+    "fast": {
+      "text": "Bien vu ! Arrête le ralenti pour rejouer à vitesse normale."
+    }
+  },
+  "challenges": {
+    "five": {
+      "text": "Donne 5 vies au lieu de 3.",
+      "hint": "C’est au départ, dans [mettre vies à 3]."
+    },
+    "hard": {
+      "text": "Mode difficile : perds 2 vies par étoile ratée.",
+      "hint": "Change le -1 dans « quand Etoile touche le bord du bas »."
+    },
+    "message": {
+      "text": "Affiche un message bref quand c’est perdu.",
+      "hint": "Le bloc est dans la catégorie Interface."
+    }
+  }
+}

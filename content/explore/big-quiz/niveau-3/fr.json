@@ -1,0 +1,46 @@
+{
+  "title": "Chrono et score",
+  "summary": "Un minuteur par question, une barre de temps, un score et un écran de résultats.",
+  "done": "Tu as vu un minuteur, un score et un deuxième écran.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 3, 10 secondes par question, un score, et un écran de résultats à la fin."
+    },
+    "tick": {
+      "text": "Le minuteur **Chrono** sonne chaque seconde : le temps baisse de 1, la barre aussi. À 0, c’est trop tard."
+    },
+    "once": {
+      "text": "La variable **repondu** (vrai ou faux) empêche de répondre deux fois à la même question."
+    },
+    "point": {
+      "text": "Une bonne réponse : un point."
+    },
+    "results": {
+      "text": "Après la dernière question, on ouvre l’écran **Resultats**. Choisis-le dans la liste des écrans pour voir ses blocs."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Regarde [modifier temps de -1] s’allumer chaque seconde.",
+      "hint": "Touche une réponse dans l’aperçu, ou clique sur « Redémarrer »."
+    },
+    "fast": {
+      "text": "Arrête le ralenti."
+    }
+  },
+  "challenges": {
+    "longer": {
+      "text": "Donne 15 secondes par question.",
+      "hint": "C’est [mettre temps à 10] dans « afficher la question »."
+    },
+    "double": {
+      "text": "Donne 2 points par bonne réponse.",
+      "hint": "Regarde [modifier score de 1]."
+    },
+    "late": {
+      "text": "Affiche un message bref quand le temps est fini.",
+      "hint": "Pose-le dans le [si] de « quand Chrono sonne »."
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "title": "Une pluie d’étoiles",
+  "summary": "Des clones, un minuteur et le hasard font pleuvoir les étoiles. Un score compte les points.",
+  "done": "Tu as vu les clones, le minuteur et le score.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 2, il pleut des étoiles ! Clique sur **Nouveau** en haut des blocs pour voir ce qui a changé."
+    },
+    "drop": {
+      "text": "Maintenant, la fonction crée un **clone** : une copie de l’étoile cachée. Chaque clone tombe tout seul."
+    },
+    "appear": {
+      "text": "Ce bloc tourne pour chaque nouveau clone. Ce sont les blocs du niveau 1 : ils ont juste changé de place."
+    },
+    "tick": {
+      "text": "Le **minuteur** Pluie sonne chaque seconde, et à chaque fois une étoile de plus tombe."
+    },
+    "catch": {
+      "text": "Attrapée : la variable **score** grandit de 1, on l’affiche, et le clone est supprimé."
+    },
+    "show": {
+      "text": "[regrouper] colle un texte et un nombre : « Score : » puis la valeur du score."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** : les blocs vont s’allumer un par un pendant que le jeu tourne."
+    },
+    "watch": {
+      "text": "Regarde : [créer un clone de Etoile] s’allume à chaque sonnerie du minuteur.",
+      "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
+    },
+    "fast": {
+      "text": "Bien vu ! Arrête le ralenti pour rejouer à vitesse normale."
+    }
+  },
+  "challenges": {
+    "more": {
+      "text": "Fais pleuvoir plus : une étoile toutes les 0,5 seconde.",
+      "hint": "Change l’intervalle de Pluie au départ."
+    },
+    "double": {
+      "text": "Gagne 2 points par étoile.",
+      "hint": "Regarde [modifier score de 1]."
+    },
+    "wide": {
+      "text": "Fais tomber les étoiles d’un bord à l’autre : de 20 à 340.",
+      "hint": "C’est le nombre au hasard de x."
+    }
+  }
+}

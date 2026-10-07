@@ -1,0 +1,46 @@
+{
+  "title": "Three lives",
+  "summary": "A star hitting the ground costs a life. No lives left: an end screen.",
+  "done": "You saw lives, the “if” test and the end screen.",
+  "steps": {
+    "hello": {
+      "text": "In level 3, you have 3 lives. Let 3 stars fall in the preview to see the end screen."
+    },
+    "start": {
+      "text": "At the start, the **lives** variable is 3."
+    },
+    "miss": {
+      "text": "A star touches the bottom: one life less, we show it, then we check whether the game is lost."
+    },
+    "check": {
+      "text": "The [if] block asks a question: “lives ≤ 0?”. Only if it is true do we stop the rain, delete the clones and open the End screen."
+    },
+    "end": {
+      "text": "The **End** screen has its own blocks: pick it here to see them, then come back to Game."
+    },
+    "slow": {
+      "text": "Start **slow motion**: blocks will light up one by one while the game runs."
+    },
+    "watch": {
+      "text": "Look: [change lives by -1] lights up when a star hits the ground. Let one fall!",
+      "hint": "Wait a little, or click “Restart” in the preview."
+    },
+    "fast": {
+      "text": "Well spotted! Stop slow motion to play at normal speed again."
+    }
+  },
+  "challenges": {
+    "five": {
+      "text": "Give 5 lives instead of 3.",
+      "hint": "It is at the start, in [set lives to 3]."
+    },
+    "hard": {
+      "text": "Hard mode: lose 2 lives per missed star.",
+      "hint": "Change the -1 in “when Star touches the bottom edge”."
+    },
+    "message": {
+      "text": "Show a short message when the game is lost.",
+      "hint": "The block is in the Interface category."
+    }
+  }
+}

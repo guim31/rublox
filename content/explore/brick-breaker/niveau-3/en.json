@@ -1,0 +1,46 @@
+{
+  "title": "Score and lives",
+  "summary": "Points per brick, three lives, “you win” and “game over”.",
+  "done": "You saw variables, an “if … else” and an end function.",
+  "steps": {
+    "hello": {
+      "text": "In level 3: points, lives, and “You win” or “Game over” messages."
+    },
+    "new": {
+      "text": "The starting blocks are now in the function “new game”: it is used at the start and to play again."
+    },
+    "count": {
+      "text": "The **bricks** variable counts the bricks that are built…"
+    },
+    "win": {
+      "text": "… and we take one away for each broken brick. At 0, you win!"
+    },
+    "lost": {
+      "text": "[if … else]: if there are no lives left, the game is over; else, we serve again."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Let the ball fall: [change lives by -1] lights up.",
+      "hint": "Wait a little, or click “Restart” in the preview."
+    },
+    "fast": {
+      "text": "Stop slow motion to play at normal speed."
+    }
+  },
+  "challenges": {
+    "five": {
+      "text": "Start with 5 lives.",
+      "hint": "It is in “new game”."
+    },
+    "points": {
+      "text": "Give 20 points per brick.",
+      "hint": "Look at [change score by 10]."
+    },
+    "toast": {
+      "text": "Show a short message when you win.",
+      "hint": "The block is in the Interface category."
+    }
+  }
+}

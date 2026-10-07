@@ -1,0 +1,8 @@
+{
+  "id": "big-quiz",
+  "order": 3,
+  "kind": "quiz",
+  "icon": "❓",
+  "accent": "yellow",
+  "levels": 4
+}

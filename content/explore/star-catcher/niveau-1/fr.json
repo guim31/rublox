@@ -1,0 +1,46 @@
+{
+  "title": "Une étoile tombe",
+  "summary": "Le panier suit ton doigt, une étoile tombe. Une fonction la fait tomber.",
+  "done": "Tu sais comment l’étoile tombe et comment le panier l’attrape.",
+  "steps": {
+    "hello": {
+      "text": "Voici **Attrape-étoiles** ! Essaie-le dans l’aperçu : glisse le panier pour attraper l’étoile. Puis on regarde ses blocs."
+    },
+    "start": {
+      "text": "Tout commence ici : [quand Ciel démarre] appelle la fonction « faire tomber une étoile »."
+    },
+    "drop": {
+      "text": "Une **fonction** range des blocs sous un nom. Celle-ci place l’étoile en haut, au hasard, la montre, puis lui donne une vitesse vers le bas."
+    },
+    "catch": {
+      "text": "Quand l’étoile touche le panier, on appelle la même fonction : l’étoile repart d’en haut. Une fonction sert plusieurs fois !"
+    },
+    "follow": {
+      "text": "Le panier se glisse au doigt (réglé dans Design). Ce bloc le remet au sol à chaque mouvement : il ne va que de gauche à droite."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** : les blocs vont s’allumer un par un pendant que le jeu tourne."
+    },
+    "watch": {
+      "text": "Regarde : le bloc [mettre Etoile à x … y …] s’allume chaque fois qu’une étoile repart d’en haut.",
+      "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
+    },
+    "fast": {
+      "text": "Bien vu ! Arrête le ralenti pour rejouer à vitesse normale."
+    }
+  },
+  "challenges": {
+    "faster": {
+      "text": "Fais tomber l’étoile plus vite : 250 ou plus.",
+      "hint": "Change le 150 dans « faire tomber une étoile »."
+    },
+    "higher": {
+      "text": "Remonte le panier : mets 500 au lieu de 590.",
+      "hint": "C’est dans le bloc « quand on glisse Panier »."
+    },
+    "spin": {
+      "text": "Quand tu attrapes l’étoile, fais-la tourner.",
+      "hint": "Prends [tourner … de … degrés] chez Etoile, et pose-le dans « quand Etoile touche Panier »."
+    }
+  }
+}

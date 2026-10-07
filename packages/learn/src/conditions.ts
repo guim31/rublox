@@ -1,6 +1,6 @@
 import { resolveProps } from '@rublox/catalog'
 import type { ProjectDoc, ScreenId } from '@rublox/schema'
-import { allBlocks, countBlocks, isInside } from './blocks.ts'
+import { allBlocks, countBlocks, findBlock, isInside } from './blocks.ts'
 
 /** Something that happened in the running app (a click in the preview…). */
 export type PreviewEvent = {
@@ -24,6 +24,8 @@ export type LearnState = {
   previewScreen: ScreenId | null
   /** Slow motion is on. */
   slowMotion: boolean
+  /** Blocks lit by slow motion since the step started (J9). */
+  stepped?: readonly string[]
 }
 
 /**
@@ -58,7 +60,24 @@ export type Condition =
       fields?: Record<string, string | number>
       /** `start`: in the start screen's workspace; `other`: in any other screen's. */
       workspace?: 'start' | 'other' | 'app'
+      /** Only in the block with this id, or below it in its stack (J9). */
+      within?: string
     }
+  /**
+   * The block with this id (J9: the blocks of an app to take apart keep their ids) has a
+   * field that equals `equals`, differs from `not`, or is a number between `min` and `max`.
+   */
+  | {
+      kind: 'blockField'
+      id: string
+      field: string
+      equals?: string | number
+      not?: string | number
+      min?: number
+      max?: number
+    }
+  /** Slow motion lit this block (or any block) since the step started (J9). */
+  | { kind: 'stepped'; id?: string }
   /** At most `max` blocks in the whole project. */
   | { kind: 'blockCount'; max: number }
   /** The editor shows this tab. */
@@ -125,24 +144,53 @@ export function evaluate(condition: Condition, state: LearnState): boolean {
     case 'block': {
       const types = Array.isArray(condition.type) ? condition.type : [condition.type]
       const start = doc.settings.navigation.startScreen
-      const matches = allBlocks(doc).filter(({ workspace, block, ancestors, enabled }) => {
-        if (!enabled || !types.includes(block.type)) return false
-        if (condition.workspace === 'start' && workspace !== start) return false
-        if (condition.workspace === 'app' && workspace !== 'app') return false
-        if (condition.workspace === 'other' && (workspace === start || workspace === 'app'))
-          return false
-        if (condition.inside && !isInside(ancestors, condition.inside)) return false
-        const fields = (block.fields ?? {}) as Record<string, unknown>
-        for (const name of condition.filled ?? []) {
-          if (String(fields[name] ?? '').trim() === '') return false
-        }
-        for (const [name, value] of Object.entries(condition.fields ?? {})) {
-          if (fields[name] !== value) return false
-        }
-        return true
-      })
+      const matches = allBlocks(doc).filter(
+        ({ workspace, block, ancestors, ancestorIds, enabled }) => {
+          if (!enabled || !types.includes(block.type)) return false
+          if (
+            condition.within &&
+            block.id !== condition.within &&
+            !ancestorIds.includes(condition.within)
+          )
+            return false
+          if (condition.workspace === 'start' && workspace !== start) return false
+          if (condition.workspace === 'app' && workspace !== 'app') return false
+          if (condition.workspace === 'other' && (workspace === start || workspace === 'app'))
+            return false
+          if (condition.inside && !isInside(ancestors, condition.inside)) return false
+          const fields = (block.fields ?? {}) as Record<string, unknown>
+          for (const name of condition.filled ?? []) {
+            if (String(fields[name] ?? '').trim() === '') return false
+          }
+          for (const [name, value] of Object.entries(condition.fields ?? {})) {
+            if (fields[name] !== value) return false
+          }
+          return true
+        },
+      )
       return matches.length >= (condition.min ?? 1)
     }
+    case 'blockField': {
+      const found = findBlock(doc, condition.id)
+      if (!found?.enabled) return false
+      const value = ((found.block.fields ?? {}) as Record<string, unknown>)[condition.field]
+      if (value === undefined) return false
+      const same = (expected: string | number) =>
+        typeof expected === 'number' ? Number(value) === expected : String(value) === expected
+      if (condition.equals !== undefined && !same(condition.equals)) return false
+      if (condition.not !== undefined && same(condition.not)) return false
+      if (condition.min !== undefined || condition.max !== undefined) {
+        const number = Number(value)
+        if (!Number.isFinite(number)) return false
+        if (condition.min !== undefined && number < condition.min) return false
+        if (condition.max !== undefined && number > condition.max) return false
+      }
+      return true
+    }
+    case 'stepped':
+      return condition.id
+        ? (state.stepped ?? []).includes(condition.id)
+        : (state.stepped ?? []).length > 0
     case 'blockCount':
       return countBlocks(doc) > 0 && countBlocks(doc) <= condition.max
     case 'tab':

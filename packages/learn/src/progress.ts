@@ -19,16 +19,40 @@ export type ChallengeProgress = {
   updatedAt: string
 }
 
+/** A level of an app to take apart (J9), by `<app>/<level>`. */
+export type ExploreProgress = {
+  id: string
+  app: string
+  level: number
+  /** The learner's copy of the level. */
+  projectId: string
+  /** Index of the current step of the guided tour (the number of steps when done). */
+  step: number
+  tourDone: boolean
+  /** Ids of the modification challenges succeeded at least once. */
+  challenges: string[]
+  /** The tour is done and every challenge succeeded. */
+  done: boolean
+  updatedAt: string
+}
+
 export type BadgeAward = { id: BadgeId; awardedAt: string }
 
 /** Everything a learner has done (SPEC § 4.10), by id. */
 export type LearningProgress = {
   tutorials: Record<string, TutorialProgress>
   challenges: Record<string, ChallengeProgress>
+  /** Apps to take apart (J9), by `<app>/<level>`. */
+  explore: Record<string, ExploreProgress>
   badges: Partial<Record<BadgeId, BadgeAward>>
 }
 
-export const EMPTY_PROGRESS: LearningProgress = { tutorials: {}, challenges: {}, badges: {} }
+export const EMPTY_PROGRESS: LearningProgress = {
+  tutorials: {},
+  challenges: {},
+  explore: {},
+  badges: {},
+}
 
 /**
  * Where the progression is kept. In guest mode, IndexedDB in this browser
@@ -39,6 +63,7 @@ export interface ProgressStore {
   load(): Promise<LearningProgress>
   saveTutorial(progress: TutorialProgress): Promise<void>
   saveChallenge(progress: ChallengeProgress): Promise<void>
+  saveExplore(progress: ExploreProgress): Promise<void>
   /** Records a badge; resolves to `false` when it was already earned. */
   award(id: BadgeId, at?: Date): Promise<boolean>
   /** Forgets everything (used by tests and "start over"). */
@@ -59,6 +84,10 @@ export class MemoryProgressStore implements ProgressStore {
 
   async saveChallenge(progress: ChallengeProgress): Promise<void> {
     this.progress.challenges[progress.id] = { ...progress }
+  }
+
+  async saveExplore(progress: ExploreProgress): Promise<void> {
+    this.progress.explore[progress.id] = { ...progress, challenges: [...progress.challenges] }
   }
 
   async award(id: BadgeId, at = new Date()): Promise<boolean> {

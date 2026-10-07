@@ -1,0 +1,43 @@
+{
+  "title": "Une question",
+  "summary": "Trois boutons, une variable « choix », et un « si … sinon » qui vérifie la réponse.",
+  "done": "Tu sais comment le quiz vérifie une réponse.",
+  "steps": {
+    "hello": {
+      "text": "Voici **Le grand quiz** ! Réponds à la question dans l’aperçu, puis regardons comment il sait si c’est juste."
+    },
+    "click": {
+      "text": "Quand on touche un bouton, on range son texte dans la variable **choix**. Une variable, c’est une boîte avec un nom."
+    },
+    "check": {
+      "text": "Les trois boutons appellent la même fonction : on n’écrit la vérification qu’une fois."
+    },
+    "test": {
+      "text": "[si … sinon] : si le choix vaut « 8 », on écrit « Bravo » en vert ; sinon, la bonne réponse en rouge."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Touche une réponse dans l’aperçu : regarde le [si] s’allumer, puis une seule des deux branches.",
+      "hint": "Touche une réponse dans l’aperçu, ou clique sur « Redémarrer »."
+    },
+    "fast": {
+      "text": "Arrête le ralenti."
+    }
+  },
+  "challenges": {
+    "question": {
+      "text": "Change la question (dans Design) et sa bonne réponse (dans le [si]).",
+      "hint": "Par exemple : « Combien de roues a un vélo ? », réponses 1, 2, 3, et « 2 » dans le [si]."
+    },
+    "cheer": {
+      "text": "Écris ton propre message de victoire.",
+      "hint": "Change le texte « Bravo ! 🎉 »."
+    },
+    "toast": {
+      "text": "Affiche aussi un message bref quand c’est gagné.",
+      "hint": "Le bloc est dans la catégorie Interface."
+    }
+  }
+}

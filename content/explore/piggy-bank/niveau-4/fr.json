@@ -1,0 +1,43 @@
+{
+  "title": "Graphique et historique",
+  "summary": "Un graphique du solde, et un historique gardé sur le téléphone.",
+  "done": "Tu as vu un graphique et des variables gardées sur le téléphone.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 4, un graphique, et la tirelire se souvient de tout, même après l’avoir fermée."
+    },
+    "stored": {
+      "text": "Les variables **mouvements** et **objectif** sont maintenant *stockées* : le téléphone les garde. À l’ouverture, on réaffiche tout."
+    },
+    "chart": {
+      "text": "Dans la boucle, chaque mouvement ajoute un point au **graphique** : le solde à ce moment-là."
+    },
+    "label": {
+      "text": "[si … alors … sinon …] en bloc rond donne une valeur : « + » pour un ajout, rien pour une dépense (qui a déjà son « - »)."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Ajoute de l’argent : un point s’ajoute pour chaque mouvement.",
+      "hint": "Tape un nombre dans l’aperçu, puis touche « + Ajouter »."
+    },
+    "fast": {
+      "text": "Arrête le ralenti."
+    }
+  },
+  "challenges": {
+    "bars": {
+      "text": "Fais un graphique en barres au lieu d’une courbe.",
+      "hint": "Choisis le graphique dans Design : son type."
+    },
+    "label": {
+      "text": "Écris « n°1 », « n°2 »… sous les points.",
+      "hint": "Remplace l’étiquette par [regrouper « n° » numero]."
+    },
+    "count": {
+      "text": "Montre aussi le nombre de mouvements.",
+      "hint": "[longueur de mouvements] donne ce nombre."
+    }
+  }
+}

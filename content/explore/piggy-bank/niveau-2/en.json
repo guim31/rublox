@@ -1,0 +1,43 @@
+{
+  "title": "Spending and balance",
+  "summary": "Each movement goes in a list; a loop computes the balance.",
+  "done": "You saw a list and a “for each” loop.",
+  "steps": {
+    "hello": {
+      "text": "In level 2, you can also spend. Click **New** to see what changed."
+    },
+    "push": {
+      "text": "We no longer add to the total: we write each **movement** at the end of a list."
+    },
+    "spend": {
+      "text": "Spending is written as a negative: 0 − amount."
+    },
+    "loop": {
+      "text": "The [for each] loop goes over each movement and adds it to the total, which starts from 0."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Add money twice: the loop lights up once per movement.",
+      "hint": "Type a number in the preview, then tap “+ Add”."
+    },
+    "fast": {
+      "text": "Stop slow motion."
+    }
+  },
+  "challenges": {
+    "toast": {
+      "text": "Show a short message when you spend.",
+      "hint": "Put it in “when Spend is clicked”."
+    },
+    "red": {
+      "text": "Change the colour of the total in “show the balance”.",
+      "hint": "With an [if], you can even make it red when it is below 0."
+    },
+    "reset": {
+      "text": "Add a “Clear all” button that empties the list.",
+      "hint": "[set moves to] [create empty list], then call “show the balance”."
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "title": "The ball bounces",
+  "summary": "A paddle and a ball bouncing everywhere. Speed tells where the ball goes.",
+  "done": "You know how the ball moves and bounces.",
+  "steps": {
+    "hello": {
+      "text": "Here is **Brick Breaker**! Drag the paddle in the preview to send the ball back."
+    },
+    "serve": {
+      "text": "A sprite has an **x speed** (to the right) and a **y speed** (downwards). The function gives both to the ball."
+    },
+    "bounce": {
+      "text": "When the ball touches the paddle, its y speed becomes negative: it goes back up."
+    },
+    "side": {
+      "text": "This calculation compares the x of the ball and the paddle: hit on the right, it goes right."
+    },
+    "lost": {
+      "text": "The edges of the scene make things bounce. If the ball touches the bottom, we serve again."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Send the ball back with the paddle: [set y speed to -300] lights up.",
+      "hint": "Wait a little, or click “Restart” in the preview."
+    },
+    "fast": {
+      "text": "Stop slow motion to play at normal speed."
+    }
+  },
+  "challenges": {
+    "faster": {
+      "text": "Serve the ball faster: 350 or more.",
+      "hint": "Change the 260 in “serve the ball”."
+    },
+    "strong": {
+      "text": "Stronger bounce: -400 instead of -300.",
+      "hint": "Keep the minus sign: it sends the ball up."
+    },
+    "spin": {
+      "text": "Make the ball turn when it touches the paddle.",
+      "hint": "Take [turn … by … degrees] from Ball."
+    }
+  }
+}

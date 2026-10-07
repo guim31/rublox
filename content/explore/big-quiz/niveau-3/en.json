@@ -1,0 +1,46 @@
+{
+  "title": "Clock and score",
+  "summary": "A timer per question, a time bar, a score and a results screen.",
+  "done": "You saw a timer, a score and a second screen.",
+  "steps": {
+    "hello": {
+      "text": "In level 3, 10 seconds per question, a score, and a results screen at the end."
+    },
+    "tick": {
+      "text": "The **Clock** timer rings every second: the time goes down by 1, the bar too. At 0, it’s too late."
+    },
+    "once": {
+      "text": "The **answered** variable (true or false) stops you answering the same question twice."
+    },
+    "point": {
+      "text": "A right answer: one point."
+    },
+    "results": {
+      "text": "After the last question, we open the **Results** screen. Pick it in the list of screens to see its blocks."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Watch [change timeLeft by -1] light up every second.",
+      "hint": "Tap an answer in the preview, or click “Restart”."
+    },
+    "fast": {
+      "text": "Stop slow motion."
+    }
+  },
+  "challenges": {
+    "longer": {
+      "text": "Give 15 seconds per question.",
+      "hint": "It is [set timeLeft to 10] in “show the question”."
+    },
+    "double": {
+      "text": "Give 2 points per right answer.",
+      "hint": "Look at [change score by 1]."
+    },
+    "late": {
+      "text": "Show a short message when time is up.",
+      "hint": "Put it in the [if] of “when Clock rings”."
+    }
+  }
+}

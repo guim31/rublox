@@ -2,8 +2,14 @@ import type { learning as fr } from '../fr/learn.ts'
 import type { Messages } from '../types.ts'
 import { helpContent } from './help.ts'
 
-type Learning = Omit<Pick<Messages['studio'], keyof typeof fr>, 'blockSheets'> & {
+type Studio = Messages['studio']
+/** The badges of the apps to take apart (J9) are in `explore.ts`, merged by `index.ts`. */
+type Learn = Omit<Studio['learn'], 'badges'> & {
+  badges: Omit<Studio['learn']['badges'], `explore-${string}`>
+}
+type Learning = Omit<Pick<Studio, keyof typeof fr>, 'blockSheets' | 'learn'> & {
   blockSheets: typeof helpContent.blockSheets
+  learn: Learn
 }
 
 /** Strings of the learning experience, the welcome page, the tour and the help (J3). */

@@ -45,6 +45,13 @@ export type BuildOptions = {
   /** Overrides the name of the recipe. */
   name?: string
   now?: Date
+  /**
+   * Ids derived from the recipe instead of random ones (J9, `@rublox/explore`): screens
+   * `s-<key>`, components `c-<screen key>-<key>`, variables `v-<key>`, and blocks keep the
+   * `id` written in the recipe. Two recipes that share keys and block ids build documents whose
+   * shared parts have the same ids (levels of an app to take apart).
+   */
+  stableIds?: boolean
 }
 
 /** Resolves `{ fr, en }` values anywhere in a recipe. */
@@ -62,6 +69,8 @@ export function localize<T>(value: T, locale: Locale): T {
 
 type ScreenRefs = {
   id: string
+  /** The screen's key in the recipe (stable ids). */
+  key: string
   /** Component id by key and by name. */
   components: Map<string, string>
   screen: Screen
@@ -146,10 +155,11 @@ class Builder {
     doc.screenOrder = []
     const takenScreens: string[] = []
     spec.screens.forEach((screenSpec, index) => {
-      const id = index === 0 ? firstId : newId()
       const name = freeName(screenSpec.name as string, takenScreens, 'Screen')
+      const stable = this.options.stableIds ? `s-${screenSpec.key ?? index}` : null
+      const id = stable ?? (index === 0 ? firstId : newId())
       takenScreens.push(name)
-      const rootId = newId()
+      const rootId = stable ? `${stable}-root` : newId()
       const root: ComponentNode = { type: SCREEN_TYPE, name, props: {}, children: [] }
       const screen: Screen = { name, rootId, components: { [rootId]: root }, nonVisual: [] }
       doc.screens[id] = screen
@@ -159,13 +169,16 @@ class Builder {
       // The screen itself is a component too (`rx_Screen_on_open`), named by its key or name.
       const components = new Map([[screenSpec.key ?? name, rootId]])
       components.set(name, rootId)
-      this.screens.set(id, { id, components, screen })
+      this.screens.set(id, { id, key: screenSpec.key ?? String(index), components, screen })
     })
-    doc.settings.navigation = { kind: spec.navigation, startScreen: firstId }
+    doc.settings.navigation = {
+      kind: spec.navigation,
+      startScreen: doc.screenOrder[0] ?? firstId,
+    }
 
     for (const variable of spec.variables) {
       const name = freeName(variable.name as string, [...this.variables.keys()], 'variable')
-      const id = newId()
+      const id = this.options.stableIds ? `v-${variable.key ?? name}` : newId()
       doc.variables[variable.kind].push({
         id,
         name,
@@ -233,7 +246,7 @@ class Builder {
       node.name = freeName(spec.name as string, taken, node.name)
     }
     node.props = this.props(def.type, { ...node.props, ...spec.props }, `${path}.props`)
-    const id = newId()
+    const id = this.options.stableIds ? `c-${refs.key}-${spec.key ?? node.name}` : newId()
     refs.screen.components[id] = node
     refs.components.set(spec.key ?? (spec.name as string | undefined) ?? node.name, id)
     refs.components.set(node.name, id)
@@ -284,7 +297,7 @@ class Builder {
     stacks.forEach((stack, index) => {
       const block = this.block(stack, refs, `${path}.${index}`, null)
       if (!block) return
-      const id = newId()
+      const id = typeof block.id === 'string' ? block.id : newId()
       block.id = id
       if (typeof block.x !== 'number' || typeof block.y !== 'number') {
         block.x = 40
@@ -307,8 +320,9 @@ class Builder {
       this.issue(path, 'not a block')
       return null
     }
-    const { id: _id, ...rest } = input as BlocklyJson & { id?: unknown }
+    const { id: given, ...rest } = input as BlocklyJson & { id?: unknown }
     const block: BlocklyJson = structuredClone(rest)
+    if (this.options.stableIds && typeof given === 'string') block.id = given
     if (!isKnownBlockType(block.type)) {
       this.issue(`${path}.type`, `unknown block type "${block.type}"`)
       return null
@@ -430,7 +444,7 @@ class Builder {
     const known = this.variables.get(name)
     if (known) return known
     const valid = freeName(name, [...this.variables.keys()], 'variable')
-    const id = newId()
+    const id = this.options.stableIds ? `v-${valid}` : newId()
     this.doc.variables.app.push({ id, name: valid })
     this.variables.set(name, id)
     this.variables.set(valid, id)

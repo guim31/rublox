@@ -1,0 +1,398 @@
+{
+  "level": 1,
+  "recipe": {
+    "name": {
+      "fr": "Ma tirelire 1",
+      "en": "My Piggy Bank 1"
+    },
+    "mode": "junior",
+    "theme": {
+      "primary": "#0ca678",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [
+      {
+        "key": "total",
+        "name": {
+          "fr": "solde",
+          "en": "total"
+        },
+        "kind": "app",
+        "initial": 0
+      }
+    ],
+    "screens": [
+      {
+        "key": "bank",
+        "name": {
+          "fr": "Tirelire",
+          "en": "PiggyBank"
+        },
+        "props": {
+          "padding": 20,
+          "gap": 14
+        },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": {
+              "fr": "Titre",
+              "en": "Title"
+            },
+            "props": {
+              "text": {
+                "fr": "🐷 Ma tirelire",
+                "en": "🐷 My piggy bank"
+              },
+              "fontSize": 26,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "balance",
+            "type": "Text",
+            "name": {
+              "fr": "Solde",
+              "en": "Balance"
+            },
+            "props": {
+              "text": "0 €",
+              "fontSize": 44,
+              "bold": true,
+              "align": "center",
+              "color": "@primary"
+            }
+          },
+          {
+            "key": "amount",
+            "type": "TextInput",
+            "name": {
+              "fr": "Montant",
+              "en": "Amount"
+            },
+            "props": {
+              "inputType": "number",
+              "placeholder": {
+                "fr": "Combien ?",
+                "en": "How much?"
+              }
+            }
+          },
+          {
+            "key": "actions",
+            "type": "Row",
+            "name": {
+              "fr": "Boutons",
+              "en": "Buttons"
+            },
+            "props": {
+              "gap": 12
+            },
+            "children": [
+              {
+                "key": "add",
+                "type": "Button",
+                "name": {
+                  "fr": "Ajouter",
+                  "en": "Add"
+                },
+                "props": {
+                  "text": {
+                    "fr": "+ Ajouter",
+                    "en": "+ Add"
+                  },
+                  "grow": true
+                }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": {
+              "COMPONENT": "bank"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "afficher le solde",
+                      "en": "show the balance"
+                    }
+                  },
+                  "id": "open-show"
+                }
+              }
+            },
+            "id": "open",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "À l’ouverture : le solde.",
+                  "en": "When it opens: the balance."
+                },
+                "pinned": true,
+                "width": 240,
+                "height": 64
+              }
+            },
+            "x": 40,
+            "y": 40
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "add"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": {
+                    "VAR": "total"
+                  },
+                  "inputs": {
+                    "DELTA": {
+                      "block": {
+                        "type": "math_arithmetic",
+                        "fields": {
+                          "OP": "MULTIPLY"
+                        },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "rx_TextInput_get",
+                              "fields": {
+                                "COMPONENT": "amount",
+                                "PROP": "text"
+                              },
+                              "id": "add-amount/a"
+                            }
+                          },
+                          "B": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 1
+                              },
+                              "id": "add-amount/b"
+                            }
+                          }
+                        },
+                        "id": "add-amount"
+                      }
+                    }
+                  },
+                  "id": "add-money",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "« × 1 » change le texte tapé en nombre.",
+                        "en": "“× 1” turns the typed text into a number."
+                      },
+                      "pinned": true,
+                      "width": 240,
+                      "height": 64
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "afficher le solde",
+                          "en": "show the balance"
+                        }
+                      },
+                      "id": "add-show",
+                      "next": {
+                        "block": {
+                          "type": "rx_TextInput_call_clear",
+                          "fields": {
+                            "COMPONENT": "amount"
+                          },
+                          "id": "add-clear"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "add",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Ajouter ce qui est tapé.",
+                  "en": "Add what is typed."
+                },
+                "pinned": true,
+                "width": 240,
+                "height": 64
+              }
+            },
+            "x": 40,
+            "y": 222
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "afficher le solde",
+                "en": "show the balance"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_Text_set",
+                  "fields": {
+                    "COMPONENT": "balance",
+                    "PROP": "text"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": {
+                          "itemCount": 2
+                        },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "total"
+                              },
+                              "id": "show-balance/value/add0"
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": " €"
+                              },
+                              "id": "show-balance/value/add1"
+                            }
+                          }
+                        },
+                        "id": "show-balance/value"
+                      }
+                    }
+                  },
+                  "id": "show-balance"
+                }
+              }
+            },
+            "id": "show",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Écrit le solde en grand.",
+                  "en": "Writes the balance in big."
+                },
+                "pinned": true,
+                "width": 240,
+                "height": 64
+              }
+            },
+            "x": 40,
+            "y": 496
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "add",
+      "target": "block:add"
+    },
+    {
+      "id": "number",
+      "target": "block:add-money"
+    },
+    {
+      "id": "show",
+      "target": "block:show"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:add-money",
+      "check": {
+        "kind": "stepped",
+        "id": "add-money"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "euros",
+      "block": "show-balance",
+      "check": {
+        "kind": "blockField",
+        "id": "show-balance/value/add1",
+        "field": "TEXT",
+        "not": " €"
+      }
+    },
+    {
+      "id": "toast",
+      "block": "add",
+      "check": {
+        "kind": "block",
+        "type": "rx_ui_toast",
+        "within": "add"
+      }
+    },
+    {
+      "id": "ten",
+      "block": "add-money",
+      "check": {
+        "kind": "all",
+        "of": [
+          {
+            "kind": "component",
+            "type": "Button",
+            "min": 2
+          },
+          {
+            "kind": "block",
+            "type": "math_change",
+            "min": 2
+          }
+        ]
+      }
+    }
+  ]
+}

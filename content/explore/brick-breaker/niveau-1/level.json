@@ -1,0 +1,535 @@
+{
+  "level": 1,
+  "recipe": {
+    "name": {
+      "fr": "Casse-briques 1",
+      "en": "Brick Breaker 1"
+    },
+    "mode": "junior",
+    "theme": {
+      "primary": "#e8590c",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [],
+    "screens": [
+      {
+        "key": "game",
+        "name": {
+          "fr": "Jeu",
+          "en": "Game"
+        },
+        "props": {
+          "padding": 0
+        },
+        "components": [
+          {
+            "key": "field",
+            "type": "GameScene",
+            "name": {
+              "fr": "Terrain",
+              "en": "Field"
+            },
+            "props": {
+              "background": "#14213d",
+              "edges": "bounce"
+            },
+            "children": [
+              {
+                "key": "ball",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Balle",
+                  "en": "Ball"
+                },
+                "props": {
+                  "costumes": ["⚽"],
+                  "x": 180,
+                  "y": 360,
+                  "width": 32,
+                  "height": 32,
+                  "collision": "circle"
+                }
+              },
+              {
+                "key": "paddle",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Raquette",
+                  "en": "Paddle"
+                },
+                "props": {
+                  "costumes": ["🛹"],
+                  "x": 180,
+                  "y": 580,
+                  "width": 90,
+                  "height": 44,
+                  "draggable": true,
+                  "edges": "stop"
+                }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_GameScene_on_start",
+            "fields": {
+              "COMPONENT": "field"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "lancer la balle",
+                      "en": "serve the ball"
+                    }
+                  },
+                  "id": "start-serve"
+                }
+              }
+            },
+            "id": "start",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Au départ, on lance la balle.",
+                  "en": "At the start, we serve the ball."
+                },
+                "pinned": true,
+                "width": 240,
+                "height": 64
+              }
+            },
+            "x": 40,
+            "y": 40
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "lancer la balle",
+                "en": "serve the ball"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_Sprite_call_goTo",
+                  "fields": {
+                    "COMPONENT": "ball"
+                  },
+                  "inputs": {
+                    "ARG0": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 180
+                        },
+                        "id": "serve-place/arg0"
+                      }
+                    },
+                    "ARG1": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 360
+                        },
+                        "id": "serve-place/arg1"
+                      }
+                    }
+                  },
+                  "id": "serve-place",
+                  "next": {
+                    "block": {
+                      "type": "rx_Sprite_set",
+                      "fields": {
+                        "COMPONENT": "ball",
+                        "PROP": "vx"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_random_int",
+                            "inputs": {
+                              "FROM": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": -150
+                                  },
+                                  "id": "serve-vx/value/from"
+                                }
+                              },
+                              "TO": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": 150
+                                  },
+                                  "id": "serve-vx/value/to"
+                                }
+                              }
+                            },
+                            "id": "serve-vx/value"
+                          }
+                        }
+                      },
+                      "id": "serve-vx",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "Un peu à gauche ou à droite, au hasard.",
+                            "en": "A little left or right, at random."
+                          },
+                          "pinned": true,
+                          "width": 240,
+                          "height": 64
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_Sprite_set",
+                          "fields": {
+                            "COMPONENT": "ball",
+                            "PROP": "vy"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 260
+                                },
+                                "id": "serve-vy/value"
+                              }
+                            }
+                          },
+                          "id": "serve-vy",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "Vers le bas : y grandit.",
+                                "en": "Downwards: y grows."
+                              },
+                              "pinned": true,
+                              "width": 240,
+                              "height": 64
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "serve",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Remet la balle au milieu et la lance.",
+                  "en": "Puts the ball in the middle and serves it."
+                },
+                "pinned": true,
+                "width": 240,
+                "height": 64
+              }
+            },
+            "x": 40,
+            "y": 222
+          },
+          {
+            "type": "rx_Sprite_on_hit",
+            "fields": {
+              "COMPONENT": "ball",
+              "FILTER": "paddle"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_set",
+                  "fields": {
+                    "COMPONENT": "ball",
+                    "PROP": "vy"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": -300
+                        },
+                        "id": "bounce-vy/value"
+                      }
+                    }
+                  },
+                  "id": "bounce-vy",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "Repart vers le haut.",
+                        "en": "Goes back up."
+                      },
+                      "pinned": true,
+                      "width": 240,
+                      "height": 64
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Sprite_set",
+                      "fields": {
+                        "COMPONENT": "ball",
+                        "PROP": "vx"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_arithmetic",
+                            "fields": {
+                              "OP": "MULTIPLY"
+                            },
+                            "inputs": {
+                              "A": {
+                                "block": {
+                                  "type": "math_arithmetic",
+                                  "fields": {
+                                    "OP": "MINUS"
+                                  },
+                                  "inputs": {
+                                    "A": {
+                                      "block": {
+                                        "type": "rx_Sprite_get",
+                                        "fields": {
+                                          "COMPONENT": "ball",
+                                          "PROP": "x"
+                                        },
+                                        "id": "bounce-vx/value/a/a"
+                                      }
+                                    },
+                                    "B": {
+                                      "block": {
+                                        "type": "rx_Sprite_get",
+                                        "fields": {
+                                          "COMPONENT": "paddle",
+                                          "PROP": "x"
+                                        },
+                                        "id": "bounce-vx/value/a/b"
+                                      }
+                                    }
+                                  },
+                                  "id": "bounce-vx/value/a"
+                                }
+                              },
+                              "B": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": 5
+                                  },
+                                  "id": "bounce-vx/value/b"
+                                }
+                              }
+                            },
+                            "id": "bounce-vx/value"
+                          }
+                        }
+                      },
+                      "id": "bounce-vx",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "Touchée sur le côté : elle part de côté.",
+                            "en": "Hit on the side: it goes sideways."
+                          },
+                          "pinned": true,
+                          "width": 240,
+                          "height": 64
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "bounce",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "La balle rebondit sur la raquette.",
+                  "en": "The ball bounces off the paddle."
+                },
+                "pinned": true,
+                "width": 240,
+                "height": 64
+              }
+            },
+            "x": 40,
+            "y": 496
+          },
+          {
+            "type": "rx_Sprite_on_edge",
+            "fields": {
+              "COMPONENT": "ball",
+              "FILTER": "bottom"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "lancer la balle",
+                      "en": "serve the ball"
+                    }
+                  },
+                  "id": "lost-serve"
+                }
+              }
+            },
+            "id": "lost",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Ratée : on relance.",
+                  "en": "Missed: serve again."
+                },
+                "pinned": true,
+                "width": 240,
+                "height": 64
+              }
+            },
+            "x": 40,
+            "y": 724
+          },
+          {
+            "type": "rx_Sprite_on_drag",
+            "fields": {
+              "COMPONENT": "paddle"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_set",
+                  "fields": {
+                    "COMPONENT": "paddle",
+                    "PROP": "y"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 580
+                        },
+                        "id": "follow-ground/value"
+                      }
+                    }
+                  },
+                  "id": "follow-ground"
+                }
+              }
+            },
+            "id": "follow",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "La raquette suit ton doigt, en restant en bas.",
+                  "en": "The paddle follows your finger, staying at the bottom."
+                },
+                "pinned": true,
+                "width": 240,
+                "height": 64
+              }
+            },
+            "x": 40,
+            "y": 906
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "serve",
+      "target": "block:serve"
+    },
+    {
+      "id": "bounce",
+      "target": "block:bounce"
+    },
+    {
+      "id": "side",
+      "target": "block:bounce-vx"
+    },
+    {
+      "id": "lost",
+      "target": "block:lost"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:bounce-vy",
+      "check": {
+        "kind": "stepped",
+        "id": "bounce-vy"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "faster",
+      "block": "serve-vy",
+      "check": {
+        "kind": "blockField",
+        "id": "serve-vy/value",
+        "field": "NUM",
+        "min": 350
+      }
+    },
+    {
+      "id": "strong",
+      "block": "bounce-vy",
+      "check": {
+        "kind": "blockField",
+        "id": "bounce-vy/value",
+        "field": "NUM",
+        "max": -400
+      }
+    },
+    {
+      "id": "spin",
+      "block": "bounce",
+      "check": {
+        "kind": "block",
+        "type": "rx_Sprite_call_turn",
+        "within": "bounce"
+      }
+    }
+  ]
+}

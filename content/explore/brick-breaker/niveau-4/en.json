@@ -1,0 +1,46 @@
+{
+  "title": "Speeds and a bonus",
+  "summary": "A menu to choose your speed, and a bonus heart that falls.",
+  "done": "You saw a menu on another screen, a speed variable and a bonus.",
+  "steps": {
+    "hello": {
+      "text": "In level 4, a **Menu** screen to choose the speed, and bonus hearts."
+    },
+    "menu": {
+      "text": "Pick the **Menu** screen: each button sets the **speed** variable, then opens the game. Then come back to **Game**."
+    },
+    "speed": {
+      "text": "The ball takes the speed chosen in the menu, instead of 260."
+    },
+    "gift": {
+      "text": "The **Gift** timer drops a bonus heart every 6 seconds."
+    },
+    "catch": {
+      "text": "Catch it with the paddle: one more life!"
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Wait for the heart: [create a clone of Bonus] lights up.",
+      "hint": "Wait a little, or click “Restart” in the preview."
+    },
+    "fast": {
+      "text": "Stop slow motion to play at normal speed."
+    }
+  },
+  "challenges": {
+    "easy": {
+      "text": "Make “Easy” even easier: 180 or less.",
+      "hint": "It is on the Menu screen."
+    },
+    "often": {
+      "text": "Drop a bonus every 4 seconds.",
+      "hint": "It is the interval of Gift, in “new game”."
+    },
+    "grow": {
+      "text": "The bonus also makes the paddle wider.",
+      "hint": "Set the width of Paddle to 130 when the bonus is caught."
+    }
+  }
+}

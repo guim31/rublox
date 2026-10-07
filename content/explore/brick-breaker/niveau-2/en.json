@@ -1,0 +1,43 @@
+{
+  "title": "The brick wall",
+  "summary": "Two loops, one inside the other, build a wall of 28 bricks.",
+  "done": "You saw two nested loops and clones.",
+  "steps": {
+    "hello": {
+      "text": "In level 2, a brick wall! Click **New** above the blocks to see what changed."
+    },
+    "wall": {
+      "text": "A **loop** repeats blocks. Here there are two: for each row (1 to 4), we make 7 columns."
+    },
+    "place": {
+      "text": "The position comes from the counters: x = col × 45, y = 60 + row × 40. Then we create a clone there."
+    },
+    "break": {
+      "text": "A brick hit by the ball is deleted, and the ball goes the other way."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Look: [create a clone of Brick] lights up 28 times, one brick at a time.",
+      "hint": "Wait a little, or click “Restart” in the preview."
+    },
+    "fast": {
+      "text": "Stop slow motion to play at normal speed."
+    }
+  },
+  "challenges": {
+    "rows": {
+      "text": "Build 5 rows instead of 4.",
+      "hint": "It is the outer loop: “from 1 to 4”."
+    },
+    "cols": {
+      "text": "Make 6 columns instead of 7.",
+      "hint": "It is the inner loop."
+    },
+    "spin": {
+      "text": "Make the ball turn when it breaks a brick.",
+      "hint": "Put [turn Ball by … degrees] in “when Brick touches Ball”."
+    }
+  }
+}

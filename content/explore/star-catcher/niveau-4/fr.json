@@ -1,0 +1,43 @@
+{
+  "title": "De plus en plus vite",
+  "summary": "La vitesse monte avec le score, le record est gardé sur le téléphone, et il y a des sons.",
+  "done": "Tu as vu un calcul de vitesse, une variable gardée sur le téléphone et des sons.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 4, ça va de plus en plus vite, ton record est gardé, et on entend des sons."
+    },
+    "speed": {
+      "text": "La vitesse est un calcul : 150 + score × 10. Avec 5 points, l’étoile tombe à 200."
+    },
+    "best": {
+      "text": "La variable **record** est *stockée* : le téléphone la garde, même quand on ferme l’appli. On la change seulement si le score est plus grand."
+    },
+    "sound": {
+      "text": "Un composant **Son** joue un petit bruit à chaque étoile attrapée."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** : les blocs vont s’allumer un par un pendant que le jeu tourne."
+    },
+    "watch": {
+      "text": "Regarde le bloc de vitesse s’allumer pour chaque nouvelle étoile.",
+      "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
+    },
+    "fast": {
+      "text": "Bien vu ! Arrête le ralenti pour rejouer à vitesse normale."
+    }
+  },
+  "challenges": {
+    "gentle": {
+      "text": "Accélère plus doucement : 5 par point au lieu de 10.",
+      "hint": "C’est le 10 du calcul de vitesse."
+    },
+    "quick": {
+      "text": "Fais démarrer les étoiles à 200 au lieu de 150.",
+      "hint": "C’est le 150 du calcul de vitesse."
+    },
+    "sad": {
+      "text": "Joue un son quand la partie est perdue.",
+      "hint": "Pose [jouer SonRate] dans le [si] de « vérifier si c’est perdu »."
+    }
+  }
+}

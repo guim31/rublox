@@ -1,0 +1,46 @@
+{
+  "title": "Un objectif",
+  "summary": "Un objectif d’épargne, une barre de progression et un pourcentage.",
+  "done": "Tu as vu un calcul de pourcentage et un « si … sinon ».",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 3, un objectif d’épargne et une barre qui se remplit."
+    },
+    "bar": {
+      "text": "Le **pourcentage** : solde ÷ objectif × 100. 10 € sur 20 €, c’est 50 : la barre est à moitié pleine."
+    },
+    "min": {
+      "text": "[limiter … entre 0 et 100] : la barre ne passe jamais sous 0 ni au-dessus de 100."
+    },
+    "reached": {
+      "text": "Si le solde atteint l’objectif, on fête ; sinon, on dit combien il manque."
+    },
+    "goal": {
+      "text": "Le bouton 🎯 change l’objectif, seulement si le nombre tapé est plus grand que 0."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Ajoute de l’argent : le bloc de la barre s’allume.",
+      "hint": "Tape un nombre dans l’aperçu, puis touche « + Ajouter »."
+    },
+    "fast": {
+      "text": "Arrête le ralenti."
+    }
+  },
+  "challenges": {
+    "party": {
+      "text": "Fête l’objectif atteint avec un message bref.",
+      "hint": "Dans la première branche du [si]."
+    },
+    "words": {
+      "text": "Écris ton propre message d’objectif atteint.",
+      "hint": "Change le texte « 🎉 Objectif atteint ! »."
+    },
+    "color": {
+      "text": "Change la couleur de la barre quand l’objectif est atteint.",
+      "hint": "[mettre couleur de BarreObjectif à …] dans le [si]."
+    }
+  }
+}

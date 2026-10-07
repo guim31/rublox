@@ -1,0 +1,43 @@
+{
+  "title": "Ajouter de l’argent",
+  "summary": "Une case, un bouton, et une variable « solde » qui grandit.",
+  "done": "Tu sais comment la tirelire ajoute ce que tu tapes.",
+  "steps": {
+    "hello": {
+      "text": "Voici **Ma tirelire** ! Tape un nombre dans l’aperçu et touche « + Ajouter »."
+    },
+    "add": {
+      "text": "Quand on touche « Ajouter », la variable **solde** grandit de ce qui est tapé."
+    },
+    "number": {
+      "text": "Ce qu’on tape est un **texte**. « × 1 » le change en **nombre** : sinon 2 + 3 ferait « 23 » !"
+    },
+    "show": {
+      "text": "La fonction écrit le solde suivi de « € »."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Ajoute de l’argent dans l’aperçu : [modifier solde de …] s’allume.",
+      "hint": "Tape un nombre dans l’aperçu, puis touche « + Ajouter »."
+    },
+    "fast": {
+      "text": "Arrête le ralenti."
+    }
+  },
+  "challenges": {
+    "euros": {
+      "text": "Écris « euros » (ou ta monnaie) au lieu de « € ».",
+      "hint": "C’est dans « afficher le solde »."
+    },
+    "toast": {
+      "text": "Montre un message bref quand tu ajoutes de l’argent.",
+      "hint": "Le bloc est dans la catégorie Interface."
+    },
+    "ten": {
+      "text": "Ajoute un bouton « +10 € » qui ajoute 10 au solde.",
+      "hint": "Pose un bouton dans Design, puis [quand … est cliqué] avec [modifier solde de 10]."
+    }
+  }
+}

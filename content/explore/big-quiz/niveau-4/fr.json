@@ -1,0 +1,49 @@
+{
+  "title": "Thèmes et mélange",
+  "summary": "Trois thèmes, des questions mélangées à chaque partie, et un record par thème.",
+  "done": "Tu as vu un vrai algorithme : le mélange de Fisher-Yates.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 4, on choisit un thème, les questions sont mélangées, et chaque thème a son record."
+    },
+    "load": {
+      "text": "Le thème est un numéro. Le thème 1 est chargé d’abord ; [si] le thème vaut 2 ou 3, ses listes le remplacent."
+    },
+    "fill": {
+      "text": "Pour mélanger, on ne bouge pas les questions : on fait une liste **ordre** : 1, 2, 3, 4, 5…"
+    },
+    "mix": {
+      "text": "… puis, de la dernière place à la 2ᵉ, on échange chaque place avec une place au hasard avant elle. C’est l’algorithme de **Fisher-Yates** : chaque ordre a autant de chances."
+    },
+    "pick": {
+      "text": "La question n° index est celle de l’ordre mélangé."
+    },
+    "record": {
+      "text": "La liste **records** est *stockée* : le téléphone garde un record par thème."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Regarde les échanges s’allumer : 4 échanges pour 5 questions.",
+      "hint": "Touche une réponse dans l’aperçu, ou clique sur « Redémarrer »."
+    },
+    "fast": {
+      "text": "Arrête le ralenti."
+    }
+  },
+  "challenges": {
+    "space": {
+      "text": "Ajoute une question au thème de l’espace.",
+      "hint": "Elles sont dans « choisir les questions »."
+    },
+    "three": {
+      "text": "Des parties de 3 questions : arrête après la 3ᵉ.",
+      "hint": "Dans « passer à la question suivante », compare l’index avec 3 au lieu de la longueur de la liste."
+    },
+    "cheer": {
+      "text": "Affiche « Nouveau record ! » quand il y en a un.",
+      "hint": "Un message bref dans le [si] du record."
+    }
+  }
+}
