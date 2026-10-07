@@ -16,7 +16,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J5 | Données et services : tables, variables, API web, cartes, graphiques | fait (PR #8), voir § 0.8 ; essai sur téléphones à faire (`docs/compatibilite.md`) |
 | J6 | Galerie, remix, modèles, assistant IA | fait (PR #10), voir § 0.7 |
 | J7 | Mode jeu : scène, lutins, physique | fait (PR #5), voir § 0.6 |
-| J8 | Finitions : accessibilité, performances, sécurité, mise en production | à faire |
+| J8 | Finitions : accessibilité, performances, sécurité, mise en production | fait (PR #12), voir § 0.10 ; version 1.0.0 |
 
 ### 0.1 Ce que le J0 a fixé (06/10/2026)
 
@@ -45,7 +45,8 @@ mise à jour de ce paragraphe.
   une capture d'image.
 - Motion n'est pas utilisé : animations CSS courtes, désactivées par `prefers-reduced-motion`.
 - L'extension de navigation au clavier de Blockly n'est pas installée (P1) ; Blockly 13 en
-  intègre déjà une partie.
+  intègre déjà une partie. *(J8 : Blockly 13 l'a intégrée entière ; ses raccourcis de saut et
+  de défilement sont enregistrés, voir § 0.10.)*
 - Les fonctions (blocs Fonctions) sont propres à un espace de travail ; les fonctions partagées
   par l'espace « Appli » restent à faire. Les variables stockées et partagées existent dans le
   format et le code généré (`stored`, `shared`) mais vivent en mémoire jusqu'au J5.
@@ -683,7 +684,8 @@ présence), fichiers des ressources recopiés quand on colle dans un autre proje
   coupé) ; les libellés de « Tester », « Partager » et « Publier » ne s'affichent en Junior
   qu'à partir de 1 536 px (icône et infobulle en dessous), comme le mot de l'état
   d'enregistrement (gardé pour les lecteurs d'écran) depuis l'onglet Données du J5. Le nom du
-  projet y reste écrasé à 1 440 px (antérieur, à reprendre au J8).
+  projet y reste écrasé à 1 440 px (antérieur, à reprendre au J8). *(J8 : sous 1 536 px, les
+  onglets Design, Blocs et Données de Junior n'ont plus d'icône ; le nom garde 144 px.)*
 
 **Défauts antérieurs corrigés au passage**
 
@@ -723,6 +725,82 @@ présence), fichiers des ressources recopiés quand on colle dans un autre proje
   par `session.assetUrl` ; coller des composants recopie les fichiers manquants dans le projet
   (`clipboard.ts`), un fichier pas encore arrivé est recherché à nouveau (1 s, 2 s…, 5 fois).
 - Chaînes du J4b : `packages/i18n/src/{fr,en}/collab.ts`, espace `studio`, préfixe `collab.`.
+
+### 0.10 Ce que le J8 a fixé (07/10/2026)
+
+**Fait** : audit de sécurité de toute la base (rapport dans la PR #12, tests dans
+`apps/server/test/audit.test.ts` et à côté de chaque domaine), axe sans violation sur toutes les
+pages et tous les dialogues (Junior et Studio, clair et sombre, origine des applis comprise) et
+sur l'appli de chacun des 12 modèles, blocs au clavier seul, mouvement réduit, budgets du § 7
+mesurés et tenus, tests instables corrigés, guide d'utilisation (`docs/guide/fr.md`, `en.md`),
+README, `CHANGELOG.md`, version 1.0.0 de tous les paquets.
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Navigation au clavier de Blockly** : l'extension officielle (`@blockly/keyboard-navigation`)
+  s'arrête à Blockly 12 ; Blockly 13 l'a intégrée. Le studio enregistre en plus ses raccourcis
+  de saut et de défilement (`registerNavigationShortcuts`). Tab atteint la boîte à outils, les
+  flèches choisissent, Entrée pose un bloc (deux fois : insérer, confirmer), un bloc posé quand
+  un autre est choisi s'y accroche. Les raccourcis sont listés dans un onglet « Clavier » de
+  l'aide (`help.keys`). Test : `e2e/keyboard.spec.ts`.
+- **Couleurs lisibles dans les applis** : le moteur écrit en blanc ou en presque noir sur une
+  couleur pleine (`textOn`, le meilleur contraste) et rend la couleur principale lisible quand
+  elle sert de texte (`--rx-primary-text`, `readableOn` : mélangée vers le blanc ou le noir
+  jusqu'à 4,5:1). Une couleur de texte choisie dans l'inspecteur l'emporte. Un ton moyen où ni le
+  blanc ni le noir n'atteint 4,5:1 reste possible pour un projet ; les modèles n'en ont plus.
+- **Menus non modaux** : un menu Radix modal masque le reste de la page (`aria-hidden`) autour
+  d'éléments encore atteignables ; Échap et un clic dehors les ferment toujours.
+- **Poids du studio** : mesuré sur tout ce que télécharge le tableau de bord (JavaScript et CSS,
+  gzip) : 447 Ko au départ, **281 Ko** à la fin. Chargés à la demande : les dialogues de nouveau
+  projet et de l'IA (modèles), les miniatures (rendus des composants, catalogue), les
+  modifications des projets invités et la création d'un projet du serveur (Yjs, Zod, catalogue),
+  la lecture d'une archive, le rapatriement, les démos, le client Better Auth (connexion et
+  déconnexion), et la langue qui n'est pas affichée (`@rublox/i18n/fr`, `/en`, `/locale`).
+  **Aperçu** : 128 ms (médiane, annuler et rétablir mesurés de l'éditeur jusqu'à l'aperçu).
+  **Propriété** : 5 à 8 ms de la saisie au canevas. Test : `e2e/budget-perf.spec.ts` (projet
+  `perf`).
+- **Sécurité, ce qui a changé de comportement** :
+  - fin d'une session (désactivation, nouveau mot de passe, suppression, déconnexion,
+    révocation) : les connexions `/ws/collab` du compte sont fermées et s'authentifient de
+    nouveau (`Collab.disconnectUser`) ; un onglet révoqué le voit tout de suite ;
+  - publier demande aussi le droit du **propriétaire** du projet (`membersCanPublish` ne se
+    contourne plus par un coéditeur) ;
+  - donner un projet coupe l'IA de l'appli publiée et le retire de la galerie ;
+  - la galerie coupée par l'administrateur ferme l'accès `gallery` ; un projet à la corbeille
+    refuse toute écriture (409 `in_trash`, sauf dépublier) ;
+  - le ticket de l'éditeur porte le compte, dont l'accès est revérifié à chaque usage (un
+    partage retiré le révoque) ;
+  - le relais refuse les en-têtes `Host` et de transport d'une connexion, les adresses publiques
+    des interfaces de la machine, les plages IPv6 de transition (`::/96`, 6to4, Teredo, NAT64
+    local) et les séparateurs encodés (`%2F`, `%5C`) ; une entrée mal formée de
+    `RUBLOX_RELAY_DENY` empêche le démarrage ;
+  - `/_rx/proxy` et `/_rx/ai` comptent le corps à mesure qu'il arrive ; `/_rx/ai` exige l'origine
+    des applis et compte une adresse IPv6 par /64 ; une question à l'IA réserve sa place dans le
+    quota avant d'être posée ;
+  - le studio envoie `Cross-Origin-Opener-Policy: same-origin` ; les messages de l'aperçu sont
+    vérifiés champ par champ ; le service worker d'une appli ne lit que son propre cache ; un lien
+    de test sur téléphone a un budget de messages et 20 téléphones au plus ; son jeton n'est
+    jamais journalisé ; `Permissions-Policy` n'annonce plus `web-share` (inconnu de Chrome),
+    l'attribut `allow` de l'iframe le garde.
+- **Limites connues, acceptées** (dans le rapport de la PR) : les applis d'une même origine
+  partagent leur stockage (§ 6.6) et peuvent donc encore écrire dans le cache d'une autre ; les
+  visiteurs d'un projet de la galerie reçoivent la présence de ses éditeurs (§ 0.9) ; le relais
+  d'une appli publiée est limité par projet (120 appels par minute), pas par visiteur ; le jeton
+  du ticket et des liens passe dans l'adresse de `/_rx/shared`.
+
+**Contrats pour la suite**
+
+- `requireProject(…, 'write')` refuse un projet à la corbeille ; `Collab.disconnectUser(id)` à
+  toute nouvelle façon de terminer une session ; `settingsOf(db)` donne les réglages là où seule
+  la base est passée.
+- Tickets de données : `exp.compte.signature` (`Tickets.issue(projet, compte)`).
+- Studio : `LinkButton` pour un lien en forme de bouton ; `Menu` non modal ; `setLanguage()` pour
+  changer de langue (charge ses chaînes) ; un module du premier téléchargement n'importe de
+  `@rublox/i18n` que `/locale`, ni aucune valeur de `@rublox/schema` (Zod suivrait).
+- Moteur : `textOn`, `readableOn`, `--rx-on-primary`, `--rx-on-secondary`, `--rx-primary-text`
+  (`theme.ts`).
+- Tests : `e2e/a11y-j8.spec.ts` (toute nouvelle page ou dialogue y entre), `e2e/keyboard.spec.ts`,
+  `e2e/budget-perf.spec.ts` (le budget casse la CI s'il est dépassé).
 
 ## 1. En bref
 
