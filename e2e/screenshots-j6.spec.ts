@@ -66,7 +66,7 @@ for (const [mode, theme] of VARIANTS) {
     const page = await open(browser, { mode, theme }, 'Camille')
     await page.goto('/')
     await page.getByRole('button', { name: 'Nouveau projet' }).first().click()
-    await page.getByRole('dialog').getByTestId('template-catch-star').click()
+    await page.getByRole('dialog').getByTestId('template-dice').click()
     await page.waitForTimeout(300)
     await page.screenshot({ path: `${DIR}/${mode}-${theme}-templates.png` })
 
