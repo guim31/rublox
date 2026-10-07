@@ -7,6 +7,8 @@ import {
   yDocToProject,
 } from '@rublox/schema'
 import type * as Y from 'yjs'
+import { currentUserId } from '../lib/session.ts'
+import { Presence } from './presence.ts'
 import {
   type DocSource,
   GuestSource,
@@ -28,6 +30,8 @@ export const BLOCKLY_ORIGIN = { name: 'blockly' }
 export class ProjectSession {
   readonly undo: Y.UndoManager
   readonly ydoc: Y.Doc
+  /** Who else has the project open (server projects only, SPEC § 4.9). */
+  readonly presence: Presence | null
   private doc: ProjectDoc
   private readonly listeners = new Set<() => void>()
   private readonly assetUrls = new Map<string, string>()
@@ -43,6 +47,8 @@ export class ProjectSession {
     this.doc = yDocToProject(ydoc)
     // Only this tab's edits: the others' (provider, cache) are not taken back.
     this.undo = createUndoManager(ydoc, [BLOCKLY_ORIGIN])
+    const awareness = source instanceof ServerSource ? source.provider.awareness : null
+    this.presence = awareness ? new Presence(awareness, currentUserId()) : null
     this.undo.on('stack-item-added', () => this.emit())
     this.undo.on('stack-item-popped', () => this.emit())
     ydoc.on('update', this.onUpdate)
@@ -136,6 +142,7 @@ export class ProjectSession {
     this.disposed = true
     this.ydoc.off('update', this.onUpdate)
     this.undo.destroy()
+    this.presence?.dispose()
     for (const url of this.assetUrls.values()) URL.revokeObjectURL(url)
     await this.source.close()
     this.ydoc.destroy()

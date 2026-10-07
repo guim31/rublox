@@ -60,6 +60,7 @@ import type { EditorTab } from '../routes/p.$projectId.tsx'
 import { addNewScreen } from './actions.ts'
 import { useDoc, useSaveState, useSession, useUndoState } from './context.tsx'
 import { useEditorNavigate } from './nav.ts'
+import { PresenceAvatars } from './presence-ui.tsx'
 import { LiveButton } from './publish/live-dialog.tsx'
 import { PublishDialog } from './publish/publish-dialog.tsx'
 import { TransferMenu } from './publish/transfer-menu.tsx'
@@ -143,6 +144,7 @@ export function TopBar({ projectId, tab, screenId }: Props) {
       </div>
       <SaveIndicator />
       <div className="flex-1" />
+      <PresenceAvatars projectId={projectId} />
       <IconButton
         label={t('commands.open')}
         shortcut="Mod+K"

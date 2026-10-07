@@ -1,5 +1,6 @@
 import { blocks as baseBlocks } from './blocks.ts'
 import { catalog } from './catalog.ts'
+import { collab } from './collab.ts'
 import { data } from './data.ts'
 import { j6 } from './gallery.ts'
 import { game } from './game.ts'
@@ -13,6 +14,7 @@ const studio = {
   game: game.studio,
   data: data.studio,
   ...j6.studio,
+  collab,
 }
 const blocks = { ...baseBlocks, game: game.blocks, data: data.blocks }
 const runtime = {

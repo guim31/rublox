@@ -326,3 +326,11 @@ svg[display="none"] {
     font-family: var(--font-ui);
   }
 }
+
+/* Presence (J4b): a person's colour, filled (white text) or as a line, lifted in the dark theme. */
+[style*="--peer"] {
+  --peer-line: var(--peer);
+}
+:root[data-theme="dark"] [style*="--peer"] {
+  --peer-line: color-mix(in srgb, var(--peer) 55%, white);
+}

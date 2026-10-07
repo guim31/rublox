@@ -14,6 +14,7 @@ import { addComponentOfType, moveComponentTo } from '../actions.ts'
 import { ComponentIcon } from '../component-icon.tsx'
 import { useAssetsVersion, useDoc, useSession } from '../context.tsx'
 import { useCanvasTableRows } from '../data/rows.ts'
+import { PeerSelections } from '../presence-ui.tsx'
 import { DEVICES, type Device, useEditor } from '../store.ts'
 import {
   axisOf,
@@ -99,6 +100,8 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     const s = stage.getBoundingClientRect()
     return { left: r.left - s.left, top: r.top - s.top, width: r.width, height: r.height }
   }, [])
+
+  const peerBoxOf = useCallback((id: ComponentId) => boxOf(elementOf(id)), [boxOf, elementOf])
 
   /** A game scene's stage on screen: its rectangle, scale, and pointer → scene units. */
   const sceneGeometry = useCallback(
@@ -440,6 +443,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
                 />
               </div>
             ) : null}
+            <PeerSelections screenId={screenId} boxOf={peerBoxOf} />
             <Overlay
               boxes={boxes}
               drop={drop?.line}
