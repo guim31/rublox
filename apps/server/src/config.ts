@@ -57,6 +57,10 @@ const envSchema = z.object({
   RUBLOX_ADMIN_USERNAME: optionalString,
   RUBLOX_ADMIN_PASSWORD: optionalString,
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).optional(),
+  /** Turns the AI assistant on (J6). Never in the repository, never in the logs. */
+  ANTHROPIC_API_KEY: optionalString,
+  RUBLOX_AI_MODEL: optionalString,
+  RUBLOX_AI_FAST_MODEL: optionalString,
   STUDIO_DIST: optionalString,
   PLAYER_DIST: optionalString,
 })
@@ -86,10 +90,25 @@ export interface Config {
   /** First start only: the administrator account created when the database has no account. */
   admin: { username: string; password: string } | undefined
   logLevel: LogLevel
+  /** The AI assistant: absent without `ANTHROPIC_API_KEY` (no trace of it in the studio). */
+  ai: AiConfig | undefined
   studioDist: string
   playerDist: string
   migrationsFolder: string
 }
+
+/**
+ * Models of the AI assistant (SPEC § 6.10): `model` builds apps, `fastModel` explains,
+ * debugs and answers the AI component of apps (short answers, many of them).
+ */
+export interface AiConfig {
+  apiKey: string
+  model: string
+  fastModel: string
+}
+
+export const DEFAULT_AI_MODEL = 'claude-opus-5-5'
+export const DEFAULT_AI_FAST_MODEL = 'claude-haiku-4-5'
 
 export class ConfigError extends Error {
   override name = 'ConfigError'
@@ -162,6 +181,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
         ? { username: e.RUBLOX_ADMIN_USERNAME, password: e.RUBLOX_ADMIN_PASSWORD }
         : undefined,
     logLevel: e.LOG_LEVEL ?? (e.NODE_ENV === 'test' ? 'silent' : 'info'),
+    ai: e.ANTHROPIC_API_KEY
+      ? {
+          apiKey: e.ANTHROPIC_API_KEY,
+          model: e.RUBLOX_AI_MODEL ?? DEFAULT_AI_MODEL,
+          fastModel: e.RUBLOX_AI_FAST_MODEL ?? DEFAULT_AI_FAST_MODEL,
+        }
+      : undefined,
     studioDist: e.STUDIO_DIST ? resolve(e.STUDIO_DIST) : defaultStudioDist,
     playerDist: e.PLAYER_DIST ? resolve(e.PLAYER_DIST) : defaultPlayerDist,
     migrationsFolder,

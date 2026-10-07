@@ -58,13 +58,15 @@ export async function requireManagedAccount(
   return target
 }
 
-export type ProjectAccess = 'owner' | 'editor' | 'viewer' | 'manager'
+/** `gallery`: anyone signed in, read-only, on a project shared in the gallery (J6). */
+export type ProjectAccess = 'owner' | 'editor' | 'viewer' | 'manager' | 'gallery'
 
 export const canWrite = (access: ProjectAccess) => access === 'owner' || access === 'editor'
 
 /**
  * What `userId` may do with a project: its owner; an account it is shared with (`editor` or
- * `viewer`); or a manager of a space where the owner is a member (`manager`: read-only).
+ * `viewer`); a manager of a space where the owner is a member (`manager`: read-only); or
+ * anyone when it is shared in the gallery (`gallery`: read-only, "See the blocks").
  */
 export async function projectAccess(db: Database, userId: string, projectId: string) {
   const [project] = await db.select().from(projects).where(eq(projects.id, projectId))
@@ -90,19 +92,34 @@ export async function projectAccess(db: Database, userId: string, projectId: str
     .where(and(eq(member.userId, project.ownerId), eq(member.role, 'member')))
     .limit(1)
   if (managed) return { project, access: 'manager' as ProjectAccess }
+  if (inGallery(project)) return { project, access: 'gallery' as ProjectAccess }
   return null
 }
 
-/** The project and the caller's access, or 404 (also when the access is too low to know). */
+/**
+ * The project and the caller's access, or 404 (also when the access is too low to know).
+ * `view` lets anyone see a gallery project (open it read-only, remix it); `read` is for the
+ * people it is shared with (versions, members…).
+ */
 export async function requireProject(
   db: Database,
   userId: string,
   projectId: string,
-  need: 'read' | 'write' | 'owner',
+  need: 'view' | 'read' | 'write' | 'owner',
 ) {
   const found = await projectAccess(db, userId, projectId)
   if (!found) fail(404, 'not_found')
+  if (need === 'read' && found.access === 'gallery') fail(404, 'not_found')
   if (need === 'write' && !canWrite(found.access)) fail(403, 'forbidden')
   if (need === 'owner' && found.access !== 'owner') fail(403, 'forbidden')
   return found
+}
+
+/** Shared in the gallery, and not taken out of it nor thrown away. */
+export function inGallery(project: {
+  visibility: string
+  deletedAt: Date | null
+  galleryRemovedAt: Date | null
+}): boolean {
+  return project.visibility === 'gallery' && !project.deletedAt && !project.galleryRemovedAt
 }

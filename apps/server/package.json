@@ -21,12 +21,14 @@
     "@rublox/catalog": "workspace:*",
     "@rublox/config": "workspace:*",
     "@rublox/schema": "workspace:*",
+    "@rublox/templates": "workspace:*",
     "@types/ws": "^8.18.2",
     "drizzle-kit": "0.31.11",
     "esbuild": "0.28.2",
     "tsx": "4.23.15"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.131.0",
     "@better-auth/passkey": "1.7.7",
     "@electric-sql/pglite": "0.5.8",
     "@hocuspocus/server": "4.7.0",

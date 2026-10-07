@@ -1,0 +1,144 @@
+{
+  "id": "dice",
+  "order": 1,
+  "mode": "junior",
+  "icon": "🎲",
+  "accent": "indigo",
+  "recipe": {
+    "name": { "fr": "Lance le dé", "en": "Roll the dice" },
+    "theme": { "primary": "#5b4bff" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 24, "gap": 24, "alignItems": "center", "justify": "center" },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": {
+                "fr": "Touche le bouton pour lancer le dé",
+                "en": "Tap the button to roll the dice"
+              },
+              "align": "center",
+              "fontSize": 20,
+              "bold": true
+            }
+          },
+          {
+            "key": "face",
+            "type": "Text",
+            "name": { "fr": "Face", "en": "Face" },
+            "props": { "text": "🎲", "fontSize": 120, "align": "center" }
+          },
+          {
+            "key": "result",
+            "type": "Text",
+            "name": { "fr": "Resultat", "en": "Result" },
+            "props": { "text": "", "fontSize": 24, "align": "center" }
+          },
+          {
+            "key": "roll",
+            "type": "Button",
+            "name": { "fr": "Lancer", "en": "Roll" },
+            "props": { "text": { "fr": "Lancer le dé", "en": "Roll the dice" }, "fontSize": 20 }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "roll" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": { "VAR": "number" },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_random_int",
+                        "inputs": {
+                          "FROM": { "block": { "type": "math_number", "fields": { "NUM": 1 } } },
+                          "TO": { "block": { "type": "math_number", "fields": { "NUM": 6 } } }
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Text_set",
+                      "fields": { "COMPONENT": "face", "PROP": "text" },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "lists_getIndex",
+                            "fields": { "MODE": "GET", "WHERE": "FROM_START" },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "lists_split",
+                                  "fields": { "MODE": "SPLIT" },
+                                  "inputs": {
+                                    "INPUT": {
+                                      "block": {
+                                        "type": "text",
+                                        "fields": { "TEXT": "⚀,⚁,⚂,⚃,⚄,⚅" }
+                                      }
+                                    },
+                                    "DELIM": {
+                                      "block": { "type": "text", "fields": { "TEXT": "," } }
+                                    }
+                                  }
+                                }
+                              },
+                              "AT": {
+                                "block": { "type": "variables_get", "fields": { "VAR": "number" } }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_Text_set",
+                          "fields": { "COMPONENT": "result", "PROP": "text" },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "text_join",
+                                "extraState": { "itemCount": 2 },
+                                "inputs": {
+                                  "ADD0": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": { "fr": "Tu as fait ", "en": "You rolled " }
+                                      }
+                                    }
+                                  },
+                                  "ADD1": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": { "VAR": "number" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [{ "key": "number", "name": { "fr": "nombre", "en": "number" }, "initial": 1 }]
+  }
+}

@@ -34,10 +34,17 @@ export type ErrorCode =
   | 'in_trash'
   | 'wrong_password'
   | 'last_admin'
+  // J6: gallery and AI assistant
+  | 'gallery_disabled'
+  | 'gallery_forbidden'
+  | 'gallery_removed'
+  | 'ai_forbidden'
+  | 'ai_quota'
+  | 'ai_failed'
 
 /** Stops the request with a JSON error: `{ error: code }`. Never 401 (SPEC § 6.9). */
 export function fail(
-  status: 400 | 403 | 404 | 409 | 410 | 413 | 415 | 429,
+  status: 400 | 403 | 404 | 409 | 410 | 413 | 415 | 429 | 502,
   code: ErrorCode,
 ): never {
   throw new HTTPException(status, { res: Response.json({ error: code }, { status }) })

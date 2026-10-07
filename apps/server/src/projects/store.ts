@@ -35,6 +35,7 @@ export async function storeDoc(
       name: doc.meta.name.slice(0, 80) || '…',
       description: doc.meta.description ?? null,
       preview: previewOf(doc),
+      uiMode: doc.meta.mode,
       updatedAt: now,
     })
     .where(eq(projects.id, projectId))

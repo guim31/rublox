@@ -1,0 +1,41 @@
+{
+  "name": "Qui fait la vaisselle ?",
+  "summary": "Écris les prénoms séparés par des virgules, puis touche « Tirer au sort » : l’appli choisit qui fait la vaisselle.",
+  "navigation": "stack",
+  "primaryColor": "#ff6b5c",
+  "variables": [],
+  "screens": [
+    {
+      "name": "Accueil",
+      "propsJson": "{\"padding\": 24, \"gap\": 16}",
+      "components": [
+        {
+          "name": "Titre",
+          "type": "Text",
+          "parent": "",
+          "propsJson": "{\"text\": \"Qui fait la vaisselle ?\", \"fontSize\": 28, \"bold\": true, \"align\": \"center\"}"
+        },
+        {
+          "name": "Noms",
+          "type": "TextInput",
+          "parent": "",
+          "propsJson": "{\"placeholder\": \"Léa, Tom, Papa\"}"
+        },
+        {
+          "name": "Tirer",
+          "type": "Button",
+          "parent": "",
+          "propsJson": "{\"text\": \"Tirer au sort\"}"
+        },
+        {
+          "name": "Gagnant",
+          "type": "Text",
+          "parent": "",
+          "propsJson": "{\"text\": \"\", \"fontSize\": 40, \"align\": \"center\"}"
+        }
+      ],
+      "blocksJson": "[{\"type\": \"rx_Button_on_click\", \"fields\": {\"COMPONENT\": \"Tirer\"}, \"inputs\": {\"DO\": {\"block\": {\"type\": \"rx_Text_set\", \"fields\": {\"COMPONENT\": \"Gagnant\", \"PROP\": \"text\"}, \"inputs\": {\"VALUE\": {\"block\": {\"type\": \"lists_getIndex\", \"fields\": {\"MODE\": \"GET\", \"WHERE\": \"RANDOM\"}, \"inputs\": {\"VALUE\": {\"block\": {\"type\": \"lists_split\", \"fields\": {\"MODE\": \"SPLIT\"}, \"inputs\": {\"INPUT\": {\"block\": {\"type\": \"rx_TextInput_get\", \"fields\": {\"COMPONENT\": \"Noms\", \"PROP\": \"text\"}}}, \"DELIM\": {\"block\": {\"type\": \"text\", \"fields\": {\"TEXT\": \",\"}}}}}}}}}}, \"next\": {\"block\": {\"type\": \"rx_ui_toast\", \"inputs\": {\"MESSAGE\": {\"block\": {\"type\": \"text\", \"fields\": {\"TEXT\": \"Bonne vaisselle !\"}}}}}}}}}}]"
+    }
+  ],
+  "appBlocksJson": "[]"
+}

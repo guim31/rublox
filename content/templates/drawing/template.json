@@ -1,0 +1,363 @@
+{
+  "id": "drawing",
+  "order": 6,
+  "mode": "junior",
+  "icon": "🎨",
+  "accent": "coral",
+  "recipe": {
+    "name": { "fr": "Mon carnet de dessin", "en": "My sketchbook" },
+    "theme": { "primary": "#e8590c", "font": "rounded" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 16, "gap": 14 },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "🎨 Mon carnet de dessin", "en": "🎨 My sketchbook" },
+              "fontSize": 24,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "sheet",
+            "type": "Canvas",
+            "name": { "fr": "Feuille", "en": "Sheet" },
+            "props": { "height": 380, "penColor": "#1c7ed6", "penWidth": 8 }
+          },
+          {
+            "key": "palette",
+            "type": "Row",
+            "name": { "fr": "Palette", "en": "Palette" },
+            "props": { "justify": "center", "gap": 6, "wrap": true },
+            "children": [
+              {
+                "key": "red",
+                "type": "Icon",
+                "name": { "fr": "Rouge", "en": "Red" },
+                "props": {
+                  "icon": "droplet",
+                  "color": "#e03131",
+                  "size": 40,
+                  "label": { "fr": "Rouge", "en": "Red" }
+                }
+              },
+              {
+                "key": "orange",
+                "type": "Icon",
+                "name": { "fr": "Orange", "en": "Orange" },
+                "props": {
+                  "icon": "droplet",
+                  "color": "#f76707",
+                  "size": 40,
+                  "label": { "fr": "Orange", "en": "Orange" }
+                }
+              },
+              {
+                "key": "yellow",
+                "type": "Icon",
+                "name": { "fr": "Jaune", "en": "Yellow" },
+                "props": {
+                  "icon": "droplet",
+                  "color": "#fcc419",
+                  "size": 40,
+                  "label": { "fr": "Jaune", "en": "Yellow" }
+                }
+              },
+              {
+                "key": "green",
+                "type": "Icon",
+                "name": { "fr": "Vert", "en": "Green" },
+                "props": {
+                  "icon": "droplet",
+                  "color": "#2f9e44",
+                  "size": 40,
+                  "label": { "fr": "Vert", "en": "Green" }
+                }
+              },
+              {
+                "key": "blue",
+                "type": "Icon",
+                "name": { "fr": "Bleu", "en": "Blue" },
+                "props": {
+                  "icon": "droplet",
+                  "color": "#1c7ed6",
+                  "size": 40,
+                  "label": { "fr": "Bleu", "en": "Blue" }
+                }
+              },
+              {
+                "key": "purple",
+                "type": "Icon",
+                "name": { "fr": "Violet", "en": "Purple" },
+                "props": {
+                  "icon": "droplet",
+                  "color": "#9c36b5",
+                  "size": 40,
+                  "label": { "fr": "Violet", "en": "Purple" }
+                }
+              },
+              {
+                "key": "black",
+                "type": "Icon",
+                "name": { "fr": "Noir", "en": "Black" },
+                "props": {
+                  "icon": "droplet",
+                  "color": "#212529",
+                  "size": 40,
+                  "label": { "fr": "Noir", "en": "Black" }
+                }
+              }
+            ]
+          },
+          {
+            "key": "tools",
+            "type": "Row",
+            "name": { "fr": "Outils", "en": "Tools" },
+            "props": { "justify": "center", "gap": 8 },
+            "children": [
+              {
+                "key": "pen",
+                "type": "Icon",
+                "name": { "fr": "Crayon", "en": "Pen" },
+                "props": { "icon": "brush", "color": "#1c7ed6", "size": 32 }
+              },
+              {
+                "key": "thin",
+                "type": "Button",
+                "name": { "fr": "Fin", "en": "Thin" },
+                "props": { "text": { "fr": "Fin", "en": "Thin" }, "variant": "outline" }
+              },
+              {
+                "key": "thick",
+                "type": "Button",
+                "name": { "fr": "Gros", "en": "Thick" },
+                "props": { "text": { "fr": "Gros", "en": "Thick" }, "variant": "outline" }
+              },
+              {
+                "key": "clear",
+                "type": "Button",
+                "name": { "fr": "Effacer", "en": "Clear" },
+                "props": { "text": { "fr": "Effacer", "en": "Clear" } }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Icon_on_click",
+            "fields": { "COMPONENT": "red" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penColor" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#e03131" } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Icon_set",
+                      "fields": { "COMPONENT": "pen", "PROP": "color" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#e03131" } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Icon_on_click",
+            "fields": { "COMPONENT": "orange" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penColor" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#f76707" } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Icon_set",
+                      "fields": { "COMPONENT": "pen", "PROP": "color" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#f76707" } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Icon_on_click",
+            "fields": { "COMPONENT": "yellow" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penColor" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#fcc419" } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Icon_set",
+                      "fields": { "COMPONENT": "pen", "PROP": "color" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#fcc419" } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Icon_on_click",
+            "fields": { "COMPONENT": "green" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penColor" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#2f9e44" } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Icon_set",
+                      "fields": { "COMPONENT": "pen", "PROP": "color" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#2f9e44" } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Icon_on_click",
+            "fields": { "COMPONENT": "blue" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penColor" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#1c7ed6" } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Icon_set",
+                      "fields": { "COMPONENT": "pen", "PROP": "color" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#1c7ed6" } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Icon_on_click",
+            "fields": { "COMPONENT": "purple" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penColor" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#9c36b5" } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Icon_set",
+                      "fields": { "COMPONENT": "pen", "PROP": "color" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#9c36b5" } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Icon_on_click",
+            "fields": { "COMPONENT": "black" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penColor" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#212529" } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Icon_set",
+                      "fields": { "COMPONENT": "pen", "PROP": "color" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "text", "fields": { "TEXT": "#212529" } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "thin" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penWidth" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 4 } } }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "thick" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Canvas_set",
+                  "fields": { "COMPONENT": "sheet", "PROP": "penWidth" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 18 } } }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "clear" },
+            "inputs": {
+              "DO": {
+                "block": { "type": "rx_Canvas_call_clear", "fields": { "COMPONENT": "sheet" } }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

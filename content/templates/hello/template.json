@@ -1,0 +1,187 @@
+{
+  "id": "hello",
+  "order": 7,
+  "mode": "junior",
+  "icon": "👋",
+  "accent": "yellow",
+  "recipe": {
+    "name": { "fr": "Dis bonjour", "en": "Say hello" },
+    "theme": { "primary": "#f08c00", "font": "rounded" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 24, "gap": 16, "justify": "center" },
+        "components": [
+          {
+            "key": "wave",
+            "type": "Text",
+            "name": { "fr": "Main", "en": "Hand" },
+            "props": { "text": "👋", "fontSize": 88, "align": "center" }
+          },
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "Comment tu t’appelles ?", "en": "What’s your name?" },
+              "fontSize": 26,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "name",
+            "type": "TextInput",
+            "name": { "fr": "Prenom", "en": "FirstName" },
+            "props": {
+              "placeholder": { "fr": "Ton prénom", "en": "Your first name" },
+              "fontSize": 20,
+              "padding": 12
+            }
+          },
+          {
+            "key": "hello",
+            "type": "Button",
+            "name": { "fr": "Bonjour", "en": "Hello" },
+            "props": { "text": { "fr": "Dis bonjour", "en": "Say hello" }, "fontSize": 20 }
+          },
+          {
+            "key": "answer",
+            "type": "Text",
+            "name": { "fr": "Reponse", "en": "Answer" },
+            "props": {
+              "text": "",
+              "fontSize": 32,
+              "bold": true,
+              "color": "@primary",
+              "align": "center"
+            }
+          },
+          { "key": "voice", "type": "TextToSpeech", "name": { "fr": "Voix", "en": "Voice" } }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "hello" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "controls_if",
+                  "extraState": { "hasElse": true },
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "fields": { "OP": "EQ" },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "text_length",
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "rx_TextInput_get",
+                                    "fields": { "COMPONENT": "name", "PROP": "text" }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "B": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_ui_toast",
+                        "inputs": {
+                          "MESSAGE": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Écris d’abord ton prénom !",
+                                  "en": "Type your first name first!"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ELSE": {
+                      "block": {
+                        "type": "variables_set",
+                        "fields": { "VAR": "greeting" },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "text_join",
+                              "extraState": { "itemCount": 3 },
+                              "inputs": {
+                                "ADD0": {
+                                  "block": {
+                                    "type": "text",
+                                    "fields": { "TEXT": { "fr": "Bonjour ", "en": "Hello " } }
+                                  }
+                                },
+                                "ADD1": {
+                                  "block": {
+                                    "type": "rx_TextInput_get",
+                                    "fields": { "COMPONENT": "name", "PROP": "text" }
+                                  }
+                                },
+                                "ADD2": {
+                                  "block": {
+                                    "type": "text",
+                                    "fields": { "TEXT": { "fr": " !", "en": "!" } }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "rx_Text_set",
+                            "fields": { "COMPONENT": "answer", "PROP": "text" },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": { "VAR": "greeting" }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "rx_TextToSpeech_call_say",
+                                "fields": { "COMPONENT": "voice" },
+                                "inputs": {
+                                  "ARG0": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": { "VAR": "greeting" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      { "key": "greeting", "name": { "fr": "message", "en": "greeting" }, "initial": "" }
+    ]
+  }
+}

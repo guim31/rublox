@@ -1,0 +1,620 @@
+{
+  "id": "catch-star",
+  "order": 12,
+  "mode": "junior",
+  "icon": "⭐",
+  "accent": "mint",
+  "recipe": {
+    "name": { "fr": "Attrape l’étoile", "en": "Catch the star" },
+    "theme": { "primary": "#7048e8", "font": "rounded" },
+    "screens": [
+      {
+        "key": "game",
+        "name": { "fr": "Jeu", "en": "Game" },
+        "props": { "padding": 0 },
+        "components": [
+          {
+            "key": "sky",
+            "type": "GameScene",
+            "name": { "fr": "Ciel", "en": "Sky" },
+            "props": { "background": "#1b1f4b" },
+            "children": [
+              {
+                "key": "moon",
+                "type": "Sprite",
+                "name": { "fr": "Lune", "en": "Moon" },
+                "props": {
+                  "costumes": ["🌙"],
+                  "x": 300,
+                  "y": 120,
+                  "width": 72,
+                  "height": 72,
+                  "collision": "none",
+                  "opacity": 80
+                }
+              },
+              {
+                "key": "star",
+                "type": "Sprite",
+                "name": { "fr": "Etoile", "en": "Star" },
+                "props": { "costumes": ["⭐"], "x": 180, "y": 360, "width": 80, "height": 80 }
+              },
+              {
+                "key": "scoreText",
+                "type": "SceneText",
+                "name": { "fr": "Score", "en": "Score" },
+                "props": {
+                  "text": { "fr": "Score : 0", "en": "Score: 0" },
+                  "x": 20,
+                  "y": 40,
+                  "align": "left",
+                  "color": "#ffffff"
+                }
+              },
+              {
+                "key": "timeText",
+                "type": "SceneText",
+                "name": { "fr": "Temps", "en": "Time" },
+                "props": { "text": "⏱ 30", "x": 340, "y": 40, "align": "right", "color": "#ffe066" }
+              }
+            ]
+          },
+          {
+            "key": "clock",
+            "type": "Timer",
+            "name": { "fr": "Chrono", "en": "Clock" },
+            "props": { "interval": 1, "repeat": true, "autostart": false }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_GameScene_on_start",
+            "fields": { "COMPONENT": "sky" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": { "VAR": "score" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": { "VAR": "timeLeft" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 30 } } }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_SceneText_set",
+                          "fields": { "COMPONENT": "scoreText", "PROP": "text" },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "text_join",
+                                "extraState": { "itemCount": 2 },
+                                "inputs": {
+                                  "ADD0": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": { "TEXT": { "fr": "Score : ", "en": "Score: " } }
+                                    }
+                                  },
+                                  "ADD1": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": { "VAR": "score" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "rx_SceneText_set",
+                              "fields": { "COMPONENT": "timeText", "PROP": "text" },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "text_join",
+                                    "extraState": { "itemCount": 2 },
+                                    "inputs": {
+                                      "ADD0": {
+                                        "block": { "type": "text", "fields": { "TEXT": "⏱ " } }
+                                      },
+                                      "ADD1": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": { "VAR": "timeLeft" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "rx_Sprite_set",
+                                  "fields": { "COMPONENT": "star", "PROP": "visible" },
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "logic_boolean",
+                                        "fields": { "BOOL": "TRUE" }
+                                      }
+                                    }
+                                  },
+                                  "next": {
+                                    "block": {
+                                      "type": "rx_Sprite_call_goTo",
+                                      "fields": { "COMPONENT": "star" },
+                                      "inputs": {
+                                        "ARG0": {
+                                          "block": {
+                                            "type": "math_random_int",
+                                            "inputs": {
+                                              "FROM": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": { "NUM": 40 }
+                                                }
+                                              },
+                                              "TO": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": { "NUM": 320 }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "ARG1": {
+                                          "block": {
+                                            "type": "math_random_int",
+                                            "inputs": {
+                                              "FROM": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": { "NUM": 120 }
+                                                }
+                                              },
+                                              "TO": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": { "NUM": 600 }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "next": {
+                                        "block": {
+                                          "type": "rx_Timer_call_start",
+                                          "fields": { "COMPONENT": "clock" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Sprite_on_tap",
+            "fields": { "COMPONENT": "star" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "controls_if",
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "fields": { "OP": "GT" },
+                        "inputs": {
+                          "A": {
+                            "block": { "type": "variables_get", "fields": { "VAR": "timeLeft" } }
+                          },
+                          "B": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "math_change",
+                        "fields": { "VAR": "score" },
+                        "inputs": {
+                          "DELTA": { "block": { "type": "math_number", "fields": { "NUM": 1 } } }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "rx_SceneText_set",
+                            "fields": { "COMPONENT": "scoreText", "PROP": "text" },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "text_join",
+                                  "extraState": { "itemCount": 2 },
+                                  "inputs": {
+                                    "ADD0": {
+                                      "block": {
+                                        "type": "text",
+                                        "fields": { "TEXT": { "fr": "Score : ", "en": "Score: " } }
+                                      }
+                                    },
+                                    "ADD1": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": { "VAR": "score" }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "rx_Sprite_call_turn",
+                                "fields": { "COMPONENT": "star" },
+                                "inputs": {
+                                  "ARG0": {
+                                    "block": { "type": "math_number", "fields": { "NUM": 45 } }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "rx_Sprite_call_goTo",
+                                    "fields": { "COMPONENT": "star" },
+                                    "inputs": {
+                                      "ARG0": {
+                                        "block": {
+                                          "type": "math_random_int",
+                                          "inputs": {
+                                            "FROM": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 40 }
+                                              }
+                                            },
+                                            "TO": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 320 }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "ARG1": {
+                                        "block": {
+                                          "type": "math_random_int",
+                                          "inputs": {
+                                            "FROM": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 120 }
+                                              }
+                                            },
+                                            "TO": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 600 }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Timer_on_tick",
+            "fields": { "COMPONENT": "clock" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": { "VAR": "timeLeft" },
+                  "inputs": {
+                    "DELTA": { "block": { "type": "math_number", "fields": { "NUM": -1 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_SceneText_set",
+                      "fields": { "COMPONENT": "timeText", "PROP": "text" },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_join",
+                            "extraState": { "itemCount": 2 },
+                            "inputs": {
+                              "ADD0": { "block": { "type": "text", "fields": { "TEXT": "⏱ " } } },
+                              "ADD1": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": { "VAR": "timeLeft" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "controls_if",
+                          "inputs": {
+                            "IF0": {
+                              "block": {
+                                "type": "logic_compare",
+                                "fields": { "OP": "LTE" },
+                                "inputs": {
+                                  "A": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": { "VAR": "timeLeft" }
+                                    }
+                                  },
+                                  "B": {
+                                    "block": { "type": "math_number", "fields": { "NUM": 0 } }
+                                  }
+                                }
+                              }
+                            },
+                            "DO0": {
+                              "block": {
+                                "type": "rx_Timer_call_stop",
+                                "fields": { "COMPONENT": "clock" },
+                                "next": {
+                                  "block": {
+                                    "type": "rx_Sprite_set",
+                                    "fields": { "COMPONENT": "star", "PROP": "visible" },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "logic_boolean",
+                                          "fields": { "BOOL": "FALSE" }
+                                        }
+                                      }
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "rx_ui_alert",
+                                        "inputs": {
+                                          "MESSAGE": {
+                                            "block": {
+                                              "type": "text_join",
+                                              "extraState": { "itemCount": 2 },
+                                              "inputs": {
+                                                "ADD0": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Temps écoulé ! Ton score : ",
+                                                        "en": "Time’s up! Your score: "
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "ADD1": {
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "fields": { "VAR": "score" }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "variables_set",
+                                            "fields": { "VAR": "score" },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": { "NUM": 0 }
+                                                }
+                                              }
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "variables_set",
+                                                "fields": { "VAR": "timeLeft" },
+                                                "inputs": {
+                                                  "VALUE": {
+                                                    "block": {
+                                                      "type": "math_number",
+                                                      "fields": { "NUM": 30 }
+                                                    }
+                                                  }
+                                                },
+                                                "next": {
+                                                  "block": {
+                                                    "type": "rx_SceneText_set",
+                                                    "fields": {
+                                                      "COMPONENT": "scoreText",
+                                                      "PROP": "text"
+                                                    },
+                                                    "inputs": {
+                                                      "VALUE": {
+                                                        "block": {
+                                                          "type": "text_join",
+                                                          "extraState": { "itemCount": 2 },
+                                                          "inputs": {
+                                                            "ADD0": {
+                                                              "block": {
+                                                                "type": "text",
+                                                                "fields": {
+                                                                  "TEXT": {
+                                                                    "fr": "Score : ",
+                                                                    "en": "Score: "
+                                                                  }
+                                                                }
+                                                              }
+                                                            },
+                                                            "ADD1": {
+                                                              "block": {
+                                                                "type": "variables_get",
+                                                                "fields": { "VAR": "score" }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "next": {
+                                                      "block": {
+                                                        "type": "rx_SceneText_set",
+                                                        "fields": {
+                                                          "COMPONENT": "timeText",
+                                                          "PROP": "text"
+                                                        },
+                                                        "inputs": {
+                                                          "VALUE": {
+                                                            "block": {
+                                                              "type": "text_join",
+                                                              "extraState": { "itemCount": 2 },
+                                                              "inputs": {
+                                                                "ADD0": {
+                                                                  "block": {
+                                                                    "type": "text",
+                                                                    "fields": { "TEXT": "⏱ " }
+                                                                  }
+                                                                },
+                                                                "ADD1": {
+                                                                  "block": {
+                                                                    "type": "variables_get",
+                                                                    "fields": { "VAR": "timeLeft" }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        },
+                                                        "next": {
+                                                          "block": {
+                                                            "type": "rx_Sprite_set",
+                                                            "fields": {
+                                                              "COMPONENT": "star",
+                                                              "PROP": "visible"
+                                                            },
+                                                            "inputs": {
+                                                              "VALUE": {
+                                                                "block": {
+                                                                  "type": "logic_boolean",
+                                                                  "fields": { "BOOL": "TRUE" }
+                                                                }
+                                                              }
+                                                            },
+                                                            "next": {
+                                                              "block": {
+                                                                "type": "rx_Sprite_call_goTo",
+                                                                "fields": { "COMPONENT": "star" },
+                                                                "inputs": {
+                                                                  "ARG0": {
+                                                                    "block": {
+                                                                      "type": "math_random_int",
+                                                                      "inputs": {
+                                                                        "FROM": {
+                                                                          "block": {
+                                                                            "type": "math_number",
+                                                                            "fields": { "NUM": 40 }
+                                                                          }
+                                                                        },
+                                                                        "TO": {
+                                                                          "block": {
+                                                                            "type": "math_number",
+                                                                            "fields": { "NUM": 320 }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  },
+                                                                  "ARG1": {
+                                                                    "block": {
+                                                                      "type": "math_random_int",
+                                                                      "inputs": {
+                                                                        "FROM": {
+                                                                          "block": {
+                                                                            "type": "math_number",
+                                                                            "fields": { "NUM": 120 }
+                                                                          }
+                                                                        },
+                                                                        "TO": {
+                                                                          "block": {
+                                                                            "type": "math_number",
+                                                                            "fields": { "NUM": 600 }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                },
+                                                                "next": {
+                                                                  "block": {
+                                                                    "type": "rx_Timer_call_start",
+                                                                    "fields": {
+                                                                      "COMPONENT": "clock"
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      { "key": "score", "name": { "fr": "score", "en": "score" }, "initial": 0 },
+      { "key": "timeLeft", "name": { "fr": "tempsRestant", "en": "timeLeft" }, "initial": 30 }
+    ]
+  }
+}

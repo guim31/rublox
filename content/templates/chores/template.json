@@ -1,0 +1,302 @@
+{
+  "id": "chores",
+  "order": 2,
+  "mode": "junior",
+  "icon": "🧽",
+  "accent": "coral",
+  "recipe": {
+    "name": { "fr": "Qui fait la vaisselle ?", "en": "Who does the dishes?" },
+    "theme": { "primary": "#f0643c", "font": "rounded" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 24, "gap": 16, "justify": "center" },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "Qui fait la vaisselle ?", "en": "Who does the dishes?" },
+              "fontSize": 28,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "hint",
+            "type": "Text",
+            "name": { "fr": "Consigne", "en": "Hint" },
+            "props": {
+              "text": {
+                "fr": "Écris les prénoms, séparés par des virgules.",
+                "en": "Type the names, separated by commas."
+              },
+              "color": "@muted",
+              "align": "center"
+            }
+          },
+          {
+            "key": "names",
+            "type": "TextInput",
+            "name": { "fr": "Prenoms", "en": "Names" },
+            "props": {
+              "text": { "fr": "Léa, Tom, Inès, Noah", "en": "Emma, Leo, Mia, Noah" },
+              "placeholder": { "fr": "Léa, Tom, Inès…", "en": "Emma, Leo, Mia…" },
+              "fontSize": 18,
+              "padding": 12
+            }
+          },
+          {
+            "key": "draw",
+            "type": "Button",
+            "name": { "fr": "Tirer", "en": "Draw" },
+            "props": {
+              "text": { "fr": "Tirer au sort 🎲", "en": "Pick someone 🎲" },
+              "fontSize": 20
+            }
+          },
+          {
+            "key": "card",
+            "type": "Box",
+            "name": { "fr": "Carte", "en": "Card" },
+            "props": { "alignItems": "center", "padding": 24, "gap": 8, "margin": [12, 0, 0, 0] },
+            "children": [
+              {
+                "key": "sponge",
+                "type": "Text",
+                "name": { "fr": "Eponge", "en": "Sponge" },
+                "props": { "text": "🧽", "fontSize": 64, "align": "center" }
+              },
+              {
+                "key": "winner",
+                "type": "Text",
+                "name": { "fr": "Gagnant", "en": "Winner" },
+                "props": {
+                  "text": "?",
+                  "fontSize": 40,
+                  "bold": true,
+                  "color": "@primary",
+                  "align": "center"
+                }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "draw" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "controls_if",
+                  "extraState": { "hasElse": true },
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "fields": { "OP": "EQ" },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "text_length",
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "text_trim",
+                                    "fields": { "MODE": "BOTH" },
+                                    "inputs": {
+                                      "TEXT": {
+                                        "block": {
+                                          "type": "rx_TextInput_get",
+                                          "fields": { "COMPONENT": "names", "PROP": "text" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "B": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_ui_toast",
+                        "inputs": {
+                          "MESSAGE": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Écris au moins un prénom !",
+                                  "en": "Type at least one name!"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ELSE": {
+                      "block": {
+                        "type": "variables_set",
+                        "fields": { "VAR": "people" },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "lists_split",
+                              "fields": { "MODE": "SPLIT" },
+                              "inputs": {
+                                "INPUT": {
+                                  "block": {
+                                    "type": "rx_TextInput_get",
+                                    "fields": { "COMPONENT": "names", "PROP": "text" }
+                                  }
+                                },
+                                "DELIM": { "block": { "type": "text", "fields": { "TEXT": "," } } }
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "rx_Text_set",
+                            "fields": { "COMPONENT": "winner", "PROP": "text" },
+                            "inputs": {
+                              "VALUE": { "block": { "type": "text", "fields": { "TEXT": "🥁" } } }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "rx_wait",
+                                "inputs": {
+                                  "SECONDS": {
+                                    "block": { "type": "math_number", "fields": { "NUM": 0.8 } }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "variables_set",
+                                    "fields": { "VAR": "chosen" },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "text_trim",
+                                          "fields": { "MODE": "BOTH" },
+                                          "inputs": {
+                                            "TEXT": {
+                                              "block": {
+                                                "type": "lists_getIndex",
+                                                "fields": { "MODE": "GET", "WHERE": "FROM_START" },
+                                                "inputs": {
+                                                  "VALUE": {
+                                                    "block": {
+                                                      "type": "variables_get",
+                                                      "fields": { "VAR": "people" }
+                                                    }
+                                                  },
+                                                  "AT": {
+                                                    "block": {
+                                                      "type": "math_random_int",
+                                                      "inputs": {
+                                                        "FROM": {
+                                                          "block": {
+                                                            "type": "math_number",
+                                                            "fields": { "NUM": 1 }
+                                                          }
+                                                        },
+                                                        "TO": {
+                                                          "block": {
+                                                            "type": "lists_length",
+                                                            "inputs": {
+                                                              "VALUE": {
+                                                                "block": {
+                                                                  "type": "variables_get",
+                                                                  "fields": { "VAR": "people" }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "rx_Text_set",
+                                        "fields": { "COMPONENT": "winner", "PROP": "text" },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": {
+                                              "type": "variables_get",
+                                              "fields": { "VAR": "chosen" }
+                                            }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "rx_ui_toast",
+                                            "inputs": {
+                                              "MESSAGE": {
+                                                "block": {
+                                                  "type": "text_join",
+                                                  "extraState": { "itemCount": 2 },
+                                                  "inputs": {
+                                                    "ADD0": {
+                                                      "block": {
+                                                        "type": "variables_get",
+                                                        "fields": { "VAR": "chosen" }
+                                                      }
+                                                    },
+                                                    "ADD1": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": {
+                                                            "fr": " fait la vaisselle !",
+                                                            "en": " does the dishes!"
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      { "key": "people", "name": { "fr": "prenoms", "en": "people" }, "initial": "" },
+      { "key": "chosen", "name": { "fr": "choisi", "en": "chosen" }, "initial": "" }
+    ]
+  }
+}

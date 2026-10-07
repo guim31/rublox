@@ -1,0 +1,533 @@
+{
+  "id": "quiz",
+  "order": 4,
+  "mode": "junior",
+  "icon": "🦁",
+  "accent": "mint",
+  "recipe": {
+    "name": { "fr": "Le quiz des animaux", "en": "The animal quiz" },
+    "theme": { "primary": "#0ca678", "font": "rounded" },
+    "screens": [
+      {
+        "key": "q1",
+        "name": { "fr": "Question1", "en": "Question1" },
+        "props": { "padding": 24, "gap": 16, "justify": "center" },
+        "components": [
+          {
+            "key": "step",
+            "type": "Text",
+            "name": { "fr": "Etape", "en": "Step" },
+            "props": {
+              "text": { "fr": "Question 1 / 3", "en": "Question 1 / 3" },
+              "color": "@muted",
+              "align": "center",
+              "bold": true
+            }
+          },
+          {
+            "key": "animal",
+            "type": "Text",
+            "name": { "fr": "Animal", "en": "Animal" },
+            "props": { "text": "🐙", "fontSize": 96, "align": "center" }
+          },
+          {
+            "key": "question",
+            "type": "Text",
+            "name": { "fr": "Question", "en": "Question" },
+            "props": {
+              "text": {
+                "fr": "Combien de bras a une pieuvre ?",
+                "en": "How many arms does an octopus have?"
+              },
+              "fontSize": 24,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "answerA",
+            "type": "Button",
+            "name": { "fr": "ReponseA", "en": "AnswerA" },
+            "props": { "text": { "fr": "6 bras", "en": "6 arms" }, "fontSize": 20 }
+          },
+          {
+            "key": "answerB",
+            "type": "Button",
+            "name": { "fr": "ReponseB", "en": "AnswerB" },
+            "props": { "text": { "fr": "8 bras", "en": "8 arms" }, "fontSize": 20 }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": { "COMPONENT": "q1" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": { "VAR": "score" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "answerA" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_ui_toast",
+                  "inputs": {
+                    "MESSAGE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": { "itemCount": 2 },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": { "fr": "Raté ! C’était : ", "en": "Oops! It was: " }
+                              }
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "text",
+                              "fields": { "TEXT": { "fr": "8 bras", "en": "8 arms" } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "next": { "block": { "type": "rx_screen_open", "fields": { "SCREEN": "q2" } } }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "answerB" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": { "VAR": "score" },
+                  "inputs": {
+                    "DELTA": { "block": { "type": "math_number", "fields": { "NUM": 1 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_ui_toast",
+                      "inputs": {
+                        "MESSAGE": {
+                          "block": {
+                            "type": "text",
+                            "fields": { "TEXT": { "fr": "Bravo ! 🎉", "en": "Well done! 🎉" } }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": { "type": "rx_screen_open", "fields": { "SCREEN": "q2" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "key": "q2",
+        "name": { "fr": "Question2", "en": "Question2" },
+        "props": { "padding": 24, "gap": 16, "justify": "center" },
+        "components": [
+          {
+            "key": "step",
+            "type": "Text",
+            "name": { "fr": "Etape", "en": "Step" },
+            "props": {
+              "text": { "fr": "Question 2 / 3", "en": "Question 2 / 3" },
+              "color": "@muted",
+              "align": "center",
+              "bold": true
+            }
+          },
+          {
+            "key": "animal",
+            "type": "Text",
+            "name": { "fr": "Animal", "en": "Animal" },
+            "props": { "text": "🐧", "fontSize": 96, "align": "center" }
+          },
+          {
+            "key": "question",
+            "type": "Text",
+            "name": { "fr": "Question", "en": "Question" },
+            "props": {
+              "text": { "fr": "Le manchot sait-il voler ?", "en": "Can a penguin fly?" },
+              "fontSize": 24,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "answerA",
+            "type": "Button",
+            "name": { "fr": "ReponseA", "en": "AnswerA" },
+            "props": { "text": { "fr": "Oui", "en": "Yes" }, "fontSize": 20 }
+          },
+          {
+            "key": "answerB",
+            "type": "Button",
+            "name": { "fr": "ReponseB", "en": "AnswerB" },
+            "props": { "text": { "fr": "Non, il nage !", "en": "No, it swims!" }, "fontSize": 20 }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "answerA" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_ui_toast",
+                  "inputs": {
+                    "MESSAGE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": { "itemCount": 2 },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": { "fr": "Raté ! C’était : ", "en": "Oops! It was: " }
+                              }
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": { "fr": "Non, il nage !", "en": "No, it swims!" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "next": { "block": { "type": "rx_screen_open", "fields": { "SCREEN": "q3" } } }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "answerB" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": { "VAR": "score" },
+                  "inputs": {
+                    "DELTA": { "block": { "type": "math_number", "fields": { "NUM": 1 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_ui_toast",
+                      "inputs": {
+                        "MESSAGE": {
+                          "block": {
+                            "type": "text",
+                            "fields": { "TEXT": { "fr": "Bravo ! 🎉", "en": "Well done! 🎉" } }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": { "type": "rx_screen_open", "fields": { "SCREEN": "q3" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "key": "q3",
+        "name": { "fr": "Question3", "en": "Question3" },
+        "props": { "padding": 24, "gap": 16, "justify": "center" },
+        "components": [
+          {
+            "key": "step",
+            "type": "Text",
+            "name": { "fr": "Etape", "en": "Step" },
+            "props": {
+              "text": { "fr": "Question 3 / 3", "en": "Question 3 / 3" },
+              "color": "@muted",
+              "align": "center",
+              "bold": true
+            }
+          },
+          {
+            "key": "animal",
+            "type": "Text",
+            "name": { "fr": "Animal", "en": "Animal" },
+            "props": { "text": "🦒", "fontSize": 96, "align": "center" }
+          },
+          {
+            "key": "question",
+            "type": "Text",
+            "name": { "fr": "Question", "en": "Question" },
+            "props": {
+              "text": {
+                "fr": "De quelle couleur est la langue de la girafe ?",
+                "en": "What colour is a giraffe’s tongue?"
+              },
+              "fontSize": 24,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "answerA",
+            "type": "Button",
+            "name": { "fr": "ReponseA", "en": "AnswerA" },
+            "props": { "text": { "fr": "Bleu foncé", "en": "Dark blue" }, "fontSize": 20 }
+          },
+          {
+            "key": "answerB",
+            "type": "Button",
+            "name": { "fr": "ReponseB", "en": "AnswerB" },
+            "props": { "text": { "fr": "Rose", "en": "Pink" }, "fontSize": 20 }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "answerA" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": { "VAR": "score" },
+                  "inputs": {
+                    "DELTA": { "block": { "type": "math_number", "fields": { "NUM": 1 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_ui_toast",
+                      "inputs": {
+                        "MESSAGE": {
+                          "block": {
+                            "type": "text",
+                            "fields": { "TEXT": { "fr": "Bravo ! 🎉", "en": "Well done! 🎉" } }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": { "type": "rx_screen_open", "fields": { "SCREEN": "end" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "answerB" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_ui_toast",
+                  "inputs": {
+                    "MESSAGE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": { "itemCount": 2 },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": { "fr": "Raté ! C’était : ", "en": "Oops! It was: " }
+                              }
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "text",
+                              "fields": { "TEXT": { "fr": "Bleu foncé", "en": "Dark blue" } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "next": { "block": { "type": "rx_screen_open", "fields": { "SCREEN": "end" } } }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "key": "end",
+        "name": { "fr": "Fin", "en": "End" },
+        "props": { "padding": 24, "gap": 16, "justify": "center", "alignItems": "center" },
+        "components": [
+          {
+            "key": "medal",
+            "type": "Text",
+            "name": { "fr": "Medaille", "en": "Medal" },
+            "props": { "text": "🏆", "fontSize": 96, "align": "center" }
+          },
+          {
+            "key": "result",
+            "type": "Text",
+            "name": { "fr": "Resultat", "en": "Result" },
+            "props": { "text": "", "fontSize": 28, "bold": true, "align": "center" }
+          },
+          {
+            "key": "comment",
+            "type": "Text",
+            "name": { "fr": "Commentaire", "en": "Comment" },
+            "props": { "text": "", "fontSize": 18, "color": "@muted", "align": "center" }
+          },
+          {
+            "key": "again",
+            "type": "Button",
+            "name": { "fr": "Rejouer", "en": "Again" },
+            "props": { "text": { "fr": "Rejouer", "en": "Play again" }, "fontSize": 20 }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": { "COMPONENT": "end" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Text_set",
+                  "fields": { "COMPONENT": "result", "PROP": "text" },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": { "itemCount": 3 },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": { "TEXT": { "fr": "Ton score : ", "en": "Your score: " } }
+                            }
+                          },
+                          "ADD1": {
+                            "block": { "type": "variables_get", "fields": { "VAR": "score" } }
+                          },
+                          "ADD2": { "block": { "type": "text", "fields": { "TEXT": " / 3" } } }
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "controls_if",
+                      "extraState": { "hasElse": true },
+                      "inputs": {
+                        "IF0": {
+                          "block": {
+                            "type": "logic_compare",
+                            "fields": { "OP": "EQ" },
+                            "inputs": {
+                              "A": {
+                                "block": { "type": "variables_get", "fields": { "VAR": "score" } }
+                              },
+                              "B": { "block": { "type": "math_number", "fields": { "NUM": 3 } } }
+                            }
+                          }
+                        },
+                        "DO0": {
+                          "block": {
+                            "type": "rx_Text_set",
+                            "fields": { "COMPONENT": "medal", "PROP": "text" },
+                            "inputs": {
+                              "VALUE": { "block": { "type": "text", "fields": { "TEXT": "🏆" } } }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "rx_Text_set",
+                                "fields": { "COMPONENT": "comment", "PROP": "text" },
+                                "inputs": {
+                                  "VALUE": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": {
+                                          "fr": "Parfait, tu connais bien les animaux !",
+                                          "en": "Perfect, you know your animals!"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "ELSE": {
+                          "block": {
+                            "type": "rx_Text_set",
+                            "fields": { "COMPONENT": "medal", "PROP": "text" },
+                            "inputs": {
+                              "VALUE": { "block": { "type": "text", "fields": { "TEXT": "🐾" } } }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "rx_Text_set",
+                                "fields": { "COMPONENT": "comment", "PROP": "text" },
+                                "inputs": {
+                                  "VALUE": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": {
+                                          "fr": "Pas mal ! Rejoue pour tout trouver.",
+                                          "en": "Not bad! Play again to get them all."
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "again" },
+            "inputs": {
+              "DO": { "block": { "type": "rx_screen_open", "fields": { "SCREEN": "q1" } } }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [{ "key": "score", "name": { "fr": "score", "en": "score" }, "initial": 0 }]
+  }
+}

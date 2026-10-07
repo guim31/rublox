@@ -1,0 +1,645 @@
+{
+  "id": "bill-split",
+  "order": 9,
+  "mode": "studio",
+  "icon": "🧾",
+  "accent": "yellow",
+  "recipe": {
+    "name": { "fr": "Partage de l’addition", "en": "Split the bill" },
+    "theme": { "primary": "#e67700" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 20, "gap": 16 },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "🧾 Partage de l’addition", "en": "🧾 Split the bill" },
+              "fontSize": 26,
+              "bold": true
+            }
+          },
+          {
+            "key": "form",
+            "type": "Box",
+            "name": { "fr": "Formulaire", "en": "Form" },
+            "props": { "gap": 10 },
+            "children": [
+              {
+                "key": "totalLabel",
+                "type": "Text",
+                "name": { "fr": "EtiquetteTotal", "en": "TotalLabel" },
+                "props": {
+                  "text": { "fr": "Montant total (€)", "en": "Total amount ($)" },
+                  "bold": true,
+                  "fontSize": 15
+                }
+              },
+              {
+                "key": "total",
+                "type": "TextInput",
+                "name": { "fr": "Total", "en": "Total" },
+                "props": {
+                  "inputType": "number",
+                  "placeholder": "0",
+                  "fontSize": 20,
+                  "background": "@background"
+                }
+              },
+              {
+                "key": "peopleLabel",
+                "type": "Text",
+                "name": { "fr": "EtiquettePersonnes", "en": "PeopleLabel" },
+                "props": {
+                  "text": { "fr": "Nombre de personnes", "en": "Number of people" },
+                  "bold": true,
+                  "fontSize": 15
+                }
+              },
+              {
+                "key": "people",
+                "type": "TextInput",
+                "name": { "fr": "Personnes", "en": "People" },
+                "props": {
+                  "inputType": "number",
+                  "text": "2",
+                  "fontSize": 20,
+                  "background": "@background"
+                }
+              },
+              {
+                "key": "tipLabel",
+                "type": "Text",
+                "name": { "fr": "EtiquettePourboire", "en": "TipLabel" },
+                "props": {
+                  "text": { "fr": "Pourboire : 10 %", "en": "Tip: 10%" },
+                  "bold": true,
+                  "fontSize": 15
+                }
+              },
+              {
+                "key": "tip",
+                "type": "Slider",
+                "name": { "fr": "Pourboire", "en": "Tip" },
+                "props": { "min": 0, "max": 25, "step": 1, "value": 10 }
+              }
+            ]
+          },
+          {
+            "key": "resultCard",
+            "type": "Box",
+            "name": { "fr": "CarteResultat", "en": "ResultCard" },
+            "props": { "alignItems": "center", "gap": 6, "background": "#fff4e6" },
+            "children": [
+              {
+                "key": "eachLabel",
+                "type": "Text",
+                "name": { "fr": "EtiquetteChacun", "en": "EachLabel" },
+                "props": {
+                  "text": { "fr": "Chacun paie", "en": "Each person pays" },
+                  "color": "@muted",
+                  "align": "center"
+                }
+              },
+              {
+                "key": "share",
+                "type": "Text",
+                "name": { "fr": "Part", "en": "Share" },
+                "props": {
+                  "text": "—",
+                  "fontSize": 44,
+                  "bold": true,
+                  "color": "@primary",
+                  "align": "center"
+                }
+              },
+              {
+                "key": "detail",
+                "type": "Text",
+                "name": { "fr": "Detail", "en": "Detail" },
+                "props": {
+                  "text": {
+                    "fr": "Indique le montant et le nombre de personnes.",
+                    "en": "Enter the amount and the number of people."
+                  },
+                  "fontSize": 14,
+                  "color": "@muted",
+                  "align": "center"
+                }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "procedures_defnoreturn",
+            "fields": { "NAME": { "fr": "calculer", "en": "compute" } },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_Text_set",
+                  "fields": { "COMPONENT": "tipLabel", "PROP": "text" },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": { "itemCount": 3 },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": { "TEXT": { "fr": "Pourboire : ", "en": "Tip: " } }
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "rx_Slider_get",
+                              "fields": { "COMPONENT": "tip", "PROP": "value" }
+                            }
+                          },
+                          "ADD2": {
+                            "block": {
+                              "type": "text",
+                              "fields": { "TEXT": { "fr": " %", "en": "%" } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": { "VAR": "amount" },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_replace",
+                            "inputs": {
+                              "FROM": { "block": { "type": "text", "fields": { "TEXT": "," } } },
+                              "TO": { "block": { "type": "text", "fields": { "TEXT": "." } } },
+                              "TEXT": {
+                                "block": {
+                                  "type": "rx_TextInput_get",
+                                  "fields": { "COMPONENT": "total", "PROP": "text" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "variables_set",
+                          "fields": { "VAR": "amount" },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_arithmetic",
+                                "fields": { "OP": "MULTIPLY" },
+                                "inputs": {
+                                  "A": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": { "VAR": "amount" }
+                                    }
+                                  },
+                                  "B": {
+                                    "block": { "type": "math_number", "fields": { "NUM": 1 } }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "variables_set",
+                              "fields": { "VAR": "persons" },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "math_round",
+                                    "fields": { "OP": "ROUND" },
+                                    "inputs": {
+                                      "NUM": {
+                                        "block": {
+                                          "type": "math_arithmetic",
+                                          "fields": { "OP": "MULTIPLY" },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "rx_TextInput_get",
+                                                "fields": { "COMPONENT": "people", "PROP": "text" }
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 1 }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "controls_if",
+                                  "extraState": { "hasElse": true },
+                                  "inputs": {
+                                    "IF0": {
+                                      "block": {
+                                        "type": "logic_operation",
+                                        "fields": { "OP": "AND" },
+                                        "inputs": {
+                                          "A": {
+                                            "block": {
+                                              "type": "logic_compare",
+                                              "fields": { "OP": "GT" },
+                                              "inputs": {
+                                                "A": {
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "fields": { "VAR": "amount" }
+                                                  }
+                                                },
+                                                "B": {
+                                                  "block": {
+                                                    "type": "math_number",
+                                                    "fields": { "NUM": 0 }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "B": {
+                                            "block": {
+                                              "type": "logic_compare",
+                                              "fields": { "OP": "GTE" },
+                                              "inputs": {
+                                                "A": {
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "fields": { "VAR": "persons" }
+                                                  }
+                                                },
+                                                "B": {
+                                                  "block": {
+                                                    "type": "math_number",
+                                                    "fields": { "NUM": 1 }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "DO0": {
+                                      "block": {
+                                        "type": "variables_set",
+                                        "fields": { "VAR": "withTip" },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": {
+                                              "type": "math_arithmetic",
+                                              "fields": { "OP": "MULTIPLY" },
+                                              "inputs": {
+                                                "A": {
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "fields": { "VAR": "amount" }
+                                                  }
+                                                },
+                                                "B": {
+                                                  "block": {
+                                                    "type": "math_arithmetic",
+                                                    "fields": { "OP": "ADD" },
+                                                    "inputs": {
+                                                      "A": {
+                                                        "block": {
+                                                          "type": "math_number",
+                                                          "fields": { "NUM": 1 }
+                                                        }
+                                                      },
+                                                      "B": {
+                                                        "block": {
+                                                          "type": "math_arithmetic",
+                                                          "fields": { "OP": "DIVIDE" },
+                                                          "inputs": {
+                                                            "A": {
+                                                              "block": {
+                                                                "type": "rx_Slider_get",
+                                                                "fields": {
+                                                                  "COMPONENT": "tip",
+                                                                  "PROP": "value"
+                                                                }
+                                                              }
+                                                            },
+                                                            "B": {
+                                                              "block": {
+                                                                "type": "math_number",
+                                                                "fields": { "NUM": 100 }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "rx_Text_set",
+                                            "fields": { "COMPONENT": "share", "PROP": "text" },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "text_join",
+                                                  "extraState": { "itemCount": 3 },
+                                                  "inputs": {
+                                                    "ADD0": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": { "fr": "", "en": "$" }
+                                                        }
+                                                      }
+                                                    },
+                                                    "ADD1": {
+                                                      "block": {
+                                                        "type": "math_arithmetic",
+                                                        "fields": { "OP": "DIVIDE" },
+                                                        "inputs": {
+                                                          "A": {
+                                                            "block": {
+                                                              "type": "math_round",
+                                                              "fields": { "OP": "ROUND" },
+                                                              "inputs": {
+                                                                "NUM": {
+                                                                  "block": {
+                                                                    "type": "math_arithmetic",
+                                                                    "fields": { "OP": "MULTIPLY" },
+                                                                    "inputs": {
+                                                                      "A": {
+                                                                        "block": {
+                                                                          "type": "math_arithmetic",
+                                                                          "fields": {
+                                                                            "OP": "DIVIDE"
+                                                                          },
+                                                                          "inputs": {
+                                                                            "A": {
+                                                                              "block": {
+                                                                                "type": "variables_get",
+                                                                                "fields": {
+                                                                                  "VAR": "withTip"
+                                                                                }
+                                                                              }
+                                                                            },
+                                                                            "B": {
+                                                                              "block": {
+                                                                                "type": "variables_get",
+                                                                                "fields": {
+                                                                                  "VAR": "persons"
+                                                                                }
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      },
+                                                                      "B": {
+                                                                        "block": {
+                                                                          "type": "math_number",
+                                                                          "fields": { "NUM": 100 }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          },
+                                                          "B": {
+                                                            "block": {
+                                                              "type": "math_number",
+                                                              "fields": { "NUM": 100 }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "ADD2": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": { "fr": " €", "en": "" }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "rx_Text_set",
+                                                "fields": { "COMPONENT": "detail", "PROP": "text" },
+                                                "inputs": {
+                                                  "VALUE": {
+                                                    "block": {
+                                                      "type": "text_join",
+                                                      "extraState": { "itemCount": 2 },
+                                                      "inputs": {
+                                                        "ADD0": {
+                                                          "block": {
+                                                            "type": "text",
+                                                            "fields": {
+                                                              "TEXT": {
+                                                                "fr": "Total avec pourboire : ",
+                                                                "en": "Total with tip: "
+                                                              }
+                                                            }
+                                                          }
+                                                        },
+                                                        "ADD1": {
+                                                          "block": {
+                                                            "type": "text_join",
+                                                            "extraState": { "itemCount": 3 },
+                                                            "inputs": {
+                                                              "ADD0": {
+                                                                "block": {
+                                                                  "type": "text",
+                                                                  "fields": {
+                                                                    "TEXT": { "fr": "", "en": "$" }
+                                                                  }
+                                                                }
+                                                              },
+                                                              "ADD1": {
+                                                                "block": {
+                                                                  "type": "math_arithmetic",
+                                                                  "fields": { "OP": "DIVIDE" },
+                                                                  "inputs": {
+                                                                    "A": {
+                                                                      "block": {
+                                                                        "type": "math_round",
+                                                                        "fields": { "OP": "ROUND" },
+                                                                        "inputs": {
+                                                                          "NUM": {
+                                                                            "block": {
+                                                                              "type": "math_arithmetic",
+                                                                              "fields": {
+                                                                                "OP": "MULTIPLY"
+                                                                              },
+                                                                              "inputs": {
+                                                                                "A": {
+                                                                                  "block": {
+                                                                                    "type": "variables_get",
+                                                                                    "fields": {
+                                                                                      "VAR": "withTip"
+                                                                                    }
+                                                                                  }
+                                                                                },
+                                                                                "B": {
+                                                                                  "block": {
+                                                                                    "type": "math_number",
+                                                                                    "fields": {
+                                                                                      "NUM": 100
+                                                                                    }
+                                                                                  }
+                                                                                }
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    },
+                                                                    "B": {
+                                                                      "block": {
+                                                                        "type": "math_number",
+                                                                        "fields": { "NUM": 100 }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              },
+                                                              "ADD2": {
+                                                                "block": {
+                                                                  "type": "text",
+                                                                  "fields": {
+                                                                    "TEXT": { "fr": " €", "en": "" }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "ELSE": {
+                                      "block": {
+                                        "type": "rx_Text_set",
+                                        "fields": { "COMPONENT": "share", "PROP": "text" },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": { "type": "text", "fields": { "TEXT": "—" } }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "rx_Text_set",
+                                            "fields": { "COMPONENT": "detail", "PROP": "text" },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "text",
+                                                  "fields": {
+                                                    "TEXT": {
+                                                      "fr": "Indique le montant et le nombre de personnes.",
+                                                      "en": "Enter the amount and the number of people."
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_TextInput_on_change",
+            "fields": { "COMPONENT": "total" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": { "name": { "fr": "calculer", "en": "compute" } }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_TextInput_on_change",
+            "fields": { "COMPONENT": "people" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": { "name": { "fr": "calculer", "en": "compute" } }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Slider_on_change",
+            "fields": { "COMPONENT": "tip" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": { "name": { "fr": "calculer", "en": "compute" } }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      { "key": "amount", "name": { "fr": "montant", "en": "amount" }, "initial": 0 },
+      { "key": "persons", "name": { "fr": "personnes", "en": "people" }, "initial": 2 },
+      { "key": "withTip", "name": { "fr": "avecPourboire", "en": "withTip" }, "initial": 0 }
+    ]
+  }
+}
