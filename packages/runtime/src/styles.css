@@ -249,6 +249,23 @@
 .rx-rich > :last-child {
   margin-bottom: 0;
 }
+.rx-rich h1,
+.rx-rich h2,
+.rx-rich h3 {
+  font-weight: 700;
+}
+.rx-rich strong {
+  font-weight: 700;
+}
+.rx-rich em {
+  font-style: italic;
+}
+.rx-rich ul {
+  list-style: disc;
+}
+.rx-rich ol {
+  list-style: decimal;
+}
 .rx-rich h1 {
   font-size: 1.6em;
   margin: 0.4em 0;

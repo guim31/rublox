@@ -10,7 +10,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 |---|---|---|
 | J0 | Socle et tranche verticale (mode invité) | fait (PR #1), voir § 0.1 |
 | J1 | Comptes, espaces, invitations, projets côté serveur | fait (PR #2), voir § 0.2 |
-| J2 | Catalogue complet des composants et de leurs blocs | à faire |
+| J2 | Catalogue complet des composants et de leurs blocs | fait (PR #4), voir § 0.4 ; essai sur téléphones à faire (`docs/compatibilite.md`) |
 | J3 | Expérience Junior et Studio, apprentissage, accueil | fait (PR #7), voir § 0.3 |
 | J4 | Collaboration, test sur téléphone, publication PWA, export | à faire |
 | J5 | Données et services : tables, variables, API web, cartes, graphiques | à faire |
@@ -49,6 +49,7 @@ mise à jour de ce paragraphe.
 - Les fonctions (blocs Fonctions) sont propres à un espace de travail ; les fonctions partagées
   par l'espace « Appli » restent à faire. Les variables stockées et partagées existent dans le
   format et le code généré (`stored`, `shared`) mais vivent en mémoire jusqu'au J5.
+  *(J2 : fonctions partagées et variables stockées faites, voir § 0.4.)*
 
 **Contrats pour J1, J2 et J3**
 
@@ -231,6 +232,94 @@ mise à jour de ce paragraphe.
   `runtime-learn.ts` (espace `runtime`).
 - Préférences ajoutées à `usePrefs` (version 2) : `consoleOpen` par mode, `sounds`,
   `showBadges`, `toursSeen`, `welcomed`, `slowDelay`.
+
+### 0.4 Ce que le J2 a fixé (07/10/2026)
+
+**Fait** : les 40 composants du § 4.4 marqués J2 (y compris les P2 Note en étoiles, Texte riche,
+Batterie et Réseau), chacun avec propriétés, événements, méthodes, blocs, rendu, comportement,
+icône et fiche d'aide en FR et EN ; thème de l'appli éditable ; navigation par onglets et par
+tiroir ; multisélection en Studio ; copier, couper, coller entre écrans et entre projets ;
+fonctions partagées par l'espace « Appli » ; variables stockées gardées sur l'appareil ;
+autorisations demandées au premier usage ; une appli de démonstration qui utilise chaque
+composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Essai sur de vrais téléphones non fait** : impossible depuis une session de code. La liste de
+  vérification `docs/compatibilite.md` est prête, sur l'appli de démonstration ; ses colonnes
+  « attendu » disent ce que le code prévoit. Critère d'acceptation à fermer par Guilhem.
+- Les **valeurs d'un événement** (l'élément touché, la nouvelle valeur…) passent par un seul bloc
+  `rx_event_value` (« valeur [élément] de l'événement ») à poser dans le bloc « quand… », et non
+  par des variables locales façon Thunkable : un seul type de bloc, un menu qui ne montre que les
+  valeurs de l'événement englobant, un avertissement ailleurs. Code généré :
+  `Liste1.onItemClick(async (event) => { … event.item … })`.
+- Ce qu'un composant **mesure** (position, accélération, élément touché, « disponible ») est une
+  **propriété d'état** (`state: true`) : lisible par les blocs, absente de l'inspecteur et du
+  projet, écrite par le moteur.
+- Lecteur de QR code : `BarcodeDetector` quand le navigateur le fournit, sinon **jsQR** (Apache-2.0,
+  pur JavaScript, chargé à la demande) plutôt que zxing en wasm : pas de fichier wasm à servir,
+  et Safari (sans `BarcodeDetector`) reste couvert.
+- Animation Lottie : **lottie-web** (MIT, rendu SVG « light », chargé à la demande) et fichiers
+  `.json` seulement ; dotLottie (`.lottie`, zip) demanderait un lecteur wasm : plus tard si besoin.
+- Les notifications locales n'apparaissent que pendant que l'appli est ouverte (pas de serveur
+  de notifications). Android exige un service worker (appli publiée, J4) ; iPhone exige l'appli
+  installée sur l'écran d'accueil.
+- La **Carte** et le **Graphique** restent au J5, la **scène de jeu** au J7, comme prévu.
+- Les blocs « n'importe quel Bouton » (§ 4.2, Studio) ne sont pas faits : ils demandent une
+  catégorie par type de composant et un type de valeur « composant » ; reportés (P1).
+
+**Contrats pour la suite**
+
+- Catalogue (`packages/catalog`) :
+  - types de propriétés en plus : `list` (textes, ou objets avec `itemFields`), `date`
+    (`AAAA-MM-JJ`), `time` (`HH:MM`), `any` ; `asset` accepte `blob:` et `data:` créés pendant
+    l'exécution (photo, enregistrement) ;
+  - `state: true` sur une propriété (voir plus haut) ; blocs `get` par défaut ;
+  - `event({ args: { item: arg('string') } })` ; les libellés des valeurs vont dans
+    `strings.<langue>.args` (test de complétude) ;
+  - `availableProp()` et `errorEvent()` (`common.ts`) pour toute fonction du navigateur : propriété
+    « disponible » posée au démarrage de l'écran, événement « a un problème » avec `message` ;
+  - `ICON_NAMES` (`icons.ts`) : la liste des icônes d'une appli, dessinées par le moteur
+    (`AppIcon`) ; propriété `prop.icon` ;
+  - `createDemoProject({ locale, mode })` (`demo/`) : l'appli de démonstration ; un nouveau
+    composant doit y entrer (le test `typesMissingFromDemo` échoue sinon).
+- Moteur (`packages/runtime`) :
+  - **comportements** : `BEHAVIORS[type]` (`behaviors/registry.ts`) avec `methods`, `mount` (au
+    démarrage de l'écran) et `available` ; le contexte `ctx` donne `get`, `set`, `emit`, `fail`
+    (avertissement + événement `error`), `handle()`, `assetUrl`, `onDispose`, `alive`,
+    `overlay(kind)` ; tout ce qui tourne (minuteur, capteur, flux) s'arrête par `onDispose`
+    quand l'écran se ferme ou que l'appli s'arrête ;
+  - un rendu donne prise à son comportement par `useExpose(p, handle)` (une vidéo, une zone de
+    dessin) ; `p.emit(event, args)` porte les valeurs de l'événement ;
+  - panneaux plein écran : `OVERLAYS[kind]` (`overlays/registry.ts`), ouverts par `ctx.overlay` ;
+  - variables stockées : `localStorage['rublox:<appId>:stored']`, `appId` = identifiant du projet
+    par défaut (`EngineOptions.appId`, à fixer au slug ou à l'id de publication au J4) ;
+  - fonctions de l'espace « Appli » : le module `app` les range dans `functions` avant son
+    premier `await` ; un écran appelle `await functions.nom(…)` (blocs `rx_app_call` et
+    `rx_app_call_value`). Le paramètre `functions` n'apparaît dans l'en-tête d'un module que
+    s'il s'en sert (les instantanés du J0 ne changent pas) ;
+  - navigation onglets et tiroir : `engine.navigationScreens()`, `engine.switchTo(id)` ; chaque
+    écran du menu garde son instance (et son état) ; `screens.open` d'un écran du menu change
+    d'onglet, celui d'un autre écran l'empile au-dessus ; `snapshot.root` est l'onglet courant ;
+  - écrire deux fois la même valeur ne redessine rien (un rendu qui écrit dans un effet ne boucle
+    pas).
+- Format (`packages/schema`) : `setTheme`, `setNavigation` (les entrées du menu suivent l'ordre
+  des écrans ; supprimer un écran le retire du menu), `copyComponents`, `pasteComponents`
+  (nouveaux identifiants, noms libres, composants invisibles dans `nonVisual`).
+- Studio : `useEditor().selection` (multisélection) à côté de `selected` ; presse-papiers
+  `editor/clipboard.ts` (format `rublox/components`, presse-papiers du système par les
+  événements copier/coller, et `localStorage['rublox:clipboard']`) ; les composants invisibles
+  vont dans `nonVisual` (bandeau sous le téléphone et calques) ; l'inspecteur a un onglet
+  « Appli » quand l'écran est sélectionné. Toute ressource envoyée passe par
+  `session.storeAsset`.
+- Chaînes du J2 : `packages/i18n/src/{fr,en}/catalog.ts`, espace `catalog` (`useTranslation('catalog')`
+  côté studio, `messages[locale].catalog` ailleurs).
+- J4 : coller dans un projet d'un autre propriétaire ne recopie pas les fichiers des ressources
+  sur le serveur (seulement leur description) ; le service worker des applis publiées doit
+  relayer `showNotification` ; `appId` des variables stockées.
+- J5 : la Liste de données et la Grille de données se brancheront sur une table (même propriété
+  `items`, mêmes champs `image`, `title`, `subtitle`) ; les variables partagées reprennent le
+  mécanisme des stockées (`shared` vit encore en mémoire).
 
 ## 1. En bref
 

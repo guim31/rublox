@@ -36,7 +36,7 @@ export const catalog: Messages['catalog'] = {
       fonts: { system: 'The phone’s', rounded: 'Rounded', serif: 'Serif', mono: 'Typewriter' },
       radius: 'Corners',
       scheme: 'Light or dark',
-      schemes: { light: 'Light', dark: 'Dark', auto: 'Like the phone' },
+      schemes: { light: 'Light', dark: 'Dark', auto: 'Auto' },
       navigation: 'Navigation',
       kinds: { stack: 'Stack', tabs: 'Tabs', drawer: 'Drawer' },
       kindHints: {

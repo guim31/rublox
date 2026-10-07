@@ -45,7 +45,7 @@ export const catalog = {
       },
       radius: 'Arrondis',
       scheme: 'Clair ou sombre',
-      schemes: { light: 'Clair', dark: 'Sombre', auto: 'Comme le téléphone' },
+      schemes: { light: 'Clair', dark: 'Sombre', auto: 'Auto' },
       navigation: 'Navigation',
       kinds: { stack: 'Pile', tabs: 'Onglets', drawer: 'Tiroir' },
       kindHints: {

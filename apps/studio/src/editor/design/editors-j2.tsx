@@ -18,8 +18,8 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Input, Select } from '../../components/ui/input.tsx'
 import { cn } from '../../lib/cn.ts'
+import { errorMessage } from '../../lib/errors.ts'
 import { ASSET_ACCEPT, ASSET_MAX_BYTES, assetKindOf } from '../../storage/asset-kinds.ts'
-import { storeAssetFile } from '../../storage/assets.ts'
 import { useDoc, useSession } from '../context.tsx'
 import type { EditorProps } from './editors.tsx'
 
@@ -340,6 +340,7 @@ export function IconEditor({ id, value, onChange }: EditorProps<string>) {
 /** A sound, a video or a Lottie animation of the project, or an https: address. */
 export function MediaAssetEditor({ id, value, onChange, def }: EditorProps<string>) {
   const { t } = useTranslation('catalog')
+  const { t: tStudio } = useTranslation()
   const session = useSession()
   const doc = useDoc()
   const inputId = useId()
@@ -353,7 +354,13 @@ export function MediaAssetEditor({ id, value, onChange, def }: EditorProps<strin
     if (assetKindOf(file) !== kind) return void toast.error(t(`studio.asset.wrongKind.${kind}`))
     if (file.size > ASSET_MAX_BYTES[kind as keyof typeof ASSET_MAX_BYTES])
       return void toast.error(t('studio.asset.tooBig'))
-    const stored = await storeAssetFile(file, kind)
+    let stored: Awaited<ReturnType<typeof session.storeAsset>>
+    try {
+      // Through the session: this browser in guest mode, the server once signed in (J1).
+      stored = await session.storeAsset(file, kind)
+    } catch (error) {
+      return void toast.error(errorMessage(tStudio, error))
+    }
     const existing = Object.entries(doc.assets).find(([, a]) => a.sha256 === stored.sha256)
     onChange(existing ? existing[0] : addAsset(session.ydoc, stored))
   }

@@ -19,7 +19,7 @@ test('the demo app opens in one click and runs every screen without an error', a
   await openBlocks(page)
   const app = preview(page)
   await expect(app.locator('.rx-tabs')).toBeVisible()
-  for (const tab of ['Saisie', 'Listes', 'Medias', 'Appareil', 'Tous les composants']) {
+  for (const tab of ['Saisie', 'Listes', 'Medias', 'Appareil', 'Accueil']) {
     await app.locator('.rx-tab', { hasText: tab }).dispatchEvent('click')
     await expect(app.locator('.rx-tab[aria-current="page"]')).toHaveText(tab)
   }

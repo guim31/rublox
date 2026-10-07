@@ -355,11 +355,11 @@ export function createDemoProject(input: {
     kind: 'tabs',
     startScreen: homeId,
     items: [
-      { screen: homeId, icon: 'house' },
-      { screen: ids.inputs, icon: 'pencil' },
-      { screen: ids.lists, icon: 'list' },
-      { screen: ids.media, icon: 'film' },
-      { screen: ids.device, icon: 'smartphone' },
+      { screen: homeId, icon: 'house', label: L.home },
+      { screen: ids.inputs, icon: 'pencil', label: L.inputs },
+      { screen: ids.lists, icon: 'list', label: L.lists },
+      { screen: ids.media, icon: 'film', label: L.media },
+      { screen: ids.device, icon: 'smartphone', label: L.device },
     ],
   }
   doc.variables.stored.push({
