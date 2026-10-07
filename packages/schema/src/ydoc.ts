@@ -193,3 +193,25 @@ export function yDocToProject(ydoc: Y.Doc): ProjectDoc {
 export function hasProject(ydoc: Y.Doc): boolean {
   return yRoot(ydoc).get('format') === PROJECT_FORMAT
 }
+
+/**
+ * The undo stack of an editor (SPEC § 4.9): it records only the transactions of this editor
+ * (origin `null`, the default of every operation, plus `origins`), never those received from
+ * the server or written by the offline cache, so undo and redo take back one's own edits and
+ * leave everybody else's in place.
+ */
+export function createUndoManager(ydoc: Y.Doc, origins: unknown[] = []): Y.UndoManager {
+  return new Y.UndoManager(
+    [
+      ydoc.getMap(Y_ROOTS.meta),
+      ydoc.getMap(Y_ROOTS.settings),
+      ydoc.getArray(Y_ROOTS.screenOrder),
+      ydoc.getMap(Y_ROOTS.screens),
+      ydoc.getMap(Y_ROOTS.blocks),
+      ydoc.getMap(Y_ROOTS.variables),
+      ydoc.getMap(Y_ROOTS.assets),
+      ydoc.getMap(Y_ROOTS.data),
+    ],
+    { captureTimeout: 400, trackedOrigins: new Set([null, ...origins]) },
+  )
+}

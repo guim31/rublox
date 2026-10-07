@@ -1,12 +1,12 @@
 import {
   type Asset,
   type AssetKind,
+  createUndoManager,
   hasProject,
   type ProjectDoc,
-  Y_ROOTS,
   yDocToProject,
 } from '@rublox/schema'
-import * as Y from 'yjs'
+import type * as Y from 'yjs'
 import {
   type DocSource,
   GuestSource,
@@ -41,19 +41,8 @@ export class ProjectSession {
     const ydoc = source.ydoc
     this.ydoc = ydoc
     this.doc = yDocToProject(ydoc)
-    this.undo = new Y.UndoManager(
-      [
-        ydoc.getMap(Y_ROOTS.meta),
-        ydoc.getMap(Y_ROOTS.settings),
-        ydoc.getArray(Y_ROOTS.screenOrder),
-        ydoc.getMap(Y_ROOTS.screens),
-        ydoc.getMap(Y_ROOTS.blocks),
-        ydoc.getMap(Y_ROOTS.variables),
-        ydoc.getMap(Y_ROOTS.assets),
-        ydoc.getMap(Y_ROOTS.data),
-      ],
-      { captureTimeout: 400, trackedOrigins: new Set([null, BLOCKLY_ORIGIN]) },
-    )
+    // Only this tab's edits: the others' (provider, cache) are not taken back.
+    this.undo = createUndoManager(ydoc, [BLOCKLY_ORIGIN])
     this.undo.on('stack-item-added', () => this.emit())
     this.undo.on('stack-item-popped', () => this.emit())
     ydoc.on('update', this.onUpdate)
