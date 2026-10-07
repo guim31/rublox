@@ -161,9 +161,24 @@ for (const [index, [mode, theme]] of VARIANTS.entries()) {
     await parent.context().setOffline(false)
     await expect(parent.getByTestId('save-state')).toHaveAttribute('data-state', 'saved')
 
-    await admin.goto('/admin')
-    await expect(admin.getByText('Sacha').first()).toBeVisible()
-    await admin.waitForTimeout(300)
-    await admin.screenshot({ path: `${DIR}/${mode}-${theme}-admin.png` })
+    // The profile wins over the browser's preferences (`useProfileSync`): the four variants
+    // run in parallel, so each one shows the administration as its own administrator, whose
+    // profile has this variant's mode and theme (one shared `admin` showed dark Studio in all).
+    const own = { username: `direction${index + 1}`, password: 'admin-password' }
+    await api(admin, 'POST', '/api/admin/users', {
+      ...own,
+      displayName: 'Direction',
+      role: 'admin',
+    })
+    const director = await open(browser, prefs)
+    await director.goto('/login')
+    await api(director, 'POST', '/api/auth/sign-in/username', own)
+    await api(director, 'PATCH', '/api/me', { uiMode: mode, theme })
+    await director.goto('/admin')
+    await expect(director.getByText('Sacha').first()).toBeVisible()
+    await expect(director.locator('html')).toHaveAttribute('data-theme', theme)
+    await expect(director.locator('html')).toHaveAttribute('data-mode', mode)
+    await director.waitForTimeout(300)
+    await director.screenshot({ path: `${DIR}/${mode}-${theme}-admin.png` })
   })
 }
