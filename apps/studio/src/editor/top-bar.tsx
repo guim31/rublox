@@ -61,6 +61,9 @@ import type { EditorTab } from '../routes/p.$projectId.tsx'
 import { addNewScreen } from './actions.ts'
 import { useDoc, useSaveState, useSession, useUndoState } from './context.tsx'
 import { useEditorNavigate } from './nav.ts'
+import { LiveButton } from './publish/live-dialog.tsx'
+import { PublishDialog } from './publish/publish-dialog.tsx'
+import { TransferMenu } from './publish/transfer-menu.tsx'
 import { ShareDialog } from './share-dialog.tsx'
 import { VersionsDialog } from './versions-dialog.tsx'
 
@@ -148,18 +151,27 @@ export function TopBar({ projectId, tab, screenId }: Props) {
         <Search size={18} />
       </IconButton>
       {session.source.kind === 'server' ? <HistoryButton /> : null}
-      <Soon label={t('editor.testSoon')} icon={<Smartphone size={16} />} text={t('editor.test')} />
+      <TransferMenu />
+      {session.source.kind === 'server' ? (
+        <LiveButton />
+      ) : (
+        <Soon label={t('live.guest')} icon={<Smartphone size={16} />} text={t('editor.test')} />
+      )}
       {session.source.kind === 'server' ? (
         <ShareButton />
       ) : (
         <Soon label={t('editor.guestOnly')} icon={<Share2 size={16} />} text={t('editor.share')} />
       )}
-      <Soon
-        label={t('editor.guestOnly')}
-        icon={<Rocket size={16} />}
-        text={t('editor.publish')}
-        primary
-      />
+      {session.source.kind === 'server' ? (
+        <PublishButton />
+      ) : (
+        <Soon
+          label={t('publish.guest')}
+          icon={<Rocket size={16} />}
+          text={t('editor.publish')}
+          primary
+        />
+      )}
       <div className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
       <HelpButton />
       <ModeSwitch />
@@ -183,6 +195,27 @@ function ShareButton() {
         </Button>
       </Tooltip>
       {open ? <ShareDialog open onClose={() => setOpen(false)} /> : null}
+    </>
+  )
+}
+
+function PublishButton() {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <Tooltip content={t('editor.publish')}>
+        <Button
+          variant="primary"
+          icon={<Rocket size={16} />}
+          aria-label={t('editor.publish')}
+          onClick={() => setOpen(true)}
+          data-testid="publish-open"
+        >
+          <span className="hidden xl:inline">{t('editor.publish')}</span>
+        </Button>
+      </Tooltip>
+      {open ? <PublishDialog open onClose={() => setOpen(false)} /> : null}
     </>
   )
 }

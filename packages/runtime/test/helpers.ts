@@ -1,7 +1,7 @@
 import { generateProjectCode } from '@rublox/blocks'
 import { createComponent, createProject } from '@rublox/catalog'
 import type { BlocklyJson, ProjectDoc } from '@rublox/schema'
-import { Engine, type LogEntry, type ModuleLoader } from '../src/index.ts'
+import { Engine, type EngineOptions, type LogEntry, type ModuleLoader } from '../src/index.ts'
 
 /** Loads generated code as a `data:` module: Node has no `blob:` imports. */
 export const dataLoader: ModuleLoader = async (code) => {
@@ -72,13 +72,15 @@ export const onClick = (component: string, body: BlocklyJson, id = 'evt'): Block
   inputs: { DO: { block: body } },
 })
 
-export function engineFor(doc: ProjectDoc) {
+export function engineFor(doc: ProjectDoc, options: Partial<EngineOptions> = {}) {
   const logs: LogEntry[] = []
   const engine = new Engine({
     doc,
     code: generateProjectCode(doc),
     host: { log: (entry) => logs.push(entry) },
     loadModule: dataLoader,
+    storage: null,
+    ...options,
   })
   return { engine, logs }
 }

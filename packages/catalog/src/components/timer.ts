@@ -1,0 +1,66 @@
+import { defineComponent } from '../component.ts'
+import { arg, event, method, prop } from '../define.ts'
+
+export const Timer = defineComponent({
+  type: 'Timer',
+  category: 'device',
+  icon: 'timer',
+  visible: false,
+  container: false,
+  junior: true,
+  props: {
+    interval: prop.number({
+      default: 1,
+      min: 0.05,
+      max: 86400,
+      step: 0.1,
+      group: 'content',
+      junior: true,
+      blocks: 'get-set',
+    }),
+    repeat: prop.boolean({ default: true, group: 'content', junior: true, blocks: 'get-set' }),
+    autostart: prop.boolean({ default: true, group: 'content', junior: true }),
+    running: prop.boolean({ default: false, group: 'content', state: true }),
+    ticks: prop.number({ default: 0, group: 'content', state: true }),
+  },
+  events: { tick: event({ junior: true, args: { count: arg('number') } }) },
+  methods: { start: method({ junior: true }), stop: method({ junior: true }) },
+  strings: {
+    fr: {
+      label: 'Minuteur',
+      prefix: 'Minuteur',
+      description: 'Déclenche des blocs à intervalle régulier.',
+      help: 'Un minuteur sonne toutes les « intervalle » secondes : ses blocs « quand Minuteur1 sonne » s’exécutent à chaque fois. « répéter » à faux le fait sonner une seule fois.',
+      example: 'Quand Minuteur1 sonne, mettre Texte1.texte à valeur compte de l’événement',
+      props: {
+        interval: 'intervalle (secondes)',
+        repeat: 'répéter',
+        autostart: 'démarrer à l’ouverture',
+        running: 'en marche',
+        ticks: 'nombre de sonneries',
+      },
+      events: { tick: 'quand %1 sonne' },
+      methods: { start: 'démarrer %1', stop: 'arrêter %1' },
+      enums: {},
+      args: { count: 'compte' },
+    },
+    en: {
+      label: 'Timer',
+      prefix: 'Timer',
+      description: 'Runs blocks at regular intervals.',
+      help: 'A timer rings every "interval" seconds: its "when Timer1 rings" blocks run each time. "repeat" set to false makes it ring only once.',
+      example: 'When Timer1 rings, set Text1.text to event value count',
+      props: {
+        interval: 'interval (seconds)',
+        repeat: 'repeat',
+        autostart: 'start when the screen opens',
+        running: 'running',
+        ticks: 'number of rings',
+      },
+      events: { tick: 'when %1 rings' },
+      methods: { start: 'start %1', stop: 'stop %1' },
+      enums: {},
+      args: { count: 'count' },
+    },
+  },
+})

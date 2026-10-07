@@ -40,10 +40,12 @@ function flatten(screen: Screen): Row[] {
  */
 export function Layers({ screenId }: { screenId: ScreenId }) {
   const { t } = useTranslation()
+  const { t: tc } = useTranslation('catalog')
   const session = useSession()
   const doc = useDoc()
   const locale = usePrefs((s) => s.locale)
-  const { selected, select, hover, announce } = useEditor()
+  const { selected, select, hover, announce, selection, toggle } = useEditor()
+  const mode = usePrefs((s) => s.mode)
   const screen = doc.screens[screenId]
   const [renaming, setRenaming] = useState<ComponentId | null>(null)
   const [zone, setZone] = useState<Zone | null>(null)
@@ -215,7 +217,7 @@ export function Layers({ screenId }: { screenId: ScreenId }) {
           const node = screen.components[id]
           if (!node) return null
           const isRoot = id === screen.rootId
-          const active = id === current
+          const active = id === current || selection.includes(id)
           const container = isContainer(screen, id)
           return (
             <div
@@ -268,7 +270,11 @@ export function Layers({ screenId }: { screenId: ScreenId }) {
                   select(payload.id)
                 }
               }}
-              onClick={() => select(id)}
+              onClick={(event) => {
+                if (mode === 'studio' && (event.shiftKey || event.metaKey || event.ctrlKey))
+                  toggle(id)
+                else select(id)
+              }}
               onDoubleClick={() => setRenaming(id)}
               onMouseEnter={() => hover(id)}
               onMouseLeave={() => hover(null)}
@@ -368,6 +374,47 @@ export function Layers({ screenId }: { screenId: ScreenId }) {
           )
         })}
       </div>
+      {screen.nonVisual.length ? (
+        <div className="border-t border-border p-1.5" data-testid="layers-non-visual">
+          <p className="px-1.5 pt-1 pb-1 text-[11px] font-strong text-muted uppercase tracking-wide junior:text-ui-sm junior:normal-case junior:tracking-normal">
+            {tc('studio.nonVisual.title')}
+          </p>
+          {screen.nonVisual.map((id) => {
+            const node = screen.components[id]
+            if (!node) return null
+            const active = id === current
+            return (
+              <div
+                key={id}
+                className={cn(
+                  'group flex h-control-sm items-center gap-1.5 rounded-[calc(var(--radius)-2px)] pr-1 pl-1.5 text-ui-sm junior:text-ui',
+                  active ? 'bg-primary-soft text-primary-text' : 'hover:bg-surface-2',
+                )}
+              >
+                <button
+                  type="button"
+                  data-testid={`layer-${node.name}`}
+                  onClick={() => select(id)}
+                  className="flex min-w-0 flex-1 items-center gap-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <ComponentIcon
+                    type={node.type}
+                    size={14}
+                    className={active ? '' : 'text-muted'}
+                  />
+                  <span className="truncate">{node.name}</span>
+                </button>
+                <RowAction
+                  label={t('common.delete')}
+                  onClick={() => deleteComponent(session, screenId, id)}
+                >
+                  <Trash2 size={13} />
+                </RowAction>
+              </div>
+            )
+          })}
+        </div>
+      ) : null}
       <p className="border-t border-border px-3 py-2 text-[11px] leading-snug text-muted junior:text-ui-sm">
         {t('editor.layers.moveHint')}
       </p>

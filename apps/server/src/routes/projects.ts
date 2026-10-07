@@ -42,6 +42,7 @@ import {
 import type { Services } from '../services.ts'
 import { MB } from '../settings.ts'
 import { sniff } from '../sniff.ts'
+import { publishedIconFiles } from './publish.ts'
 
 export const TRASH_DAYS = 30
 /** An automatic snapshot at most every 10 minutes of activity (SPEC § 4.8). */
@@ -712,6 +713,7 @@ export async function purgeTrash(services: Services, now = Date.now()) {
       (row) => row.sha256,
     ),
   )
+  for (const hash of await publishedIconFiles(services.db)) used.add(hash)
   const removedFiles = await services.files.prune((hash) => used.has(hash))
   return { projects: purged.length, files: removedFiles }
 }

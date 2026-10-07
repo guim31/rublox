@@ -9,6 +9,8 @@ import {
   type UiMode,
   type WorkspaceKey,
 } from '@rublox/schema'
+import { BEHAVIORS } from './behaviors/registry.ts'
+import type { BehaviorContext } from './behaviors/types.ts'
 import { friendlyError, listItem, StopSignal } from './errors.ts'
 import { FrameClock } from './game/clock.ts'
 import { GameInstance } from './game/instance.ts'
@@ -73,6 +75,12 @@ export type EngineOptions = {
   clock?: FrameClock
   /** Slow motion; the code must then be generated with `slow: true`. */
   slow?: SlowMotion
+  /** Stored variables are kept under this id (SPEC § 6.6); the project id by default. */
+  appId?: string
+  /** Where stored variables live: `localStorage` by default, `null` to keep them in memory. */
+  storage?: Pick<Storage, 'getItem' | 'setItem'> | null
+  /** URL of an asset property value, for behaviors (a sound to play). */
+  assetUrl?: (value: string) => string | undefined
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: generated code passes any value
@@ -100,6 +108,8 @@ export type ModuleApi = {
     toast(message: Value): void
   }
   device: Record<string, Value>
+  /** Functions of the `app` workspace, shared by every screen. */
+  functions: Record<string, Value>
   rx: {
     tick(): Promise<void>
     wait(seconds: Value): Promise<void>
@@ -120,6 +130,11 @@ type Instance = {
   game?: GameInstance
   /** Proxy of a scene body (a clone), set when the screen's module runs. */
   proxyOf?: (body: Body) => Value
+  /** What renderers exposed (`useExpose`), by component. */
+  handles: Map<ComponentId, unknown>
+  /** Behavior contexts, created when the screen opens or a method is first called. */
+  contexts: Map<ComponentId, BehaviorContext>
+  cleanups: (() => void)[]
 }
 
 export type Dialog = {
@@ -131,15 +146,36 @@ export type Dialog = {
 
 export type Toast = { id: number; message: string }
 
+/** A full-screen panel over the app (QR scanner…), drawn by `OVERLAYS[kind]`. */
+export type Overlay = {
+  id: number
+  kind: string
+  data: unknown
+  resolve: (value: unknown) => void
+}
+
 export type EngineSnapshot = {
   doc: ProjectDoc
   screen: Instance | null
   depth: number
   running: boolean
+  /** The screen at the bottom of the stack: the current tab with tabs or drawer. */
+  root: ScreenId | null
   dialogs: readonly Dialog[]
   toasts: readonly Toast[]
+  overlays: readonly Overlay[]
   version: number
 }
+
+function defaultStorage(): Pick<Storage, 'getItem' | 'setItem'> | null {
+  try {
+    return globalThis.localStorage ?? null
+  } catch {
+    return null
+  }
+}
+
+const httpsOnly = (value: string) => (/^https:\/\//i.test(value) ? value : undefined)
 
 /** Default loader: the code becomes a `blob:` module (never `eval`, SPEC § 6.5). */
 export const loadBlobModule: ModuleLoader = async (code) => {
@@ -184,7 +220,14 @@ export class Engine {
   private readonly loadModule: ModuleLoader
   private readonly appVars = new Map<string, unknown>()
   private readonly storedVars = new Map<string, unknown>()
+  private functions: Record<string, Value> = {}
+  private readonly appId: string
+  private readonly storage: Pick<Storage, 'getItem' | 'setItem'> | null
+  private readonly assetUrl: (value: string) => string | undefined
+  private overlays: Overlay[] = []
   private stack: Instance[] = []
+  /** Tabs and drawer: the instance of each top-level screen, kept while another one shows. */
+  private readonly roots = new Map<ScreenId, Instance>()
   private running = false
   private generation = 0
   private nextKey = 1
@@ -228,6 +271,9 @@ export class Engine {
     this.initialScreen = options.initialScreen
     this.clock = options.clock ?? new FrameClock()
     if (options.slow) this.setSlowMotion(options.slow)
+    this.appId = options.appId ?? options.doc.meta.id
+    this.storage = options.storage === undefined ? defaultStorage() : options.storage
+    this.assetUrl = options.assetUrl ?? httpsOnly
     this.snapshot = this.makeSnapshot(0)
   }
 
@@ -244,10 +290,12 @@ export class Engine {
     return {
       doc: this.doc,
       screen: this.stack.at(-1) ?? null,
+      root: this.stack[0]?.screenId ?? null,
       depth: this.stack.length,
       running: this.running,
       dialogs: [...this.dialogs],
       toasts: [...this.toasts],
+      overlays: [...this.overlays],
       version,
     }
   }
@@ -273,8 +321,14 @@ export class Engine {
     this.running = true
     this.generation += 1
     this.appVars.clear()
+    this.functions = {}
+    this.loadStored()
     this.initVariables()
     this.lastYield = now()
+    // The app module defines the shared functions before its first `await`: load it first so
+    // that they exist when the screen's code runs.
+    const appCode = this.code[APP_WORKSPACE]?.code
+    if (appCode) await this.load(APP_WORKSPACE, appCode).catch(() => undefined)
     const appRun = this.runModule(APP_WORKSPACE, null)
     const first =
       this.initialScreen && this.doc.screens[this.initialScreen]
@@ -293,6 +347,8 @@ export class Engine {
     this.generation += 1
     for (const instance of this.stack) this.disposeInstance(instance)
     this.clock.release()
+    for (const instance of this.roots.values()) this.disposeInstance(instance)
+    this.roots.clear()
     for (const entry of this.timers) {
       clearTimeout(entry.timer)
       entry.reject(new StopSignal())
@@ -305,6 +361,8 @@ export class Engine {
     this.host.step?.({ blockId: null, workspace: null, paused: false })
     for (const dialog of this.dialogs) dialog.resolve(new StopSignal())
     this.dialogs = []
+    for (const overlay of this.overlays) overlay.resolve(new StopSignal())
+    this.overlays = []
     this.toasts = []
     this.notify()
   }
@@ -338,10 +396,19 @@ export class Engine {
       await this.restart()
       return
     }
+    // Hidden tabs whose blocks changed start again the next time they show.
+    for (const [screenId, instance] of this.roots) {
+      if (this.stack.includes(instance)) continue
+      if (previous[screenId]?.code !== code[screenId]?.code || !doc.screens[screenId]) {
+        this.disposeInstance(instance)
+        this.roots.delete(screenId)
+      }
+    }
     this.initVariables()
     for (const instance of this.stack) {
       const screen = doc.screens[instance.screenId]
       if (screen && instance.game) instance.game.sync(screen)
+      this.mountWorlds(instance)
     }
     const restarts: Promise<void>[] = []
     this.stack.forEach((instance, index) => {
@@ -369,6 +436,38 @@ export class Engine {
     for (const variable of this.doc.variables.app) {
       if (!this.appVars.has(variable.name)) this.appVars.set(variable.name, variable.initial ?? 0)
     }
+    for (const variable of this.doc.variables.stored) {
+      if (!this.storedVars.has(variable.name))
+        this.storedVars.set(variable.name, variable.initial ?? 0)
+    }
+  }
+
+  // Stored variables: kept on the device, under the app's id (SPEC § 6.6)
+
+  private storageKey(): string {
+    return `rublox:${this.appId}:stored`
+  }
+
+  private loadStored(): void {
+    this.storedVars.clear()
+    try {
+      const text = this.storage?.getItem(this.storageKey())
+      const saved = text ? (JSON.parse(text) as Record<string, unknown>) : {}
+      const names = new Set(this.doc.variables.stored.map((variable) => variable.name))
+      for (const [name, value] of Object.entries(saved)) {
+        if (names.has(name)) this.storedVars.set(name, value)
+      }
+    } catch {
+      // Unreadable storage (private mode, bad JSON): start from the initial values.
+    }
+  }
+
+  private saveStored(): void {
+    try {
+      this.storage?.setItem(this.storageKey(), JSON.stringify(Object.fromEntries(this.storedVars)))
+    } catch {
+      this.log('warn', messages[this.locale].catalog.runtime.storageFull)
+    }
   }
 
   // Screens
@@ -385,6 +484,9 @@ export class Engine {
       overrides: new Map(),
       handlers: new Map(),
       alive: true,
+      handles: new Map(),
+      contexts: new Map(),
+      cleanups: [],
     }
     const screen = this.doc.screens[screenId]
     if (screen && GameInstance.needed(screen)) {
@@ -398,18 +500,14 @@ export class Engine {
     return instance
   }
 
-  /** An instance leaves for good: its handlers stop, its game scenes too. */
-  private disposeInstance(instance: Instance): void {
-    instance.alive = false
-    instance.game?.dispose()
-  }
-
   private async push(screenId: ScreenId): Promise<void> {
     const instance = this.newInstance(screenId)
     this.stack.at(-1)?.game?.deactivate()
+    if (this.stack.length === 0 && this.isTopLevel(screenId)) this.roots.set(screenId, instance)
     this.stack.push(instance)
     this.notify()
     await this.runModule(screenId, instance)
+    this.mountBehaviors(instance)
     this.fireOpen(instance)
   }
 
@@ -418,9 +516,130 @@ export class Engine {
     if (!old) return
     this.disposeInstance(old)
     const instance = this.newInstance(old.screenId)
+    // What the renderers exposed stays valid: they are not redrawn for a code change.
+    for (const [id, handle] of old.handles) instance.handles.set(id, handle)
+    this.mountWorlds(instance)
     this.stack[index] = instance
+    if (this.roots.get(old.screenId) === old) this.roots.set(old.screenId, instance)
     await this.runModule(instance.screenId, instance)
+    this.mountBehaviors(instance)
     if (this.stack.at(-1) === instance) this.fireOpen(instance)
+  }
+
+  /** Ends a screen instance: its behaviors stop (timers, sensors, sounds), its game too. */
+  private disposeInstance(instance: Instance): void {
+    if (!instance.alive) return
+    instance.alive = false
+    instance.game?.dispose()
+    for (const cleanup of instance.cleanups.splice(0)) {
+      try {
+        cleanup()
+      } catch (error) {
+        console.warn('Rublox: a component did not stop cleanly', error)
+      }
+    }
+  }
+
+  // Behaviors (SPEC § 6.3): what components do beyond showing their properties
+
+  private mountBehaviors(instance: Instance): void {
+    if (!instance.alive) return
+    const screen = this.doc.screens[instance.screenId]
+    if (!screen) return
+    for (const [id, node] of Object.entries(screen.components)) {
+      const behavior = BEHAVIORS[node.type]
+      if (!behavior) continue
+      const ctx = this.contextOf(instance, id)
+      if (behavior.available && getComponentDef(node.type)?.props.available) {
+        let available = false
+        try {
+          available = behavior.available()
+        } catch {
+          available = false
+        }
+        ctx.set('available', available)
+      }
+      try {
+        behavior.mount?.(ctx)
+      } catch (error) {
+        this.report(error)
+      }
+    }
+  }
+
+  private contextOf(instance: Instance, componentId: ComponentId): BehaviorContext {
+    const existing = instance.contexts.get(componentId)
+    if (existing) return existing
+    const name = () => this.doc.screens[instance.screenId]?.components[componentId]?.name ?? ''
+    const ctx: BehaviorContext = {
+      id: componentId,
+      get name() {
+        return name()
+      },
+      type: this.doc.screens[instance.screenId]?.components[componentId]?.type ?? '',
+      locale: this.locale,
+      appId: this.appId,
+      get: (prop) => this.componentValue(instance, componentId, prop),
+      set: (prop, value) => this.writeProp(instance, componentId, prop, value),
+      emit: (event, args) => this.fire(instance, componentId, event, args),
+      fail: (message) => {
+        this.log('warn', `${name()} : ${message}`)
+        this.fire(instance, componentId, 'error', { message })
+      },
+      handle: <T>() => instance.handles.get(componentId) as T | undefined,
+      assetUrl: (value) => this.resolveAsset(value),
+      onDispose: (cleanup) => {
+        if (instance.alive) instance.cleanups.push(cleanup)
+        else cleanup()
+      },
+      alive: () => instance.alive && this.running,
+      overlay: <T>(kind: string, data?: unknown) => this.overlay(kind, data) as Promise<T>,
+    }
+    instance.contexts.set(componentId, ctx)
+    return ctx
+  }
+
+  /** URL of an asset property: a project asset, https:, or one made while running. */
+  resolveAsset(value: string): string | undefined {
+    if (/^(blob:|data:(image|audio|video)\/)/i.test(value)) return value
+    return this.assetUrl(value)
+  }
+
+  /** A renderer of the visible screen exposed (or withdrew) its imperative handle. */
+  expose(instanceKey: number, componentId: ComponentId, handle: unknown): void {
+    const instance = this.stack.find((entry) => entry.key === instanceKey)
+    if (!instance) return
+    if (handle === null || handle === undefined) {
+      instance.handles.delete(componentId)
+      instance.game?.worlds.get(componentId)?.unmount()
+    } else instance.handles.set(componentId, handle)
+    this.mountWorlds(instance)
+  }
+
+  /** Draws each game scene into the stage its renderer exposed (`{ stage }`). */
+  private mountWorlds(instance: Instance): void {
+    for (const [id, world] of instance.game?.worlds ?? []) {
+      const stage = (instance.handles.get(id) as { stage?: HTMLElement } | undefined)?.stage
+      if (stage && world.stage !== stage) world.mount(stage, (value) => this.resolveAsset(value))
+    }
+  }
+
+  private overlay(kind: string, data: unknown): Promise<unknown> {
+    return new Promise((resolve, reject) => {
+      const overlay: Overlay = {
+        id: this.nextKey++,
+        kind,
+        data,
+        resolve: (value) => {
+          this.overlays = this.overlays.filter((o) => o !== overlay)
+          this.notify()
+          if (value instanceof StopSignal) reject(value)
+          else resolve(value)
+        },
+      }
+      this.overlays.push(overlay)
+      this.notify()
+    })
   }
 
   private fireOpen(instance: Instance): void {
@@ -436,6 +655,40 @@ export class Engine {
       this.log('warn', format(messages[this.locale].runtime.noScreen, { name }))
       return
     }
+    if (this.isTopLevel(screenId)) this.switchTo(screenId)
+    else void this.push(screenId)
+  }
+
+  // Tabs and drawer (SPEC § 4.1): their screens are top-level, each keeps its state
+
+  /** The screens of the tab bar or the drawer: the navigation items, or every screen. */
+  navigationScreens(): ScreenId[] {
+    const navigation = this.doc.settings.navigation
+    if (navigation.kind === 'stack') return []
+    const items = navigation.items?.map((item) => item.screen) ?? this.doc.screenOrder
+    return items.filter((id) => this.doc.screens[id])
+  }
+
+  private isTopLevel(screenId: ScreenId): boolean {
+    return this.navigationScreens().includes(screenId)
+  }
+
+  /** Shows a tab (or a drawer entry): closes the screens opened above, keeps the tab's state. */
+  switchTo(screenId: ScreenId): void {
+    if (!this.running || !this.doc.screens[screenId]) return
+    const [root, ...above] = this.stack
+    if (root?.screenId === screenId && above.length === 0) return
+    root?.game?.deactivate()
+    for (const instance of above) this.disposeInstance(instance)
+    if (root && !this.roots.has(root.screenId)) this.disposeInstance(root)
+    const kept = this.roots.get(screenId)
+    if (kept?.alive) {
+      this.stack = [kept]
+      this.notify()
+      this.fireOpen(kept)
+      return
+    }
+    this.stack = []
     void this.push(screenId)
   }
 
@@ -450,8 +703,8 @@ export class Engine {
 
   // Events from the rendering
 
-  /** A component of the visible screen fired an event (a click…). */
-  emit(componentId: ComponentId, event: string): void {
+  /** A component of the visible screen fired an event (a click…), with its values. */
+  emit(componentId: ComponentId, event: string, args?: Record<string, unknown>): void {
     const instance = this.stack.at(-1)
     if (!instance) return
     const node = this.doc.screens[instance.screenId]?.components[componentId]
@@ -463,7 +716,7 @@ export class Engine {
         componentName: node.name,
         event,
       })
-    this.fire(instance, componentId, event)
+    this.fire(instance, componentId, event, args)
   }
 
   // Slow motion
@@ -639,6 +892,8 @@ export class Engine {
       return
     }
     const current = instance.overrides.get(componentId) ?? {}
+    // Writing the same value again changes nothing (and redraws nothing).
+    if (prop in current && Object.is(current[prop], coerced)) return
     instance.overrides.set(componentId, { ...current, [prop]: coerced })
     if (instance.alive) this.notify()
   }
@@ -847,11 +1102,22 @@ export class Engine {
       },
     })
 
-    // Stored and shared variables arrive at J5; until then they live in memory.
+    // Stored variables are kept on the device; shared ones arrive at J5 (in memory until then).
     const stored = new Proxy({} as Record<string, Value>, {
       get: (_, key) => (typeof key === 'string' ? (this.storedVars.get(key) ?? 0) : undefined),
       set: (_, key, value) => {
-        if (typeof key === 'string') this.storedVars.set(key, value)
+        if (typeof key === 'string') {
+          this.storedVars.set(key, value)
+          this.saveStored()
+        }
+        return true
+      },
+    })
+    const sharedVars = new Map<string, unknown>()
+    const shared = new Proxy({} as Record<string, Value>, {
+      get: (_, key) => (typeof key === 'string' ? (sharedVars.get(key) ?? 0) : undefined),
+      set: (_, key, value) => {
+        if (typeof key === 'string') sharedVars.set(key, value)
         return true
       },
     })
@@ -862,8 +1128,9 @@ export class Engine {
       components,
       app,
       stored,
-      shared: stored,
+      shared,
       device: {},
+      functions: this.functions,
       screens: {
         open: (name) => {
           check()
@@ -926,24 +1193,16 @@ export class Engine {
     }
   }
 
-  private async callMethod(
+  private callMethod(
     instance: Instance,
     componentId: ComponentId,
     method: string,
-    _args: unknown[],
-  ) {
+    args: unknown[],
+  ): unknown {
     const node = this.doc.screens[instance.screenId]?.components[componentId]
-    if (!node) return undefined
-    if (node.type === 'TextInput') {
-      if (method === 'clear') this.writeProp(instance, componentId, 'text', '')
-      if (method === 'focus') {
-        const element = globalThis.document?.querySelector<HTMLElement>(
-          `[data-rx-id="${CSS.escape(componentId)}"] input, [data-rx-id="${CSS.escape(componentId)}"] textarea`,
-        )
-        element?.focus()
-      }
-    }
-    return undefined
+    const run = node && BEHAVIORS[node.type]?.methods?.[method]
+    if (!run) return undefined
+    return run(this.contextOf(instance, componentId), ...args)
   }
 
   private invalid(component: string, property: string, value: unknown): void {

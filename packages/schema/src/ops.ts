@@ -5,9 +5,12 @@ import type {
   BlocklyJson,
   ComponentId,
   ComponentNode,
+  NavItem,
   ProjectMeta,
+  ProjectSettings,
   Screen,
   ScreenId,
+  Theme,
   VarDecl,
   VarKind,
   WorkspaceKey,
@@ -185,6 +188,12 @@ export function removeScreen(ydoc: Y.Doc, screenId: ScreenId, origin?: Origin) {
     yBlocks(ydoc).delete(screenId)
     const navigation = ySettings(ydoc).get('navigation') as YMap
     if (navigation.get('startScreen') === screenId) navigation.set('startScreen', order.get(0))
+    const items = navigation.get('items') as NavItem[] | undefined
+    if (items?.some((item) => item.screen === screenId))
+      navigation.set(
+        'items',
+        items.filter((item) => item.screen !== screenId),
+      )
   }, origin)
 }
 
@@ -504,4 +513,121 @@ export function addAsset(ydoc: Y.Doc, asset: Asset, id = newId(), origin?: Origi
 
 export function removeAsset(ydoc: Y.Doc, assetId: string, origin?: Origin) {
   ydoc.transact(() => yAssets(ydoc).delete(assetId), origin)
+}
+
+// App settings: theme and navigation (SPEC § 4.1)
+
+/** Changes some fields of the app theme (colors, font, corners, light or dark). */
+export function setTheme(ydoc: Y.Doc, patch: Partial<Theme>, origin?: Origin) {
+  ydoc.transact(() => {
+    const settings = ySettings(ydoc)
+    let theme = settings.get('theme') as YMap | undefined
+    if (!theme) {
+      theme = mapFrom({})
+      settings.set('theme', theme)
+    }
+    for (const [key, value] of Object.entries(patch)) {
+      if (value !== undefined && theme.get(key) !== value) theme.set(key, value)
+    }
+  }, origin)
+}
+
+/**
+ * Changes the navigation: its kind (stack, tabs, drawer) and the screens of the tab bar or
+ * the drawer, with their icon and label. `items: undefined` keeps them; `null` removes them
+ * (every screen, in order).
+ */
+export function setNavigation(
+  ydoc: Y.Doc,
+  patch: { kind?: ProjectSettings['navigation']['kind']; items?: NavItem[] | null },
+  origin?: Origin,
+) {
+  ydoc.transact(() => {
+    const navigation = ySettings(ydoc).get('navigation') as YMap
+    if (patch.kind && navigation.get('kind') !== patch.kind) navigation.set('kind', patch.kind)
+    if (patch.items === null) navigation.delete('items')
+    else if (patch.items) {
+      const screens = yScreens(ydoc)
+      navigation.set(
+        'items',
+        patch.items.filter((item) => screens.has(item.screen)).map((item) => ({ ...item })),
+      )
+    }
+  }, origin)
+}
+
+// Copy and paste (between screens and projects)
+
+/** Components cut out of a screen: each root with every descendant, by their old ids. */
+export type ComponentClip = { rootId: ComponentId; nodes: Record<ComponentId, ComponentNode> }
+
+/** The subtrees of `ids` (a component inside another one of the list is left out). */
+export function copyComponents(
+  ydoc: Y.Doc,
+  screenId: ScreenId,
+  ids: ComponentId[],
+): ComponentClip[] {
+  const rootId = screenMap(ydoc, screenId).get('rootId') as string
+  const components = componentsMap(ydoc, screenId)
+  const wanted = ids.filter((id) => id !== rootId && components.has(id))
+  const tops = wanted.filter(
+    (id) => !wanted.some((other) => other !== id && isInside(ydoc, screenId, id, other)),
+  )
+  return tops.map((top) => ({
+    rootId: top,
+    nodes: Object.fromEntries(
+      descendants(ydoc, screenId, top).map((id) => [
+        id,
+        components.get(id)?.toJSON() as ComponentNode,
+      ]),
+    ),
+  }))
+}
+
+/**
+ * Inserts copied components with new ids and free names, in one transaction. Visible ones go
+ * into `parentId` at `index`; non-visual ones (`isVisual` false) join the screen's non-visual
+ * list. Returns the ids of the inserted roots.
+ */
+export function pasteComponents(
+  ydoc: Y.Doc,
+  screenId: ScreenId,
+  clips: ComponentClip[],
+  parentId: ComponentId,
+  index: number,
+  isVisual: (type: string) => boolean,
+  origin?: Origin,
+): ComponentId[] {
+  const roots: ComponentId[] = []
+  ydoc.transact(() => {
+    const components = componentsMap(ydoc, screenId)
+    const names = new Set(componentNames(ydoc, screenId))
+    let at = index
+    for (const clip of clips) {
+      const ids = new Map(Object.keys(clip.nodes).map((old) => [old, newId()]))
+      const insert = (old: ComponentId): ComponentId => {
+        const node = clip.nodes[old] as ComponentNode
+        const id = ids.get(old) as string
+        const name = names.has(node.name) ? uniqueName(node.name, names) : node.name
+        names.add(name)
+        const children = node.children
+          ?.filter((child) => clip.nodes[child])
+          .map((child) => insert(child))
+        components.set(id, componentToY({ ...node, name, children, locked: false }))
+        return id
+      }
+      if (!clip.nodes[clip.rootId]) continue
+      const id = insert(clip.rootId)
+      const visual = isVisual(clip.nodes[clip.rootId]?.type ?? '')
+      const list = visual
+        ? childrenOf(componentMap(ydoc, screenId, parentId))
+        : (screenMap(ydoc, screenId).get('nonVisual') as YArray<string>)
+      if (visual) {
+        list.insert(Math.min(at, list.length), [id])
+        at += 1
+      } else list.push([id])
+      roots.push(id)
+    }
+  }, origin)
+  return roots
 }

@@ -62,7 +62,7 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome pnpm test:e2e`.
   Contre les serveurs de dev : `E2E_BASE_URL=http://localhost:5173 npx playwright test --project=e2e`.
 - `pnpm screenshots` : captures de PR (Junior, Studio, clair, sombre), une spec par jalon
-  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j3/`). Lancer seulement celle du jalon :
+  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j2/`, `j3/`, `j4/`). Lancer seulement celle du jalon :
   `npx playwright test --project=screenshots e2e/screenshots-j1.spec.ts` après `pnpm build`.
 - `cd packages/blocks && npx vitest run -u` : régénérer les instantanés du générateur, puis
   relire le diff du code produit (`pnpm --filter … test -- -u` n'écrit que les nouveaux).
@@ -78,12 +78,18 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 ## Où ajouter quoi
 
 - Un composant : `packages/catalog/src/components/<type>.ts` (déclaration et textes FR/EN),
-  `registry.ts`, rendu dans `packages/runtime/src/components/` + `RENDERERS`, icône dans
-  `apps/studio/src/editor/component-icon.tsx`. Ses blocs et son générateur en découlent ; les tests
-  de complétude disent ce qui manque. Voir `docs/SPEC.md` § 0.1 pour les contrats.
+  `registry.ts`, rendu dans `packages/runtime/src/components/` + `RENDERERS`, comportement
+  (méthodes, minuteurs, capteurs) dans `packages/runtime/src/behaviors/` + `BEHAVIORS`, icône dans
+  `apps/studio/src/editor/component-icon.tsx`, et une place dans l'appli de démonstration
+  (`packages/catalog/src/demo/demo.ts`). Ses blocs et son générateur en découlent ; les tests
+  de complétude disent ce qui manque. Voir `docs/SPEC.md` § 0.1 et § 0.4 pour les contrats.
+- Une fonction du navigateur (caméra, capteur…) : `availableProp()` et `errorEvent()` dans la
+  déclaration, `available` et `ctx.fail(...)` dans le comportement (messages de
+  `behaviors/device.ts`), une ligne dans `docs/compatibilite.md`.
 - Une chaîne d'interface : `packages/i18n/src/fr/*.ts` puis `en/*.ts` (TypeScript refuse une clé
   manquante ; `t('…')` est typé). Celles des comptes, espaces et administration sont dans
-  `accounts.ts`.
+  `accounts.ts`, celles du catalogue (J2) dans `catalog.ts` (espace `catalog` :
+  `useTranslation('catalog')`).
 - Un tutoriel ou un défi : un dossier `content/tutorials/<id>/` (`tutorial.json`, `fr.json`,
   `en.json`) ou `content/challenges/<id>/`, puis une ligne dans `packages/learn/src/content.ts`.
   Les vérifications et les cibles sont décrites dans `packages/learn/src/{conditions,model}.ts` ;
@@ -100,6 +106,23 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   par navigateur). Côté studio : `call(api.<route>.$get(…))`.
 
 ## Pièges
+
+- **TS2589 (« Type instantiation is excessively deep »)** : quand les chaînes grossissent, un
+  paramètre typé `ReturnType<typeof useTranslation>['t']` devient trop profond ; le typer
+  `TFunction` (`i18next`).
+- **pnpm add** écrit parfois `^x.y.z` malgré `save-exact` : vérifier `package.json` après un ajout.
+- **WebSockets** : tout passe par `Upgrades` (`apps/server/src/upgrades.ts`), un seul écouteur
+  `upgrade`. L'authentification d'une socket est asynchrone : un client est « entré » à son
+  premier message (`phones` pour l'éditeur du test en direct), pas à `open`.
+- **Service worker** : `navigator.serviceWorker.ready` répond dès l'état `activating` ; attendre
+  `activated` avant de couper le réseau (`context.setOffline`). Le service worker d'une appli ne
+  s'enregistre qu'en production (`import.meta.env.PROD`) : en développement, `/a/<slug>/` vient
+  de Vite et `/_app/` n'existe pas.
+- **Playwright et deux pages** : `Escape` n'atteint pas toujours un dialogue Radix quand une autre
+  page (le téléphone émulé) a été ouverte entre-temps ; cliquer « Fermer ». `devices['iPhone 13']`
+  donne l'agent utilisateur d'un iPhone même dans Chromium.
+- **Captures avec un compte** : le profil l'emporte sur les préférences du navigateur
+  (`useProfileSync`) ; un compte par capture, son profil réglé par `PATCH /api/me`.
 
 - **TypeScript 7** (`tsc` natif) fonctionne avec tout l'outillage du dépôt ; aucun outil n'a
   besoin de l'API JavaScript de TypeScript.
@@ -169,6 +192,14 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   (`e2e/learn.spec.ts`).
 - **Glisser-déposer tactile** : le repli (`touch-drag.ts`) rejoue des `DragEvent` construits ;
   leur `dataTransfer` peut manquer (vieux Safari) : ne jamais le lire sans test.
+- **Rendus et effets** : `p.emit` et `p.setValue` d'un rendu sont recréés à chaque rendu ; un
+  `useEffect` qui en dépend tourne à chaque fois. Les lire par une `ref`. Le moteur ignore une
+  écriture identique, mais un effet qui écrit une valeur différente à chaque fois figerait l'aperçu.
+- **Tailwind dans le canevas** : le preflight du studio s'applique aux composants dessinés dans le
+  canevas (titres, listes, marges) ; `styles.css` du moteur redonne explicitement ce qu'il faut
+  (`.rx-rich h1`, `ul`…), sinon le canevas diffère de l'aperçu.
+- **Composants invisibles** : ils vont dans `screen.nonVisual`, jamais dans l'arbre ; le canevas
+  les montre sous le téléphone (`non-visual-tray`).
 - **Mesurer le jeu** : le Chromium du conteneur n'a pas de GPU ; dès qu'un seul pixel bouge,
   l'aperçu plafonne vers 45 à 50 images par seconde, jeu ou pas (même un `<canvas>`). Comparer au
   plafond mesuré à côté, et juger le jeu sur son temps JavaScript par image (profileur CDP sur

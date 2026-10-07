@@ -1,4 +1,6 @@
-import { type Renderer, rootAttributes } from './types.ts'
+import { useMemo, useRef } from 'react'
+import type { FocusHandle } from '../behaviors/text-input.ts'
+import { type Renderer, rootAttributes, useExpose } from './types.ts'
 
 const INPUT_TYPES = {
   text: 'text',
@@ -9,7 +11,11 @@ const INPUT_TYPES = {
 
 export const TextInputRenderer: Renderer = (p) => {
   const kind = String(p.props.inputType ?? 'text')
+  const field = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
+  const handle = useMemo<FocusHandle>(() => ({ focus: () => field.current?.focus() }), [])
+  useExpose(p, handle)
   const common = {
+    ref: field,
     value: String(p.props.text ?? ''),
     placeholder: String(p.props.placeholder ?? ''),
     disabled: p.props.disabled === true,

@@ -7,6 +7,7 @@ import { adminRoutes } from './routes/admin.ts'
 import { invitesRoutes } from './routes/invites.ts'
 import { meRoutes } from './routes/me.ts'
 import { projectsRoutes } from './routes/projects.ts'
+import { publishRoutes } from './routes/publish.ts'
 import { spacesRoutes } from './routes/spaces.ts'
 import type { Services } from './services.ts'
 import { MB } from './settings.ts'
@@ -62,6 +63,7 @@ export function createApi(services: Services) {
       .route('/invites', invitesRoutes(services))
       .route('/admin', adminRoutes(services))
       .route('/projects', projectsRoutes(services))
+      .route('/projects', publishRoutes(services))
       .all('*', (c) => c.json({ error: 'not_found' }, 404))
   )
 }

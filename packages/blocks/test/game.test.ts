@@ -159,9 +159,7 @@ describe('game blocks', () => {
         contextFromDoc(doc, screenId, { locale }),
       )
       const label = workspace.getBlockById('a')?.toString()
-      expect(label).toBe(
-        locale === 'fr' ? 'temps écoulé (s) de l’événement' : 'elapsed time (s) of the event',
-      )
+      expect(label).toContain(locale === 'fr' ? 'temps écoulé (s)' : 'elapsed time (s)')
       workspace.dispose()
     }
     const toolbox = JSON.stringify(buildToolbox(contextFromDoc(doc, screenId, { mode: 'studio' })))

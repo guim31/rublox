@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
 import { injectRuntimeConfig, safeRelativePath } from '../src/static.ts'
-import { createDistFixture, get, indexHtml, testApp } from './helpers.ts'
+import { createDistFixture, get, indexHtml, STUDIO, testApp } from './helpers.ts'
 
 const dist = createDistFixture()
 const app = testApp(dist)
@@ -86,7 +86,7 @@ describe('host routing', () => {
     expect(api.headers.get('content-type')).not.toContain('application/json')
   })
 
-  it.each(['/a/my-app/', '/live/token', '/assets/abc', '/_rx/proxy'])(
+  it.each(['/a/x/', '/live/token', '/assets/abc', '/_rx/proxy'])(
     'reserves %s on the apps origin',
     async (path) => {
       const res = await get(app, appsHost, path)
@@ -94,6 +94,17 @@ describe('host routing', () => {
       expect(await res.json()).toEqual({ error: 'not_found' })
     },
   )
+
+  it('lets the studio read the built player, to export an app as a website', async () => {
+    const kit = await get(app, appsHost, '/_rx/kit.json')
+    expect(kit.headers.get('access-control-allow-origin')).toBe(STUDIO)
+    const body = (await kit.json()) as { html: string; files: string[] }
+    expect(body.files).toEqual(['/favicon.svg', '/_app/engine.wasm', '/_app/player-def456.js'])
+    const file = await get(app, appsHost, '/_app/player-def456.js')
+    expect(file.headers.get('access-control-allow-origin')).toBe(STUDIO)
+    // Never the studio's own files, and no CORS for the player page itself.
+    expect((await get(app, appsHost, '/')).headers.get('access-control-allow-origin')).toBeNull()
+  })
 
   it.each([
     '/../secret.txt',

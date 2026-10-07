@@ -77,6 +77,537 @@
   width: 100%;
   height: 100%;
 }
+/* J2 components */
+.rx-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.rx-spacer-design {
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--rx-primary) 10%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+}
+.rx-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.rx-toggle label {
+  flex: 1;
+  cursor: pointer;
+}
+.rx-checkbox,
+.rx-switch {
+  appearance: none;
+  flex-shrink: 0;
+  margin: 0;
+  cursor: pointer;
+  border: 2px solid var(--rx-border);
+  background: var(--rx-background);
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
+}
+.rx-checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+}
+.rx-checkbox:checked {
+  background: var(--rx-accent);
+  border-color: var(--rx-accent);
+}
+.rx-checkbox:checked::after {
+  content: "";
+  width: 6px;
+  height: 11px;
+  border: solid var(--rx-on-primary);
+  border-width: 0 3px 3px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+.rx-switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--rx-border);
+  border-color: transparent;
+}
+.rx-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 150ms ease;
+}
+.rx-switch:checked {
+  background: var(--rx-accent);
+}
+.rx-switch:checked::after {
+  transform: translateX(20px);
+}
+.rx-checkbox:focus-visible,
+.rx-switch:focus-visible,
+.rx-slider input:focus-visible,
+.rx-rating button:focus-visible,
+.rx-list button:focus-visible,
+.rx-card button:focus-visible,
+.rx-tile:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--rx-primary) 55%, transparent);
+  outline-offset: 2px;
+}
+.rx-slider {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+.rx-slider input {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--rx-accent);
+  cursor: pointer;
+}
+.rx-field {
+  display: flex;
+  overflow: hidden;
+}
+.rx-field-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 8px 12px;
+}
+.rx-field-input:focus {
+  outline: none;
+}
+.rx-field:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rx-primary) 35%, transparent);
+}
+.rx-select {
+  cursor: pointer;
+}
+.rx-rating {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.rx-rating button {
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.rx-rating button:disabled {
+  cursor: default;
+}
+.rx-progress {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.rx-progress-fill {
+  height: 100%;
+  transition: width 250ms ease;
+}
+.rx-spin {
+  animation: rx-spin 0.9s linear infinite;
+}
+@keyframes rx-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.rx-rich {
+  overflow-wrap: anywhere;
+}
+.rx-rich > :first-child {
+  margin-top: 0;
+}
+.rx-rich > :last-child {
+  margin-bottom: 0;
+}
+.rx-rich h1,
+.rx-rich h2,
+.rx-rich h3 {
+  font-weight: 700;
+}
+.rx-rich strong {
+  font-weight: 700;
+}
+.rx-rich em {
+  font-style: italic;
+}
+.rx-rich ul {
+  list-style: disc;
+}
+.rx-rich ol {
+  list-style: decimal;
+}
+.rx-rich h1 {
+  font-size: 1.6em;
+  margin: 0.4em 0;
+  line-height: 1.2;
+}
+.rx-rich h2 {
+  font-size: 1.3em;
+  margin: 0.4em 0;
+}
+.rx-rich h3 {
+  font-size: 1.1em;
+  margin: 0.4em 0;
+}
+.rx-rich p {
+  margin: 0.5em 0;
+  white-space: pre-wrap;
+}
+.rx-rich ul,
+.rx-rich ol {
+  margin: 0.5em 0;
+  padding-left: 1.4em;
+}
+.rx-rich code {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  background: var(--rx-surface);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.rx-list {
+  overflow: hidden;
+}
+.rx-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rx-list button {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.rx-list button:hover,
+.rx-tile:hover,
+.rx-card-main:hover {
+  background: color-mix(in srgb, var(--rx-primary) 8%, transparent);
+}
+.rx-list-divided {
+  border-top: 1px solid var(--rx-border);
+}
+.rx-list-empty {
+  margin: 0;
+  padding: 14px;
+  color: var(--rx-muted);
+  text-align: center;
+}
+.rx-datalist {
+  display: flex;
+  flex-direction: column;
+}
+.rx-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 10px;
+  border-radius: var(--rx-radius);
+  overflow: hidden;
+}
+.rx-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.rx-card-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rx-card-title {
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rx-card-subtitle {
+  color: var(--rx-muted);
+  font-size: 0.9em;
+}
+.rx-card-button {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rx-primary);
+  color: var(--rx-on-primary);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.rx-thumb {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: calc(var(--rx-radius) * 0.7);
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--rx-primary) 30%, transparent),
+    color-mix(in srgb, var(--rx-secondary) 30%, transparent)
+  );
+}
+.rx-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.rx-datagrid {
+  display: grid;
+}
+.rx-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--rx-radius);
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.rx-tile .rx-thumb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+.rx-media {
+  position: relative;
+  display: flex;
+}
+.rx-media video,
+.rx-media iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.rx-web {
+  background: var(--rx-background);
+}
+.rx-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  color: var(--rx-muted);
+  text-align: center;
+  background: var(--rx-surface);
+  min-height: 100%;
+  width: 100%;
+}
+.rx-placeholder small {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.rx-lottie {
+  position: relative;
+  display: flex;
+}
+.rx-lottie-box {
+  position: absolute;
+  inset: 0;
+}
+.rx-canvas {
+  display: flex;
+}
+.rx-canvas canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Tabs and drawer navigation */
+.rx-tabs {
+  display: flex;
+  border-top: 1px solid var(--rx-border);
+  background: var(--rx-background);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.rx-tab {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--rx-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.rx-tab span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rx-tab[aria-current="page"] {
+  color: var(--rx-primary);
+}
+.rx-tab:focus-visible,
+.rx-drawer-item:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--rx-primary) 55%, transparent);
+  outline-offset: -3px;
+}
+.rx-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  background: rgba(10, 8, 30, 0.45);
+  animation: rx-fade-in 150ms ease-out;
+}
+.rx-drawer-close {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.rx-drawer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(78%, 300px);
+  height: 100%;
+  padding: 16px 10px;
+  background: var(--rx-background);
+  box-shadow: 8px 0 32px rgba(10, 8, 30, 0.25);
+  animation: rx-drawer-in 180ms ease-out;
+}
+.rx-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--rx-text);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.rx-drawer-item[aria-current="page"] {
+  background: color-mix(in srgb, var(--rx-primary) 14%, transparent);
+  color: var(--rx-primary);
+}
+@keyframes rx-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rx-drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+/* Full-screen panels (QR scanner) */
+.rx-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: #fff;
+}
+.rx-overlay video {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  object-fit: cover;
+}
+.rx-overlay-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  font-weight: 650;
+}
+.rx-overlay-bar button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.rx-scan-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(64%, 260px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
 @media (prefers-reduced-motion: reduce) {
   .rx-app * {
     /* biome-ignore lint/complexity/noImportantStyles: must win over component styles */

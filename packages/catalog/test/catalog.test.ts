@@ -12,6 +12,7 @@ import {
   CATEGORY_LABELS,
   COMPONENTS,
   createComponent,
+  createDemoProject,
   createProject,
   createScreen,
   getComponentDef,
@@ -19,6 +20,7 @@ import {
   prop,
   resolveProps,
   stripDefaults,
+  typesMissingFromDemo,
 } from '../src/index.ts'
 
 describe('catalog completeness', () => {
@@ -107,6 +109,16 @@ describe('catalog completeness', () => {
     expect(getComponentDef('Sprite')?.clonable).toBe(true)
   })
 
+  it('keeps state properties out of the project and the inspector', () => {
+    for (const def of COMPONENTS) {
+      for (const [key, propDef] of Object.entries(def.props)) {
+        if (!propDef.state) continue
+        expect(propDef.blocks, `${def.type}.${key}`).not.toMatch(/set/)
+        expect(stripDefaults(def.type, { [key]: 'x' }), `${def.type}.${key}`).toEqual({})
+      }
+    }
+  })
+
   it('includes the J0 components', () => {
     for (const type of ['Screen', 'Row', 'Column', 'Button', 'Text', 'TextInput', 'Image']) {
       expect(getComponentDef(type), type).toBeDefined()
@@ -193,5 +205,43 @@ describe('coercion', () => {
     expect(color.coerce('url(x)')).toBeUndefined()
     const variant = prop.enum(['a', 'b'], { default: 'a', group: 'style' })
     expect(variant.coerce('c')).toBeUndefined()
+  })
+
+  it('reads lists, dates and times', () => {
+    const list = prop.list({ default: [], group: 'content' })
+    expect(list.coerce('rouge, vert, bleu')).toEqual(['rouge', 'vert', 'bleu'])
+    expect(list.coerce('a, b\nc')).toEqual(['a, b', 'c'])
+    expect(list.coerce([1, true, 'x'])).toEqual(['1', 'true', 'x'])
+    expect(list.coerce(null)).toEqual([])
+    expect(list.coerce({})).toBeUndefined()
+    const items = prop.list({
+      default: [],
+      group: 'content',
+      itemFields: { title: 'string', image: 'asset' },
+    })
+    expect(items.coerce(['Chat', { title: 'Chien', image: 'x', other: 1 }])).toEqual([
+      { title: 'Chat', image: '' },
+      { title: 'Chien', image: 'x' },
+    ])
+    const date = prop.date({ default: '', group: 'content' })
+    expect(date.coerce('2026-10-06')).toBe('2026-10-06')
+    expect(date.coerce('2026-02-30')).toBeUndefined()
+    expect(date.coerce(new Date(2026, 0, 5))).toBe('2026-01-05')
+    const time = prop.time({ default: '', group: 'content' })
+    expect(time.coerce('9:05')).toBe('09:05')
+    expect(time.coerce('24:00')).toBeUndefined()
+  })
+})
+
+describe('demo app', () => {
+  it.each(['fr', 'en'] as const)('is a valid project that uses every component (%s)', (locale) => {
+    const doc = createDemoProject({ locale, mode: 'studio' })
+    expect(projectDocSchema.safeParse(doc).error).toBeUndefined()
+    expect(
+      typesMissingFromDemo(
+        doc,
+        COMPONENTS.map((def) => def.type),
+      ),
+    ).toEqual([])
   })
 })

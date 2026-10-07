@@ -6,11 +6,7 @@ export const game: {
   runtime: Messages['runtime']['game']
   studio: Messages['studio']['game']
 } = {
-  blocks: {
-    eventValue: '%1 of the event',
-    eventValueTooltip: 'A value the event brings (elapsed time, the other sprite…).',
-    eventValueOutside: 'This block only works inside its own "when …" block.',
-  },
+  blocks: {},
   runtime: {
     tooManyClones: 'There are already {{count}} clones: {{name}} does not create a new one.',
   },

@@ -1,5 +1,5 @@
 import { messages } from '@rublox/i18n'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   costumeOf,
   fitStage,
@@ -9,22 +9,25 @@ import {
   sceneTextStyle,
   spriteStyle,
 } from '../game/draw.ts'
-import type { World } from '../game/world.ts'
-import { type Renderer, rootAttributes } from './types.ts'
+import { type Renderer, rootAttributes, useExpose } from './types.ts'
 
 /**
  * The game scene: a stage of `sceneWidth × sceneHeight` scene units, scaled to fit and
  * centered. On the editor canvas its children are React elements placed by their x and y;
- * in a running app the scene's `World` (`p.live`) draws them itself, out of React.
+ * in a running app it exposes its stage (`{ stage }`) and the engine's `World` draws them
+ * itself, out of React.
  */
 export const GameSceneRenderer: Renderer = (p) => {
   const outer = useRef<HTMLDivElement>(null)
-  const stage = useRef<HTMLDivElement>(null)
+  const [stage, setStage] = useState<HTMLDivElement | null>(null)
   const width = num(p.props.sceneWidth, 360)
   const height = num(p.props.sceneHeight, 640)
   const [box, setBox] = useState({ width, height })
-  const world = p.live as World | undefined
-  const { assetUrl } = p
+  const running = !p.design
+  useExpose(
+    p,
+    useMemo(() => (stage ? { stage } : null), [stage]),
+  )
 
   useLayoutEffect(() => {
     const element = outer.current
@@ -36,10 +39,6 @@ export const GameSceneRenderer: Renderer = (p) => {
     observer.observe(element)
     return () => observer.disconnect()
   }, [])
-
-  useEffect(() => {
-    if (world && stage.current) return world.mount(stage.current, assetUrl)
-  }, [world, assetUrl])
 
   const fit = fitStage(box, { width, height })
   const image =
@@ -56,7 +55,7 @@ export const GameSceneRenderer: Renderer = (p) => {
       style={{ minHeight: 160, ...p.style }}
     >
       <div
-        ref={stage}
+        ref={setStage}
         className="rx-scene-stage"
         data-rx-stage=""
         style={{
@@ -66,7 +65,7 @@ export const GameSceneRenderer: Renderer = (p) => {
           backgroundImage: image ? `url(${JSON.stringify(image)})` : undefined,
         }}
       >
-        {world ? null : p.children}
+        {running ? null : p.children}
       </div>
     </div>
   )

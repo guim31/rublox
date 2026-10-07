@@ -1,0 +1,60 @@
+import { defineComponent } from '../component.ts'
+import { arg, event, prop } from '../define.ts'
+
+export const Slider = defineComponent({
+  type: 'Slider',
+  category: 'input',
+  icon: 'sliders-horizontal',
+  visible: true,
+  container: false,
+  junior: true,
+  props: {
+    value: prop.number({ default: 50, group: 'content', junior: true, blocks: 'get-set' }),
+    min: prop.number({ default: 0, group: 'content', junior: true, blocks: 'get-set' }),
+    max: prop.number({ default: 100, group: 'content', junior: true, blocks: 'get-set' }),
+    step: prop.number({ default: 1, min: 0, group: 'content', blocks: 'get-set' }),
+    color: prop.color({ default: '@primary', group: 'style', junior: true }),
+    disabled: prop.boolean({ default: false, group: 'advanced', blocks: 'get-set' }),
+  },
+  events: { change: event({ junior: true, args: { value: arg('number') } }) },
+  strings: {
+    fr: {
+      label: 'Curseur',
+      prefix: 'Curseur',
+      description: 'Choisir un nombre en glissant.',
+      help: 'Un curseur choisit un nombre entre un minimum et un maximum, en le faisant glisser du doigt.',
+      example: 'Quand Curseur1 change, mettre Texte1.taille à valeur de Curseur1',
+      props: {
+        value: 'valeur',
+        min: 'minimum',
+        max: 'maximum',
+        step: 'pas',
+        color: 'couleur',
+        disabled: 'désactivé',
+      },
+      events: { change: 'quand %1 change' },
+      methods: {},
+      enums: {},
+      args: { value: 'valeur' },
+    },
+    en: {
+      label: 'Slider',
+      prefix: 'Slider',
+      description: 'Pick a number by sliding.',
+      help: 'A slider picks a number between a minimum and a maximum, by sliding a finger.',
+      example: 'When Slider1 changes, set Text1.size to value of Slider1',
+      props: {
+        value: 'value',
+        min: 'minimum',
+        max: 'maximum',
+        step: 'step',
+        color: 'color',
+        disabled: 'disabled',
+      },
+      events: { change: 'when %1 changes' },
+      methods: {},
+      enums: {},
+      args: { value: 'value' },
+    },
+  },
+})

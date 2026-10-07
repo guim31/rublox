@@ -109,14 +109,15 @@ export async function createProject(input: {
   name: string
   locale: Locale
   mode: UiMode
+  doc?: ProjectDoc
 }): Promise<string> {
-  const doc = newProjectDoc(input)
+  const doc = input.doc ?? newProjectDoc(input)
   await storeDoc(doc)
   await saveSummary(summarize(doc))
   return doc.meta.id
 }
 
-/** Keeps a ready-made project in this browser (a demo): its document and its summary. */
+/** Adds a complete project to this browser (an imported `.rublox` file). */
 export async function addProject(doc: ProjectDoc): Promise<string> {
   await storeDoc(doc)
   await saveSummary(summarize(doc))

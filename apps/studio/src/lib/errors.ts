@@ -20,6 +20,10 @@ const KNOWN = new Set([
   'unsupported_type',
   'quota_exceeded',
   'invalid_project',
+  'slug_taken',
+  'missing_asset',
+  'publish_forbidden',
+  'in_trash',
 ] as const)
 
 type Code = typeof KNOWN extends Set<infer C> ? C : never

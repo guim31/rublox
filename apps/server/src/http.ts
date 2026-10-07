@@ -28,10 +28,14 @@ export type ErrorCode =
   | 'unsupported_type'
   | 'quota_exceeded'
   | 'invalid_project'
+  | 'slug_taken'
+  | 'missing_asset'
+  | 'publish_forbidden'
+  | 'in_trash'
 
 /** Stops the request with a JSON error: `{ error: code }`. */
 export function fail(
-  status: 400 | 401 | 403 | 404 | 409 | 413 | 415 | 429,
+  status: 400 | 401 | 403 | 404 | 409 | 410 | 413 | 415 | 429,
   code: ErrorCode,
 ): never {
   throw new HTTPException(status, { res: Response.json({ error: code }, { status }) })

@@ -168,6 +168,22 @@ export class PropertyField extends Blockly.FieldDropdown {
   }
 }
 
+/** Functions of the `app` workspace (see `AppFunctionRef`). */
+export class AppFunctionField extends ReferenceField {
+  protected available(): Option[] {
+    const block = this.getSourceBlock()
+    return (contextOf(block?.workspace).appFunctions ?? []).map((fn) => [fn.name, fn.name])
+  }
+
+  protected override missingLabel(id: string): string {
+    return id ? `⚠ ${id}` : '…'
+  }
+
+  static override fromJson() {
+    return new AppFunctionField()
+  }
+}
+
 const EVENT_BLOCK = /^rx_([A-Za-z0-9]+)_on_([A-Za-z0-9]+)$/
 
 /** The label of an event argument, from any component that declares it. */

@@ -1,10 +1,6 @@
 /** Strings of the game mode (J7), merged into the `studio`, `blocks` and `runtime` spaces. */
 export const game = {
-  blocks: {
-    eventValue: '%1 de l’événement',
-    eventValueTooltip: 'Une valeur que l’événement apporte (le temps écoulé, l’autre lutin…).',
-    eventValueOutside: 'Ce bloc ne marche que dans son bloc « quand … ».',
-  },
+  blocks: {},
   runtime: {
     tooManyClones: 'Il y a déjà {{count}} clones : {{name}} n’en crée pas de nouveau.',
   },

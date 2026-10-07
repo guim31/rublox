@@ -1,6 +1,6 @@
 import { COMPONENTS, type ComponentDef } from '@rublox/catalog'
 import { format, messages } from '@rublox/i18n'
-import { isValidName } from '@rublox/schema'
+import { APP_WORKSPACE, isValidName } from '@rublox/schema'
 import type * as Blockly from 'blockly/core'
 import { JavascriptGenerator, javascriptGenerator, Order } from 'blockly/javascript'
 import { type BlocksContext, contextOf } from './context.ts'
@@ -27,6 +27,9 @@ export const MODULE_PARAMS = [
   'device',
   'rx',
 ]
+
+/** Shared functions of the `app` workspace: a parameter only of modules that use them. */
+export const FUNCTIONS_PARAM = 'functions'
 
 // Statement markers, stripped after generation to build the line → block map. Private-use
 // characters: `quote` escapes them, so text typed in a block can never forge one.
@@ -85,6 +88,8 @@ export class RubloxGenerator extends JavascriptGenerator {
   context!: BlocksContext
   /** Component names the code uses, for the `const { … } = components` line. */
   readonly usedComponents = new Set<string>()
+  /** The module reads or writes `functions` (shared functions of the app). */
+  usesFunctions = false
   /** Variable ids of the parameters of the function being generated. */
   private parameters = new Set<string>()
   private workspace?: Blockly.Workspace
@@ -95,7 +100,7 @@ export class RubloxGenerator extends JavascriptGenerator {
     Object.assign(this.forBlock, javascriptGenerator.forBlock)
     this.INFINITE_LOOP_TRAP = 'await rx.tick();\n'
     this.STATEMENT_PREFIX = `${MARK_START}%1${MARK_END}\n`
-    this.addReservedWords([...MODULE_PARAMS, 'event'].join(','))
+    this.addReservedWords([...MODULE_PARAMS, FUNCTIONS_PARAM, 'event'].join(','))
     installBlockGenerators(this)
   }
 
@@ -104,6 +109,7 @@ export class RubloxGenerator extends JavascriptGenerator {
     this.workspace = workspace
     this.context = contextOf(workspace)
     this.usedComponents.clear()
+    this.usesFunctions = false
     this.parameters.clear()
     // App variables live in `app`, not in local declarations.
     delete this.definitions_.variables
@@ -126,7 +132,8 @@ export class RubloxGenerator extends JavascriptGenerator {
     const variable = this.workspace?.getVariableMap().getVariableById(id)
     const name = variable?.getName() ?? id
     if (this.parameters.has(id)) return super.getVariableName(id)
-    return member('app', name)
+    const kind = this.context.variables?.find((v) => v.id === id)?.kind ?? 'app'
+    return member(kind, name)
   }
 
   /** The name of a component of the screen, or `null` (and a comment) when it was deleted. */
@@ -158,8 +165,10 @@ export class RubloxGenerator extends JavascriptGenerator {
   /** Top blocks that produce code, in a stable order: app start, functions, then events. */
   codeBlocks(workspace: Blockly.Workspace): Blockly.Block[] {
     const rank = (block: Blockly.Block) => {
-      if (block.type === BLOCK_TYPES.appStart) return 0
-      if (block.type.startsWith('procedures_def')) return 1
+      // Functions first: in the `app` module they are registered in `functions` before the
+      // start blocks run (which may wait).
+      if (block.type.startsWith('procedures_def')) return 0
+      if (block.type === BLOCK_TYPES.appStart) return 1
       return 2
     }
     return workspace
@@ -235,6 +244,33 @@ function installBlockGenerators(generator: Gen): void {
     return getIndex ? getIndex(block, g) : null
   }
 
+  f[BLOCK_TYPES.eventValue] = (block) => {
+    const arg = block.getFieldValue('ARG')
+    return eventArgsOf(block).includes(arg)
+      ? [`event.${arg}`, Order.MEMBER]
+      : ['undefined', Order.ATOMIC]
+  }
+
+  // Functions of the app workspace, called from a screen.
+  const appCall = (block: Blockly.Block, g: Gen): string | null => {
+    const name = block.getFieldValue('FUNCTION')
+    const fn = g.context.appFunctions?.find((candidate) => candidate.name === name)
+    if (!fn) return null
+    const args = fn.params.map(
+      (_, index) => g.valueToCode(block, `ARG${index}`, Order.NONE) || 'null',
+    )
+    g.usesFunctions = true
+    return `await ${member(FUNCTIONS_PARAM, name)}(${args.join(', ')})`
+  }
+  f[BLOCK_TYPES.appCall] = (block, g) => {
+    const call = appCall(block, g)
+    return call ? `${call};\n` : `// ${messages[g.context.locale].catalog.blocks.missingFunction}\n`
+  }
+  f[BLOCK_TYPES.appCallValue] = (block, g) => {
+    const call = appCall(block, g)
+    return call ? [call, Order.AWAIT] : ['undefined', Order.ATOMIC]
+  }
+
   // Blockly's console output would be `window.alert`: send it to the console panel instead.
   f.text_print = (block, g) => `rx.log(${g.valueToCode(block, 'TEXT', Order.NONE) || "''"});\n`
 
@@ -251,7 +287,12 @@ function installBlockGenerators(generator: Gen): void {
       }
       const returned = block.getInput('RETURN') ? g.valueToCode(block, 'RETURN', Order.NONE) : ''
       if (returned) body += `${g.INDENT}return ${returned};\n`
-      return `async function ${name}(${params.join(', ')}) {\n${body}}\n`
+      const code = `async function ${name}(${params.join(', ')}) {\n${body}}\n`
+      // Functions of the app workspace are shared with every screen.
+      if (g.context.workspace !== APP_WORKSPACE) return code
+      const shared = block.getFieldValue('NAME')
+      g.usesFunctions = true
+      return `${code}${member(FUNCTIONS_PARAM, shared)} = ${name};\n`
     })
   }
   f.procedures_defnoreturn = definition
@@ -418,7 +459,8 @@ export function workspaceToModule(
   ]
   for (const helper of helpers) header.push(helper, '')
 
-  const params = `{ ${MODULE_PARAMS.join(', ')} }`
+  const names = generator.usesFunctions ? [...MODULE_PARAMS, FUNCTIONS_PARAM] : MODULE_PARAMS
+  const params = `{ ${names.join(', ')} }`
   const used = [...generator.usedComponents].sort((a, b) => a.localeCompare(b))
   const bodyRaw = chunks.join('\n')
   const body = stripMarkers(

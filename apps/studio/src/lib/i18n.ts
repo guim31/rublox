@@ -15,7 +15,7 @@ export function initI18n(locale: Locale) {
     lng: locale,
     fallbackLng: 'fr',
     defaultNS: 'studio',
-    ns: ['studio', 'blocks', 'runtime'],
+    ns: ['studio', 'blocks', 'runtime', 'catalog'],
     resources: {
       fr: { ...messages.fr },
       en: { ...messages.en },

@@ -30,7 +30,7 @@ export function createComponent(
   if (!def) throw new UnknownComponentError(type)
   const props: Record<string, unknown> = {}
   for (const [key, propDef] of Object.entries(def.props)) {
-    if (isLocalized(propDef.default)) props[key] = propDef.default[locale]
+    if (isLocalized(propDef.default) && !propDef.state) props[key] = propDef.default[locale]
   }
   const node: ComponentNode = {
     type,

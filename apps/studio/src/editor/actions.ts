@@ -86,8 +86,14 @@ export function addComponentOfType(
 ): ComponentId {
   const doc = session.getDoc()
   const node = createComponent(type, doc.meta.locale, componentNames(session.ydoc, screenId))
+  // Non-visual components (timer, sound…) live under the screen, not in its tree.
+  const visible = getComponentDef(type)?.visible !== false
   let id = ''
   session.ydoc.transact(() => {
+    if (!visible) {
+      id = addComponent(session.ydoc, screenId, node, null)
+      return
+    }
     let where = target ?? defaultTarget(doc, screenId, useEditor.getState().selected, type)
     // No game scene yet for a sprite: add one first, then the sprite inside.
     const parentType = getComponentDef(type)?.parents?.[0]

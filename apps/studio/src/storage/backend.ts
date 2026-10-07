@@ -1,5 +1,5 @@
 import { createProject as newProjectDoc } from '@rublox/catalog'
-import { type Locale, projectToYDoc, type UiMode } from '@rublox/schema'
+import { type Locale, type ProjectDoc, projectToYDoc, type UiMode } from '@rublox/schema'
 import * as Y from 'yjs'
 import { api, call } from '../lib/api.ts'
 import { toBase64 } from '../lib/base64.ts'
@@ -13,7 +13,8 @@ import * as guest from './projects.ts'
 export interface ProjectsBackend {
   kind: 'guest' | 'server'
   list(): Promise<ProjectSummary[]>
-  create(input: { name: string; locale: Locale; mode: UiMode }): Promise<string>
+  /** A new empty project, or `doc` when given (the demo app). */
+  create(input: { name: string; locale: Locale; mode: UiMode; doc?: ProjectDoc }): Promise<string>
   rename(id: string, name: string): Promise<void>
   duplicate(id: string, name: string): Promise<string>
   setFavorite(id: string, favorite: boolean): Promise<void>
@@ -40,8 +41,13 @@ export const guestBackend: ProjectsBackend = {
 const project = api.projects[':projectId']
 
 /** The Yjs state of a new project, built by the studio (the server validates it). */
-export function newProjectState(input: { name: string; locale: Locale; mode: UiMode }): string {
-  return toBase64(Y.encodeStateAsUpdate(projectToYDoc(newProjectDoc(input))))
+export function newProjectState(input: {
+  name: string
+  locale: Locale
+  mode: UiMode
+  doc?: ProjectDoc
+}): string {
+  return toBase64(Y.encodeStateAsUpdate(projectToYDoc(input.doc ?? newProjectDoc(input))))
 }
 
 export const serverBackend: ProjectsBackend = {

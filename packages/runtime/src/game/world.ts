@@ -124,7 +124,7 @@ export class World {
   private active = false
   private disposed = false
   private unsubscribe: (() => void) | null = null
-  private stage: HTMLElement | null = null
+  private drawingOn: HTMLElement | null = null
   private assetUrl: (value: string) => string | undefined = () => undefined
   private pendingDrags = new Map<number, { x: number; y: number }>()
   private pendingMove: { dx: number; dy: number; body: Body } | null = null
@@ -188,7 +188,7 @@ export class World {
         const body = this.makeBody(id, node.type, node.name, values)
         this.originals.set(id, body)
         this.bodies.push(body)
-        if (this.stage) this.createElement(body)
+        if (this.drawingOn) this.createElement(body)
       }
     }
     // Back to front as in the project; clones just behind their original.
@@ -200,7 +200,7 @@ export class World {
     })
     if (sorted.some((body, index) => body !== this.bodies[index])) {
       this.bodies = sorted
-      if (this.stage) for (const body of sorted) if (body.el) this.stage.append(body.el)
+      if (this.drawingOn) for (const body of sorted) if (body.el) this.drawingOn.append(body.el)
     }
   }
 
@@ -259,7 +259,7 @@ export class World {
     copy.glide = undefined
     const at = this.bodies.indexOf(body)
     this.bodies.splice(at < 0 ? this.bodies.length : at, 0, copy)
-    if (this.stage) this.createElement(copy, body.el)
+    if (this.drawingOn) this.createElement(copy, body.el)
     this.host.redraw()
     this.host.fire(copy, copy.componentId, 'clone', {})
     return copy
@@ -633,7 +633,7 @@ export class World {
   /** Draws the world into a stage element (the running scene); returns `unmount`. */
   mount(stage: HTMLElement, assetUrl: (value: string) => string | undefined): () => void {
     this.unmount()
-    this.stage = stage
+    this.drawingOn = stage
     this.assetUrl = assetUrl
     stage.addEventListener('pointerdown', this.onPointerDown)
     stage.addEventListener('pointermove', this.onPointerMove)
@@ -642,12 +642,18 @@ export class World {
     for (const body of this.bodies) this.createElement(body)
     this.render(true)
     return () => {
-      if (this.stage === stage) this.unmount()
+      if (this.drawingOn === stage) this.unmount()
     }
   }
 
-  private unmount(): void {
-    const stage = this.stage
+  /** The element the world draws into, if any. */
+  get stage(): HTMLElement | null {
+    return this.drawingOn
+  }
+
+  /** Stops drawing (the scene left the page); the game goes on. */
+  unmount(): void {
+    const stage = this.drawingOn
     if (!stage) return
     stage.removeEventListener('pointerdown', this.onPointerDown)
     stage.removeEventListener('pointermove', this.onPointerMove)
@@ -659,11 +665,11 @@ export class World {
       body.drawn = undefined
       body.styles = undefined
     }
-    this.stage = null
+    this.drawingOn = null
   }
 
   private createElement(body: Body, before?: HTMLElement): void {
-    const stage = this.stage
+    const stage = this.drawingOn
     if (!stage || body.el) return
     const el = stage.ownerDocument.createElement('div')
     el.className = `rx-body rx-body-${body.type}`
@@ -697,7 +703,7 @@ export class World {
 
   /** Writes what changed to the DOM: transforms, costumes, texts. */
   render(all = false): void {
-    if (!this.stage) return
+    if (!this.drawingOn) return
     for (const body of this.bodies) {
       const el = body.el
       if (!el || (!body.dirty && !all)) continue
@@ -775,7 +781,7 @@ export class World {
 
   /** A pointer position in scene units. */
   private point(event: PointerEvent): { x: number; y: number } {
-    const stage = this.stage
+    const stage = this.drawingOn
     if (!stage) return { x: 0, y: 0 }
     const rect = stage.getBoundingClientRect()
     const width = num(this.scene.values.sceneWidth, 360)
