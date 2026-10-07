@@ -1,0 +1,63 @@
+{
+  "id": "two-screens",
+  "mode": "studio",
+  "order": 1,
+  "minutes": 10,
+  "accent": "mint",
+  "icon": "📱",
+  "requires": ["Button"],
+  "steps": [
+    { "id": "welcome" },
+    {
+      "id": "next-button",
+      "target": "palette:Button",
+      "check": { "kind": "prop", "type": "Button", "prop": "text" }
+    },
+    {
+      "id": "add-screen",
+      "target": "screen-picker",
+      "check": { "kind": "screens", "min": 2 }
+    },
+    {
+      "id": "back-button",
+      "target": "palette:Button",
+      "check": { "kind": "component", "type": "Button", "min": 2 }
+    },
+    { "id": "go-blocks", "target": "tab:blocks", "check": { "kind": "tab", "tab": "blocks" } },
+    {
+      "id": "back-block",
+      "target": "toolbox-category:screens",
+      "check": {
+        "kind": "block",
+        "type": "rx_screen_back",
+        "inside": ["rx_Button_on_click"],
+        "workspace": "other"
+      }
+    },
+    {
+      "id": "switch-screen",
+      "target": "screen-picker",
+      "check": { "kind": "workspace", "screen": "start" }
+    },
+    {
+      "id": "open-block",
+      "target": "toolbox-category:screens",
+      "check": {
+        "kind": "block",
+        "type": "rx_screen_open",
+        "inside": ["rx_Button_on_click"],
+        "workspace": "start"
+      }
+    },
+    {
+      "id": "go-there",
+      "target": "preview",
+      "check": { "kind": "previewScreen", "screen": "other" }
+    },
+    {
+      "id": "come-back",
+      "target": "preview",
+      "check": { "kind": "previewScreen", "screen": "start" }
+    }
+  ]
+}

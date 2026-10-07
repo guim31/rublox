@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InviteCodeRouteImport } from './routes/invite.$code'
 import { Route as PProjectIdRouteImport } from './routes/p.$projectId'
@@ -31,6 +32,11 @@ const AccountRoute = AccountRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/invite/$code': typeof InviteCodeRoute
   '/p/$projectId': typeof PProjectIdRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/invite/$code': typeof InviteCodeRoute
   '/p/$projectId': typeof PProjectIdRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/invite/$code': typeof InviteCodeRoute
   '/p/$projectId': typeof PProjectIdRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/learn'
     | '/login'
     | '/invite/$code'
     | '/p/$projectId'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/learn'
     | '/login'
     | '/invite/$code'
     | '/p/$projectId'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/learn'
     | '/login'
     | '/invite/$code'
     | '/p/$projectId'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
+  LearnRoute: typeof LearnRoute
   LoginRoute: typeof LoginRoute
   InviteCodeRoute: typeof InviteCodeRoute
   PProjectIdRoute: typeof PProjectIdRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
+  LearnRoute: LearnRoute,
   LoginRoute: LoginRoute,
   InviteCodeRoute: InviteCodeRoute,
   PProjectIdRoute: PProjectIdRoute,

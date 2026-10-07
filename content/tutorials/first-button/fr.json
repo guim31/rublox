@@ -1,0 +1,38 @@
+{
+  "title": "Mon premier bouton",
+  "summary": "Un bouton qui dit bonjour quand on appuie dessus. Ta toute première appli !",
+  "done": "Tu as fabriqué ta première appli : un bouton qui répond quand on le touche. C’est comme ça que commencent toutes les applis !",
+  "steps": {
+    "welcome": {
+      "text": "Salut ! Je suis là pour t’aider. Ensemble, on va fabriquer ta première appli : un **bouton** qui dit bonjour. Prêt·e ?"
+    },
+    "add-button": {
+      "text": "Glisse un **Bouton** de la palette jusqu’à l’écran du téléphone.",
+      "hint": "Tu peux aussi le sélectionner et appuyer sur Entrée."
+    },
+    "button-text": {
+      "text": "Ton bouton est là ! Dans la case **texte**, à droite, écris ce qu’il affiche, par exemple « Dis bonjour »."
+    },
+    "add-text": {
+      "text": "Ajoute maintenant un **Texte** : c’est là que ton appli va répondre.",
+      "hint": "Glisse-le sous le bouton, ou sélectionne-le et appuie sur Entrée."
+    },
+    "go-blocks": {
+      "text": "L’écran est prêt. Pour lui donner vie, va dans l’onglet **Blocs**."
+    },
+    "event-block": {
+      "text": "Clique sur **{{Button}}** dans la liste à gauche, puis glisse le bloc [quand {{Button}} est cliqué] au milieu.",
+      "hint": "Les blocs « quand… » attendent que quelque chose se passe."
+    },
+    "set-block": {
+      "text": "Clique sur **{{Text}}**, puis glisse le bloc [mettre texte de {{Text}} à] **à l’intérieur** du bloc « quand {{Button}} est cliqué ».",
+      "hint": "Approche-le du creux du bloc : il s’emboîte tout seul."
+    },
+    "type-hello": {
+      "text": "Clique dans la case blanche du bloc « mettre » et écris ce que ton appli doit dire, par exemple « Bonjour ! »."
+    },
+    "try-it": {
+      "text": "Ton appli tourne déjà dans l’aperçu, à droite. Appuie sur ton bouton pour voir ce qui se passe !"
+    }
+  }
+}

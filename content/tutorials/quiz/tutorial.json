@@ -1,0 +1,63 @@
+{
+  "id": "quiz",
+  "mode": "junior",
+  "order": 3,
+  "minutes": 15,
+  "accent": "yellow",
+  "icon": "❓",
+  "requires": ["Button", "Text"],
+  "steps": [
+    { "id": "welcome", "mood": "wave" },
+    {
+      "id": "question",
+      "target": "palette:Text",
+      "check": { "kind": "prop", "type": "Text", "prop": "text" }
+    },
+    {
+      "id": "two-buttons",
+      "target": "palette:Button",
+      "check": { "kind": "component", "type": "Button", "min": 2 }
+    },
+    {
+      "id": "answers",
+      "target": "inspector:text",
+      "check": { "kind": "prop", "type": "Button", "prop": "text", "min": 2 }
+    },
+    { "id": "go-blocks", "target": "tab:blocks", "check": { "kind": "tab", "tab": "blocks" } },
+    {
+      "id": "first-event",
+      "target": "toolbox:Button",
+      "check": { "kind": "block", "type": "rx_Button_on_click" }
+    },
+    {
+      "id": "right",
+      "target": "toolbox-category:interface",
+      "check": {
+        "kind": "block",
+        "type": ["rx_ui_alert", "rx_ui_toast"],
+        "inside": ["rx_Button_on_click"]
+      }
+    },
+    {
+      "id": "second-event",
+      "target": "toolbox:Button.2",
+      "check": { "kind": "block", "type": "rx_Button_on_click", "min": 2 }
+    },
+    {
+      "id": "wrong",
+      "target": "toolbox-category:interface",
+      "check": {
+        "kind": "block",
+        "type": ["rx_ui_alert", "rx_ui_toast"],
+        "inside": ["rx_Button_on_click"],
+        "min": 2
+      }
+    },
+    {
+      "id": "play",
+      "target": "preview",
+      "mood": "cheer",
+      "check": { "kind": "preview", "event": "click", "type": "Button", "min": 2 }
+    }
+  ]
+}

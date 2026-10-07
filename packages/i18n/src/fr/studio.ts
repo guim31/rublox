@@ -1,7 +1,9 @@
 import { accounts } from './accounts.ts'
+import { learning } from './learn.ts'
 
 export const studio = {
   ...accounts,
+  ...learning,
   appName: 'Rublox',
   tagline: 'Fabrique de vraies applis pour téléphone, avec des blocs.',
   playerIntro:

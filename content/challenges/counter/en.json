@@ -1,0 +1,10 @@
+{
+  "title": "The counter",
+  "goal": "Each tap on the button adds 1 to the number shown.",
+  "stars": [
+    "Tapping the button changes the text.",
+    "A variable counts the taps (the “change by 1” block).",
+    "You tested it: three taps in the preview."
+  ],
+  "hint": "Create a “counter” variable in Variables, add 1 to it on each click, then show it in the text."
+}

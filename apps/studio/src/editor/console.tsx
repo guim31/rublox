@@ -22,7 +22,7 @@ const ICONS = { log: Info, warn: TriangleAlert, error: CircleAlert }
 export function ConsolePanel({ open, projectId }: { open: boolean; projectId: string }) {
   const { t, i18n } = useTranslation()
   const { logs, clearLogs } = useEditor()
-  const set = usePrefs((s) => s.set)
+  const toggle = usePrefs((s) => s.toggleConsole)
   const go = useEditorNavigate(projectId)
   const list = useRef<HTMLOListElement>(null)
   const errors = logs.filter((l) => l.level === 'error').length
@@ -41,7 +41,7 @@ export function ConsolePanel({ open, projectId }: { open: boolean; projectId: st
         <button
           type="button"
           aria-expanded={open}
-          onClick={() => set({ consoleOpen: !open })}
+          onClick={toggle}
           className="flex h-control-sm items-center gap-2 rounded-ui px-2 font-strong text-ui-sm hover:bg-surface-2"
           aria-label={open ? t('editor.console.hide') : t('editor.console.show')}
         >
@@ -52,6 +52,7 @@ export function ConsolePanel({ open, projectId }: { open: boolean; projectId: st
               className={cn(
                 'rounded-full px-1.5 text-[11px]',
                 errors ? 'bg-coral-soft text-danger' : 'bg-surface-2 text-muted',
+                errors && !open && 'animate-pulse',
               )}
             >
               {logs.length}
@@ -72,7 +73,11 @@ export function ConsolePanel({ open, projectId }: { open: boolean; projectId: st
       {open ? (
         <ol
           ref={list}
-          className="h-28 overflow-y-auto border-t border-border font-mono text-[12px] junior:h-32 junior:font-ui junior:text-ui-sm"
+          className={cn(
+            'overflow-y-auto border-t border-border font-mono text-[12px] junior:font-ui junior:text-ui-sm',
+            // An empty console only takes the room of its message (J0 review).
+            logs.length === 0 ? 'h-11' : 'h-28 junior:h-32',
+          )}
           aria-live="polite"
           data-testid="console"
         >

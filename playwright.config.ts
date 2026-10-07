@@ -10,6 +10,28 @@ import { defineConfig, devices } from '@playwright/test'
 const port = Number(process.env.E2E_PORT ?? 4310)
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`
 
+/**
+ * By default a test starts as a returning guest: the welcome page and the guided tours (J3)
+ * are already seen. Tests of those clear it with `test.use({ storageState: EMPTY_STATE })`.
+ */
+const returningGuest = {
+  cookies: [],
+  origins: [
+    {
+      origin: baseURL,
+      localStorage: [
+        {
+          name: 'rublox:prefs',
+          value: JSON.stringify({
+            state: { welcomed: true, toursSeen: { junior: true, studio: true } },
+            version: 2,
+          }),
+        },
+      ],
+    },
+  ],
+}
+
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
@@ -25,6 +47,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     viewport: { width: 1440, height: 900 },
+    storageState: returningGuest,
     launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
       ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
       : {},

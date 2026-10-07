@@ -1,0 +1,38 @@
+{
+  "title": "Le dé magique",
+  "summary": "Un dé qui tombe sur un nombre au hasard à chaque lancer.",
+  "done": "Ton dé magique est prêt ! Le bloc « au hasard » sert dans plein de jeux : tirer une carte, choisir qui commence…",
+  "steps": {
+    "welcome": {
+      "text": "Et si ton téléphone devenait un dé ? On va fabriquer un dé qui tombe sur un nombre **au hasard** entre 1 et 6."
+    },
+    "add-text": {
+      "text": "Pose un **Texte** sur l’écran : il affichera le nombre du dé."
+    },
+    "big-text": {
+      "text": "Un dé, ça se voit de loin ! Agrandis le texte avec la **taille**, par exemple 80."
+    },
+    "add-button": {
+      "text": "Ajoute un **Bouton** pour lancer le dé."
+    },
+    "button-text": {
+      "text": "Écris « Lancer le dé » dans le **texte** du bouton."
+    },
+    "go-blocks": {
+      "text": "Passons aux blocs : ouvre l’onglet **Blocs**."
+    },
+    "event-block": {
+      "text": "Dans **{{Button}}**, prends le bloc [quand {{Button}} est cliqué] et pose-le au milieu."
+    },
+    "set-block": {
+      "text": "Dans **{{Text}}**, prends [mettre texte de {{Text}} à] et emboîte-le dans le bloc « quand… »."
+    },
+    "random": {
+      "text": "Dans **Maths**, prends le bloc [entier aléatoire entre 1 et 6] et pose-le sur la case blanche du bloc « mettre ».",
+      "hint": "Il remplace la case blanche : lâche-le juste dessus."
+    },
+    "roll": {
+      "text": "Lance ton dé dans l’aperçu : appuie trois fois sur le bouton. Le nombre change à chaque fois ?"
+    }
+  }
+}

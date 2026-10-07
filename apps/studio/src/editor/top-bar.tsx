@@ -53,6 +53,7 @@ import {
   MenuTrigger,
 } from '../components/ui/menu.tsx'
 import { Tooltip } from '../components/ui/tooltip.tsx'
+import { HelpButton } from '../help/help-panel.tsx'
 import { cn } from '../lib/cn.ts'
 import { useCommands } from '../lib/commands.ts'
 import { usePrefs } from '../lib/prefs.ts'
@@ -90,6 +91,7 @@ export function TopBar({ projectId, tab, screenId }: Props) {
         className="flex items-center gap-1 rounded-ui bg-surface-2 p-0.5"
       >
         <TabLink
+          tour="tab:design"
           active={tab === 'design'}
           onClick={() =>
             go({ tab: 'design', screen: screenId === APP_WORKSPACE ? undefined : screenId })
@@ -99,6 +101,7 @@ export function TopBar({ projectId, tab, screenId }: Props) {
           {t('editor.tabs.design')}
         </TabLink>
         <TabLink
+          tour="tab:blocks"
           active={tab === 'blocks'}
           onClick={() => go({ tab: 'blocks' })}
           icon={<Puzzle size={16} />}
@@ -140,6 +143,7 @@ export function TopBar({ projectId, tab, screenId }: Props) {
         label={t('commands.open')}
         shortcut="Mod+K"
         onClick={() => useCommands.getState().setOpen(true)}
+        data-tour="commands"
       >
         <Search size={18} />
       </IconButton>
@@ -157,6 +161,7 @@ export function TopBar({ projectId, tab, screenId }: Props) {
         primary
       />
       <div className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
+      <HelpButton />
       <ModeSwitch />
       <PrefsMenu />
     </header>
@@ -223,12 +228,14 @@ function Soon({
 }
 
 function TabLink({
+  tour,
   active,
   disabled,
   onClick,
   icon,
   children,
 }: {
+  tour?: string
   active: boolean
   disabled?: boolean
   onClick?: () => void
@@ -241,6 +248,7 @@ function TabLink({
       onClick={onClick}
       disabled={disabled}
       aria-current={active ? 'page' : undefined}
+      data-tour={tour}
       className={cn(
         'inline-flex h-[calc(var(--h-control)-4px)] items-center gap-1.5 rounded-[calc(var(--radius)-2px)] px-3 font-strong text-muted transition-colors hover:text-text disabled:opacity-45 disabled:hover:text-muted',
         active && 'bg-surface text-text shadow-1',

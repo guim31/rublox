@@ -1,0 +1,23 @@
+{
+  "id": "countdown",
+  "mode": "junior",
+  "order": 2,
+  "accent": "coral",
+  "icon": "🚀",
+  "requires": ["Button", "Text"],
+  "starter": {
+    "components": [
+      { "type": "Text", "props": { "text": "10", "fontSize": 64, "align": "center" } },
+      { "type": "Button", "props": { "text": { "fr": "Décollage", "en": "Lift-off" } } }
+    ]
+  },
+  "stars": [
+    { "kind": "block", "type": "controls_repeat_ext", "inside": ["rx_Button_on_click"] },
+    { "kind": "block", "type": "rx_wait", "inside": ["controls_repeat_ext", "rx_Button_on_click"] },
+    {
+      "kind": "block",
+      "type": "rx_Text_set",
+      "inside": ["controls_repeat_ext", "rx_Button_on_click"]
+    }
+  ]
+}

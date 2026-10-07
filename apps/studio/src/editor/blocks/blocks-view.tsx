@@ -8,6 +8,7 @@ import { Switch } from '../../components/ui/switch.tsx'
 import { usePrefs } from '../../lib/prefs.ts'
 import { useDoc } from '../context.tsx'
 import { Preview } from '../preview/preview.tsx'
+import { useEditor } from '../store.ts'
 import { CodeView } from './code-view.tsx'
 import { PromptDialog } from './prompt.tsx'
 import { BlocksWorkspace } from './workspace.tsx'
@@ -15,20 +16,27 @@ import { BlocksWorkspace } from './workspace.tsx'
 const GENERATE_DELAY_MS = 120
 
 /** Regenerates the modules shortly after each change (the preview updates within ~300 ms). */
-function useGeneratedCode(doc: ProjectDoc): {
+function useGeneratedCode(
+  doc: ProjectDoc,
+  slow: boolean,
+): {
   doc: ProjectDoc
   code: Record<WorkspaceKey, GeneratedCode>
+  shown: Record<WorkspaceKey, GeneratedCode>
 } {
-  const [state, setState] = useState(() => ({ doc, code: generateProjectCode(doc) }))
+  // The code view shows the readable code; the preview runs the slow variant when needed.
+  const make = () => {
+    const code = generateProjectCode(doc)
+    return { doc, slow, code, shown: code, run: slow ? generateProjectCode(doc, { slow }) : code }
+  }
+  const [state, setState] = useState(make)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `make` reads doc and slow
   useEffect(() => {
-    if (state.doc === doc) return
-    const timer = setTimeout(
-      () => setState({ doc, code: generateProjectCode(doc) }),
-      GENERATE_DELAY_MS,
-    )
+    if (state.doc === doc && state.slow === slow) return
+    const timer = setTimeout(() => setState(make()), state.slow === slow ? GENERATE_DELAY_MS : 0)
     return () => clearTimeout(timer)
-  }, [doc, state.doc])
-  return state
+  }, [doc, slow, state.doc, state.slow])
+  return { doc: state.doc, code: state.run, shown: state.shown }
 }
 
 /**
@@ -45,7 +53,8 @@ export default function BlocksView({
 }) {
   const { t } = useTranslation()
   const doc = useDoc()
-  const generated = useGeneratedCode(doc)
+  const slow = useEditor((s) => s.slow.enabled)
+  const generated = useGeneratedCode(doc, slow)
   const { mode, juniorCode, moreBlocks, set } = usePrefs()
   const showCode = mode === 'studio' || juniorCode
   const label = `${t('editor.blocks.workspace')} — ${doc.screens[workspace]?.name ?? t('editor.screens.appShort')}`
@@ -100,7 +109,7 @@ export default function BlocksView({
               </Panel>
               <ResizeHandle orientation="vertical" />
               <Panel id="code" minSize={120} className="h-full bg-surface">
-                <CodeView code={generated.code[workspace]?.code ?? ''} />
+                <CodeView code={generated.shown[workspace]?.code ?? ''} />
               </Panel>
             </PanelGroup>
           ) : (

@@ -6,11 +6,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PhoneFrame } from '../../components/phone.tsx'
 import { IconButton } from '../../components/ui/button.tsx'
+import { recordEvent, useLearn } from '../../learn/store.ts'
 import { cn } from '../../lib/cn.ts'
 import { appsOrigin, config } from '../../lib/config.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { useAssetsVersion, useSession } from '../context.tsx'
 import { DEVICES, useEditor } from '../store.ts'
+import { onStep, SlowMotionBar, SlowMotionToggle } from './slow-motion.tsx'
 
 /**
  * The live preview: the player on the apps origin in an iframe (SPEC § 6.6), fed with the
@@ -28,7 +30,8 @@ export function Preview({
   const { t } = useTranslation()
   const session = useSession()
   const { mode, locale } = usePrefs()
-  const { running, appScheme, set } = useEditor()
+  const { running, appScheme, set, slow } = useEditor()
+  const slowDelay = usePrefs((s) => s.slowDelay)
   const assetsVersion = useAssetsVersion()
   const frame = useRef<HTMLIFrameElement>(null)
   const area = useRef<HTMLDivElement>(null)
@@ -50,7 +53,14 @@ export function Preview({
         sentAssets.current = -1
         setReady(true)
       } else if (message.type === 'rx:log') useEditor.getState().log(message.entry)
-      else if (message.type === 'rx:state') useEditor.getState().set({ running: message.running })
+      else if (message.type === 'rx:state') {
+        // Sent on every change of the app: only store what differs.
+        if (useEditor.getState().running !== message.running)
+          useEditor.getState().set({ running: message.running })
+        if (useLearn.getState().previewScreen !== message.screenId)
+          useLearn.setState({ previewScreen: message.screenId })
+      } else if (message.type === 'rx:event') recordEvent(message.event)
+      else if (message.type === 'rx:step') onStep(message.step)
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
@@ -86,6 +96,16 @@ export function Preview({
     if (ready) post({ type: 'rx:scheme', scheme: appScheme })
   }, [ready, appScheme])
 
+  // Slow motion settings go before the code that uses them (`rx:load` follows).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `post` only reads a ref
+  useEffect(() => {
+    if (ready)
+      post({
+        type: 'rx:slow',
+        slow: { enabled: slow.enabled, delay: slowDelay, breakpoints: slow.breakpoints },
+      })
+  }, [ready, slow.enabled, slow.breakpoints, slowDelay])
+
   // Commands (palette, shortcuts) reach the preview through the editor store.
   // biome-ignore lint/correctness/useExhaustiveDependencies: `post` only reads a ref
   useEffect(() => {
@@ -93,6 +113,7 @@ export function Preview({
       preview: {
         restart: () => post({ type: 'rx:restart', screenId }),
         stop: () => post({ type: 'rx:stop' }),
+        resume: (step: boolean) => post({ type: 'rx:resume', step }),
       },
     })
     return () => set({ preview: null })
@@ -135,6 +156,7 @@ export function Preview({
           </span>
         </h2>
         <div className="flex-1" />
+        <SlowMotionToggle />
         <IconButton
           size="sm"
           label={appScheme === 'light' ? t('editor.preview.darkApp') : t('editor.preview.lightApp')}
@@ -161,6 +183,7 @@ export function Preview({
           <Square size={13} fill="currentColor" />
         </IconButton>
       </header>
+      <SlowMotionBar />
       <div
         ref={area}
         className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4"

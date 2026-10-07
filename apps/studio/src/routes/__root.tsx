@@ -7,6 +7,8 @@ import { Mascot } from '../components/brand.tsx'
 import { CommandPalette } from '../components/command-palette.tsx'
 import { Button } from '../components/ui/button.tsx'
 import { TooltipProvider } from '../components/ui/tooltip.tsx'
+import { BadgeToasts } from '../learn/badges.tsx'
+import { useLearningSync } from '../learn/sync.ts'
 import { useCommands } from '../lib/commands.ts'
 import { isMod, useKeydown } from '../lib/hotkeys.ts'
 import { i18next } from '../lib/i18n.ts'
@@ -51,6 +53,7 @@ function Root() {
 function App() {
   usePrefsOnDocument()
   useProfileSync()
+  useLearningSync()
   const theme = usePrefs((s) => s.theme)
   useKeydown((event) => {
     if (isMod(event) && event.key.toLowerCase() === 'k') {
@@ -62,6 +65,7 @@ function App() {
     <TooltipProvider>
       <Outlet />
       <CommandPalette />
+      <BadgeToasts />
       <Toaster
         position="bottom-center"
         theme={theme}

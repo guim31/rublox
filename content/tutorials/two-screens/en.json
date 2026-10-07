@@ -1,0 +1,37 @@
+{
+  "title": "Two screens and navigation",
+  "summary": "An app with two screens: one button to go there, one to come back.",
+  "done": "Stack navigation holds no secrets for you: “go to screen” pushes, “go back” pops, and the previous screen keeps its state.",
+  "steps": {
+    "welcome": {
+      "text": "Real apps have several screens. Let’s link two of them: one button to go to the second, another to come back."
+    },
+    "next-button": {
+      "text": "On the **{{screen.1}}** screen, add a **Button** and write “Next” in its text."
+    },
+    "add-screen": {
+      "text": "Open the screen picker and choose **Add a screen**."
+    },
+    "back-button": {
+      "text": "You are now on **{{screen.2}}**. Give it a “Back” **Button**."
+    },
+    "go-blocks": {
+      "text": "Open the **Blocks** tab: we stay on {{screen.2}}."
+    },
+    "back-block": {
+      "text": "Add [when {{Button.2}} is clicked] and, from **Screens**, [go back to the previous screen] inside it."
+    },
+    "switch-screen": {
+      "text": "Switch to the **{{screen.1}}** screen with the screen picker."
+    },
+    "open-block": {
+      "text": "Add [when {{Button}} is clicked] and, inside it, [go to screen {{screen.2}}]."
+    },
+    "go-there": {
+      "text": "In the preview, tap **Next**: the app moves to {{screen.2}}."
+    },
+    "come-back": {
+      "text": "Now tap **Back** to return to {{screen.1}}."
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "title": "Le quiz",
+  "summary": "Une question, deux réponses : ton appli dit si c’est juste.",
+  "done": "Ton quiz fonctionne ! Tu peux ajouter d’autres questions avec de nouveaux écrans, et faire jouer tes amis.",
+  "steps": {
+    "welcome": {
+      "text": "Aujourd’hui, on fabrique un **quiz** : une question, deux boutons de réponse, et ton appli dit si c’est juste."
+    },
+    "question": {
+      "text": "Pose un **Texte** et écris ta question dans la case **texte**, par exemple « Combien de pattes a une araignée ? »."
+    },
+    "two-buttons": {
+      "text": "Ajoute **deux boutons** : un pour chaque réponse."
+    },
+    "answers": {
+      "text": "Écris une réponse sur chaque bouton, par exemple « 8 » sur {{Button}} (la bonne) et « 6 » sur {{Button.2}}.",
+      "hint": "Clique sur un bouton de l’écran pour le sélectionner, puis change son texte."
+    },
+    "go-blocks": {
+      "text": "Tout est en place. Ouvre l’onglet **Blocs**."
+    },
+    "first-event": {
+      "text": "Dans **{{Button}}**, prends [quand {{Button}} est cliqué] et pose-le au milieu."
+    },
+    "right": {
+      "text": "Dans **Interface**, prends [afficher le message] et emboîte-le dans « quand {{Button}} est cliqué ». Écris « Bravo ! » dans sa case."
+    },
+    "second-event": {
+      "text": "À ton tour pour la mauvaise réponse : dans **{{Button.2}}**, prends [quand {{Button.2}} est cliqué]."
+    },
+    "wrong": {
+      "text": "Mets-y aussi un message, par exemple « Essaie encore ! »."
+    },
+    "play": {
+      "text": "Joue à ton quiz dans l’aperçu : essaie les deux réponses !"
+    }
+  }
+}

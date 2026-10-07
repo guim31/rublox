@@ -3,10 +3,16 @@ import { expect, type Locator, type Page } from '@playwright/test'
 /** Sets the interface preferences before the first load (mode, theme, language). */
 export async function usePrefs(
   page: Page,
-  prefs: { mode?: 'junior' | 'studio'; theme?: 'light' | 'dark'; locale?: 'fr' | 'en' },
+  prefs: {
+    mode?: 'junior' | 'studio'
+    theme?: 'light' | 'dark'
+    locale?: 'fr' | 'en'
+    welcomed?: boolean
+    toursSeen?: { junior: boolean; studio: boolean }
+  },
 ) {
   await page.addInitScript((value) => {
-    const current = JSON.parse(localStorage.getItem('rublox:prefs') || '{"state":{},"version":1}')
+    const current = JSON.parse(localStorage.getItem('rublox:prefs') || '{"state":{},"version":2}')
     localStorage.setItem(
       'rublox:prefs',
       JSON.stringify({ ...current, state: { ...current.state, ...value } }),
@@ -170,3 +176,6 @@ export async function signIn(page: Page, username: string, password: string) {
   await page.getByRole('button', { name: /^(Me connecter|Sign in)$/ }).click()
   await expect(page.getByTestId('user-menu')).toBeVisible()
 }
+
+/** A first visit: no saved preference (welcome page, guided tour). */
+export const EMPTY_STATE = { cookies: [], origins: [] }

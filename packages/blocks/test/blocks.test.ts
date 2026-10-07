@@ -461,3 +461,33 @@ describe('toolbox', () => {
     }
   })
 })
+
+describe('slow motion', () => {
+  it('steps before each statement, not before the event itself', () => {
+    const { doc, screen } = project()
+    const stacks = {
+      evt: onClick('button', { ...setText('text', text('Bonjour')), id: 'set1' }, 'evt'),
+      start: {
+        type: 'rx_app_start',
+        id: 'start',
+        x: 0,
+        y: 300,
+        inputs: { DO: { block: { type: 'rx_log', id: 'log1', inputs: {} } } },
+      },
+    }
+    const variables = [{ id: 'v1', name: 'score' }]
+    const normal = generateWorkspaceCode(stacks as never, contextFromDoc(doc, screen), variables)
+    const slow = generateWorkspaceCode(stacks as never, contextFromDoc(doc, screen), variables, {
+      slow: true,
+    })
+    expect(normal.code).not.toContain('rx.step')
+    compile(slow.code)
+    const body = slow.code.slice(slow.code.indexOf('export default'))
+    expect(body).toContain("    await rx.step('set1');\n    Texte1.text = 'Bonjour';")
+    expect(body).not.toContain("rx.step('evt')")
+    // Each step line belongs to its block, for the console and the highlight.
+    const lines = slow.code.split('\n')
+    const at = lines.findIndex((line) => line.includes("rx.step('set1')"))
+    expect(slow.lineMap[at]).toBe('set1')
+  })
+})

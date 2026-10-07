@@ -98,6 +98,13 @@ async function storeDoc(doc: ProjectDoc): Promise<void> {
   ydoc.destroy()
 }
 
+/** Stores a project built elsewhere (a tutorial's starting project…) in this browser. */
+export async function importProjectDoc(doc: ProjectDoc): Promise<string> {
+  await storeDoc(doc)
+  await saveSummary(summarize(doc))
+  return doc.meta.id
+}
+
 export async function createProject(input: {
   name: string
   locale: Locale

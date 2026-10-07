@@ -1,0 +1,10 @@
+{
+  "title": "A function used twice",
+  "goal": "Two buttons add 1 or 10 to the score: write a single “add” function and call it from both.",
+  "stars": [
+    "A function is defined.",
+    "Both buttons call it.",
+    "The project takes 14 blocks or fewer."
+  ],
+  "hint": "Give the function a “how much” parameter (the block’s gear), and let it update the variable and the text."
+}

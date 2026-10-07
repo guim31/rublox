@@ -1,0 +1,38 @@
+{
+  "title": "The quiz",
+  "summary": "One question, two answers: your app tells whether you are right.",
+  "done": "Your quiz works! Add more questions on new screens, and let your friends play.",
+  "steps": {
+    "welcome": {
+      "text": "Today, let’s build a **quiz**: a question, two answer buttons, and your app tells whether you are right."
+    },
+    "question": {
+      "text": "Put a **Text** on the screen and write your question in its **text** box, for example “How many legs does a spider have?”."
+    },
+    "two-buttons": {
+      "text": "Add **two buttons**: one for each answer."
+    },
+    "answers": {
+      "text": "Write an answer on each button, for example “8” on {{Button}} (the right one) and “6” on {{Button.2}}.",
+      "hint": "Click a button on the screen to select it, then change its text."
+    },
+    "go-blocks": {
+      "text": "Everything is in place. Open the **Blocks** tab."
+    },
+    "first-event": {
+      "text": "In **{{Button}}**, take [when {{Button}} is clicked] and drop it in the middle."
+    },
+    "right": {
+      "text": "In **Interface**, take [show the message] and snap it inside “when {{Button}} is clicked”. Type “Well done!” in its box."
+    },
+    "second-event": {
+      "text": "Your turn for the wrong answer: in **{{Button.2}}**, take [when {{Button.2}} is clicked]."
+    },
+    "wrong": {
+      "text": "Put a message in it too, for example “Try again!”."
+    },
+    "play": {
+      "text": "Play your quiz in the preview: try both answers!"
+    }
+  }
+}
