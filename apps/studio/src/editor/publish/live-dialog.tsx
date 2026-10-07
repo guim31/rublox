@@ -97,7 +97,7 @@ export function LiveButton() {
           data-testid="live-open"
           className="relative"
         >
-          <span className="hidden xl:inline">{t('editor.test')}</span>
+          <span className="rx-bar-label">{t('editor.test')}</span>
           {active ? (
             <span
               className={cn(

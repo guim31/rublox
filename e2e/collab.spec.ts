@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import { type Browser, expect, type Page, test } from '@playwright/test'
 import {
   ADMIN,
@@ -21,6 +22,7 @@ async function person(
   browser: Browser,
   name: string,
   mode: 'junior' | 'studio' = 'studio',
+  theme: 'light' | 'dark' = 'light',
 ): Promise<Person> {
   const username = `${name
     .toLowerCase()
@@ -28,7 +30,8 @@ async function person(
     .replace(/[^a-z]/g, '')}-${unique()}`
   const context = await browser.newContext({ locale: 'fr-FR' })
   const page = await context.newPage()
-  await usePrefs(page, { locale: 'fr', mode, theme: 'light' })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await usePrefs(page, { locale: 'fr', mode, theme })
   return { page, username, name }
 }
 
@@ -56,8 +59,11 @@ async function share(owner: Page, projectId: string, username: string, role: str
   expect(response.ok()).toBe(true)
 }
 
-async function team(browser: Browser, options: { cleo?: boolean } = {}) {
-  const alice = await person(browser, 'Alice')
+async function team(
+  browser: Browser,
+  options: { cleo?: boolean; theme?: 'light' | 'dark'; mode?: 'junior' | 'studio' } = {},
+) {
+  const alice = await person(browser, 'Alice', options.mode, options.theme)
   const bob = await person(browser, 'Bob')
   const cleo = await person(browser, 'Cléo')
   const people = options.cleo === false ? [alice, bob] : [alice, bob, cleo]
@@ -298,3 +304,30 @@ test('pasting into someone else’s project copies the files of its images', asy
       .toBe(8)
   }
 })
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`axe on the presence: ${theme}`, async ({ browser }) => {
+    const { alice, bob } = await team(browser, { theme })
+    await addComponent(alice.page, 'Button')
+    await bob.page.getByTestId('layer-Bouton1').click()
+    await expect(alice.page.getByTestId('peer-label')).toHaveText('Bob')
+    // An open menu hides the rest of the page from assistive technologies (Radix): then only
+    // the menu is checked.
+    const check = async (where: string, only?: string) => {
+      const builder = new AxeBuilder({ page: alice.page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+        .exclude('[data-testid=preview-frame]')
+        .exclude('[data-testid=canvas-screen]')
+      const results = await (only ? builder.include(only) : builder).analyze()
+      expect(
+        results.violations.map(
+          (v) => `${where} ${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`,
+        ),
+      ).toEqual([])
+    }
+    await check('editor')
+    await alice.page.getByTestId('presence').click()
+    await expect(alice.page.getByTestId('presence-person')).toHaveCount(2)
+    await check('presence menu', '[role=menu]')
+  })
+}

@@ -202,7 +202,7 @@ function ShareButton() {
           aria-label={t('editor.share')}
           onClick={() => setOpen(true)}
         >
-          <span className="hidden xl:inline">{t('editor.share')}</span>
+          <span className="rx-bar-label">{t('editor.share')}</span>
         </Button>
       </Tooltip>
       {open ? <ShareDialog open onClose={() => setOpen(false)} /> : null}
@@ -223,7 +223,7 @@ function PublishButton() {
           onClick={() => setOpen(true)}
           data-testid="publish-open"
         >
-          <span className="hidden xl:inline">{t('editor.publish')}</span>
+          <span className="rx-bar-label">{t('editor.publish')}</span>
         </Button>
       </Tooltip>
       {open ? <PublishDialog open onClose={() => setOpen(false)} /> : null}
@@ -265,7 +265,7 @@ function Soon({
         aria-label={text}
         className="cursor-not-allowed opacity-45 active:scale-100"
       >
-        <span className="hidden xl:inline">{text}</span>
+        <span className="rx-bar-label">{text}</span>
       </Button>
     </Tooltip>
   )

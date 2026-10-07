@@ -350,3 +350,22 @@ svg[display="none"] {
   filter: drop-shadow(0 0 1px var(--peer-line)) drop-shadow(0 0 1px var(--peer-line))
     drop-shadow(0 0 1px var(--peer-line));
 }
+
+/* Labels of the top bar's buttons (Test, Share, Publish): shown from 1280 px, from 1536 px in
+   Junior, whose controls are bigger (the bar also holds the people present, J4b). */
+.rx-bar-label {
+  display: none;
+}
+@media (min-width: 80rem) {
+  .rx-bar-label {
+    display: inline;
+  }
+  :root[data-mode="junior"] .rx-bar-label {
+    display: none;
+  }
+}
+@media (min-width: 96rem) {
+  :root[data-mode="junior"] .rx-bar-label {
+    display: inline;
+  }
+}
