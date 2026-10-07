@@ -40,6 +40,16 @@ async function fromTemplate(page: Page, template: string) {
   await expect(page.getByTestId('canvas-screen')).toBeVisible()
 }
 
+/** Badges earned on the way (first app…) announce themselves: their toasts go first. */
+async function closeToasts(page: Page) {
+  const toasts = page.locator('[data-sonner-toast]')
+  await page.waitForTimeout(600)
+  while (await toasts.count()) {
+    await toasts.first().locator('[data-close-button]').click()
+    await page.waitForTimeout(250)
+  }
+}
+
 const VARIANTS = [
   ['junior', 'light'],
   ['junior', 'dark'],
@@ -57,7 +67,7 @@ for (const [mode, theme] of VARIANTS) {
     if (theme === 'dark')
       await page.getByRole('button', { name: 'Appli en sombre' }).first().click()
     await page.mouse.move(0, 0)
-    await page.waitForTimeout(400)
+    await closeToasts(page)
     await page.screenshot({ path: `${DIR}/${mode}-${theme}-template.png` })
 
     // Blocks with the keyboard: the focus in the toolbox's flyout, the shortcuts in the help.
@@ -65,6 +75,7 @@ for (const [mode, theme] of VARIANTS) {
     await page.getByTestId('help-button').click()
     await page.getByTestId('help-panel').getByRole('radio', { name: 'Clavier' }).click()
     await expect(page.getByTestId('help-keys')).toBeVisible()
+    await closeToasts(page)
     await page.getByRole('button', { name: /^Blocs$/ }).focus()
     await expect(async () => {
       await page.keyboard.press('Tab')
