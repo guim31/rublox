@@ -28,16 +28,23 @@ export function AppHeader() {
           <nav aria-label={t('nav.main')} className="ml-2 hidden items-center gap-1 sm:flex">
             <NavLink to="/">{t('nav.projects')}</NavLink>
             <NavLink to="/spaces">{t('nav.spaces')}</NavLink>
+            <NavLink to="/learn">{t('learn.open')}</NavLink>
             {user.isAdmin ? <NavLink to="/admin">{t('nav.admin')}</NavLink> : null}
           </nav>
         ) : (
-          <span
-            className="hidden items-center gap-1.5 rounded-full bg-yellow-soft px-3 py-1 text-ui-sm font-strong text-text sm:inline-flex"
-            title={t('guest.explain')}
-          >
-            <span className="size-2 rounded-full bg-yellow" aria-hidden="true" />
-            {t('guest.badge')}
-          </span>
+          <>
+            <span
+              className="hidden items-center gap-1.5 rounded-full bg-yellow-soft px-3 py-1 text-ui-sm font-strong text-text sm:inline-flex"
+              title={t('guest.explain')}
+            >
+              <span className="size-2 rounded-full bg-yellow" aria-hidden="true" />
+              {t('guest.badge')}
+            </span>
+            <nav aria-label={t('nav.main')} className="ml-1 hidden items-center gap-1 sm:flex">
+              <NavLink to="/">{t('nav.projects')}</NavLink>
+              <NavLink to="/learn">{t('learn.open')}</NavLink>
+            </nav>
+          </>
         )}
         <div className="flex-1" />
         <button
@@ -65,7 +72,13 @@ export function AppHeader() {
   )
 }
 
-function NavLink({ to, children }: { to: '/' | '/spaces' | '/admin'; children: ReactNode }) {
+function NavLink({
+  to,
+  children,
+}: {
+  to: '/' | '/spaces' | '/admin' | '/learn'
+  children: ReactNode
+}) {
   return (
     <Link
       to={to}

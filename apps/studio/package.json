@@ -38,6 +38,7 @@
     "@rublox/blocks": "workspace:*",
     "@rublox/catalog": "workspace:*",
     "@rublox/i18n": "workspace:*",
+    "@rublox/learn": "workspace:*",
     "@rublox/runtime": "workspace:*",
     "@rublox/schema": "workspace:*",
     "@tanstack/react-query": "5.104.1",

@@ -1,0 +1,58 @@
+{
+  "id": "magic-dice",
+  "mode": "junior",
+  "order": 2,
+  "minutes": 12,
+  "accent": "coral",
+  "icon": "🎲",
+  "requires": ["Button", "Text"],
+  "steps": [
+    { "id": "welcome", "mood": "think" },
+    {
+      "id": "add-text",
+      "target": "palette:Text",
+      "check": { "kind": "component", "type": "Text" }
+    },
+    {
+      "id": "big-text",
+      "target": "inspector:fontSize",
+      "check": { "kind": "prop", "type": "Text", "prop": "fontSize" }
+    },
+    {
+      "id": "add-button",
+      "target": "palette:Button",
+      "check": { "kind": "component", "type": "Button" }
+    },
+    {
+      "id": "button-text",
+      "target": "inspector:text",
+      "check": { "kind": "prop", "type": "Button", "prop": "text" }
+    },
+    { "id": "go-blocks", "target": "tab:blocks", "check": { "kind": "tab", "tab": "blocks" } },
+    {
+      "id": "event-block",
+      "target": "toolbox:Button",
+      "check": { "kind": "block", "type": "rx_Button_on_click" }
+    },
+    {
+      "id": "set-block",
+      "target": "toolbox:Text",
+      "check": { "kind": "block", "type": "rx_Text_set", "inside": ["rx_Button_on_click"] }
+    },
+    {
+      "id": "random",
+      "target": "toolbox-category:math",
+      "check": {
+        "kind": "block",
+        "type": "math_random_int",
+        "inside": ["rx_Text_set", "rx_Button_on_click"]
+      }
+    },
+    {
+      "id": "roll",
+      "target": "preview",
+      "mood": "cheer",
+      "check": { "kind": "preview", "event": "click", "type": "Button", "min": 3 }
+    }
+  ]
+}

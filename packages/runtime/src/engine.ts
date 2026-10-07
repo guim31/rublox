@@ -9,7 +9,7 @@ import {
   type UiMode,
   type WorkspaceKey,
 } from '@rublox/schema'
-import { friendlyError, StopSignal } from './errors.ts'
+import { friendlyError, listItem, StopSignal } from './errors.ts'
 import { FrameClock } from './game/clock.ts'
 import { GameInstance } from './game/instance.ts'
 import { type Body, isWorldType, type World } from './game/world.ts'
@@ -27,9 +27,26 @@ export type LogEntry = {
   time: number
 }
 
+/** Something the person did in the app (tutorials and challenges check it). */
+export type AppEvent = {
+  screenId: ScreenId
+  componentId: ComponentId
+  componentType: string
+  componentName: string
+  event: string
+}
+
+/** Slow motion (SPEC § 4.3): each block waits `delay` ms; breakpoints pause the app. */
+export type SlowMotion = { enabled: boolean; delay: number; breakpoints: string[] }
+
+/** The block running in slow motion (`null`: nothing runs now). */
+export type StepInfo = { blockId: string | null; workspace: WorkspaceKey | null; paused: boolean }
+
 export type EngineHost = {
   log(entry: LogEntry): void
   state?(state: { screenId: ScreenId | null; running: boolean }): void
+  event?(event: AppEvent): void
+  step?(step: StepInfo): void
 }
 
 export type LoadedModule = {
@@ -54,6 +71,8 @@ export type EngineOptions = {
   initialScreen?: ScreenId
   /** Frames of the game scenes (tests drive one by hand). */
   clock?: FrameClock
+  /** Slow motion; the code must then be generated with `slow: true`. */
+  slow?: SlowMotion
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: generated code passes any value
@@ -86,6 +105,8 @@ export type ModuleApi = {
     wait(seconds: Value): Promise<void>
     log(...values: Value[]): void
     step(blockId: string): Promise<void>
+    /** Item `index` (from 1) of a list, with an error a child can read when it is missing. */
+    item(list: Value, index: Value): Value
   }
 }
 
@@ -189,6 +210,13 @@ export class Engine {
    * that frame give way until the next one.
    */
   private redrawFrame = -1
+  private slow: SlowMotion = { enabled: false, delay: 500, breakpoints: [] }
+  private readonly breakpoints = new Set<string>()
+  /** Waiting at a breakpoint: resolves (go on) or rejects (stop). */
+  private paused: { resolve: () => void; reject: (e: unknown) => void }[] = []
+  /** "Next block": pause again at the next step. */
+  private stepping = false
+  private active = 0
 
   constructor(options: EngineOptions) {
     this.doc = options.doc
@@ -199,6 +227,7 @@ export class Engine {
     this.loadModule = options.loadModule ?? loadBlobModule
     this.initialScreen = options.initialScreen
     this.clock = options.clock ?? new FrameClock()
+    if (options.slow) this.setSlowMotion(options.slow)
     this.snapshot = this.makeSnapshot(0)
   }
 
@@ -269,6 +298,11 @@ export class Engine {
       entry.reject(new StopSignal())
     }
     this.timers.clear()
+    for (const pause of this.paused) pause.reject(new StopSignal())
+    this.paused = []
+    this.stepping = false
+    this.active = 0
+    this.host.step?.({ blockId: null, workspace: null, paused: false })
     for (const dialog of this.dialogs) dialog.resolve(new StopSignal())
     this.dialogs = []
     this.toasts = []
@@ -419,7 +453,79 @@ export class Engine {
   /** A component of the visible screen fired an event (a click…). */
   emit(componentId: ComponentId, event: string): void {
     const instance = this.stack.at(-1)
-    if (instance) this.fire(instance, componentId, event)
+    if (!instance) return
+    const node = this.doc.screens[instance.screenId]?.components[componentId]
+    if (node && this.running)
+      this.host.event?.({
+        screenId: instance.screenId,
+        componentId,
+        componentType: node.type,
+        componentName: node.name,
+        event,
+      })
+    this.fire(instance, componentId, event)
+  }
+
+  // Slow motion
+
+  setSlowMotion(slow: SlowMotion): void {
+    this.slow = { ...slow }
+    this.breakpoints.clear()
+    for (const id of slow.breakpoints) this.breakpoints.add(id)
+    // Turned off while paused: let the code run on.
+    if (!slow.enabled) this.resume(false)
+  }
+
+  /** Leaves a pause: runs on, or (`step`) stops again at the next block. */
+  resume(step: boolean): void {
+    this.stepping = step && this.slow.enabled
+    const waiting = this.paused
+    this.paused = []
+    for (const pause of waiting) pause.resolve()
+  }
+
+  isPaused(): boolean {
+    return this.paused.length > 0
+  }
+
+  /** Counts running handlers, to switch the highlight off when the last one ends. */
+  private track<T>(run: () => Promise<T>): Promise<T> {
+    if (!this.slow.enabled) return run()
+    this.active += 1
+    return run().finally(() => {
+      this.active = Math.max(0, this.active - 1)
+      if (this.active === 0 && this.slow.enabled && this.running)
+        this.host.step?.({ blockId: null, workspace: null, paused: false })
+    })
+  }
+
+  private async step(blockId: string, workspace: WorkspaceKey, check: () => void): Promise<void> {
+    check()
+    if (!this.slow.enabled) return
+    const pause = this.stepping || this.breakpoints.has(blockId)
+    this.host.step?.({ blockId, workspace, paused: pause })
+    if (pause) {
+      this.stepping = false
+      await new Promise<void>((resolve, reject) => this.paused.push({ resolve, reject }))
+      this.host.step?.({ blockId, workspace, paused: false })
+    } else {
+      await this.sleep(this.slow.delay)
+    }
+    this.lastYield = now()
+    check()
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const entry = {
+        timer: setTimeout(() => {
+          this.timers.delete(entry)
+          resolve()
+        }, ms),
+        reject,
+      }
+      this.timers.add(entry)
+    })
   }
 
   /** A value changed by the person using the app (typing in a text input). */
@@ -450,8 +556,9 @@ export class Engine {
       if (skipIfBusy && entry.busy) continue
       entry.busy = true
       this.lastYield = now()
-      Promise.resolve()
-        .then(() => (self === undefined ? entry.fn(args) : entry.fn(self, args)))
+      void this.track(() =>
+        Promise.resolve().then(() => (self === undefined ? entry.fn(args) : entry.fn(self, args))),
+      )
         .catch((error) => this.report(error))
         .finally(() => {
           entry.busy = false
@@ -545,7 +652,7 @@ export class Engine {
     try {
       const loaded = await this.load(workspace, code)
       if (generation !== this.generation || (instance && !instance.alive)) return
-      await loaded.run(this.api(instance))
+      await this.track(async () => loaded.run(this.api(instance)))
     } catch (error) {
       this.report(error)
     }
@@ -803,16 +910,7 @@ export class Engine {
         wait: (seconds) => {
           check()
           const ms = Math.max(0, Number(seconds) || 0) * 1000
-          return new Promise<void>((resolve, reject) => {
-            const entry = {
-              timer: setTimeout(() => {
-                this.timers.delete(entry)
-                resolve()
-              }, ms),
-              reject,
-            }
-            this.timers.add(entry)
-          }).then(() => {
+          return this.sleep(ms).then(() => {
             this.lastYield = now()
             check()
           })
@@ -821,8 +919,9 @@ export class Engine {
           const blockId = this.blockFromStack(new Error().stack)
           this.log('log', values.map(display).join(' '), blockId)
         },
-        // Slow motion (J3) replaces this: the engine will light the block and wait.
-        step: async () => check(),
+        // Slow motion: lights the block up in the editor, then waits (or pauses).
+        step: (blockId) => this.step(String(blockId), instance?.screenId ?? APP_WORKSPACE, check),
+        item: (list, index) => listItem(list, index),
       },
     }
   }

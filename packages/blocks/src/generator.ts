@@ -224,6 +224,17 @@ function installBlockGenerators(generator: Gen): void {
     Order.AWAIT,
   ]
 
+  // A missing list item gets an error a child can read (`rx.item`, SPEC § 4.3).
+  const getIndex = f.lists_getIndex
+  f.lists_getIndex = (block, g) => {
+    if (block.getFieldValue('MODE') === 'GET' && block.getFieldValue('WHERE') === 'FROM_START') {
+      const list = g.valueToCode(block, 'VALUE', Order.NONE) || '[]'
+      const at = g.valueToCode(block, 'AT', Order.NONE) || '1'
+      return [`rx.item(${list}, ${at})`, Order.FUNCTION_CALL]
+    }
+    return getIndex ? getIndex(block, g) : null
+  }
+
   // Blockly's console output would be `window.alert`: send it to the console panel instead.
   f.text_print = (block, g) => `rx.log(${g.valueToCode(block, 'TEXT', Order.NONE) || "''"});\n`
 
@@ -327,6 +338,14 @@ function eventFilterCode(
   return name ? `${name}, ` : null
 }
 
+export type GenerateOptions = {
+  /**
+   * Slow motion (SPEC § 6.5): `await rx.step('<block id>')` before each statement, so that
+   * the engine lights the block up and waits.
+   */
+  slow?: boolean
+}
+
 export type GeneratedCode = {
   code: string
   /** Block id of each line of `code` (index 0 is line 1), or `null`. */
@@ -338,7 +357,10 @@ export type GeneratedCode = {
  * the last marker above it that is not more indented, so the `}` closing a handler belongs to
  * the handler, not to its last statement.
  */
-export function stripMarkers(raw: string): {
+export function stripMarkers(
+  raw: string,
+  slow?: { skip: ReadonlySet<string> },
+): {
   lines: string[]
   ids: (string | null)[]
 } {
@@ -350,8 +372,14 @@ export function stripMarkers(raw: string): {
     const match = MARKER.exec(line)
     if (match) {
       const indent = indentOf(line)
+      const id = (match[1] ?? '').replace(/\\(.)/g, '$1')
       while (stack.length && (stack.at(-1)?.indent ?? 0) >= indent) stack.pop()
-      stack.push({ indent, id: (match[1] ?? '').replace(/\\(.)/g, '$1') })
+      stack.push({ indent, id })
+      // Slow motion: the marker becomes a step, except before event and function blocks.
+      if (slow && !slow.skip.has(id)) {
+        lines.push(`${line.slice(0, indent)}await rx.step(${quote(id)});`)
+        ids.push(id)
+      }
       continue
     }
     const indent = indentOf(line)
@@ -368,12 +396,14 @@ export function stripMarkers(raw: string): {
 export function workspaceToModule(
   generator: RubloxGenerator,
   workspace: Blockly.Workspace,
+  options: GenerateOptions = {},
 ): GeneratedCode {
   generator.init(workspace)
   const context = generator.context
   const strings = messages[context.locale].blocks.code
   const chunks: string[] = []
-  for (const block of generator.codeBlocks(workspace)) {
+  const tops = generator.codeBlocks(workspace)
+  for (const block of tops) {
     const code = generator.blockToCode(block)
     if (typeof code === 'string' && code.trim()) chunks.push(code)
   }
@@ -391,7 +421,16 @@ export function workspaceToModule(
   const params = `{ ${MODULE_PARAMS.join(', ')} }`
   const used = [...generator.usedComponents].sort((a, b) => a.localeCompare(b))
   const bodyRaw = chunks.join('\n')
-  const body = stripMarkers(bodyRaw)
+  const body = stripMarkers(
+    bodyRaw,
+    options.slow
+      ? {
+          skip: new Set(
+            tops.filter((block) => block.type !== BLOCK_TYPES.appStart).map((block) => block.id),
+          ),
+        }
+      : undefined,
+  )
 
   const lines = [...header, `export default async function (${params}) {`]
   const ids: (string | null)[] = header.map(() => null).concat([null])

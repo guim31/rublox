@@ -87,7 +87,7 @@ export function EditorCommands({
         group: 'editor',
         label: t('commands.toggleConsole'),
         icon: <Terminal size={16} />,
-        run: () => usePrefs.getState().set({ consoleOpen: !usePrefs.getState().consoleOpen }),
+        run: () => usePrefs.getState().toggleConsole(),
       },
       ...paletteFor(mode).flatMap(({ components }) =>
         components.map(

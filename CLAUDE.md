@@ -62,7 +62,7 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome pnpm test:e2e`.
   Contre les serveurs de dev : `E2E_BASE_URL=http://localhost:5173 npx playwright test --project=e2e`.
 - `pnpm screenshots` : captures de PR (Junior, Studio, clair, sombre), une spec par jalon
-  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`). Lancer seulement celle du jalon :
+  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j3/`). Lancer seulement celle du jalon :
   `npx playwright test --project=screenshots e2e/screenshots-j1.spec.ts` après `pnpm build`.
 - `cd packages/blocks && npx vitest run -u` : régénérer les instantanés du générateur, puis
   relire le diff du code produit (`pnpm --filter … test -- -u` n'écrit que les nouveaux).
@@ -83,6 +83,13 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - Une chaîne d'interface : `packages/i18n/src/fr/*.ts` puis `en/*.ts` (TypeScript refuse une clé
   manquante ; `t('…')` est typé). Celles des comptes, espaces et administration sont dans
   `accounts.ts`.
+- Un tutoriel ou un défi : un dossier `content/tutorials/<id>/` (`tutorial.json`, `fr.json`,
+  `en.json`) ou `content/challenges/<id>/`, puis une ligne dans `packages/learn/src/content.ts`.
+  Les vérifications et les cibles sont décrites dans `packages/learn/src/{conditions,model}.ts` ;
+  `pnpm --filter @rublox/learn test` vérifie les deux langues et les types cités. Un élément
+  d'interface que la bulle doit montrer porte `data-tour="…"` (`apps/studio/src/learn/targets.ts`).
+- Les chaînes du J3 (apprentissage, accueil, aide, ralenti) sont dans `learn.ts`, les fiches des
+  blocs et le glossaire dans `help.ts` (tout nouveau bloc général demande sa fiche).
 - Un composant de jeu : comme ci-dessus, avec `parents: ['GameScene']` (et l'ajouter aux
   `accepts` de la scène) ; son dessin à l'exécution va dans `World` (`runtime/src/game/`), pas
   dans React. Une démo : `packages/catalog/src/demos/` (blocs écrits en JSON avec
@@ -146,6 +153,21 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **Routes TanStack** : un fichier de `routes/` n'exporte que `Route` (découpage du code) ; ce
   qui est partagé va ailleurs (`spaces/shared.ts`). Deux routes ne partagent pas un nom de
   paramètre de recherche de types différents (`tab` de l'éditeur, `section` de l'admin).
+- **Types de `t()`** : avec beaucoup de chaînes, `ReturnType<typeof useTranslation>['t']` en
+  paramètre fait « Type instantiation is excessively deep » (TS2589) : typer avec `TFunction`
+  d'`i18next`. Les clés dynamiques (`learn.badges.${id}`) se lisent avec `returnObjects` ou
+  directement dans `messages[locale]`.
+- **Messages du lecteur** : `rx:state` arrive à chaque changement de l'appli (des centaines par
+  seconde dans une boucle). Un `set` de zustand crée un nouvel état même à valeur égale, et tout
+  composant qui lit `useEditor()` sans sélecteur se redessine : ne stocker que ce qui change,
+  sinon l'éditeur se fige (test « an endless loop freezes nothing »).
+- **Playwright et J3** : par défaut un test démarre en invité qui a déjà vu l'accueil et les
+  visites guidées (`storageState` de `playwright.config.ts`). Pour une première visite :
+  `test.use({ storageState: EMPTY_STATE })` (`e2e/helpers.ts`), ou `usePrefs(page, { welcomed:
+  false })`. Le glisser au doigt se teste en envoyant des `PointerEvent` `pointerType: 'touch'`
+  (`e2e/learn.spec.ts`).
+- **Glisser-déposer tactile** : le repli (`touch-drag.ts`) rejoue des `DragEvent` construits ;
+  leur `dataTransfer` peut manquer (vieux Safari) : ne jamais le lire sans test.
 - **Mesurer le jeu** : le Chromium du conteneur n'a pas de GPU ; dès qu'un seul pixel bouge,
   l'aperçu plafonne vers 45 à 50 images par seconde, jeu ou pas (même un `<canvas>`). Comparer au
   plafond mesuré à côté, et juger le jeu sur son temps JavaScript par image (profileur CDP sur

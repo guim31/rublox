@@ -26,7 +26,9 @@ export function DesignView({ screenId }: { screenId: ScreenId }) {
       >
         <PanelGroup id={`design-left-${mode}`} orientation="vertical" className="h-full">
           <Panel id="palette" defaultSize="55%" minSize={120} className="flex h-full flex-col">
-            <Palette screenId={screenId} />
+            <div className="flex h-full min-h-0 flex-col" data-tour="palette" data-tour-anchor>
+              <Palette screenId={screenId} />
+            </div>
           </Panel>
           <ResizeHandle orientation="vertical" />
           <Panel id="layers" minSize={120} className="flex h-full flex-col">
@@ -59,7 +61,9 @@ export function DesignView({ screenId }: { screenId: ScreenId }) {
         maxSize="36%"
         className="h-full bg-surface"
       >
-        <Inspector screenId={screenId} />
+        <div className="h-full" data-tour="inspector">
+          <Inspector screenId={screenId} />
+        </div>
       </Panel>
     </PanelGroup>
   )

@@ -9,6 +9,7 @@ import { addComponentOfType } from '../actions.ts'
 import { ComponentIcon } from '../component-icon.tsx'
 import { useSession } from '../context.tsx'
 import { endDrag, startDrag } from './dnd.ts'
+import { touchDrag } from './touch-drag.ts'
 
 /**
  * Components by category, with search (SPEC § 4.1). Drag one onto the canvas or the layers;
@@ -75,6 +76,10 @@ export function Palette({ screenId }: { screenId: string }) {
                         aria-description={t('editor.design.paletteHint')}
                         onDragStart={(event) => startDrag(event, { kind: 'new', type: def.type })}
                         onDragEnd={endDrag}
+                        onPointerDown={touchDrag(
+                          () => ({ kind: 'new', type: def.type }),
+                          strings.label,
+                        )}
                         onDoubleClick={() =>
                           addComponentOfType(session, screenId, def.type, locale)
                         }
@@ -85,7 +90,7 @@ export function Palette({ screenId }: { screenId: string }) {
                           }
                         }}
                         className={cn(
-                          'group flex w-full cursor-grab items-center gap-2 rounded-ui border border-border bg-surface text-left transition-[border,box-shadow,transform] hover:border-primary/60 hover:shadow-1 active:cursor-grabbing',
+                          'group flex w-full cursor-grab items-center [-webkit-touch-callout:none] select-none gap-2 rounded-ui border border-border bg-surface text-left transition-[border,box-shadow,transform] hover:border-primary/60 hover:shadow-1 active:cursor-grabbing',
                           mode === 'junior'
                             ? 'flex-col justify-center gap-1.5 px-2 py-3 text-center'
                             : 'h-control-sm px-2',

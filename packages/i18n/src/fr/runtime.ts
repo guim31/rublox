@@ -1,4 +1,7 @@
+import { runtimeLearning } from './runtime-learn.ts'
+
 export const runtime = {
+  ...runtimeLearning,
   ok: 'OK',
   cancel: 'Annuler',
   yes: 'Oui',

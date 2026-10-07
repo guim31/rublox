@@ -1,0 +1,10 @@
+{
+  "title": "Le compteur",
+  "goal": "Chaque appui sur le bouton ajoute 1 au nombre affiché.",
+  "stars": [
+    "Quand on appuie sur le bouton, le texte change.",
+    "Une variable compte les appuis (bloc « ajouter 1 à »).",
+    "Tu as testé : trois appuis dans l’aperçu."
+  ],
+  "hint": "Crée une variable « compteur » dans Variables, ajoute-lui 1 à chaque clic, puis affiche-la dans le texte."
+}
