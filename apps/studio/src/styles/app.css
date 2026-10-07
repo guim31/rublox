@@ -369,3 +369,16 @@ svg[display="none"] {
     display: inline;
   }
 }
+
+/* The save state's words in the top bar: in Junior below 1536 px, only its icon shows (the
+   words stay for screen readers, the tooltip says them), as the tabs take more room. */
+@media (max-width: 95.99rem) {
+  :root[data-mode="junior"] .rx-save-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

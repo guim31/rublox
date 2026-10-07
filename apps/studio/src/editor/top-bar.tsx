@@ -383,7 +383,7 @@ function SaveIndicator() {
             state === 'offline' && 'text-coral',
           )}
         />
-        {label}
+        <span className="rx-save-label">{label}</span>
       </span>
     </Tooltip>
   )

@@ -681,7 +681,9 @@ présence), fichiers des ressources recopiés quand on colle dans un autre proje
   éditeurs présents (Hocuspocus ne filtre pas l'awareness par connexion) : nom, avatar, écran.
 - **Barre du haut de Junior** : à 1 440 px, elle débordait déjà (le menu des préférences était
   coupé) ; les libellés de « Tester », « Partager » et « Publier » ne s'affichent en Junior
-  qu'à partir de 1 536 px (icône et infobulle en dessous).
+  qu'à partir de 1 536 px (icône et infobulle en dessous), comme le mot de l'état
+  d'enregistrement (gardé pour les lecteurs d'écran) depuis l'onglet Données du J5. Le nom du
+  projet y reste écrasé à 1 440 px (antérieur, à reprendre au J8).
 
 **Défauts antérieurs corrigés au passage**
 
