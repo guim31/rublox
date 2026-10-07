@@ -1,4 +1,10 @@
-import { componentLabel, createComponent, createScreen, getComponentDef } from '@rublox/catalog'
+import {
+  componentLabel,
+  createComponent,
+  createScreen,
+  getComponentDef,
+  resolveProps,
+} from '@rublox/catalog'
 import type { Locale } from '@rublox/i18n'
 import {
   addComponent,
@@ -13,6 +19,7 @@ import {
   type ScreenId,
   screenNames,
 } from '@rublox/schema'
+import { canContain, parentOf } from './design/dnd.ts'
 import type { ProjectSession } from './session.ts'
 import { useEditor } from './store.ts'
 
@@ -26,21 +33,46 @@ export function defaultTarget(
   doc: ProjectDoc,
   screenId: ScreenId,
   selected: ComponentId | null,
-): Target {
+  type?: string,
+): Target | null {
   const screen = doc.screens[screenId]
   if (!screen) throw new Error('no screen')
+  const fits = (parentId: ComponentId) => !type || canContain(screen, parentId, type)
+  const end = (parentId: ComponentId) => ({
+    parentId,
+    index: screen.components[parentId]?.children?.length ?? 0,
+  })
   const node = selected ? screen.components[selected] : undefined
   if (node && selected) {
-    if (getComponentDef(node.type)?.container) {
-      return { parentId: selected, index: node.children?.length ?? 0 }
-    }
-    for (const [parentId, parent] of Object.entries(screen.components)) {
-      const index = parent.children?.indexOf(selected) ?? -1
-      if (index >= 0) return { parentId, index: index + 1 }
+    if (getComponentDef(node.type)?.container && fits(selected)) return end(selected)
+    // After the selection, or after the closest ancestor whose parent takes this type.
+    let child: ComponentId = selected
+    let at = parentOf(screen, child)
+    while (at) {
+      if (fits(at.parentId)) return { parentId: at.parentId, index: at.index + 1 }
+      child = at.parentId
+      at = parentOf(screen, child)
     }
   }
-  const root = screen.components[screen.rootId]
-  return { parentId: screen.rootId, index: root?.children?.length ?? 0 }
+  // A sprite goes into the screen's first game scene.
+  const parents = type ? getComponentDef(type)?.parents : undefined
+  if (parents) {
+    const host = Object.entries(screen.components).find(([, n]) => parents.includes(n.type))
+    return host ? end(host[0]) : null
+  }
+  return fits(screen.rootId) ? end(screen.rootId) : null
+}
+
+/** Where a new child of a free-layout container goes: its center, a little off each time. */
+function freePosition(doc: ProjectDoc, screenId: ScreenId, parentId: ComponentId) {
+  const parent = doc.screens[screenId]?.components[parentId]
+  if (!parent || !getComponentDef(parent.type)?.freeLayout) return undefined
+  const values = resolveProps(parent.type, parent.props, doc.meta.locale)
+  const shift = ((parent.children?.length ?? 0) % 6) * 16
+  return {
+    x: Math.round(Number(values.sceneWidth) / 2 + shift),
+    y: Math.round(Number(values.sceneHeight) / 2 + shift),
+  }
 }
 
 export function addComponentOfType(
@@ -49,11 +81,34 @@ export function addComponentOfType(
   type: string,
   locale: Locale,
   target?: Target,
+  /** Where it lands in a free-layout container (a drop in a game scene). */
+  point?: { x: number; y: number },
 ): ComponentId {
   const doc = session.getDoc()
-  const where = target ?? defaultTarget(doc, screenId, useEditor.getState().selected)
   const node = createComponent(type, doc.meta.locale, componentNames(session.ydoc, screenId))
-  const id = addComponent(session.ydoc, screenId, node, where.parentId, where.index)
+  let id = ''
+  session.ydoc.transact(() => {
+    let where = target ?? defaultTarget(doc, screenId, useEditor.getState().selected, type)
+    // No game scene yet for a sprite: add one first, then the sprite inside.
+    const parentType = getComponentDef(type)?.parents?.[0]
+    if (!where && parentType) {
+      const at = defaultTarget(doc, screenId, useEditor.getState().selected, parentType)
+      if (!at) return
+      const parent = createComponent(
+        parentType,
+        doc.meta.locale,
+        componentNames(session.ydoc, screenId),
+      )
+      const parentId = addComponent(session.ydoc, screenId, parent, at.parentId, at.index)
+      where = { parentId, index: 0 }
+    }
+    if (!where) return
+    const position = freePosition(session.getDoc(), screenId, where.parentId)
+    if (position && !point) Object.assign(node.props, position)
+    if (point) Object.assign(node.props, point)
+    id = addComponent(session.ydoc, screenId, node, where.parentId, where.index)
+  })
+  if (!id) return id
   useEditor.getState().select(id)
   useEditor.getState().announce(`${componentLabel(type, locale)} — ${node.name}`)
   return id

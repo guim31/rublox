@@ -81,6 +81,7 @@ export function PlayerApp(props: PlayerAppProps): ReactNode {
                 else engine.emit(id, event)
               }}
               setValue={(id, prop, value) => engine.setValue(id, prop, value)}
+              live={(id) => engine.live(screen.key, id)}
               assetUrl={props.assetUrl}
             />
           ) : null}

@@ -3,12 +3,16 @@ import { getComponentDef } from '@rublox/catalog'
 import {
   Box,
   Columns3,
+  Gamepad2,
+  Ghost,
   Image,
+  Joystick,
   type LucideIcon,
   Rows3,
   Smartphone,
   SquareMousePointer,
   TextCursorInput,
+  Trophy,
   Type,
 } from 'lucide-react'
 
@@ -24,6 +28,10 @@ const ICONS: Record<string, LucideIcon> = {
   type: Type,
   'text-cursor-input': TextCursorInput,
   image: Image,
+  'gamepad-2': Gamepad2,
+  ghost: Ghost,
+  trophy: Trophy,
+  joystick: Joystick,
 }
 
 export function ComponentIcon({

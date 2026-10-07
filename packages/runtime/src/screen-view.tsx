@@ -15,6 +15,8 @@ export type ScreenViewProps = {
   emit?: (componentId: ComponentId, event: string) => void
   setValue?: (componentId: ComponentId, prop: string, value: unknown) => void
   assetUrl?: (value: string) => string | undefined
+  /** The running object of a component that draws itself (a game scene), see `RendererProps`. */
+  live?: (componentId: ComponentId) => unknown
   /** Lets the editor add elements (drop markers…) among a container's children. */
   decorateChildren?: (parentId: ComponentId, children: ReactNode[]) => ReactNode[]
 }
@@ -52,6 +54,7 @@ export function ScreenView(props: ScreenViewProps): ReactNode {
         setValue={(prop, value) => props.setValue?.(id, prop, value)}
         assetUrl={props.assetUrl ?? httpsOnly}
         locale={props.locale}
+        live={props.live?.(id)}
       >
         {children}
       </Renderer>

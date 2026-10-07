@@ -52,8 +52,28 @@ export function axisOf(screen: Screen, id: ComponentId): 'x' | 'y' {
   return screen.components[id]?.type === 'Row' ? 'x' : 'y'
 }
 
-/** A drop target is valid unless it puts a component inside itself. */
+/**
+ * Whether a container takes a component type: a game scene only takes game children
+ * (`accepts`), and those only live in a scene (`parents`).
+ */
+export function canContain(screen: Screen, parentId: ComponentId, childType: string): boolean {
+  const parentType = screen.components[parentId]?.type
+  const parent = parentType ? getComponentDef(parentType) : undefined
+  if (!parent?.container) return false
+  if (parent.accepts && !parent.accepts.includes(childType)) return false
+  const parents = getComponentDef(childType)?.parents
+  return !parents || (parentType !== undefined && parents.includes(parentType))
+}
+
+/** The type being dragged. */
+export function payloadType(screen: Screen, payload: DragPayload): string | undefined {
+  return payload.kind === 'new' ? payload.type : screen.components[payload.id]?.type
+}
+
+/** A drop target is valid unless it puts a component inside itself, or where it cannot live. */
 export function validTarget(screen: Screen, payload: DragPayload, target: DropTarget): boolean {
+  const type = payloadType(screen, payload)
+  if (!type || !canContain(screen, target.parentId, type)) return false
   if (payload.kind === 'new') return true
   if (payload.id === screen.rootId) return false
   return !isDescendant(screen, target.parentId, payload.id)

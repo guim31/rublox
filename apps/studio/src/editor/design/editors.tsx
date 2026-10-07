@@ -19,6 +19,7 @@ import { errorMessage } from '../../lib/errors.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { MAX_IMAGE_BYTES } from '../../storage/assets.ts'
 import { useDoc, useSession } from '../context.tsx'
+import { CostumesEditor } from './costumes-editor.tsx'
 
 export type EditorProps<T = unknown> = {
   id: string
@@ -519,4 +520,5 @@ export const EDITORS: Record<PropDef['kind'], (props: EditorProps<never>) => Rea
   spacing: SpacingEditor as never,
   asset: AssetEditor as never,
   icon: StringEditor as never,
+  images: CostumesEditor as never,
 }

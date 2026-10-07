@@ -1,5 +1,6 @@
 import { ButtonRenderer } from './button.tsx'
 import { ColumnRenderer, RowRenderer, ScreenRenderer } from './containers.tsx'
+import { GameSceneRenderer, JoystickRenderer, SceneTextRenderer, SpriteRenderer } from './game.tsx'
 import { ImageRenderer } from './image.tsx'
 import { TextRenderer } from './text.tsx'
 import { TextInputRenderer } from './text-input.tsx'
@@ -14,4 +15,8 @@ export const RENDERERS: Record<string, Renderer> = {
   Text: TextRenderer,
   TextInput: TextInputRenderer,
   Image: ImageRenderer,
+  GameScene: GameSceneRenderer,
+  Sprite: SpriteRenderer,
+  SceneText: SceneTextRenderer,
+  Joystick: JoystickRenderer,
 }

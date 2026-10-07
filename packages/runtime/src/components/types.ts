@@ -18,6 +18,11 @@ export type RendererProps = {
   /** URL of an image property: a project asset id or an https: address. */
   assetUrl: (value: string) => string | undefined
   locale: Locale
+  /**
+   * The running object behind a component that draws itself (a game scene's `World`), in a
+   * running app only.
+   */
+  live?: unknown
 }
 
 /**
