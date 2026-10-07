@@ -214,7 +214,7 @@ function quizComponents(n: number): ComponentSource[] {
           {
             key: 'status',
             type: 'Row',
-            name: { fr: 'Etat', en: 'Status' },
+            name: { fr: 'État', en: 'Status' },
             props: { justify: 'between' },
             children: [
               {
@@ -258,13 +258,13 @@ function quizComponents(n: number): ComponentSource[] {
     ...(['a', 'b', 'c'] as const).map((key, index) => ({
       key,
       type: 'Button',
-      name: { fr: `Reponse${key.toUpperCase()}`, en: `Answer${key.toUpperCase()}` },
+      name: { fr: `Réponse${key.toUpperCase()}`, en: `Answer${key.toUpperCase()}` },
       props: { text: options[index] as Text, variant: 'outline' },
     })),
     {
       key: 'feedback',
       type: 'Text',
-      name: { fr: 'Resultat', en: 'Feedback' },
+      name: { fr: 'Résultat', en: 'Feedback' },
       props: { text: '', fontSize: 20, bold: true, align: 'center' },
     },
     ...(n >= 2
@@ -580,13 +580,13 @@ function quizBlocks(n: number): Block[] {
 function results(n: number): LevelSource['screens'][number] {
   return {
     key: 'results',
-    name: { fr: 'Resultats', en: 'Results' },
+    name: { fr: 'Résultats', en: 'Results' },
     props: { padding: 24, gap: 16, alignItems: 'stretch', justify: 'center' },
     components: [
       {
         key: 'resultTitle',
         type: 'Text',
-        name: { fr: 'TitreResultats', en: 'ResultsTitle' },
+        name: { fr: 'TitreRésultats', en: 'ResultsTitle' },
         props: {
           text: { fr: '🏁 Résultats', en: '🏁 Results' },
           fontSize: 28,
@@ -597,7 +597,7 @@ function results(n: number): LevelSource['screens'][number] {
       {
         key: 'resultScore',
         type: 'Text',
-        name: { fr: 'TexteResultat', en: 'ResultText' },
+        name: { fr: 'TexteRésultat', en: 'ResultText' },
         props: { text: '', fontSize: 20, align: 'center' },
       },
       ...(n >= 4
@@ -673,7 +673,7 @@ function themes(): LevelSource['screens'][number] {
   ]
   return {
     key: 'themes',
-    name: { fr: 'Themes', en: 'Themes' },
+    name: { fr: 'Thèmes', en: 'Themes' },
     props: { padding: 24, gap: 16, alignItems: 'stretch', justify: 'center' },
     components: [
       {
@@ -726,7 +726,7 @@ function level(n: 1 | 2 | 3 | 4): LevelSource {
       ...(n >= 2
         ? [
             { key: 'questions', name: { fr: 'questions', en: 'questions' }, initial: [] },
-            { key: 'choices', name: { fr: 'reponses', en: 'choices' }, initial: [] },
+            { key: 'choices', name: { fr: 'réponses', en: 'choices' }, initial: [] },
             { key: 'answers', name: { fr: 'bonnes', en: 'answers' }, initial: [] },
             { key: 'options', name: { fr: 'options', en: 'options' }, initial: [] },
             { key: 'index', name: { fr: 'index', en: 'index' }, initial: 1 },
@@ -736,14 +736,14 @@ function level(n: 1 | 2 | 3 | 4): LevelSource {
         ? [
             { key: 'score', name: { fr: 'score', en: 'score' }, initial: 0 },
             { key: 'timeLeft', name: { fr: 'temps', en: 'timeLeft' }, initial: 10 },
-            { key: 'answered', name: { fr: 'repondu', en: 'answered' }, initial: false },
+            { key: 'answered', name: { fr: 'répondu', en: 'answered' }, initial: false },
           ]
         : []),
       ...(n >= 4
         ? [
-            { key: 'theme', name: { fr: 'theme', en: 'theme' }, initial: 1 },
+            { key: 'theme', name: { fr: 'thème', en: 'theme' }, initial: 1 },
             { key: 'order', name: { fr: 'ordre', en: 'order' }, initial: [] },
-            { key: 'number', name: { fr: 'numero', en: 'number' }, initial: 1 },
+            { key: 'number', name: { fr: 'numéro', en: 'number' }, initial: 1 },
             { key: 'i', name: { fr: 'i', en: 'i' }, initial: 0 },
             { key: 'j', name: { fr: 'j', en: 'j' }, initial: 0 },
             { key: 'swap', name: { fr: 'garde', en: 'keep' }, initial: 0 },
@@ -937,7 +937,7 @@ const TOURS: Record<1 | 2 | 3 | 4, TourStepSource[]> = {
       id: 'once',
       target: 'block:check-once',
       text: {
-        fr: 'La variable **repondu** (vrai ou faux) empêche de répondre deux fois à la même question.',
+        fr: 'La variable **répondu** (vrai ou faux) empêche de répondre deux fois à la même question.',
         en: 'The **answered** variable (true or false) stops you answering the same question twice.',
       },
     },
@@ -950,7 +950,7 @@ const TOURS: Record<1 | 2 | 3 | 4, TourStepSource[]> = {
       id: 'results',
       target: 'block:next-end',
       text: {
-        fr: 'Après la dernière question, on ouvre l’écran **Resultats**. Choisis-le dans la liste des écrans pour voir ses blocs.',
+        fr: 'Après la dernière question, on ouvre l’écran **Résultats**. Choisis-le dans la liste des écrans pour voir ses blocs.',
         en: 'After the last question, we open the **Results** screen. Pick it in the list of screens to see its blocks.',
       },
     },

@@ -534,6 +534,12 @@ function level(n: 1 | 2 | 3 | 4): LevelSource {
             { key: 'bricks', name: { fr: 'briques', en: 'bricks' }, initial: 0 },
           ]
         : []),
+      ...(n >= 2
+        ? [
+            { key: 'row', name: { fr: 'rangée', en: 'row' }, initial: 1 },
+            { key: 'col', name: { fr: 'colonne', en: 'column' }, initial: 1 },
+          ]
+        : []),
       ...(n >= 4 ? [{ key: 'speed', name: { fr: 'vitesse', en: 'speed' }, initial: 300 }] : []),
     ],
     screens: n >= 4 ? [menu(), game] : [game],
@@ -685,8 +691,8 @@ const TOURS: Record<1 | 2 | 3 | 4, TourStepSource[]> = {
       id: 'place',
       target: 'block:wall-place',
       text: {
-        fr: 'La position vient des compteurs : x = col × 45, y = 60 + rangée × 40. Puis on crée un clone à cet endroit.',
-        en: 'The position comes from the counters: x = col × 45, y = 60 + row × 40. Then we create a clone there.',
+        fr: 'La position vient des compteurs : x = colonne × 45, y = 60 + rangée × 40. Puis on crée un clone à cet endroit.',
+        en: 'The position comes from the counters: x = column × 45, y = 60 + row × 40. Then we create a clone there.',
       },
     },
     {

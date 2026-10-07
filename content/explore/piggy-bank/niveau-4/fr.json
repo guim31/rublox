@@ -33,7 +33,7 @@
     },
     "label": {
       "text": "Écris « n°1 », « n°2 »… sous les points.",
-      "hint": "Remplace l’étiquette par [regrouper « n° » numero]."
+      "hint": "Remplace l’étiquette par [regrouper « n° » numéro]."
     },
     "count": {
       "text": "Montre aussi le nombre de mouvements.",

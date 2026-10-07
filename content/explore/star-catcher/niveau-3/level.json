@@ -74,7 +74,7 @@
                 "key": "star",
                 "type": "Sprite",
                 "name": {
-                  "fr": "Etoile",
+                  "fr": "Étoile",
                   "en": "Star"
                 },
                 "props": {
@@ -302,11 +302,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 452
+                "y": 500
               }
             },
             "x": 300,
-            "y": 452
+            "y": 500
           },
           {
             "type": "rx_Sprite_on_clone",
@@ -429,18 +429,18 @@
             "icons": {
               "comment": {
                 "text": {
-                  "fr": "Ici, « Etoile » veut dire le nouveau clone.",
+                  "fr": "Ici, « Étoile » veut dire le nouveau clone.",
                   "en": "Here, “Star” means the new clone."
                 },
                 "pinned": true,
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 634
+                "y": 700
               }
             },
             "x": 300,
-            "y": 634
+            "y": 700
           },
           {
             "type": "rx_Timer_on_tick",
@@ -472,11 +472,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 908
+                "y": 1004
               }
             },
             "x": 300,
-            "y": 908
+            "y": 1004
           },
           {
             "type": "procedures_defnoreturn",
@@ -584,11 +584,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1090
+                "y": 1204
               }
             },
             "x": 300,
-            "y": 1090
+            "y": 1204
           },
           {
             "type": "rx_Sprite_on_hit",
@@ -650,11 +650,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1318
+                "y": 1560
               }
             },
             "x": 300,
-            "y": 1318
+            "y": 1560
           },
           {
             "type": "rx_Sprite_on_edge",
@@ -728,11 +728,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1592
+                "y": 1864
               }
             },
             "x": 300,
-            "y": 1592
+            "y": 1864
           },
           {
             "type": "rx_Sprite_on_drag",
@@ -773,11 +773,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1912
+                "y": 2220
               }
             },
             "x": 300,
-            "y": 1912
+            "y": 2220
           },
           {
             "type": "procedures_defnoreturn",
@@ -864,11 +864,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 2094
+                "y": 2420
               }
             },
             "x": 300,
-            "y": 2094
+            "y": 2420
           }
         ]
       },
@@ -1032,11 +1032,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 222
+                "y": 292
               }
             },
             "x": 300,
-            "y": 222
+            "y": 292
           }
         ]
       }

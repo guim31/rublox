@@ -71,7 +71,7 @@
             "key": "a",
             "type": "Button",
             "name": {
-              "fr": "ReponseA",
+              "fr": "RéponseA",
               "en": "AnswerA"
             },
             "props": {
@@ -83,7 +83,7 @@
             "key": "b",
             "type": "Button",
             "name": {
-              "fr": "ReponseB",
+              "fr": "RéponseB",
               "en": "AnswerB"
             },
             "props": {
@@ -95,7 +95,7 @@
             "key": "c",
             "type": "Button",
             "name": {
-              "fr": "ReponseC",
+              "fr": "RéponseC",
               "en": "AnswerC"
             },
             "props": {
@@ -107,7 +107,7 @@
             "key": "feedback",
             "type": "Text",
             "name": {
-              "fr": "Resultat",
+              "fr": "Résultat",
               "en": "Feedback"
             },
             "props": {
@@ -227,11 +227,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 268
+                "y": 292
               }
             },
             "x": 300,
-            "y": 268
+            "y": 292
           },
           {
             "type": "rx_Button_on_click",
@@ -284,11 +284,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 496
+                "y": 544
               }
             },
             "x": 300,
-            "y": 496
+            "y": 544
           },
           {
             "type": "procedures_defnoreturn",
@@ -472,11 +472,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 724
+                "y": 796
               }
             },
             "x": 300,
-            "y": 724
+            "y": 796
           }
         ]
       }

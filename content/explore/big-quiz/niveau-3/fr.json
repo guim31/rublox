@@ -10,13 +10,13 @@
       "text": "Le minuteur **Chrono** sonne chaque seconde : le temps baisse de 1, la barre aussi. À 0, c’est trop tard."
     },
     "once": {
-      "text": "La variable **repondu** (vrai ou faux) empêche de répondre deux fois à la même question."
+      "text": "La variable **répondu** (vrai ou faux) empêche de répondre deux fois à la même question."
     },
     "point": {
       "text": "Une bonne réponse : un point."
     },
     "results": {
-      "text": "Après la dernière question, on ouvre l’écran **Resultats**. Choisis-le dans la liste des écrans pour voir ses blocs."
+      "text": "Après la dernière question, on ouvre l’écran **Résultats**. Choisis-le dans la liste des écrans pour voir ses blocs."
     },
     "slow": {
       "text": "Lance le **ralenti** pour voir les blocs s’allumer."

@@ -196,7 +196,7 @@
                 "key": "spend",
                 "type": "Button",
                 "name": {
-                  "fr": "Depenser",
+                  "fr": "Dépenser",
                   "en": "Spend"
                 },
                 "props": {
@@ -405,11 +405,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 222
+                "y": 240
               }
             },
             "x": 300,
-            "y": 222
+            "y": 240
           },
           {
             "type": "rx_Button_on_click",
@@ -532,11 +532,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 496
+                "y": 544
               }
             },
             "x": 300,
-            "y": 496
+            "y": 544
           },
           {
             "type": "procedures_defnoreturn",
@@ -1016,11 +1016,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 770
+                "y": 848
               }
             },
             "x": 300,
-            "y": 770
+            "y": 848
           },
           {
             "type": "rx_Button_on_click",
@@ -1160,11 +1160,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1366
+                "y": 1854
               }
             },
             "x": 300,
-            "y": 1366
+            "y": 1854
           }
         ]
       }

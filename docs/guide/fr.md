@@ -492,6 +492,7 @@ fonction qui sert deux fois.
 | Trois étoiles | Tu as eu les trois étoiles d’un défi. |
 | Première publication | Ton appli est en ligne. |
 | Premier remix | Tu as remixé l’appli de quelqu’un. |
+| Attrape-étoiles, Casse-briques, Grand quiz, Tirelire décortiqués | Tu as fini les 4 niveaux de l’appli (4.5). |
 
 Un nouveau badge s’annonce : « Nouveau badge : … ». En Studio, « Masquer les badges » les cache.
 
@@ -503,6 +504,33 @@ ne suit pas encore sur un autre appareil.
 Chaque bloc et chaque composant a sa fiche avec un exemple, et le glossaire explique les mots de la
 programmation : appli, écran, composant, propriété, évènement, bloc, variable, boucle, condition,
 fonction, paramètre, liste, aperçu, console, ralenti, point d’arrêt, bug, code. Voir 3.3.7.
+
+### 4.5 Les applis à décortiquer
+
+Plus riches que les tutoriels, quatre vraies applis se démontent petit à petit, chacune en
+**4 niveaux** : **Attrape-étoiles** et **Casse-briques** (des jeux), **Le grand quiz** et **Ma
+tirelire** (un utilitaire). Chaque niveau est une appli complète, qui marche, et reprend le
+précédent en y ajoutant quelques blocs. ([capture](../screenshots/j9/junior-light-learn.png))
+
+- Sur la page Apprendre, choisis l’appli et son niveau, puis « **Ouvrir une copie** » : tu
+  travailles toujours sur une copie, rangée dans tes projets (dans ce navigateur en mode invité) ;
+  l’original ne change jamais. « Reprendre ma copie » rouvre la dernière.
+- Les blocs sont rangés dans des **fonctions aux noms parlants** (« faire tomber une étoile »,
+  « vérifier si c’est perdu ») et portent des **commentaires** : ceux des piles sont ouverts dans
+  la marge, ceux des blocs du dedans s’ouvrent avec le « ? » du bloc.
+- Une **visite guidée** (5 à 10 étapes) montre les piles une par une : la bulle s’accroche aux
+  blocs, dit ce qu’ils font et pourquoi, puis propose de lancer le **ralenti** pour les voir
+  s’allumer. ([capture](../screenshots/j9/studio-light-tour.png))
+- Elle se termine par **3 défis de modification** (« Fais tomber l’étoile plus vite », « Donne 5
+  vies au lieu de 3 »…), cochés tout seuls quand c’est fait, avec « Montrer le bloc » et « Un
+  indice ? ». ([capture](../screenshots/j9/junior-light-challenges.png))
+- Dès le niveau 2, « **Montre-moi ce qui est nouveau** » (« Nouveau » en Junior), au-dessus des
+  blocs, allume ce que le niveau ajoute (en vert) ou modifie (en jaune) par rapport au niveau
+  d’avant, et le liste dans un petit panneau. ([capture](../screenshots/j9/junior-dark-whats-new.png))
+
+Un niveau est **terminé** quand sa visite est faite et ses défis réussis ; les 4 niveaux d’une appli
+donnent son badge. Les blocs déjà présents dans une copie ne font pas gagner les badges de projet
+(boucle, fonction…) : ce sont ceux que tu ajoutes qui comptent.
 
 ---
 

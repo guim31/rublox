@@ -33,7 +33,7 @@
       {
         "key": "choices",
         "name": {
-          "fr": "reponses",
+          "fr": "réponses",
           "en": "choices"
         },
         "kind": "app",
@@ -87,7 +87,7 @@
       {
         "key": "answered",
         "name": {
-          "fr": "repondu",
+          "fr": "répondu",
           "en": "answered"
         },
         "kind": "app",
@@ -96,7 +96,7 @@
       {
         "key": "theme",
         "name": {
-          "fr": "theme",
+          "fr": "thème",
           "en": "theme"
         },
         "kind": "app",
@@ -114,7 +114,7 @@
       {
         "key": "number",
         "name": {
-          "fr": "numero",
+          "fr": "numéro",
           "en": "number"
         },
         "kind": "app",
@@ -161,7 +161,7 @@
       {
         "key": "themes",
         "name": {
-          "fr": "Themes",
+          "fr": "Thèmes",
           "en": "Themes"
         },
         "props": {
@@ -332,11 +332,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 268
+                "y": 292
               }
             },
             "x": 300,
-            "y": 268
+            "y": 292
           },
           {
             "type": "rx_Button_on_click",
@@ -385,11 +385,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 496
+                "y": 544
               }
             },
             "x": 300,
-            "y": 496
+            "y": 544
           }
         ]
       },
@@ -425,7 +425,7 @@
             "key": "status",
             "type": "Row",
             "name": {
-              "fr": "Etat",
+              "fr": "État",
               "en": "Status"
             },
             "props": {
@@ -505,7 +505,7 @@
             "key": "a",
             "type": "Button",
             "name": {
-              "fr": "ReponseA",
+              "fr": "RéponseA",
               "en": "AnswerA"
             },
             "props": {
@@ -517,7 +517,7 @@
             "key": "b",
             "type": "Button",
             "name": {
-              "fr": "ReponseB",
+              "fr": "RéponseB",
               "en": "AnswerB"
             },
             "props": {
@@ -529,7 +529,7 @@
             "key": "c",
             "type": "Button",
             "name": {
-              "fr": "ReponseC",
+              "fr": "RéponseC",
               "en": "AnswerC"
             },
             "props": {
@@ -541,7 +541,7 @@
             "key": "feedback",
             "type": "Text",
             "name": {
-              "fr": "Resultat",
+              "fr": "Résultat",
               "en": "Feedback"
             },
             "props": {
@@ -1195,11 +1195,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 406
+                "y": 448
               }
             },
             "x": 300,
-            "y": 406
+            "y": 448
           },
           {
             "type": "rx_Button_on_click",
@@ -1252,11 +1252,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1140
+                "y": 1480
               }
             },
             "x": 300,
-            "y": 1140
+            "y": 1480
           },
           {
             "type": "rx_Button_on_click",
@@ -1309,11 +1309,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 1368
+                "y": 1732
               }
             },
             "x": 300,
-            "y": 1368
+            "y": 1732
           },
           {
             "type": "rx_Button_on_click",
@@ -1366,11 +1366,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 1596
+                "y": 1984
               }
             },
             "x": 300,
-            "y": 1596
+            "y": 1984
           },
           {
             "type": "procedures_defnoreturn",
@@ -1725,11 +1725,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1824
+                "y": 2236
               }
             },
             "x": 300,
-            "y": 1824
+            "y": 2236
           },
           {
             "type": "rx_Button_on_click",
@@ -1761,11 +1761,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 2420
+                "y": 3086
               }
             },
             "x": 300,
-            "y": 2420
+            "y": 3086
           },
           {
             "type": "procedures_defnoreturn",
@@ -2025,11 +2025,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 2602
+                "y": 3286
               }
             },
             "x": 300,
-            "y": 2602
+            "y": 3286
           },
           {
             "type": "rx_Timer_on_tick",
@@ -2252,11 +2252,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 3106
+                "y": 3928
               }
             },
             "x": 300,
-            "y": 3106
+            "y": 3928
           },
           {
             "type": "procedures_defnoreturn",
@@ -3157,11 +3157,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 3564
+                "y": 4518
               }
             },
             "x": 300,
-            "y": 3564
+            "y": 4518
           },
           {
             "type": "procedures_defnoreturn",
@@ -3544,18 +3544,18 @@
                 "width": 260,
                 "height": 88,
                 "x": 16,
-                "y": 4206
+                "y": 7162
               }
             },
             "x": 300,
-            "y": 4206
+            "y": 7162
           }
         ]
       },
       {
         "key": "results",
         "name": {
-          "fr": "Resultats",
+          "fr": "Résultats",
           "en": "Results"
         },
         "props": {
@@ -3569,7 +3569,7 @@
             "key": "resultTitle",
             "type": "Text",
             "name": {
-              "fr": "TitreResultats",
+              "fr": "TitreRésultats",
               "en": "ResultsTitle"
             },
             "props": {
@@ -3586,7 +3586,7 @@
             "key": "resultScore",
             "type": "Text",
             "name": {
-              "fr": "TexteResultat",
+              "fr": "TexteRésultat",
               "en": "ResultText"
             },
             "props": {
@@ -3814,11 +3814,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 268
+                "y": 500
               }
             },
             "x": 300,
-            "y": 268
+            "y": 500
           }
         ]
       }

@@ -496,9 +496,16 @@ export function BlocksWorkspace({
     const block = workspace.getBlockById(reveal)
     if (!(block instanceof Blockly.BlockSvg)) return
     const root = block.getRootBlock() as Blockly.BlockSvg
-    const bounds = root.getBoundingRectangle()
-    // The top of the stack, and the block itself, when the stack is taller than the view.
-    workspace.scrollBoundsIntoView(bounds, 24)
+    const stack = root.getBoundingRectangle()
+    // The top of the stack with its comment in the margin at its left (J9), and the block
+    // itself when the stack is taller than the view.
+    const left = root.getIcon(Blockly.icons.IconType.COMMENT)?.bubbleIsVisible()
+      ? Math.min(stack.left, 0)
+      : stack.left
+    workspace.scrollBoundsIntoView(
+      new Blockly.utils.Rect(stack.top, stack.bottom, left, stack.right),
+      24,
+    )
     if (root !== block) workspace.scrollBoundsIntoView(block.getBoundingRectangle(), 24)
     useEditor.getState().set({ reveal: null })
   }, [reveal, doc])

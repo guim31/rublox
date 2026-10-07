@@ -29,7 +29,7 @@
   "challenges": {
     "toast": {
       "text": "Affiche un message bref quand tu dépenses.",
-      "hint": "Pose-le dans « quand Depenser est cliqué »."
+      "hint": "Pose-le dans « quand Dépenser est cliqué »."
     },
     "red": {
       "text": "Change la couleur du solde dans « afficher le solde ».",

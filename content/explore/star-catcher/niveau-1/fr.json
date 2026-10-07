@@ -22,7 +22,7 @@
       "text": "Lance le **ralenti** : les blocs vont s’allumer un par un pendant que le jeu tourne."
     },
     "watch": {
-      "text": "Regarde : le bloc [mettre Etoile à x … y …] s’allume chaque fois qu’une étoile repart d’en haut.",
+      "text": "Regarde : le bloc [mettre Étoile à x … y …] s’allume chaque fois qu’une étoile repart d’en haut.",
       "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
     },
     "fast": {
@@ -40,7 +40,7 @@
     },
     "spin": {
       "text": "Quand tu attrapes l’étoile, fais-la tourner.",
-      "hint": "Prends [tourner … de … degrés] chez Etoile, et pose-le dans « quand Etoile touche Panier »."
+      "hint": "Prends [tourner … de … degrés] chez Étoile, et pose-le dans « quand Étoile touche Panier »."
     }
   }
 }

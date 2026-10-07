@@ -406,3 +406,9 @@ svg[display="none"] {
   stroke-width: 3px;
   filter: drop-shadow(0 0 3px var(--c-yellow)) drop-shadow(0 0 2px var(--c-yellow));
 }
+
+/* The text of a block comment sits on Blockly's pale yellow, in dark mode too (J9). */
+.blocklySvg .blocklyTextarea,
+.blocklyBubble .blocklyTextarea {
+  color: #1b1a24;
+}

@@ -11,7 +11,26 @@
       "font": "rounded"
     },
     "navigation": "stack",
-    "variables": [],
+    "variables": [
+      {
+        "key": "row",
+        "name": {
+          "fr": "rangée",
+          "en": "row"
+        },
+        "kind": "app",
+        "initial": 1
+      },
+      {
+        "key": "col",
+        "name": {
+          "fr": "colonne",
+          "en": "column"
+        },
+        "kind": "app",
+        "initial": 1
+      }
+    ],
     "screens": [
       {
         "key": "game",
@@ -267,11 +286,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 268
+                "y": 292
               }
             },
             "x": 300,
-            "y": 268
+            "y": 292
           },
           {
             "type": "rx_Sprite_on_hit",
@@ -398,11 +417,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 542
+                "y": 596
               }
             },
             "x": 300,
-            "y": 542
+            "y": 596
           },
           {
             "type": "rx_Sprite_on_edge",
@@ -435,11 +454,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 770
+                "y": 848
               }
             },
             "x": 300,
-            "y": 770
+            "y": 848
           },
           {
             "type": "rx_Sprite_on_drag",
@@ -480,11 +499,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 952
+                "y": 1048
               }
             },
             "x": 300,
-            "y": 952
+            "y": 1048
           },
           {
             "type": "procedures_defnoreturn",
@@ -703,11 +722,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1134
+                "y": 1248
               }
             },
             "x": 300,
-            "y": 1134
+            "y": 1248
           },
           {
             "type": "rx_Sprite_on_clone",
@@ -748,11 +767,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 1454
+                "y": 1656
               }
             },
             "x": 300,
-            "y": 1454
+            "y": 1656
           },
           {
             "type": "rx_Sprite_on_hit",
@@ -835,11 +854,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1636
+                "y": 1856
               }
             },
             "x": 300,
-            "y": 1636
+            "y": 1856
           }
         ]
       }

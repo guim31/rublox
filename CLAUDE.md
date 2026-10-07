@@ -99,6 +99,11 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `cd apps/server && npx vitest run test/audit.test.ts`. Captures :
   `npx playwright test --project=screenshots e2e/screenshots-j8.spec.ts` → `docs/screenshots/j8/`.
   Guide d'utilisation : `docs/guide/fr.md` et `en.md`, à tenir à jour avec l'interface.
+- Applis à décortiquer (J9) : `cd packages/explore && npx vitest run` (chaque niveau construit,
+  chargé dans Blockly, exécuté 20 s dans le moteur, identifiants gardés d'un niveau au suivant ;
+  ~3 min), `npx playwright test --project=e2e e2e/explore.spec.ts e2e/a11y-j9.spec.ts`. Après une
+  modification d'un niveau : `pnpm --filter @rublox/explore content` puis `pnpm format`. Captures :
+  `npx playwright test --project=screenshots e2e/screenshots-j9.spec.ts` → `docs/screenshots/j9/`.
 - `pnpm --filter @rublox/server db:generate` : migration Drizzle après un changement de
   `apps/server/src/db/schema.ts`.
 - `docker build -f docker/Dockerfile .` et `docker compose -f docker/compose.yaml up`.
@@ -142,6 +147,12 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `AppSpec`, `fr.json`, `en.json`), puis une ligne dans `packages/templates/src/content.ts`. Dans
   les blocs d'une recette, composants, écrans et variables se nomment par leur `key` (ou leur
   nom) ; le constructeur met les identifiants.
+- Un niveau d'appli à décortiquer (J9) : la fonction `level(n)` de l'appli dans
+  `packages/explore/authoring/<appli>.ts` (langage de `dsl.ts` : chaque instruction prend un
+  identifiant à la main, gardé d'un niveau au suivant ; jamais retirer un bloc d'un niveau
+  précédent), puis `pnpm --filter @rublox/explore content` et `pnpm format`. Une nouvelle appli :
+  `authoring/apps.ts`, `src/content.ts` (imports JSON), son badge dans `EXPLORE_BADGES`
+  (`@rublox/learn`) et ses textes dans `packages/i18n/src/{fr,en}/explore.ts`.
 - Tout ce qui touche l'IA côté studio se montre seulement si `useFeatures().ai` (ou `aiAllowed()`
   hors React) ; un composant qui a besoin de l'IA va dans `AI_TYPES` (`lib/features.ts`).
 - Une information partagée avec les autres éditeurs (présence) : un champ de `PresenceState`
@@ -360,3 +371,18 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   invité passent d'abord par un journal synchrone (`storage/journal.ts`, `localStorage`), vidé
   quand IndexedDB a confirmé, rejoué à l'ouverture. Test : `e2e/guest-journal.spec.ts` (fait
   échouer les transactions comme un départ de page).
+- **Applis à décortiquer (J9)** : Blockly ignore une clé inconnue d'un bloc JSON (`DO` à côté de
+  `inputs` au lieu de dedans) sans rien dire : la pile se charge vide. Le test qui retrouve chaque
+  identifiant (`findBlock`) l'attrape. `math_on_list` et les blocs à mutation XML refusent
+  `extraState` en objet (« DOMParser was unable to parse ») : préférer un autre bloc
+  (`math_constrain`). `colour_picker` n'accepte que les couleurs de sa palette (`#009900`,
+  `#cc0000`…). Biome reformate le JSON généré : le test de fraîcheur compare le contenu, pas le
+  texte.
+- **Commentaires de Blockly 13** : `icons.comment` avec `pinned`, `width`, `height`, `x`, `y`
+  (coordonnées de l'espace de travail, une valeur 0 est ignorée). Un commentaire épinglé
+  apparaît à sa place après un tour de boucle (`loadState` attend une promesse).
+- **z-index de Blockly** : la boîte à outils est à 70, le bloc qu'on glisse à 80 ; un panneau
+  fixe du studio qui doit passer au-dessus de la boîte à outils prend 75 (bulles, défis).
+- **Moteur et minuteurs dans Vitest** : `vi.useFakeTimers()` puis `vi.advanceTimersByTimeAsync`
+  à chaque image fait sonner les composants Minuteur (`packages/explore/test/run.test.ts`) ; le
+  chargement du module (`import` d'une adresse `data:`) n'utilise pas de minuteur.

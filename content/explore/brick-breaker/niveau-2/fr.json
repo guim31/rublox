@@ -10,7 +10,7 @@
       "text": "Une **boucle** répète des blocs. Ici, il y en a deux : pour chaque rangée (1 à 4), on fait 7 colonnes."
     },
     "place": {
-      "text": "La position vient des compteurs : x = col × 45, y = 60 + rangée × 40. Puis on crée un clone à cet endroit."
+      "text": "La position vient des compteurs : x = colonne × 45, y = 60 + rangée × 40. Puis on crée un clone à cet endroit."
     },
     "break": {
       "text": "Une brique touchée par la balle est supprimée, et la balle repart dans l’autre sens."

@@ -65,7 +65,7 @@
                 "key": "star",
                 "type": "Sprite",
                 "name": {
-                  "fr": "Etoile",
+                  "fr": "Étoile",
                   "en": "Star"
                 },
                 "props": {
@@ -258,11 +258,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 406
+                "y": 448
               }
             },
             "x": 300,
-            "y": 406
+            "y": 448
           },
           {
             "type": "rx_Sprite_on_clone",
@@ -385,18 +385,18 @@
             "icons": {
               "comment": {
                 "text": {
-                  "fr": "Ici, « Etoile » veut dire le nouveau clone.",
+                  "fr": "Ici, « Étoile » veut dire le nouveau clone.",
                   "en": "Here, “Star” means the new clone."
                 },
                 "pinned": true,
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 588
+                "y": 648
               }
             },
             "x": 300,
-            "y": 588
+            "y": 648
           },
           {
             "type": "rx_Timer_on_tick",
@@ -428,11 +428,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 862
+                "y": 952
               }
             },
             "x": 300,
-            "y": 862
+            "y": 952
           },
           {
             "type": "procedures_defnoreturn",
@@ -499,11 +499,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1044
+                "y": 1152
               }
             },
             "x": 300,
-            "y": 1044
+            "y": 1152
           },
           {
             "type": "rx_Sprite_on_hit",
@@ -565,11 +565,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1226
+                "y": 1404
               }
             },
             "x": 300,
-            "y": 1226
+            "y": 1404
           },
           {
             "type": "rx_Sprite_on_edge",
@@ -599,11 +599,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 1500
+                "y": 1708
               }
             },
             "x": 300,
-            "y": 1500
+            "y": 1708
           },
           {
             "type": "rx_Sprite_on_drag",
@@ -644,11 +644,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1682
+                "y": 1908
               }
             },
             "x": 300,
-            "y": 1682
+            "y": 1908
           }
         ]
       }

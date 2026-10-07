@@ -10,7 +10,7 @@
       "text": "A **loop** repeats blocks. Here there are two: for each row (1 to 4), we make 7 columns."
     },
     "place": {
-      "text": "The position comes from the counters: x = col × 45, y = 60 + row × 40. Then we create a clone there."
+      "text": "The position comes from the counters: x = column × 45, y = 60 + row × 40. Then we create a clone there."
     },
     "break": {
       "text": "A brick hit by the ball is deleted, and the ball goes the other way."

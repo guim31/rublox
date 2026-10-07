@@ -33,7 +33,7 @@
       {
         "key": "choices",
         "name": {
-          "fr": "reponses",
+          "fr": "réponses",
           "en": "choices"
         },
         "kind": "app",
@@ -129,7 +129,7 @@
             "key": "a",
             "type": "Button",
             "name": {
-              "fr": "ReponseA",
+              "fr": "RéponseA",
               "en": "AnswerA"
             },
             "props": {
@@ -141,7 +141,7 @@
             "key": "b",
             "type": "Button",
             "name": {
-              "fr": "ReponseB",
+              "fr": "RéponseB",
               "en": "AnswerB"
             },
             "props": {
@@ -153,7 +153,7 @@
             "key": "c",
             "type": "Button",
             "name": {
-              "fr": "ReponseC",
+              "fr": "RéponseC",
               "en": "AnswerC"
             },
             "props": {
@@ -165,7 +165,7 @@
             "key": "feedback",
             "type": "Text",
             "name": {
-              "fr": "Resultat",
+              "fr": "Résultat",
               "en": "Feedback"
             },
             "props": {
@@ -860,11 +860,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 406
+                "y": 1072
               }
             },
             "x": 300,
-            "y": 406
+            "y": 1072
           },
           {
             "type": "rx_Button_on_click",
@@ -917,11 +917,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 864
+                "y": 1740
               }
             },
             "x": 300,
-            "y": 864
+            "y": 1740
           },
           {
             "type": "rx_Button_on_click",
@@ -974,11 +974,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 1092
+                "y": 1992
               }
             },
             "x": 300,
-            "y": 1092
+            "y": 1992
           },
           {
             "type": "rx_Button_on_click",
@@ -1031,11 +1031,11 @@
                 "width": 260,
                 "height": 48,
                 "x": 16,
-                "y": 1320
+                "y": 2244
               }
             },
             "x": 300,
-            "y": 1320
+            "y": 2244
           },
           {
             "type": "procedures_defnoreturn",
@@ -1261,11 +1261,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1548
+                "y": 2496
               }
             },
             "x": 300,
-            "y": 1548
+            "y": 2496
           },
           {
             "type": "rx_Button_on_click",
@@ -1393,11 +1393,11 @@
                 "width": 260,
                 "height": 68,
                 "x": 16,
-                "y": 1914
+                "y": 3008
               }
             },
             "x": 300,
-            "y": 1914
+            "y": 3008
           }
         ]
       }

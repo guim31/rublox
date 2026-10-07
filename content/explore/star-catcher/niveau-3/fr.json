@@ -36,7 +36,7 @@
     },
     "hard": {
       "text": "Mode difficile : perds 2 vies par étoile ratée.",
-      "hint": "Change le -1 dans « quand Etoile touche le bord du bas »."
+      "hint": "Change le -1 dans « quand Étoile touche le bord du bas »."
     },
     "message": {
       "text": "Affiche un message bref quand c’est perdu.",

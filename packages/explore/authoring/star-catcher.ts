@@ -51,7 +51,7 @@ function components(n: number): ComponentSource[] {
       {
         key: 'star',
         type: 'Sprite',
-        name: { fr: 'Etoile', en: 'Star' },
+        name: { fr: 'Étoile', en: 'Star' },
         props: {
           costumes: ['⭐'],
           x: 180,
@@ -198,7 +198,7 @@ function gameBlocks(n: number): Block[] {
         en: 'Each star is a clone of the hidden star.',
       }),
       note(on('appear', 'Sprite', 'star', 'clone', fall), {
-        fr: 'Ici, « Etoile » veut dire le nouveau clone.',
+        fr: 'Ici, « Étoile » veut dire le nouveau clone.',
         en: 'Here, “Star” means the new clone.',
       }),
       note(on('tick', 'Timer', 'rain', 'tick', [run('tick-drop', DROP)]), {
@@ -533,7 +533,7 @@ const TOURS = {
       },
     },
     ...slowSteps('drop-place', {
-      fr: 'Regarde : le bloc [mettre Etoile à x … y …] s’allume chaque fois qu’une étoile repart d’en haut.',
+      fr: 'Regarde : le bloc [mettre Étoile à x … y …] s’allume chaque fois qu’une étoile repart d’en haut.',
       en: 'Look: the block [put Star at x … y …] lights up each time a star starts again from the top.',
     }),
   ],
@@ -587,7 +587,7 @@ const TOURS = {
       },
     },
     ...slowSteps('drop-clone', {
-      fr: 'Regarde : [créer un clone de Etoile] s’allume à chaque sonnerie du minuteur.',
+      fr: 'Regarde : [créer un clone de Étoile] s’allume à chaque sonnerie du minuteur.',
       en: 'Look: [create a clone of Star] lights up each time the timer rings.',
     }),
   ],
@@ -714,7 +714,7 @@ const CHALLENGES = {
         en: 'When you catch the star, make it turn.',
       },
       hint: {
-        fr: 'Prends [tourner … de … degrés] chez Etoile, et pose-le dans « quand Etoile touche Panier ».',
+        fr: 'Prends [tourner … de … degrés] chez Étoile, et pose-le dans « quand Étoile touche Panier ».',
         en: 'Take [turn … by … degrees] from Star, and drop it in “when Star touches Basket”.',
       },
     },
@@ -777,7 +777,7 @@ const CHALLENGES = {
         en: 'Hard mode: lose 2 lives per missed star.',
       },
       hint: {
-        fr: 'Change le -1 dans « quand Etoile touche le bord du bas ».',
+        fr: 'Change le -1 dans « quand Étoile touche le bord du bas ».',
         en: 'Change the -1 in “when Star touches the bottom edge”.',
       },
     },

@@ -336,7 +336,7 @@ export function stamp(stacks: Block[]): Block[] {
       const note = inner.icons?.comment
       if (note) inner.icons = { comment: { ...note, height: note.height || noteHeight(note.text) } }
     }
-    y = (done.y as number) + Math.max(90 + 46 * size(done), height + 40)
+    y = (done.y as number) + Math.max(70 + 52 * size(done), height + 40)
     return done
   })
 }
@@ -377,11 +377,26 @@ function visit(block: Block, parent: string | undefined, input: string): Block {
   return copy
 }
 
-/** Rows a stack takes, to space the column of stacks. */
+/** Blocks whose value inputs are drawn one under the other (not inline). */
+const STACKED_VALUES = new Set(['lists_create_with', 'text_join', 'logic_ternary'])
+const STATEMENTS = /^(DO\d*|ELSE|STACK)$/
+
+/** Rows a value takes: a list of 5 items takes 5 rows. */
+function valueRows(block: Block): number {
+  const values = Object.entries(block.inputs ?? {})
+    .filter(([name]) => !STATEMENTS.test(name))
+    .map(([, { block: child }]) => valueRows(child))
+  if (!values.length) return 1
+  return STACKED_VALUES.has(block.type)
+    ? values.reduce((sum, rows) => sum + rows, 0)
+    : Math.max(1, ...values)
+}
+
+/** Rows a stack takes, to space the column of stacks (an estimate on the side of room). */
 function size(block: Block): number {
-  let rows = 1
+  let rows = valueRows(block)
   for (const [name, { block: child }] of Object.entries(block.inputs ?? {})) {
-    if (/^(DO|DO0|ELSE|STACK)$/.test(name)) rows += size(child)
+    if (STATEMENTS.test(name)) rows += size(child) + 0.5
   }
   if (block.next) rows += size(block.next.block)
   return rows

@@ -110,7 +110,7 @@ function components(n: number): ComponentSource[] {
               {
                 key: 'spend',
                 type: 'Button',
-                name: { fr: 'Depenser', en: 'Spend' },
+                name: { fr: 'Dépenser', en: 'Spend' },
                 props: {
                   text: { fr: '− Dépenser', en: '− Spend' },
                   grow: true,
@@ -371,7 +371,7 @@ function level(n: 1 | 2 | 3 | 4): LevelSource {
       ...(n >= 4
         ? [
             { key: 'labels', name: { fr: 'lignes', en: 'labels' }, initial: [] },
-            { key: 'step', name: { fr: 'numero', en: 'step' }, initial: 0 },
+            { key: 'step', name: { fr: 'numéro', en: 'step' }, initial: 0 },
           ]
         : []),
     ],
@@ -679,7 +679,7 @@ const CHALLENGES = {
         en: 'Show a short message when you spend.',
       },
       hint: {
-        fr: 'Pose-le dans « quand Depenser est cliqué ».',
+        fr: 'Pose-le dans « quand Dépenser est cliqué ».',
         en: 'Put it in “when Spend is clicked”.',
       },
     },
@@ -787,7 +787,7 @@ const CHALLENGES = {
         en: 'Write “#1”, “#2”… under the points.',
       },
       hint: {
-        fr: 'Remplace l’étiquette par [regrouper « n° » numero].',
+        fr: 'Remplace l’étiquette par [regrouper « n° » numéro].',
         en: 'Replace the label with [join “#” step].',
       },
     },
