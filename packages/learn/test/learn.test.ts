@@ -21,7 +21,9 @@ import {
   getTutorial,
   type LearnState,
   MemoryProgressStore,
+  nextStep,
   richText,
+  stepProgress,
 } from '../src/index.ts'
 
 const CONTENT = join(import.meta.dirname, '../../../content')
@@ -386,5 +388,55 @@ describe('badges', () => {
     expect(await store.award('loop')).toBe(true)
     expect(await store.award('loop')).toBe(false)
     expect(Object.keys((await store.load()).badges)).toEqual(['loop'])
+  })
+})
+
+describe('step progression', () => {
+  // The family chat: a shared table with two columns, then Design, bind the list, then Blocks.
+  const tutorial = getTutorial('family-chat')
+  if (!tutorial) throw new Error('missing')
+  const index = (id: string) => tutorial.steps.findIndex((step) => step.id === id)
+  const doc = buildStarter({ name: 'Tchat', locale: 'fr', mode: 'studio', spec: tutorial.starter })
+  // The same project once the data list shows a table.
+  const bound: ProjectDoc = structuredClone(doc)
+  for (const screen of Object.values(bound.screens)) {
+    for (const node of Object.values(screen.components)) {
+      if (node.type === 'DataList') node.props.source = { table: 't1', fields: {} }
+    }
+  }
+
+  it('validates a step when its check holds, and waits otherwise', () => {
+    const goData = { step: index('go-data'), done: false }
+    expect(stepProgress(tutorial, goData, state(doc, { tab: 'design' }))).toEqual(goData)
+    expect(stepProgress(tutorial, goData, state(doc, { tab: 'data' }))).toEqual({
+      ...goData,
+      done: true,
+    })
+    expect(nextStep({ ...goData, done: true })).toEqual({ step: goData.step + 1, done: false })
+  })
+
+  it('a learner quicker than "Nice one!" is not asked again for what is done', () => {
+    // "columns" is done. Before its moment is over, the learner goes to Design, binds the
+    // list and goes to Blocks: the tutorial follows instead of asking for Design again.
+    let progress = { step: index('columns'), done: true }
+    progress = stepProgress(tutorial, progress, state(doc, { tab: 'design' }))
+    expect(progress).toEqual({ step: index('go-design'), done: true })
+    progress = stepProgress(tutorial, progress, state(bound, { tab: 'design' }))
+    expect(progress).toEqual({ step: index('bind'), done: true })
+    progress = stepProgress(tutorial, progress, state(bound, { tab: 'blocks' }))
+    expect(progress).toEqual({ step: index('go-blocks'), done: true })
+    expect(nextStep(progress)).toEqual({ step: index('send'), done: false })
+  })
+
+  it('waits for the moment to end when the following step does not hold yet', () => {
+    const progress = { step: index('go-design'), done: true }
+    expect(stepProgress(tutorial, progress, state(doc, { tab: 'blocks' }))).toEqual(progress)
+  })
+
+  it('never skips a manual step, nor goes past the last one', () => {
+    const last = { step: tutorial.steps.length - 1, done: true }
+    expect(stepProgress(tutorial, last, state(bound, { tab: 'blocks' }))).toEqual(last)
+    const welcome = { step: index('welcome'), done: false }
+    expect(stepProgress(tutorial, welcome, state(doc, { tab: 'data' }))).toEqual(welcome)
   })
 })
