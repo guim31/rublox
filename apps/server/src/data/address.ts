@@ -27,8 +27,13 @@ for (const [network, prefix] of [
   blocked.addSubnet(network, prefix, 'ipv4')
 }
 for (const [network, prefix] of [
-  ['::', 128],
-  ['::1', 128],
+  // IPv4-compatible (deprecated), which also covers `::` and `::1`.
+  ['::', 96],
+  // Transition ranges that carry an IPv4 address somewhere (SPEC § 0.10): local-use NAT64,
+  // Teredo and 6to4. Refused whole: a gateway would reach the IPv4 inside.
+  ['64:ff9b:1::', 48],
+  ['2001::', 32],
+  ['2002::', 16],
   ['100::', 64],
   ['2001:db8::', 32],
   ['fc00::', 7],

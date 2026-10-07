@@ -98,6 +98,7 @@ export async function setPassword(services: Services, userId: string, password: 
       .values({ id: uuidv7(), accountId: userId, providerId: 'credential', userId, password: hash })
   }
   await db.delete(session).where(eq(session.userId, userId))
+  services.collab.disconnectUser(userId)
 }
 
 /**

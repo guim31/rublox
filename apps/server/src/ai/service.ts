@@ -55,12 +55,36 @@ export function startOfDay(now = new Date()): Date {
  * questions to the model. Exists only when `ANTHROPIC_API_KEY` is set.
  */
 export class AiService {
+  /**
+   * Questions asked and not answered yet, per account: they count in the quota from the start
+   * (the journal only gets a row once the model answers), so parallel requests cannot all
+   * pass a quota that has one question left (SPEC § 0.10).
+   */
+  private readonly pending = new Map<string, number>()
+
   constructor(private readonly deps: { db: Database; settings: SettingsStore; client: AiClient }) {}
+
+  /** Takes one question of today's quota, or refuses (403, 429); `release` gives it back. */
+  private async reserve(userId: string): Promise<() => void> {
+    const status = await this.status(userId)
+    if (!status.allowed) fail(403, 'ai_forbidden')
+    // Counted again after the last `await`: no other request runs between the check and the
+    // reservation.
+    const used = await this.usedToday(userId)
+    const pending = this.pending.get(userId) ?? 0
+    if (used + pending >= status.quota) fail(429, 'ai_quota')
+    this.pending.set(userId, pending + 1)
+    return () => {
+      const left = (this.pending.get(userId) ?? 1) - 1
+      if (left > 0) this.pending.set(userId, left)
+      else this.pending.delete(userId)
+    }
+  }
 
   /** Whether `userId` may use the assistant: instance switch, then their spaces. */
   async status(userId: string): Promise<AiStatus> {
     const settings = await this.deps.settings.get()
-    const used = await this.usedToday(userId)
+    const used = (await this.usedToday(userId)) + (this.pending.get(userId) ?? 0)
     const base = { quota: settings.aiDailyQuota, used }
     if (!settings.aiEnabled) return { ...base, allowed: false, reason: 'disabled' }
     if (!(await this.spacesAllow(userId))) return { ...base, allowed: false, reason: 'space' }
@@ -128,6 +152,7 @@ export class AiService {
         outputTokens: usage.outputTokens,
         outcome,
       })
+    const release = await this.reserve(userId)
     try {
       const result = await this.deps.client.complete(request)
       await log(result.model, result.usage, 'ok')
@@ -143,6 +168,9 @@ export class AiService {
       }
       await log(request.tier, { inputTokens: 0, outputTokens: 0 }, 'error')
       fail(502, 'ai_failed')
+    } finally {
+      // After the journal row: the question is never counted zero times in between.
+      release()
     }
   }
 

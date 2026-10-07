@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { rateKey } from '../src/ai/app-relay.ts'
 import { FailureGuard } from '../src/guard.ts'
 import { isUuid, uuidv7 } from '../src/ids.ts'
 import { sniff } from '../src/sniff.ts'
@@ -66,5 +67,15 @@ describe('uuidv7', () => {
     expect(isUuid(a)).toBe(true)
     expect(a[14]).toBe('7')
     expect(a < b).toBe(true)
+  })
+})
+
+describe('rateKey (SPEC § 0.10)', () => {
+  it('counts an IPv4 address alone, and an IPv6 one by its /64', () => {
+    expect(rateKey('198.51.100.7')).toBe('198.51.100.7')
+    expect(rateKey('2001:db8:1:2:aaaa::1')).toBe('2001:db8:1:2::/64')
+    expect(rateKey('2001:0db8:0001:0002:ffff:ffff:ffff:ffff')).toBe('2001:db8:1:2::/64')
+    expect(rateKey('2001:db8::1')).toBe('2001:db8:0:0::/64')
+    expect(rateKey('::1')).toBe('0:0:0:0::/64')
   })
 })

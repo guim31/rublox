@@ -99,31 +99,39 @@ const TICKET_HOURS = 12
 /**
  * Tickets of the editor's preview (SPEC § 6.9: "a project open in the editor"). The studio
  * asks for one with its session and hands it to the preview, which has no cookie of its own
- * (apps origin). It names the project and expires; `exp.signature`.
+ * (apps origin). It names the project and the account, and expires: `exp.user.signature`.
+ * The account's access is checked again at each use (`resolveCredential`), so a ticket ends
+ * with the sharing that gave it (SPEC § 0.10).
  */
 export class Tickets {
   constructor(private readonly secret: string) {}
 
-  private sign(projectId: string, expires: number): string {
+  private sign(projectId: string, userId: string, expires: number): string {
     return createHmac('sha256', this.secret)
-      .update(`rublox:data-ticket:${projectId}:${expires}`)
+      .update(`rublox:data-ticket:${projectId}:${userId}:${expires}`)
       .digest('base64url')
   }
 
-  issue(projectId: string, now = Date.now()): { ticket: string; expiresAt: string } {
+  issue(
+    projectId: string,
+    userId: string,
+    now = Date.now(),
+  ): { ticket: string; expiresAt: string } {
     const expires = now + TICKET_HOURS * 3600_000
     return {
-      ticket: `${expires}.${this.sign(projectId, expires)}`,
+      ticket: `${expires}.${userId}.${this.sign(projectId, userId, expires)}`,
       expiresAt: new Date(expires).toISOString(),
     }
   }
 
-  verify(projectId: string, ticket: string, now = Date.now()): boolean {
-    const [time, signature] = ticket.split('.', 2)
+  /** The account the ticket was given to, or null when it is forged or expired. */
+  verify(projectId: string, ticket: string, now = Date.now()): string | null {
+    const [time, userId, signature, extra] = ticket.split('.')
     const expires = Number(time)
-    if (!Number.isSafeInteger(expires) || expires <= now || !signature) return false
-    const expected = Buffer.from(this.sign(projectId, expires))
+    if (!Number.isSafeInteger(expires) || expires <= now) return null
+    if (!userId || !signature || extra !== undefined) return null
+    const expected = Buffer.from(this.sign(projectId, userId, expires))
     const given = Buffer.from(signature)
-    return expected.length === given.length && timingSafeEqual(expected, given)
+    return expected.length === given.length && timingSafeEqual(expected, given) ? userId : null
   }
 }

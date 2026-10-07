@@ -11,7 +11,7 @@ import {
 import { and, desc, eq, gt, inArray, isNull, max } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { requireProject } from '../access.ts'
+import { canWrite, requireProject } from '../access.ts'
 import type { Database } from '../db/index.ts'
 import {
   assets,
@@ -67,6 +67,19 @@ export async function mayPublish(db: Database, userId: string): Promise<boolean>
   return !blocked
 }
 
+/**
+ * Both the one who publishes and the project's owner must have the right: a member whose
+ * space forbids publishing cannot get around it by sharing the project with someone who may
+ * (SPEC § 0.10).
+ */
+export async function mayPublishProject(
+  db: Database,
+  userId: string,
+  ownerId: string,
+): Promise<boolean> {
+  return (await mayPublish(db, userId)) && (ownerId === userId || (await mayPublish(db, ownerId)))
+}
+
 async function publicationOf(db: Database, projectId: string) {
   const [row] = await db.select().from(publications).where(eq(publications.projectId, projectId))
   return row ?? null
@@ -120,7 +133,7 @@ export function publishRoutes(services: Services) {
           canPublish:
             (access === 'owner' || access === 'editor') &&
             !project.deletedAt &&
-            (await mayPublish(db, me.id)),
+            (await mayPublishProject(db, me.id, project.ownerId)),
           /** The settings of the last version, to fill the dialog again. */
           settings: (versions[0]?.settings ?? null) as AppSettings | null,
           current: current ? { id: current.id, number: current.number } : null,
@@ -148,7 +161,7 @@ export function publishRoutes(services: Services) {
         const me = requireUser(c)
         const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'write')
         if (project.deletedAt) fail(409, 'in_trash')
-        if (!(await mayPublish(db, me.id))) fail(403, 'publish_forbidden')
+        if (!(await mayPublishProject(db, me.id, project.ownerId))) fail(403, 'publish_forbidden')
         const input = c.req.valid('json')
         const { doc } = input.bundle
         const existing = await publicationOf(db, project.id)
@@ -217,7 +230,7 @@ export function publishRoutes(services: Services) {
         const me = requireUser(c)
         const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'write')
         if (project.deletedAt) fail(409, 'in_trash')
-        if (!(await mayPublish(db, me.id))) fail(403, 'publish_forbidden')
+        if (!(await mayPublishProject(db, me.id, project.ownerId))) fail(403, 'publish_forbidden')
         const publication = await publicationOf(db, project.id)
         if (!publication) fail(404, 'not_found')
         const [version] = await db
@@ -239,7 +252,14 @@ export function publishRoutes(services: Services) {
       // Unpublishes: the address answers "no longer published"; versions and slug are kept.
       .delete('/:projectId/publication', async (c) => {
         const me = requireUser(c)
-        const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'write')
+        // Also from the trash: taking an app offline for good changes nothing in the project.
+        const { project, access } = await requireProject(
+          db,
+          me.id,
+          c.req.param('projectId'),
+          'read',
+        )
+        if (!canWrite(access)) fail(403, 'forbidden')
         await db
           .update(publications)
           .set({ currentVersionId: null, updatedAt: new Date() })

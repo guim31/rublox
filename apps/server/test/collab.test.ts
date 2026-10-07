@@ -285,3 +285,65 @@ describe('rights', () => {
     later.close()
   })
 })
+
+/** As the studio does (`ServerSource`): a document closed by the server is opened again. */
+function reopenOnReset(tab: Tab) {
+  tab.provider.on('close', ({ event }: { event?: { reason?: string } }) => {
+    if (event?.reason === 'Reset Connection') setTimeout(() => tab.socket.attach(tab.provider), 0)
+  })
+}
+
+describe('access that ends (SPEC § 0.10)', () => {
+  it('closes the open documents of an account the administrator disables', async () => {
+    const banned = await createUser('collab-banned')
+    const bannedId = await idOf(banned)
+    const id = await newProject('Closed')
+    expect(
+      (
+        await owner.request('PUT', `/api/projects/${id}/members`, {
+          username: 'collab-banned',
+          role: 'editor',
+        })
+      ).status,
+    ).toBe(200)
+    const a = await server.tab(owner, id)
+    const b = await server.tab(banned, id)
+    reopenOnReset(b)
+    expect(b.readOnly).toBe(false)
+    setMeta(b.ydoc, { description: 'before' })
+    await until(() => a.doc.meta.description === 'before', 'the edit before')
+    const disabled = await owner.request('PATCH', `/api/admin/users/${bannedId}`, {
+      disabled: true,
+    })
+    expect(disabled.status).toBe(200)
+    // Its open tab no longer reaches the project, though its socket was opened before: opened
+    // again, it is refused.
+    await until(() => b.refused === 'signed-out', 'the tab to be refused')
+    setMeta(b.ydoc, { description: 'after being disabled' })
+    setMeta(a.ydoc, { name: 'Closed, still' })
+    const later = await server.tab(owner, id)
+    await until(() => later.doc.meta.name === 'Closed, still')
+    expect(later.doc.meta.description).toBe('before')
+    a.close()
+    b.close()
+    later.close()
+  })
+
+  it('closes the documents of a signed-out tab, and keeps the others of the account', async () => {
+    const id = await newProject('Signed out')
+    const kept = await server.tab(editor, id)
+    reopenOnReset(kept)
+    const other = await server.signIn('collab-editor', 'collab-editor-password', '203.0.113.21')
+    const gone = await server.tab(other, id)
+    reopenOnReset(gone)
+    const out = await other.request('POST', '/api/auth/sign-out', {})
+    expect(out.status).toBe(200)
+    await until(() => gone.refused === 'signed-out', 'the signed-out tab to be refused')
+    // The tab whose session is still valid opens its document again.
+    await until(() => kept.provider.isAuthenticated && kept.provider.isSynced, 'the other tab')
+    setMeta(kept.ydoc, { description: 'still editing' })
+    await kept.saved()
+    kept.close()
+    gone.close()
+  })
+})

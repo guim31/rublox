@@ -152,6 +152,10 @@ describe('API connections', () => {
     )
     expect(buildApiUrl(connection, '').href).toBe('https://api.example.com/v1?units=metric')
     expect(() => buildApiUrl(connection, '../admin')).toThrow(TypeError)
+    expect(() => buildApiUrl(connection, '..%2F..%2Fadmin')).toThrow(TypeError)
+    expect(() => buildApiUrl(connection, '..%5cadmin')).toThrow(TypeError)
+    // A name with an encoded character is fine; only the separators are refused.
+    expect(buildApiUrl(connection, '/caf%C3%A9').pathname).toBe('/v1/caf%C3%A9')
     expect(() => buildApiUrl(connection, '//evil.example.com/x')).toThrow(TypeError)
     expect(() => buildApiUrl(connection, 'https://evil.example.com')).toThrow(TypeError)
     expect(() => buildApiUrl({ baseUrl: 'file:///etc/passwd', params: [] }, '')).toThrow(TypeError)

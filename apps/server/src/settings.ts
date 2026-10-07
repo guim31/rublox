@@ -17,13 +17,22 @@ export const settingsSchema = z.object({
 export type InstanceSettings = z.infer<typeof settingsSchema>
 const KEYS = Object.keys(settingsSchema.shape) as (keyof InstanceSettings)[]
 
+/** The settings of each database, for checks that only get the database (`projectAccess`). */
+const stores = new WeakMap<Database, SettingsStore>()
+
+export function settingsOf(db: Database): SettingsStore | undefined {
+  return stores.get(db)
+}
+
 export class SettingsStore {
   private cache: InstanceSettings | undefined
 
   constructor(
     private readonly db: Database,
     private readonly defaults: InstanceSettings,
-  ) {}
+  ) {
+    stores.set(db, this)
+  }
 
   async get(): Promise<InstanceSettings> {
     if (this.cache) return this.cache

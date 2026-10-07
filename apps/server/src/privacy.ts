@@ -1,4 +1,4 @@
-import { and, count, eq, inArray, ne } from 'drizzle-orm'
+import { and, count, eq, inArray, isNull, ne, or } from 'drizzle-orm'
 import { isManagerRole } from './access.ts'
 import { realEmail } from './auth.ts'
 import type { Database } from './db/index.ts'
@@ -167,17 +167,29 @@ export async function exportAccount(services: Services, userId: string) {
  * is the last administrator, or the last manager of a space that still has other people or
  * accounts it created (`last_manager`); a space it is alone in goes with it.
  */
+/**
+ * The administrators other than `userId` who can still sign in: a disabled one does not count
+ * (SPEC § 0.10), or the instance could be left without any usable administrator.
+ */
+export async function otherActiveAdmins(db: Database, userId: string): Promise<number> {
+  const [admins] = await db
+    .select({ total: count() })
+    .from(user)
+    .where(
+      and(
+        eq(user.role, 'admin'),
+        ne(user.id, userId),
+        or(isNull(user.banned), eq(user.banned, false)),
+      ),
+    )
+  return admins?.total ?? 0
+}
+
 export async function deleteAccount(services: Services, userId: string) {
   const { db, collab } = services
   const [row] = await db.select().from(user).where(eq(user.id, userId))
   if (!row) fail(404, 'not_found')
-  if (row.role === 'admin') {
-    const [admins] = await db
-      .select({ total: count() })
-      .from(user)
-      .where(and(eq(user.role, 'admin'), ne(user.id, userId)))
-    if ((admins?.total ?? 0) === 0) fail(409, 'last_admin')
-  }
+  if (row.role === 'admin' && (await otherActiveAdmins(db, userId)) === 0) fail(409, 'last_admin')
   const lonelySpaces: string[] = []
   const memberships = await db.select().from(member).where(eq(member.userId, userId))
   for (const entry of memberships) {
@@ -207,6 +219,8 @@ export async function deleteAccount(services: Services, userId: string) {
     }
   })
   for (const project of owned) collab.reconnect(project.id)
+  // Its connections to the projects of others (shared with it) end too.
+  collab.disconnectUser(userId)
 }
 
 /** Projects, files, sessions and the account itself (the rest cascades). */

@@ -10,11 +10,14 @@ export type FakeReply = unknown | { refuse: true }
 export class FakeAiClient implements AiClient {
   readonly requests: AiRequest<unknown>[] = []
   readonly queue: FakeReply[] = []
+  /** How long the model "thinks", in ms (several questions in flight at once). */
+  delay = 0
 
   constructor(private readonly fallback: (request: AiRequest<unknown>) => FakeReply = () => 'OK') {}
 
   async complete<T>(request: AiRequest<T>): Promise<AiResult<T>> {
     this.requests.push(request as AiRequest<unknown>)
+    if (this.delay) await new Promise((resolve) => setTimeout(resolve, this.delay))
     const reply = this.queue.length
       ? this.queue.shift()
       : this.fallback(request as AiRequest<unknown>)

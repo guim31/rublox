@@ -17,6 +17,8 @@ describe('security headers', () => {
     expect(csp).toContain("frame-ancestors 'none'")
     expect(csp).toContain("object-src 'none'")
     expect(res.headers.get('x-content-type-options')).toBe('nosniff')
+    // An app that opens the studio gets no handle on it, nor on its preview (SPEC § 0.10).
+    expect(res.headers.get('cross-origin-opener-policy')).toBe('same-origin')
     expect(res.headers.get('referrer-policy')).toBe('strict-origin-when-cross-origin')
     expect(res.headers.get('permissions-policy')).toBeNull()
   })
@@ -41,12 +43,14 @@ describe('security headers', () => {
       'accelerometer',
       'gyroscope',
       'clipboard-write',
-      'web-share',
       'fullscreen',
       'autoplay',
     ]) {
       expect(policy).toContain(`${feature}=(self "http://studio.example.com")`)
     }
+    // Unknown to Chrome as a policy feature (« Unrecognized feature »): the iframe's `allow`
+    // attribute delegates it.
+    expect(policy).not.toContain('web-share')
   })
 
   it('also protects error responses', async () => {

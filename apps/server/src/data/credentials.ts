@@ -1,5 +1,6 @@
 import type { AppBundle, DataCredential, ProjectDoc } from '@rublox/schema'
 import { and, eq } from 'drizzle-orm'
+import { projectAccess } from '../access.ts'
 import type { Collab } from '../collab.ts'
 import type { Database } from '../db/index.ts'
 import { liveLinks, projects, publications, publicationVersions } from '../db/schema.ts'
@@ -24,7 +25,7 @@ type Deps = {
 
 /**
  * Checks what an app shows to use the services of the apps origin (SPEC § 6.9): a ticket of
- * the editor for a project that is not in the trash, a "test on my phone" link that is
+ * the editor for a project that is not in the trash and still open to its account, a "test on my phone" link that is
  * neither revoked nor expired, or the slug of a published app. Null otherwise.
  */
 export async function resolveCredential(
@@ -59,7 +60,11 @@ export async function resolveCredential(
 
   let projectId: string
   if (credential.kind === 'editor') {
-    if (!deps.tickets.verify(credential.project, credential.ticket)) return null
+    const userId = deps.tickets.verify(credential.project, credential.ticket)
+    if (!userId) return null
+    // Still shared with that account (not taken back, not only through the gallery).
+    const found = await projectAccess(db, userId, credential.project)
+    if (!found || found.access === 'gallery') return null
     projectId = credential.project
   } else {
     const [link] = await db

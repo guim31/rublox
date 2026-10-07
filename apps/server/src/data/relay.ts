@@ -158,7 +158,11 @@ export class Relay {
     const headers: Record<string, string> = {}
     for (const pair of connection.headers) {
       const name = fill(pair.key).trim()
-      if (/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name)) headers[name.toLowerCase()] = fill(pair.value)
+      if (!/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name)) continue
+      const lower = name.toLowerCase()
+      if (!CONTROLLED_HEADERS.has(lower) && !lower.startsWith('proxy-')) {
+        headers[lower] = fill(pair.value)
+      }
     }
     let body: Buffer | undefined
     if (request.method !== 'GET' && request.body !== undefined && request.body !== null) {
@@ -345,3 +349,19 @@ function toResponse(fetched: Fetched): RelayResponse {
   }
   return { status: fetched.status, contentType: fetched.contentType, body }
 }
+
+/**
+ * Headers the relay decides, never the connection: `Host` would name another site than the
+ * checked address (and get around `RUBLOX_RELAY_DENY`, SPEC § 0.10); the others frame the
+ * request itself.
+ */
+const CONTROLLED_HEADERS = new Set([
+  'host',
+  'connection',
+  'content-length',
+  'transfer-encoding',
+  'te',
+  'trailer',
+  'upgrade',
+  'keep-alive',
+])

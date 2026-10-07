@@ -89,8 +89,10 @@ function send(ws: WebSocket, text: string) {
 
 /** Close codes: 4000 + reason, so that clients know not to reconnect. */
 const END_CODES: Record<LiveEndReason, number> = { 'not-found': 4004, revoked: 4003, expired: 4010 }
-/** Logs a phone may send per second (a loop printing in the console must not flood). */
+/** Messages a phone may send per second (a loop printing in the console must not flood). */
 const PHONE_LOGS_PER_SECOND = 40
+/** Phones on one link at once. */
+const MAX_PHONES = 20
 const PING_MS = 25_000
 
 /**
@@ -205,6 +207,12 @@ export class LiveHub {
     }
     if (ws.readyState !== ws.OPEN) return
     const channel = this.channel(found.link.id, found.link.expiresAt)
+    // A link is for one's own phones; whoever holds it cannot flood the editor (SPEC § 0.10).
+    if (channel.phones.size >= MAX_PHONES) {
+      ws.close(1013, 'too many phones')
+      this.release(channel)
+      return
+    }
     const phone: Phone = {
       id: randomToken(6),
       device: '',
@@ -224,14 +232,16 @@ export class LiveHub {
       const parsed = liveFromPhoneSchema.safeParse(parseJson(data))
       if (!parsed.success) return
       const message = parsed.data
+      // Every message spends the budget: each one reaches every open editor.
+      if (phone.budget <= 0) return
+      phone.budget -= 1
       if (message.type === 'hello') {
         phone.device = message.device
         channel.phonesChanged()
       } else if (message.type === 'state') {
         phone.running = message.running
         channel.phonesChanged()
-      } else if (phone.budget > 0) {
-        phone.budget -= 1
+      } else {
         channel.toEditors({
           type: 'log',
           phoneId: phone.id,

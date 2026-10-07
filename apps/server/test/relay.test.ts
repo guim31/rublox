@@ -142,6 +142,12 @@ describe('the relay refuses private addresses (SPEC § 6.9)', () => {
       '::ffff:7f00:1',
       '64:ff9b::a9fe:a9fe',
       '224.0.0.1',
+      // IPv4 inside transition ranges (SPEC § 0.10): compatible, 6to4, Teredo, local NAT64.
+      '::7f00:1',
+      '::127.0.0.1',
+      '2002:7f00:1::1',
+      '2001:0:4136:e378:8000:63bf:3fff:fdd2',
+      '64:ff9b:1::a00:1',
     ]) {
       expect(isPublicAddress(address), address).toBe(false)
     }
@@ -209,6 +215,30 @@ describe('the relay refuses the instance itself and RUBLOX_RELAY_DENY', () => {
     names.set('rublox.example.com', [{ address: '93.184.215.14', family: 4 }])
   })
 
+  it("refuses the public addresses of the machine's own interfaces (SPEC § 0.10)", async () => {
+    // The names point to a CDN; the machine itself has another public address.
+    const self = new SelfAddresses(
+      ['rublox.example.com'],
+      resolve,
+      () => {},
+      0,
+      () => [
+        { address: '203.0.114.7', family: 4 },
+        { address: '2001:db9::7', family: 6 },
+      ],
+    )
+    await self.ready
+    expect(self.has('203.0.114.7')).toBe(true)
+    expect(self.has('2001:db9::7')).toBe(true)
+    expect(self.has('203.0.114.8')).toBe(false)
+  })
+
+  it('refuses an invalid entry of RUBLOX_RELAY_DENY at start', () => {
+    for (const entry of ['1.2.3.4/8/9', '1.2.3.4/33', 'exa mple.com', '::1/129']) {
+      expect(() => new DenyList([entry]), entry).toThrow()
+    }
+  })
+
   it('refuses a listed name suffix with its subdomains, before resolving it', async () => {
     const deny = new DenyList(['corp.example.com', '*.intra.example.org'])
     expect(deny.deniesName('corp.example.com')).toBe(true)
@@ -242,10 +272,12 @@ describe('the relay calls an API', () => {
   let remote: Server
   let base: string
   const seen: { url: string; key: string | undefined }[] = []
+  const hosts: (string | undefined)[] = []
 
   beforeAll(async () => {
     remote = createServer((request, response) => {
       seen.push({ url: request.url ?? '', key: request.headers['x-key'] as string | undefined })
+      hosts.push(request.headers.host)
       if (request.url?.startsWith('/redirect-private')) {
         response.writeHead(302, { location: 'http://10.0.0.1/' }).end()
       } else if (request.url?.startsWith('/redirect-denied-name')) {
@@ -299,6 +331,28 @@ describe('the relay calls an API', () => {
       url: '/v1/forecast?lang=fr&city=Lyon',
       key: 'value-of-SERVICE_KEY',
     })
+  })
+
+  it('never lets a connection choose the Host header (SPEC § 0.10)', async () => {
+    // Another site behind the same address, denied by name, would answer to that name.
+    const ydoc = projectToYDoc(createProject({ name: 'Relais', locale: 'fr', mode: 'studio' }))
+    const apiId = addApi(ydoc, {
+      name: 'Service',
+      baseUrl: `${base}/v1`,
+      headers: [
+        { id: 'h', key: 'Host', value: 'grafana.example.com' },
+        { id: 't', key: 'Transfer-Encoding', value: 'chunked' },
+        { id: 'p', key: 'Proxy-Authorization', value: 'x' },
+      ],
+      params: [],
+    })
+    const response = await relay().call(source(yDocToProject(ydoc)), {
+      api: apiId,
+      method: 'GET',
+      path: '/hello',
+    })
+    expect(response.status).toBe(200)
+    expect(hosts.at(-1)).toBe(new URL(base).host)
   })
 
   it('checks each redirect again', async () => {

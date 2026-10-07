@@ -392,7 +392,8 @@ export function projectsRoutes(services: Services) {
         collab.reconnect(c.req.param('projectId'))
         return c.json({ ok: true })
       })
-      // Gives the project to one of its members; the former owner becomes an editor.
+      // Gives the project to one of its members; the former owner becomes an editor. The AI of
+      // the published app and the gallery sharing are switched off (SPEC § 0.10).
       .post('/:projectId/owner', jsonBody(z.object({ userId: z.string() })), async (c) => {
         const me = requireUser(c)
         const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'owner')
@@ -413,7 +414,14 @@ export function projectsRoutes(services: Services) {
             .onConflictDoNothing()
           await tx
             .update(projects)
-            .set({ ownerId: userId, spaceId: target.managedBySpaceId ?? null })
+            // What the former owner chose is not the new owner's choice: the AI of the published
+            // app would be billed to them, and the gallery would show their project.
+            .set({
+              ownerId: userId,
+              spaceId: target.managedBySpaceId ?? null,
+              appAiAllowed: false,
+              visibility: 'private',
+            })
             .where(eq(projects.id, project.id))
           await tx.update(assets).set({ ownerId: userId }).where(eq(assets.projectId, project.id))
         })
