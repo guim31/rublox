@@ -92,6 +92,18 @@ export const accounts = {
     revoked: 'Appareil déconnecté.',
     unknownDevice: 'Appareil inconnu',
     browserOn: '{{browser}} sur {{os}}',
+    data: 'Mes données',
+    dataHint: 'Télécharge tout ce que Rublox garde sur toi, ou supprime ton compte.',
+    export: 'Télécharger mes données',
+    exported: 'Tes données sont téléchargées.',
+    deleteAccount: 'Supprimer mon compte',
+    deleteTitle: 'Supprimer ton compte ?',
+    deleteText:
+      'Ton compte, tous tes projets, leurs versions et leurs fichiers seront effacés pour toujours. Les espaces où tu es seul·e partent avec. Tape ton mot de passe pour confirmer.',
+    deleteConfirm: 'Supprimer pour toujours',
+    deleted: 'Ton compte est supprimé. À bientôt peut-être !',
+    dataManaged:
+      'Le responsable de ton espace peut télécharger tes données ou supprimer ton compte.',
   },
   avatars: {
     none: 'Aucun',
@@ -146,6 +158,7 @@ export const accounts = {
     addAccountHint:
       'Pas besoin d’e-mail : tu choisis l’identifiant et le mot de passe, et tu pourras le changer.',
     accountCreated: 'Le compte de {{name}} est prêt : identifiant « {{username}} ».',
+    exportAccount: 'Télécharger ses données',
     resetPassword: 'Changer le mot de passe',
     resetTitle: 'Nouveau mot de passe pour {{name}}',
     resetDone: 'Mot de passe changé. {{name}} devra se reconnecter.',
@@ -301,7 +314,7 @@ export const accounts = {
   sync: {
     saved: 'Enregistré',
     saving: 'Enregistrement…',
-    offline: 'Hors ligne, en attente',
+    offline: 'Hors ligne',
     readOnly: 'Lecture seule',
     savedHint: 'Ton projet est enregistré sur le serveur.',
     offlineHint: 'Pas de connexion au serveur : tes changements partiront dès qu’elle reviendra.',
@@ -335,6 +348,8 @@ export const accounts = {
     missing_asset: 'Un fichier du projet manque sur le serveur : envoie-le à nouveau.',
     publish_forbidden: 'Ton espace ne permet pas encore de publier : demande à ton responsable.',
     in_trash: 'Ce projet est dans la corbeille : restaure-le d’abord.',
+    wrong_password: 'Ce n’est pas le bon mot de passe.',
+    last_admin: 'Il faut garder au moins un administrateur.',
     unknown: 'Quelque chose s’est mal passé. Réessaie.',
   },
 }

@@ -193,7 +193,7 @@ describe('administration', () => {
         (await c.request('PATCH', '/api/admin/settings', { galleryEnabled: false })).status,
       ).toBe(403)
     }
-    expect((await server.client(nextIp()).request('GET', '/api/admin/users')).status).toBe(401)
+    expect((await server.client(nextIp()).request('GET', '/api/admin/users')).status).toBe(403)
   })
 
   it('lists, creates, disables and deletes accounts', async () => {

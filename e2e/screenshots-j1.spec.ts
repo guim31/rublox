@@ -140,7 +140,26 @@ for (const [index, [mode, theme]] of VARIANTS.entries()) {
 
     await parent.goto('/account')
     await expect(parent.getByRole('heading', { name: 'Mon compte' })).toBeVisible()
+    await expect(parent.getByRole('button', { name: 'Supprimer mon compte' })).toBeVisible()
     await parent.screenshot({ path: `${DIR}/${mode}-${theme}-account.png`, fullPage: true })
+    await parent.getByRole('button', { name: 'Supprimer mon compte' }).click()
+    await expect(parent.getByRole('dialog')).toBeVisible()
+    await parent.waitForTimeout(300)
+    await parent.screenshot({ path: `${DIR}/${mode}-${theme}-delete-account.png` })
+    await parent.keyboard.press('Escape')
+
+    // Editing without a connection: the edits wait in this browser.
+    await parent.goto('/')
+    await parent.getByRole('button', { name: 'Ouvrir Quiz des capitales' }).click()
+    await expect(parent.getByTestId('save-state')).toHaveAttribute('data-state', 'saved')
+    await parent.context().setOffline(true)
+    await addComponent(parent, 'Button')
+    await expect(parent.getByTestId('save-state')).toHaveAttribute('data-state', 'offline')
+    await parent.mouse.move(900, 600)
+    await parent.waitForTimeout(300)
+    await parent.screenshot({ path: `${DIR}/${mode}-${theme}-offline.png` })
+    await parent.context().setOffline(false)
+    await expect(parent.getByTestId('save-state')).toHaveAttribute('data-state', 'saved')
 
     await admin.goto('/admin')
     await expect(admin.getByText('Sacha').first()).toBeVisible()

@@ -7,6 +7,12 @@ export const MEMORY_DATABASE_URL = 'memory://'
 
 const MIN_SECRET_BYTES = 32
 
+/**
+ * The placeholder of `docker/compose.yaml`: public, so refused in production (a test checks
+ * that both files agree).
+ */
+export const EXAMPLE_SECRET = 'change-me-to-a-long-random-secret-of-32-bytes-or-more'
+
 /** Used when `RUBLOX_SECRET` is not set, outside production only. Public: never deploy it. */
 export const DEVELOPMENT_SECRET = 'rublox-development-secret-not-for-production-use'
 
@@ -122,6 +128,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (e.NODE_ENV === 'production' && !e.RUBLOX_SECRET) {
     throw new ConfigError(
       `Invalid configuration: RUBLOX_SECRET is required in production (${MIN_SECRET_BYTES} bytes or more)`,
+    )
+  }
+  if (
+    e.NODE_ENV === 'production' &&
+    (e.RUBLOX_SECRET === EXAMPLE_SECRET || e.RUBLOX_SECRET === DEVELOPMENT_SECRET)
+  ) {
+    throw new ConfigError(
+      'Invalid configuration: RUBLOX_SECRET is the public example value; set a random one, e.g. `openssl rand -base64 48`',
     )
   }
   if (Boolean(e.RUBLOX_ADMIN_USERNAME) !== Boolean(e.RUBLOX_ADMIN_PASSWORD)) {

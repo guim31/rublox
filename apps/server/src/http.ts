@@ -32,22 +32,25 @@ export type ErrorCode =
   | 'missing_asset'
   | 'publish_forbidden'
   | 'in_trash'
+  | 'wrong_password'
+  | 'last_admin'
 
-/** Stops the request with a JSON error: `{ error: code }`. */
+/** Stops the request with a JSON error: `{ error: code }`. Never 401 (SPEC § 6.9). */
 export function fail(
-  status: 400 | 401 | 403 | 404 | 409 | 410 | 413 | 415 | 429,
+  status: 400 | 403 | 404 | 409 | 410 | 413 | 415 | 429,
   code: ErrorCode,
 ): never {
   throw new HTTPException(status, { res: Response.json({ error: code }, { status }) })
 }
 
 /**
- * The signed-in user, or a 401. The studio only calls these routes while signed in (it reads
- * `/api/me`, which never answers 401), so a 401 means a session revoked elsewhere (SPEC § 6.9).
+ * The signed-in user, or a **403** `signed_out`, never a 401: the reverse proxy bans addresses
+ * that pile up 401s, and a session that expired or was revoked elsewhere is ordinary use
+ * (SPEC § 6.9). The only 401 left is a wrong password at sign-in.
  */
 export function requireUser(c: Context<ApiEnv>): SessionUser {
   const session = c.get('session')
-  if (!session) fail(401, 'signed_out')
+  if (!session) fail(403, 'signed_out')
   return session.user
 }
 

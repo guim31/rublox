@@ -1,6 +1,7 @@
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { ConfigError, DEVELOPMENT_SECRET, loadConfig } from '../src/config.ts'
+import { ConfigError, DEVELOPMENT_SECRET, EXAMPLE_SECRET, loadConfig } from '../src/config.ts'
 import { defaultPlayerDist, defaultStudioDist, serverRoot } from '../src/paths.ts'
 
 describe('loadConfig', () => {
@@ -54,6 +55,17 @@ describe('loadConfig', () => {
     const config = loadConfig({ DATABASE_URL: '', RUBLOX_SECRET: '' })
     expect(config.databaseUrl).toBeUndefined()
     expect(config.secret).toBe(DEVELOPMENT_SECRET)
+  })
+
+  it('refuses the public example secrets in production', () => {
+    const compose = readFileSync(new URL('../../../docker/compose.yaml', import.meta.url), 'utf8')
+    expect(compose).toContain(`RUBLOX_SECRET: ${EXAMPLE_SECRET}`)
+    for (const secret of [EXAMPLE_SECRET, DEVELOPMENT_SECRET]) {
+      expect(() => loadConfig({ NODE_ENV: 'production', RUBLOX_SECRET: secret })).toThrow(
+        /example value/,
+      )
+    }
+    expect(loadConfig({ RUBLOX_SECRET: EXAMPLE_SECRET }).secret).toBe(EXAMPLE_SECRET)
   })
 
   it('requires a secret in production', () => {

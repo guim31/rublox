@@ -69,6 +69,7 @@ for (const mode of ['junior', 'studio'] as const) {
       await check('admin settings')
       await page.goto('/account')
       await expect(page.getByRole('heading', { name: 'Mon compte' })).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Supprimer mon compte' })).toBeVisible()
       await check('account')
       await page.goto('/spaces')
       await page.getByRole('button', { name: 'Créer un espace' }).click()

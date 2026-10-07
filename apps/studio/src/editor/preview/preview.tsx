@@ -194,6 +194,10 @@ export function Preview({
             title={t('editor.preview.frame')}
             src={`${config.appsUrl.replace(/\/$/, '')}/`}
             allow="camera; microphone; geolocation; accelerometer; gyroscope; clipboard-write; web-share; fullscreen; autoplay"
+            // Never `allow-top-navigation`: an app must not be able to send the studio tab
+            // elsewhere. `allow-same-origin` keeps the app on its own origin (the apps one),
+            // which is not the studio's: it gives no access to the studio.
+            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-downloads"
             className="size-full"
             data-testid="preview-frame"
           />

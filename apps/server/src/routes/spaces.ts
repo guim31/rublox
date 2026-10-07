@@ -12,6 +12,7 @@ import {
 import { member, organization, projects, spaceSettings, user } from '../db/schema.ts'
 import { type ApiEnv, fail, iso, jsonBody, requireUser } from '../http.ts'
 import { uuidv7 } from '../ids.ts'
+import { deleteAccount, exportAccount } from '../privacy.ts'
 import type { Services } from '../services.ts'
 import type { SpaceKind } from './me.ts'
 
@@ -246,8 +247,24 @@ export function spacesRoutes(services: Services) {
           c.req.param('spaceId'),
           c.req.param('userId'),
         )
-        await db.delete(user).where(eq(user.id, target.id))
+        await deleteAccount(services, target.id)
         return c.json({ ok: true })
+      })
+      // RGPD for a member account: its manager exports its data.
+      .get('/:spaceId/accounts/:userId/export', async (c) => {
+        const me = requireUser(c)
+        const target = await requireManagedAccount(
+          db,
+          me,
+          c.req.param('spaceId'),
+          c.req.param('userId'),
+        )
+        const data = await exportAccount(services, target.id)
+        c.header(
+          'Content-Disposition',
+          `attachment; filename="rublox-${target.username ?? target.id}.json"`,
+        )
+        return c.json(data)
       })
       .patch(
         '/:spaceId/members/:userId',

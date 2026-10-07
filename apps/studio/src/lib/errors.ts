@@ -24,6 +24,8 @@ const KNOWN = new Set([
   'missing_asset',
   'publish_forbidden',
   'in_trash',
+  'wrong_password',
+  'last_admin',
 ] as const)
 
 type Code = typeof KNOWN extends Set<infer C> ? C : never
