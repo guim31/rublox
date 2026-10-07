@@ -64,7 +64,8 @@ describe('conflicts on stacks of blocks', () => {
     send(b.ydoc, a.ydoc)
     const value = yBlocks(a.ydoc).get(screen)?.get('s')
     expect(yBlocks(b.ydoc).get(screen)?.get('s')).toEqual(value)
-    const winner = value === undefined ? null : (value as { fields: { TEXT: string } }).fields.TEXT
+    const winner =
+      value === undefined ? null : (value as unknown as { fields: { TEXT: string } }).fields.TEXT
     const [loser, other, winnerClient] =
       winner === 'A' ? [b, a, a.ydoc.clientID] : [a, b, b.ydoc.clientID]
     expect(loser.lost).toEqual([{ stack: 's', client: winnerClient }])
@@ -113,7 +114,7 @@ describe('conflicts on stacks of blocks', () => {
     send(b.ydoc, a.ydoc)
     const map = yBlocks(a.ydoc).get(screen)
     if (!map) throw new Error('no stacks')
-    expect(entryWriter(map as Y.Map<unknown>, 's')).toBe(b.ydoc.clientID)
+    expect(entryWriter(map, 's')).toBe(b.ydoc.clientID)
   })
 })
 

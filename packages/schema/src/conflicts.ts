@@ -7,12 +7,12 @@ export const CONFLICT_WINDOW = 15_000
  * The Yjs item holding a map entry: who wrote it (`id.client`) and which entry it replaced
  * when it was written (`origin`). Yjs has no public accessor for it.
  */
-function entryItem(map: Y.Map<unknown>, key: string): Y.Item | null {
+function entryItem<T>(map: Y.Map<T>, key: string): Y.Item | null {
   return (map as unknown as { _map: Map<string, Y.Item> })._map.get(key) ?? null
 }
 
 /** The client (Yjs client id) that wrote a map entry's current value. */
-export function entryWriter(map: Y.Map<unknown>, key: string): number | null {
+export function entryWriter<T>(map: Y.Map<T>, key: string): number | null {
   return entryItem(map, key)?.id.client ?? null
 }
 
@@ -29,7 +29,7 @@ export class StackConflicts {
   constructor(private readonly window = CONFLICT_WINDOW) {}
 
   /** One's own write of stacks (a local transaction on the stacks map). */
-  wrote(event: Y.YMapEvent<unknown>, now = Date.now()) {
+  wrote<T>(event: Y.YMapEvent<T>, now = Date.now()) {
     for (const [stack, change] of event.changes.keys) {
       const item = entryItem(event.target, stack)
       if (change.action !== 'delete' && item) this.mine.set(stack, { item: item.lastId, at: now })
@@ -38,7 +38,7 @@ export class StackConflicts {
   }
 
   /** The stacks one lost in a remote write, with the client that won (null: a deletion). */
-  lost(event: Y.YMapEvent<unknown>, now = Date.now()): { stack: string; client: number | null }[] {
+  lost<T>(event: Y.YMapEvent<T>, now = Date.now()): { stack: string; client: number | null }[] {
     const lost: { stack: string; client: number | null }[] = []
     for (const [stack, change] of event.changes.keys) {
       const mine = this.mine.get(stack)
