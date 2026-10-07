@@ -1,5 +1,5 @@
 import { generateProjectCode } from '@rublox/blocks'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   type AppEvent,
   Engine,
@@ -42,8 +42,11 @@ describe('slow motion', () => {
     const { engine, steps, home } = slowEngine()
     await engine.start()
     engine.emit('button', 'click')
-    await sleep(60)
-    expect(value(engine, 'text', 'text')).toBe('deux')
+    // Each step waits `delay` ms on timers: wait for the light to go off, not for a fixed time.
+    await vi.waitFor(() => {
+      expect(value(engine, 'text', 'text')).toBe('deux')
+      expect(steps.at(-1)?.blockId).toBeNull()
+    })
     const lit = steps.filter((s) => s.blockId).map((s) => s.blockId)
     expect(lit).toEqual(['first', 'second'])
     expect(steps.find((s) => s.blockId === 'first')?.workspace).toBe(home)
@@ -55,20 +58,21 @@ describe('slow motion', () => {
     const { engine, steps } = slowEngine(['first'])
     await engine.start()
     engine.emit('button', 'click')
-    await sleep(30)
-    expect(engine.isPaused()).toBe(true)
+    await vi.waitFor(() => expect(engine.isPaused()).toBe(true))
     expect(steps.at(-1)).toEqual(expect.objectContaining({ blockId: 'first', paused: true }))
+    // Paused means paused: nothing runs, however long we wait.
+    await sleep(30)
     expect(value(engine, 'text', 'text')).toBeUndefined()
     // "Next block": runs `first`, stops again before `second`.
     engine.resume(true)
-    await sleep(30)
+    await vi.waitFor(() =>
+      expect(steps.at(-1)).toEqual(expect.objectContaining({ blockId: 'second', paused: true })),
+    )
     expect(value(engine, 'text', 'text')).toBe('un')
     expect(engine.isPaused()).toBe(true)
-    expect(steps.at(-1)).toEqual(expect.objectContaining({ blockId: 'second', paused: true }))
     engine.resume(false)
-    await sleep(30)
-    expect(value(engine, 'text', 'text')).toBe('deux')
-    expect(engine.isPaused()).toBe(false)
+    await vi.waitFor(() => expect(value(engine, 'text', 'text')).toBe('deux'))
+    await vi.waitFor(() => expect(engine.isPaused()).toBe(false))
     engine.dispose()
   })
 
@@ -76,7 +80,7 @@ describe('slow motion', () => {
     const { engine, logs } = slowEngine(['first'])
     await engine.start()
     engine.emit('button', 'click')
-    await sleep(20)
+    await vi.waitFor(() => expect(engine.isPaused()).toBe(true))
     engine.stop()
     await flush()
     expect(engine.isPaused()).toBe(false)
@@ -87,10 +91,9 @@ describe('slow motion', () => {
     const { engine } = slowEngine(['first'], 10_000)
     await engine.start()
     engine.emit('button', 'click')
-    await sleep(20)
+    await vi.waitFor(() => expect(engine.isPaused()).toBe(true))
     engine.setSlowMotion({ enabled: false, delay: 10_000, breakpoints: [] })
-    await sleep(20)
-    expect(value(engine, 'text', 'text')).toBe('deux')
+    await vi.waitFor(() => expect(value(engine, 'text', 'text')).toBe('deux'))
     engine.dispose()
   })
 
@@ -172,7 +175,7 @@ describe('errors for children', () => {
     })
     await engine.start()
     engine.emit('button', 'click')
-    await sleep(10)
+    await vi.waitFor(() => expect(logs).toHaveLength(1))
     expect(logs).toEqual([
       expect.objectContaining({
         level: 'error',

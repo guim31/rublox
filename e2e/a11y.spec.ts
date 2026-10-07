@@ -1,6 +1,42 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
-import { ADMIN, addComponent, newProject, openBlocks, signIn, usePrefs } from './helpers.ts'
+import { expect, type Page, test } from '@playwright/test'
+import {
+  ADMIN,
+  addComponent,
+  newProject,
+  openBlocks,
+  signIn,
+  unique,
+  usePrefs,
+} from './helpers.ts'
+
+/**
+ * A new administrator of its own. The four variants run in parallel: signed in as the shared
+ * `admin`, each one rewrote the profile (theme, mode) that the others then received on their
+ * next page load, so a page could switch theme while axe measured its contrasts.
+ */
+async function ownAdmin(page: Page): Promise<string> {
+  const username = `axe-admin-${unique().toLowerCase()}`
+  const origin = new URL(page.url()).origin
+  const context = await page.context().browser()?.newContext()
+  if (!context) throw new Error('no browser')
+  const post = async (path: string, data: unknown) => {
+    const response = await context.request.post(new URL(path, origin).href, {
+      data,
+      headers: { origin },
+    })
+    expect(response.ok(), path).toBe(true)
+  }
+  await post('/api/auth/sign-in/username', ADMIN)
+  await post('/api/admin/users', {
+    username,
+    displayName: 'Axe',
+    password: 'axe-admin-password',
+    role: 'admin',
+  })
+  await context.close()
+  return username
+}
 
 /** Axe on the main pages (SPEC § 7), in both modes and both themes. Blockly's own SVG is left out. */
 for (const mode of ['junior', 'studio'] as const) {
@@ -53,7 +89,7 @@ for (const mode of ['junior', 'studio'] as const) {
       }
       await page.goto('/login')
       await check('login')
-      await signIn(page, ADMIN.username, ADMIN.password)
+      await signIn(page, await ownAdmin(page), 'axe-admin-password')
       await check('dashboard')
       await page.goto('/admin?section=invites')
       await page.getByRole('button', { name: 'Créer une invitation' }).click()
