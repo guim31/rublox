@@ -1,5 +1,14 @@
 import { type Browser, expect, type Page, test } from '@playwright/test'
-import { ADMIN, addComponent, signIn, unique, usePrefs } from './helpers.ts'
+import {
+  ADMIN,
+  addComponent,
+  buildHelloBlocks,
+  openBlocks,
+  signIn,
+  unique,
+  usePrefs,
+  workspaceBlocks,
+} from './helpers.ts'
 
 /**
  * Editing a project with several people at once (SPEC § 4.9, J4b): Alice owns the project, Bob
@@ -162,4 +171,69 @@ test('what two people did offline is merged when they are back', async ({ browse
     await expect(p.page.getByTestId('layer-Texte1')).toBeVisible({ timeout: 20_000 })
     await expect(p.page.getByTestId('save-state')).toHaveAttribute('data-state', 'saved')
   }
+})
+
+/** Types into the first text field of the first stack. */
+async function setText(page: Page, text: string) {
+  const field = workspaceBlocks(page).first().locator('.blocklyTextInputField').first()
+  const box = await field.boundingBox()
+  if (!box) throw new Error('no text field')
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+  const input = page.locator('.blocklyHtmlInput')
+  await expect(input).toBeVisible()
+  await input.fill(text)
+  await input.press('Enter')
+}
+
+test('blocks follow stack by stack; the last save wins and says so', async ({ browser }) => {
+  const { alice, bob } = await team(browser, { cleo: false })
+  await addComponent(alice.page, 'Button')
+  await addComponent(alice.page, 'Text')
+  await expect(bob.page.getByTestId('layer-Texte1')).toBeVisible()
+  await openBlocks(alice.page)
+  await openBlocks(bob.page)
+  const fieldOf = (page: Page) =>
+    workspaceBlocks(page).first().locator('.blocklyTextInputField').first()
+
+  // A stack built by Alice appears at Bob's in less than a second.
+  await buildHelloBlocks(alice.page, 'Bonjour')
+  await expect(workspaceBlocks(bob.page)).toHaveCount(1, { timeout: 1000 })
+  await expect(fieldOf(bob.page)).toHaveText(/Bonjour/, { timeout: 1000 })
+
+  // Bob changes it: Alice's stack follows, and her view does not move.
+  // The view (the canvas' transform) and the stack's place in it.
+  const view = async (page: Page) => ({
+    canvas: await page
+      .locator('[data-testid=blockly-workspace] .blocklyBlockCanvas')
+      .first()
+      .getAttribute('transform'),
+    stack: await workspaceBlocks(page).first().getAttribute('transform'),
+  })
+  const before = await view(alice.page)
+  await setText(bob.page, 'Salut')
+  await expect(fieldOf(alice.page)).toHaveText(/Salut/, { timeout: 1000 })
+  expect(await view(alice.page)).toEqual(before)
+
+  // Bob sees which block Alice picked, in her colour.
+  await workspaceBlocks(alice.page)
+    .first()
+    .click({ position: { x: 12, y: 12 } })
+  await expect(bob.page.getByTestId('peer-block-label')).toHaveText('Alice')
+
+  // Alice drags the stack while Bob changes it: Bob saved first, his version stays, and
+  // Alice is told.
+  const box = await workspaceBlocks(alice.page).first().boundingBox()
+  if (!box) throw new Error('no stack')
+  await alice.page.mouse.move(box.x + 10, box.y + 20)
+  await alice.page.mouse.down()
+  await alice.page.mouse.move(box.x + 40, box.y + 40, { steps: 5 })
+  await setText(bob.page, 'Coucou')
+  await expect(bob.page.getByTestId('save-state')).toHaveAttribute('data-state', 'saved')
+  await alice.page.waitForTimeout(400)
+  await alice.page.mouse.move(box.x + 120, box.y + 140, { steps: 5 })
+  await alice.page.mouse.up()
+  await expect(alice.page.getByText('Pile modifiée par Bob')).toBeVisible()
+  await expect(fieldOf(alice.page)).toHaveText(/Coucou/)
+  await expect(fieldOf(bob.page)).toHaveText(/Coucou/)
+  expect(await view(alice.page)).toEqual(before)
 })

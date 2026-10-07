@@ -334,3 +334,19 @@ svg[display="none"] {
 :root[data-theme="dark"] [style*="--peer"] {
   --peer-line: color-mix(in srgb, var(--peer) 55%, white);
 }
+
+/* A stack someone else changed at the same time (J4b): it glows twice. */
+.blocklySvg .rx-flash > .blocklyPath {
+  animation: rx-flash 1.2s ease-in-out 2;
+}
+@keyframes rx-flash {
+  50% {
+    filter: drop-shadow(0 0 6px var(--c-coral)) drop-shadow(0 0 2px var(--c-coral));
+  }
+}
+
+/* The block someone else selected (J4b), outlined in their colour. */
+.blocklySvg .rx-peer-block > .blocklyPath {
+  filter: drop-shadow(0 0 1px var(--peer-line)) drop-shadow(0 0 1px var(--peer-line))
+    drop-shadow(0 0 1px var(--peer-line));
+}
