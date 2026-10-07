@@ -23,6 +23,7 @@ import { Dialog } from '../../components/ui/dialog.tsx'
 import { Badge, describedBy, Field } from '../../components/ui/field.tsx'
 import { fieldClass, Input } from '../../components/ui/input.tsx'
 import { Segmented } from '../../components/ui/segmented.tsx'
+import { awardBadge } from '../../learn/store.ts'
 import { api, call } from '../../lib/api.ts'
 import { toBase64 } from '../../lib/base64.ts'
 import { cn } from '../../lib/cn.ts'
@@ -120,6 +121,7 @@ export function PublishDialog({ open, onClose }: { open: boolean; onClose: () =>
         }),
       )
       toast.success(t('publish.done', { version: result.version }))
+      void awardBadge('first-publish')
       await refresh()
       setTab('share')
     } catch (caught) {

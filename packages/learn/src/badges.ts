@@ -41,7 +41,7 @@ export const BADGES: readonly Badge[] = [
   { id: 'slow-motion', icon: '🐢', accent: 'mint', available: true },
   { id: 'bug-hunter', icon: '🔎', accent: 'coral', available: true },
   { id: 'three-stars', icon: '⭐', accent: 'yellow', available: true },
-  { id: 'first-publish', icon: '🌍', accent: 'indigo', available: false },
+  { id: 'first-publish', icon: '🌍', accent: 'indigo', available: true },
   { id: 'first-remix', icon: '🎨', accent: 'coral', available: false },
 ]
 

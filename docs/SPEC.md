@@ -182,7 +182,7 @@ mise à jour de ce paragraphe.
   tables du § 6.8 (`learning_progress`, `badges`) ne sont pas créées : le J4 ajoute en parallèle
   la migration `0002` et une seconde migration aurait été en conflit. Il suffira d'écrire un
   `ProgressStore` qui parle au serveur et de le choisir dans `learn/sync.ts`.
-- Badges « première publication » et « premier remix » : définis et affichés « bientôt »,
+- Badges « première publication » (décerné par le J4) et « premier remix » : définis et affichés « bientôt »,
   gagnables quand le J4 et le J6 appelleront `awardBadge`.
 - Ralenti : vitesse de 100 à 1 500 ms par bloc, points d'arrêt par clic droit (tenus par
   l'éditeur, pas par le projet) ; en pause, « Continuer » ou « Bloc suivant ». Le bloc en cours
