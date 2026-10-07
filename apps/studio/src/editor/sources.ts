@@ -177,6 +177,10 @@ export class ServerSource implements DocSource {
   }
 
   private onOnline = () => {
+    // The socket dropped when the network went may still be closing (its closing handshake
+    // waits for the network): `connect()` does nothing then, so ask to connect again once it
+    // has closed.
+    this.socket.shouldConnect = true
     void this.socket.connect()
   }
 

@@ -301,6 +301,9 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   provider reste non authentifié (« Hors ligne »). `ServerSource` le rouvre par
   `socket.attach(provider)`. `socket.disconnect()` est asynchrone : dans un test, attendre
   `socket.status === 'disconnected'` avant d'écrire « hors ligne », sinon `connect()` ne fait rien.
+  Même piège au retour du réseau : la socket coupée par `offline` peut être encore en train de se
+  fermer, `connect()` revient sans rien faire ; `ServerSource.onOnline` pose `shouldConnect`
+  pour qu'elle se reconnecte une fois fermée.
 - **Awareness et serveur** : `beforeHandleAwareness` reçoit les états décodés (`states`), qu'on
   peut modifier ou retirer avant qu'ils soient appliqués ; c'est là que l'identité est imposée.
 - **Yjs, cartes** : `event.changes.added` ne concerne que les listes ; pour savoir qui a écrit
