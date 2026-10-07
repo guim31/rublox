@@ -4,6 +4,7 @@ import {
   ADMIN,
   addComponent,
   buildHelloBlocks,
+  editField,
   openBlocks,
   settled,
   signIn,
@@ -197,12 +198,10 @@ test('what two people did offline is merged when they are back', async ({ browse
 
 /** Types into the first text field of the first stack. */
 async function setText(page: Page, text: string) {
-  const field = workspaceBlocks(page).first().locator('.blocklyTextInputField').first()
-  const box = await field.boundingBox()
-  if (!box) throw new Error('no text field')
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
-  const input = page.locator('.blocklyHtmlInput')
-  await expect(input).toBeVisible()
+  const input = await editField(
+    page,
+    workspaceBlocks(page).first().locator('.blocklyTextInputField').first(),
+  )
   await input.fill(text)
   await input.press('Enter')
 }
