@@ -140,7 +140,7 @@ export function LiveDialog({ open, onClose }: { open: boolean; onClose: () => vo
       onOpenChange={(value) => !value && onClose()}
       title={t('live.title')}
       description={t('live.intro')}
-      className="w-[min(94vw,680px)]"
+      className="max-h-[calc(100dvh-24px)] w-[min(94vw,680px)] overflow-y-auto"
     >
       <div className="grid gap-5 sm:grid-cols-[220px_1fr]">
         <div className="flex flex-col gap-2">
@@ -171,7 +171,6 @@ export function LiveDialog({ open, onClose }: { open: boolean; onClose: () => vo
                 aria-label={t('live.copy')}
                 data-testid="live-url"
                 className="min-w-0 flex-1 truncate bg-transparent font-mono text-ui-sm outline-none"
-                onFocus={(event) => event.currentTarget.select()}
               />
               <Button
                 size="sm"

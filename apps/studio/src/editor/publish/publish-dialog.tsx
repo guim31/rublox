@@ -139,7 +139,7 @@ export function PublishDialog({ open, onClose }: { open: boolean; onClose: () =>
         onOpenChange={(value) => !value && onClose()}
         title={title}
         description={t('publish.intro')}
-        className="w-[min(95vw,780px)]"
+        className="max-h-[calc(100dvh-24px)] w-[min(95vw,780px)] overflow-y-auto"
       >
         {!data || !form ? (
           <div className="grid h-60 place-items-center" role="status">
@@ -221,7 +221,7 @@ export function PublishDialog({ open, onClose }: { open: boolean; onClose: () =>
               </p>
             ) : null}
             {tab === 'settings' && data.canPublish ? (
-              <div className="flex justify-end gap-2 border-t border-border pt-4">
+              <div className="sticky -bottom-5 -mx-5 -mb-5 flex justify-end gap-2 border-t border-border bg-surface px-5 py-4 junior:-bottom-7 junior:-mx-7 junior:-mb-7 junior:px-7">
                 <Button
                   variant="primary"
                   size="lg"

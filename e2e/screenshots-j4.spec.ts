@@ -10,6 +10,7 @@ const DIR = 'docs/screenshots/j4'
 
 type Prefs = { mode: 'junior' | 'studio'; theme: 'light' | 'dark' }
 
+/** A fresh account per picture: its profile holds the mode and theme of the picture. */
 async function open(browser: Browser, prefs: Prefs): Promise<Page> {
   const context = await browser.newContext({
     locale: 'fr-FR',
@@ -19,11 +20,21 @@ async function open(browser: Browser, prefs: Prefs): Promise<Page> {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await usePrefs(page, { ...prefs, locale: 'fr' })
   await page.goto('/login')
-  const response = await page.request.post('/api/auth/sign-in/username', {
-    data: ADMIN,
-    headers: { origin: new URL(page.url()).origin },
-  })
-  expect(response.ok()).toBe(true)
+  const headers = { origin: new URL(page.url()).origin }
+  const post = async (path: string, data: unknown, method = 'POST') => {
+    const response = await page.request.fetch(path, { method, data, headers })
+    expect(response.ok(), path).toBe(true)
+  }
+  await post('/api/auth/sign-in/username', ADMIN)
+  const username = `camille-${unique().toLowerCase()}`
+  await post('/api/admin/users', { username, displayName: 'Camille', password: 'camille-password' })
+  await page.context().clearCookies()
+  await post('/api/auth/sign-in/username', { username, password: 'camille-password' })
+  await post(
+    '/api/me',
+    { uiMode: prefs.mode, theme: prefs.theme, locale: 'fr', avatar: 'fox' },
+    'PATCH',
+  )
   return page
 }
 
@@ -70,6 +81,9 @@ for (const [mode, theme] of VARIANTS) {
     await device.goto(url)
     await expect(device.locator('[data-rx-name="Bouton1"]')).toHaveText('Lancer')
     await expect(page.getByTestId('live-phone-count')).toHaveText('1 téléphone connecté')
+    // No tooltip in the picture.
+    await page.mouse.move(5, 890)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
     await page.screenshot({ path: `${DIR}/${mode}-${theme}-live.png` })
     if (mode === 'junior') {
       await device.screenshot({ path: `${DIR}/phone-${theme}-live.png` })

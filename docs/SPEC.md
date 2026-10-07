@@ -12,7 +12,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J1 | Comptes, espaces, invitations, projets côté serveur | fait (PR #2), voir § 0.2 |
 | J2 | Catalogue complet des composants et de leurs blocs | fait (PR #4), voir § 0.4 ; essai sur téléphones à faire (`docs/compatibilite.md`) |
 | J3 | Expérience Junior et Studio, apprentissage, accueil | fait (PR #7), voir § 0.3 |
-| J4 | Collaboration, test sur téléphone, publication PWA, export | à faire |
+| J4 | Collaboration, test sur téléphone, publication PWA, export | fait sauf l’édition à plusieurs (PR #6), voir § 0.5 |
 | J5 | Données et services : tables, variables, API web, cartes, graphiques | à faire |
 | J6 | Galerie, remix, modèles, assistant IA | à faire |
 | J7 | Mode jeu : scène, lutins, physique | à faire |
@@ -320,6 +320,70 @@ composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
 - J5 : la Liste de données et la Grille de données se brancheront sur une table (même propriété
   `items`, mêmes champs `image`, `title`, `subtitle`) ; les variables partagées reprennent le
   mécanisme des stockées (`shared` vit encore en mémoire).
+
+### 0.5 Ce que le J4 a fixé (07/10/2026)
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Édition à plusieurs (§ 4.9) pas faite** : elle repose sur la persistance Hocuspocus du
+  complément du J1 (PR #3), pas encore fusionnée à la fin du jalon. Tout le reste du J4 est fait.
+- Le **code des applis est généré par le studio** (le même générateur que l'aperçu), envoyé avec
+  le projet au test en direct et à la publication. Le serveur valide le projet
+  (`projectDocSchema`) et la forme du code, pas son contenu : Blockly côté serveur demanderait un
+  DOM (jsdom) et plusieurs Mo, et l'origine des applis est de toute façon traitée comme hostile
+  (aucun cookie, aucune API du studio) : un code forgé n'y obtient rien de plus qu'une appli.
+- Les **icônes** (192, 512, masquable 512, Apple 180, PNG) sont dessinées par le studio sur un
+  canvas (émoji sur fond de couleur, ou image du projet recadrée) : seul le navigateur a les
+  polices d'émoji. Le serveur vérifie que ce sont des PNG de 2 Mo au plus.
+- **Adresse** : choisie à la première publication, elle ne change plus (même dépubliée, elle
+  reste réservée au projet). Dépublier garde les versions ; `/a/<slug>/` répond 410 « Cette appli
+  n'est plus publiée » et le service worker de l'appli vide son cache et se retire. Un projet à la
+  corbeille est hors ligne aussi ; « Remettre en ligne » sert une version antérieure.
+- **Droits** : publient le propriétaire et les comptes en écriture ; refusé à qui est simple
+  membre d'un espace dont les responsables ont décoché « publier » (`membersCanPublish`, la règle
+  la plus stricte l'emporte). Pas de publication ni de test sur téléphone en mode invité (ils
+  passent par le serveur).
+- **Test sur téléphone** : le téléphone et l'éditeur passent par le serveur (WebSocket
+  `/_rx/live` et `/ws/live`), ce qui marche sur n'importe quel réseau qui joint l'instance. Lien
+  valable 8 heures, un seul actif par personne et par projet (un nouveau lien révoque le
+  précédent), jeton gardé en HMAC (`live_links`), rappelé par l'onglet (`sessionStorage`) pour
+  qu'un rechargement ne demande pas de rescanner. Le serveur ne stocke rien d'autre : il garde en
+  mémoire le dernier projet reçu pour le téléphone qui arrive. Console du téléphone : 40 messages
+  par seconde au plus, dans la console de l'éditeur (pastille de l'appareil) et dans le dialogue.
+- **Site web autonome** : `index.html`, lecteur, `app.json`, ressources, manifeste et icônes, avec
+  des chemins relatifs (hébergeable dans n'importe quel dossier) ; **sans service worker** (son
+  adresse n'est pas connue d'avance). Le studio lit le lecteur construit sur l'origine des applis
+  (`/_rx/kit.json` et `/_app/*`, CORS réservé à l'origine du studio).
+- **Variables stockées** : gardées dans `localStorage` sous `rublox:<appId>:` (`app:<publication>`,
+  `live:<projet>`, `site:<projet>`), en mémoire dans l'aperçu. Les variables partagées restent
+  au J5.
+
+**Contrats pour les jalons suivants**
+
+- Format et protocole : `packages/schema/src/publish.ts` (`appSettingsSchema`, `appBundleSchema`,
+  `PublishedApp`, `APP_ICON_FILES`, messages `LiveTo*` / `LiveFrom*`, fichier `.rublox` :
+  `project.json` + `assets/<sha256>`, relu par `migrateProject`).
+- Base : `publications` (slug unique, version courante), `publication_versions` (réglages, paquet
+  `{ doc, code }`, icônes), `live_links`. API : `GET|PUT|DELETE /api/projects/:id/publication`,
+  `GET …/publication/slug/:slug`, `POST …/publication/versions/:v/current`,
+  `POST|DELETE /api/projects/:id/live[/:linkId]` (`routes/publish.ts`).
+- Origine des applis : `/a/<slug>/` (et `install`, `app.json`, `manifest.webmanifest`, `sw.js`,
+  `icon-192.png`, `icon-512.png`, `icon-maskable.png`, `apple-touch-icon.png`), `/live/<jeton>`,
+  `/_rx/live`, `/_rx/kit.json` (`published.ts`, `live.ts`). La page reçoit
+  `page: { kind: 'app' | 'live' }` dans `rublox-config` ; le lecteur choisit sa vue par
+  `readPage()` (`apps/player/src/page.ts`), aussi d'après l'adresse en développement.
+- **WebSockets** : un seul écouteur `upgrade`, `Upgrades` (`apps/server/src/upgrades.ts`) ; chaque
+  point d'entrée s'y ajoute (origine, chemin, `Origin` exigé). Hocuspocus (`/ws/collab`) doit y
+  passer aussi : un second écouteur qui ferme les sockets inconnues casserait les autres.
+- Moteur : option `storage` (`AppStorage`, `localAppStorage(appId)`) ; le J5 y branche les
+  variables stockées et partagées.
+- Studio : `buildBundle(doc)` (`editor/publish/bundle.ts`, Blockly chargé à la demande),
+  `useLive` / `live.start(session)` (`editor/publish/live.ts`), `drawIcons`, `exportProject`,
+  `importArchive`, `exportSite` (`storage/archive.ts`). Les messages de la console peuvent porter
+  `source` (l'appareil). Chaînes du J4 : `packages/i18n/src/{fr,en}/publish.ts` (`live`,
+  `publish`, `transfer` dans `studio`, et l'espace `player` pour les pages du lecteur).
+- J6 (galerie, « Essayer ») : afficher l'appli publiée dans un `iframe` vers `/a/<slug>/` ; le
+  bouton « Installer » ne s'y montre pas.
 
 ## 1. En bref
 
