@@ -126,7 +126,7 @@ export type App = ReturnType<typeof createApp>
 /**
  * Better Auth, behind an allowlist of endpoints (`AUTH_ROUTES`). Failed sign-ins count towards
  * the brute-force limit, and Better Auth reads the client address Rublox resolved, never
- * `X-Forwarded-For`.
+ * `X-Forwarded-For`. A route that needs a session answers 403 without one, not 401.
  */
 async function handleAuth(services: Services, raw: Request, c: Context): Promise<Response> {
   const path = new URL(raw.url).pathname.replace(/^\/api\/auth/, '')
@@ -149,6 +149,10 @@ async function handleAuth(services: Services, raw: Request, c: Context): Promise
   headers.set(CLIENT_IP_HEADER, ip)
   const response = await services.auth.handler(new Request(raw, { headers }))
   if (signIn && response.status >= 400 && response.status < 500) services.guard.fail(ip)
+  // Only a failed sign-in may answer 401 (SPEC § 6.9): a missing session is a 403, as on /api.
+  if (response.status === 401 && !signIn) {
+    return Response.json({ error: 'signed_out' }, { status: 403 })
+  }
   return response
 }
 

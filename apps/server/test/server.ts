@@ -1,16 +1,23 @@
 import { mkdtempSync, rmSync } from 'node:fs'
+import type { Server } from 'node:http'
+import type { AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider'
+import { serve } from '@hono/node-server'
 import { createProject } from '@rublox/catalog'
-import { projectToYDoc } from '@rublox/schema'
+import { type ProjectDoc, projectToYDoc, yDocToProject } from '@rublox/schema'
 import { hc } from 'hono/client'
+import { WebSocket } from 'ws'
 import * as Y from 'yjs'
 import { bootstrapAdmin } from '../src/accounts.ts'
 import type { Api } from '../src/api.ts'
 import { createApp } from '../src/app.ts'
+import { COLLAB_PATH } from '../src/collab.ts'
 import { loadConfig } from '../src/config.ts'
 import { openDatabase } from '../src/db/index.ts'
 import { createServices } from '../src/services.ts'
+import { Upgrades } from '../src/upgrades.ts'
 import { APPS, STUDIO } from './helpers.ts'
 
 export const ADMIN = { username: 'admin', password: 'admin-password' }
@@ -46,13 +53,40 @@ export async function createTestServer(env: Record<string, string> = {}) {
     if (res.status !== 200) throw new Error(`sign-in of ${username} failed: ${res.status}`)
     return c
   }
+  // A real HTTP server, started on demand: the WebSocket of the documents needs one.
+  let listening: Promise<{ server: Server; port: number }> | undefined
+  const listen = () => {
+    listening ??= new Promise((resolve) => {
+      const server = serve({ fetch: app.fetch, port: 0, hostname: '127.0.0.1' }, (info) =>
+        resolve({ server: server as Server, port: (info as AddressInfo).port }),
+      )
+      // The same router as `index.ts`: documents and the live test side by side.
+      const upgrades = new Upgrades().add(services.collab.route())
+      for (const route of services.live.routes()) upgrades.add(route)
+      upgrades.attach(server as Server)
+    })
+    return listening
+  }
   return {
     app,
     services,
     config,
     client,
     signIn,
+    listen,
+    /** An editor tab of `client` on a project, connected to `/ws/collab`. */
+    tab: async (client: Client, projectId: string, origin = STUDIO) => {
+      const { port } = await listen()
+      return Tab.open(client, projectId, port, origin)
+    },
     close: async () => {
+      await services.collab.flush()
+      services.live.close()
+      if (listening) {
+        const { server } = await listening
+        server.closeAllConnections()
+        await new Promise((resolve) => server.close(resolve))
+      }
       await database.close()
       rmSync(dataDir, { recursive: true, force: true })
     },
@@ -119,4 +153,77 @@ export function newProjectState(name: string): string {
 
 export async function json<T = Record<string, unknown>>(response: Response): Promise<T> {
   return (await response.json()) as T
+}
+
+/**
+ * An editor tab: a Y.Doc kept in sync with `/ws/collab` by the Hocuspocus provider, with the
+ * cookies of its `Client` (as a browser sends them on the WebSocket upgrade).
+ */
+export class Tab {
+  readonly ydoc = new Y.Doc()
+  readonly provider: HocuspocusProvider
+  readonly socket: HocuspocusProviderWebsocket
+  /** Why the server refused the document, if it did. */
+  refused: string | null = null
+  readOnly = false
+
+  private constructor(client: Client, projectId: string, port: number, origin: string) {
+    const headers = {
+      host: STUDIO_HOST,
+      origin,
+      cookie: [...client.cookies].map(([k, v]) => `${k}=${v}`).join('; '),
+    }
+    class BrowserSocket extends WebSocket {
+      constructor(url: string, protocols?: string | string[]) {
+        super(url, protocols, { headers })
+      }
+    }
+    this.socket = new HocuspocusProviderWebsocket({
+      url: `ws://127.0.0.1:${port}${COLLAB_PATH}`,
+      WebSocketPolyfill: BrowserSocket,
+      maxAttempts: 1,
+    })
+    this.provider = new HocuspocusProvider({
+      websocketProvider: this.socket,
+      name: projectId,
+      document: this.ydoc,
+      onAuthenticationFailed: ({ reason }) => {
+        this.refused = reason
+      },
+      onAuthenticated: ({ scope }) => {
+        this.readOnly = scope === 'readonly'
+      },
+    })
+    this.provider.attach()
+  }
+
+  static async open(client: Client, projectId: string, port: number, origin: string) {
+    const tab = new Tab(client, projectId, port, origin)
+    await until(() => tab.provider.isSynced || tab.refused !== null, 'the tab to open')
+    return tab
+  }
+
+  get doc(): ProjectDoc {
+    return yDocToProject(this.ydoc)
+  }
+
+  /** Waits until the server acknowledged every local edit. */
+  async saved() {
+    await until(() => !this.provider.hasUnsyncedChanges, 'the edits to reach the server')
+  }
+
+  close() {
+    this.provider.destroy()
+    this.socket.destroy()
+    this.ydoc.destroy()
+  }
+}
+
+/** Polls `check` until it holds (5 s at most). */
+export async function until(check: () => boolean | Promise<boolean>, what = 'a condition') {
+  const deadline = Date.now() + 5000
+  while (!(await check())) {
+    if (Date.now() > deadline) throw new Error(`timed out waiting for ${what}`)
+    await new Promise((resolve) => setTimeout(resolve, 20))
+  }
 }

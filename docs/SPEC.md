@@ -9,7 +9,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | Jalon | Contenu | État |
 |---|---|---|
 | J0 | Socle et tranche verticale (mode invité) | fait (PR #1), voir § 0.1 |
-| J1 | Comptes, espaces, invitations, projets côté serveur | fait (PR #2), voir § 0.2 |
+| J1 | Comptes, espaces, invitations, projets côté serveur | fait (PR #2, complément PR #3), voir § 0.2 |
 | J2 | Catalogue complet des composants et de leurs blocs | fait (PR #4), voir § 0.4 ; essai sur téléphones à faire (`docs/compatibilite.md`) |
 | J3 | Expérience Junior et Studio, apprentissage, accueil | fait (PR #7), voir § 0.3 |
 | J4 | Collaboration, test sur téléphone, publication PWA, export | fait sauf l’édition à plusieurs (PR #6), voir § 0.5 |
@@ -111,17 +111,28 @@ mise à jour de ce paragraphe.
   **échecs** (connexion, passkey, vérification et usage d'un code d'invitation), 5 par adresse en
   15 minutes, en mémoire. Better Auth lit l'adresse que Rublox a résolue (`X-Real-IP` seulement si
   `TRUST_PROXY=true`), jamais `X-Forwarded-For`.
-- Réponses 401 : `/api/me` n'en renvoie jamais (`user: null` hors connexion) et le studio ne
-  sonde aucune route protégée. Restent deux cas, voulus : un mauvais mot de passe (ce que le
-  reverse proxy doit voir) et une session révoquée depuis un autre appareil (une seule fois, puis
-  retour à la connexion).
+- Réponses 401 : **aucune en usage normal**. Une route protégée sans session valide (expirée,
+  révoquée ailleurs, compte supprimé) répond **403 `signed_out`**, y compris les routes de
+  Better Auth (un 401 de Better Auth hors connexion est réécrit par `handleAuth`). Seul un échec
+  de connexion (mauvais mot de passe) répond 401, ce que le reverse proxy doit voir. Le studio
+  détecte la perte de session par `/api/me` (200, `user: null`), relu au retour sur l'onglet et
+  toutes les 5 minutes, par une réponse `signed_out`, ou par le refus du document sur
+  `/ws/collab` ; il ne sonde jamais une route protégée. Tests : `test/session.test.ts` (session
+  expirée et révoquée) et `e2e/session.spec.ts` (aucun 401 enregistré par le navigateur).
 - Toute requête `/api/*` qui modifie quelque chose doit porter l'en-tête `Origin` du studio.
-- Projets du serveur : l'état Yjs est synchronisé **par HTTP** jusqu'à Hocuspocus (J4) :
-  `POST /api/projects/:id/sync` reçoit ce qui manque au serveur et renvoie ce qui manque au
-  studio (vecteurs d'état, base64), à chaque modification (600 ms), toutes les 15 s et au retour
-  sur l'onglet. Le serveur valide chaque état avec `projectDocSchema` et refuse un projet abîmé ;
-  il possède `meta.id` (UUIDv7 ; les projets invités gardent leur nanoid jusqu'au rapatriement).
-  Pas encore de cache hors ligne pour ces projets (J4).
+- Projets du serveur : le document Yjs est tenu par **Hocuspocus** (`/ws/collab`, origine du
+  studio, `Origin` vérifié avant l'upgrade, session lue dans le cookie ; un document = un
+  projet, nommé par son id). Chargé depuis `project_docs.state`, il y est rangé 2 s après la
+  dernière modification (10 s au plus), après validation par `projectDocSchema` : un état
+  invalide n'est jamais rangé (le dernier valide reste). Le serveur possède `meta.id` (UUIDv7).
+  Lecteurs et responsables ont une connexion en lecture seule ; un changement de droits
+  (partage, corbeille, transfert, suppression) ferme les connexions, qui se réauthentifient. Un
+  refus (`signed-out`, `not-found`) passe par le protocole Yjs, jamais par un HTTP 401. Le
+  renommage depuis le tableau de bord et la restauration d'une version passent par le document
+  vivant (`Collab.edit`), les onglets ouverts les reçoivent. Côté studio : `@hocuspocus/provider`
+  plus un cache **y-indexeddb** (`rublox-cache-<id>`, projets modifiables seulement, propre au
+  compte, vidé à la déconnexion) : un projet déjà ouvert se rouvre hors ligne et ses
+  modifications partent au retour du réseau (l'éditeur suit `online` / `offline` du navigateur).
 - Historique : instantanés JSON (`project_versions`), automatiques à la synchronisation si le
   dernier a plus de 10 minutes, ou nommés. Restaurer garde d'abord l'état courant, puis remplace
   le contenu par une modification Yjs ordinaire (les onglets ouverts la reçoivent).
@@ -138,10 +149,21 @@ mise à jour de ce paragraphe.
   classe (proposition du § 10).
 - Avatars : 12 illustrations SVG dessinées pour Rublox (`apps/studio/src/components/avatar.tsx`),
   le serveur accepte tout identifiant `[a-z0-9-]{1,32}`.
-- Transférer la propriété d'un projet (P1) est fait ; RGPD (export, suppression par soi-même,
-  P1), TOTP (P2), journal d'administration (P2) et commentaires des responsables (P2) restent à
-  faire.
-- `RUBLOX_SECRET` est obligatoire en production (le serveur refuse de démarrer sans).
+- Transférer la propriété d'un projet (P1) est fait. RGPD (P1) fait : `GET /api/me/export`
+  (JSON : profil, espaces, sessions, noms des passkeys, projets avec leur contenu et la liste
+  de leurs versions, fichiers, partages, favoris ; aucun secret), `DELETE /api/me` (mot de passe
+  redemandé ; refusé aux comptes membres, au dernier administrateur, et au dernier responsable
+  d'un espace qui a encore des membres ; un espace où le compte est seul part avec lui). Le
+  responsable exporte et supprime les comptes créés par son espace, l'administrateur supprime
+  avec les mêmes règles. TOTP (P2), journal d'administration (P2) et commentaires des
+  responsables (P2) restent à faire.
+- `RUBLOX_SECRET` est obligatoire en production : le serveur refuse de démarrer sans, avec moins
+  de 32 octets, ou avec une valeur publique (celle d'exemple de `docker/compose.yaml`,
+  `EXAMPLE_SECRET`, ou celle de développement). L'exemple de compose ne démarre donc pas tel
+  quel : c'est voulu.
+- L'aperçu de l'éditeur est une `iframe` avec `sandbox="allow-scripts allow-same-origin
+  allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-downloads"` : sans
+  `allow-top-navigation`, une appli ne peut pas rediriger l'onglet du studio.
 
 **Contrats pour les jalons suivants**
 
@@ -159,9 +181,14 @@ mise à jour de ce paragraphe.
   Lottie passent par là, jamais directement par IndexedDB).
 - Tableau de bord : `ProjectsBackend` (`storage/backend.ts`), `guestBackend` ou `serverBackend`.
 - Chaînes du J1 : `packages/i18n/src/{fr,en}/accounts.ts`, fondues dans l'espace `studio`.
-- J4 : Hocuspocus remplace `ServerSource.sync` (même `project_docs.state`, mêmes droits via
-  `requireProject`, cookie de session sur `/ws/collab`) ; ajouter le cache y-indexeddb des
-  projets du serveur ; appliquer `membersCanPublish`.
+- Documents : `Collab` (`apps/server/src/collab.ts`, dans `services.collab`) : `edit(id,
+  userId, fn)` pour toute écriture du serveur dans un projet, `read(id)` pour le lire,
+  `reconnect(id)` après un changement de droits. Côté studio, `ServerSource.provider` est le
+  `HocuspocusProvider` du projet ouvert.
+- J4 : la présence et l'édition à plusieurs s'ajoutent sur ce même provider (awareness) ;
+  appliquer `membersCanPublish`.
+- Une route protégée sans session répond `403 signed_out`, jamais 401 : garder cette règle
+  pour toute nouvelle route (`requireUser`).
 - J3 : les comptes créés par un espace démarrent en Junior (`uiMode`) ; `Avatar` et la mascotte
   sont réutilisables ; la progression d'apprentissage se rattache à `user.id`.
 
@@ -373,8 +400,8 @@ composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
   `page: { kind: 'app' | 'live' }` dans `rublox-config` ; le lecteur choisit sa vue par
   `readPage()` (`apps/player/src/page.ts`), aussi d'après l'adresse en développement.
 - **WebSockets** : un seul écouteur `upgrade`, `Upgrades` (`apps/server/src/upgrades.ts`) ; chaque
-  point d'entrée s'y ajoute (origine, chemin, `Origin` exigé). Hocuspocus (`/ws/collab`) doit y
-  passer aussi : un second écouteur qui ferme les sockets inconnues casserait les autres.
+  point d'entrée s'y ajoute (origine, chemin, `Origin` exigé). Hocuspocus (`/ws/collab`) y
+  passe aussi (`Collab.route()`, complément du J1) : un second écouteur casserait les autres.
 - Moteur : le lecteur passe `appId` à `Engine` (stockage du J2) pour l'appli publiée, le test
   en direct et le site exporté.
 - Service worker d'une appli publiée : il sert aussi aux notifications du composant Notifications

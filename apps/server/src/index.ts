@@ -58,8 +58,10 @@ async function main() {
     )
   })
 
-  // WebSockets: the live test of a project on a phone (`/ws/live`, `/_rx/live`).
+  // WebSockets: project documents (`/ws/collab`) and the live test of a project on a phone
+  // (`/ws/live`, `/_rx/live`), all through one router.
   const upgrades = new Upgrades()
+  upgrades.add(services.collab.route())
   for (const route of services.live.routes()) upgrades.add(route)
   upgrades.attach(server as Server)
 
@@ -69,6 +71,7 @@ async function main() {
     shuttingDown = true
     clearInterval(purgeTimer)
     services.live.close()
+    services.collab.close()
     logger.info({ signal }, 'shutting down')
     const timer = setTimeout(() => {
       logger.error('graceful shutdown timed out')
@@ -78,6 +81,7 @@ async function main() {
     server.close(async (error) => {
       if (error) logger.error({ err: error }, 'error while closing the HTTP server')
       try {
+        await services.collab.flush()
         await database.close()
       } catch (closeError) {
         logger.error({ err: closeError }, 'error while closing the database')

@@ -357,7 +357,7 @@ function SaveIndicator() {
     <Tooltip content={hint}>
       <span
         className={cn(
-          'hidden items-center gap-1.5 px-1 text-ui-sm text-muted lg:inline-flex',
+          'hidden shrink-0 items-center gap-1.5 whitespace-nowrap px-1 text-ui-sm text-muted lg:inline-flex',
           state === 'offline' && 'text-text',
         )}
         role="status"

@@ -21,6 +21,7 @@ import {
   user,
 } from '../db/schema.ts'
 import { type ApiEnv, fail, iso, jsonBody, queryParams, requireAdmin } from '../http.ts'
+import { deleteAccount } from '../privacy.ts'
 import type { Services } from '../services.ts'
 import { settingsSchema } from '../settings.ts'
 import type { SpaceKind } from './me.ts'
@@ -152,8 +153,7 @@ export function adminRoutes(services: Services) {
       const me = requireAdmin(c)
       const targetId = c.req.param('userId')
       if (targetId === me.id) fail(409, 'self')
-      const deleted = await db.delete(user).where(eq(user.id, targetId)).returning({ id: user.id })
-      if (deleted.length === 0) fail(404, 'not_found')
+      await deleteAccount(services, targetId)
       return c.json({ ok: true })
     })
     .get('/spaces', async (c) => {

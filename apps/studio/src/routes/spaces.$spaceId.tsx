@@ -3,6 +3,7 @@ import { createFileRoute, Link, Navigate, useNavigate } from '@tanstack/react-ro
 import type { InferResponseType } from 'hono/client'
 import {
   ArrowLeft,
+  Download,
   KeyRound,
   LogOut,
   MoreHorizontal,
@@ -27,6 +28,7 @@ import { Segmented } from '../components/ui/segmented.tsx'
 import { Switch } from '../components/ui/switch.tsx'
 import { ProjectThumbnail } from '../dashboard/thumbnail.tsx'
 import { api, call } from '../lib/api.ts'
+import { downloadJson } from '../lib/download.ts'
 import { errorMessage } from '../lib/errors.ts'
 import { isDark, usePrefs } from '../lib/prefs.ts'
 import { ME_KEY, useMe } from '../lib/session.ts'
@@ -211,6 +213,22 @@ function MembersSection({ data, meId }: { data: Details; meId: string }) {
                     <>
                       <MenuItem icon={<KeyRound size={15} />} onSelect={() => setResetting(member)}>
                         {t('spaces.resetPassword')}
+                      </MenuItem>
+                      <MenuItem
+                        icon={<Download size={15} />}
+                        onSelect={() =>
+                          run(async () => {
+                            // Typed loosely: the export's full type is too deep for the checker.
+                            const data: unknown = await call(
+                              api.spaces[':spaceId'].accounts[':userId'].export.$get({
+                                param: { spaceId, userId: member.id },
+                              }) as unknown as Promise<Response>,
+                            )
+                            downloadJson(data, `rublox-${member.username}.json`)
+                          })
+                        }
+                      >
+                        {t('spaces.exportAccount')}
                       </MenuItem>
                       <MenuSeparator />
                       <MenuItem

@@ -1,5 +1,6 @@
 import type { Logger } from 'pino'
 import { type Auth, createAuth } from './auth.ts'
+import { Collab } from './collab.ts'
 import type { Config } from './config.ts'
 import type { Database } from './db/index.ts'
 import { FileStore } from './files.ts'
@@ -22,6 +23,8 @@ export interface Services {
   guard: FailureGuard
   /** "Test on my phone": the relay between editors and phones (J4). */
   live: LiveHub
+  /** The live project documents (Hocuspocus, `/ws/collab`). */
+  collab: Collab
   logger?: Pick<Logger, 'debug' | 'info' | 'warn' | 'error'>
 }
 
@@ -46,6 +49,7 @@ export function createServices(
     }),
     guard: new FailureGuard(),
     live: new LiveHub({ db, auth, config, logger }),
+    collab: new Collab({ db, auth, config, logger }),
     logger,
   }
 }

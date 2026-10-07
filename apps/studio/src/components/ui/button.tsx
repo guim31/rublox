@@ -11,8 +11,7 @@ const VARIANTS: Record<Variant, string> = {
     'bg-surface text-text border border-border hover:bg-surface-2 hover:border-border-strong',
   ghost: 'text-text hover:bg-surface-2',
   soft: 'bg-primary-soft text-primary-text hover:brightness-95 dark:hover:brightness-125',
-  // The dark theme's danger colour is light: dark text keeps the contrast (WCAG AA).
-  danger: 'bg-danger text-white hover:brightness-110 dark:text-[#1c1a2b]',
+  danger: 'bg-danger text-on-danger hover:brightness-95',
 }
 
 const SIZES: Record<Size, string> = {

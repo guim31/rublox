@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { setSignedOutHandler } from './lib/api.ts'
 import { i18next, initI18n } from './lib/i18n.ts'
 import { usePrefs } from './lib/prefs.ts'
-import { markSignedOut } from './lib/session.ts'
+import { markSignedOut, watchSession } from './lib/session.ts'
 import { routeTree } from './routeTree.gen.ts'
 import './styles/app.css'
 
@@ -13,12 +13,15 @@ initI18n(usePrefs.getState().locale)
 
 const router = createRouter({ routeTree, defaultPreload: 'intent', scrollRestoration: true })
 
-// A session revoked from another device: say it once, then offer to sign in again.
-setSignedOutHandler(() => {
+// A session that expired or was revoked elsewhere: say it once, then offer to sign in again.
+// Noticed by `/api/me` (focus, every few minutes) or an answer `signed_out` (403, never 401).
+const sessionLost = () => {
   markSignedOut()
   toast(i18next.t('errors.signed_out'), { id: 'signed-out' })
   if (!location.pathname.startsWith('/login')) void router.navigate({ to: '/login' })
-})
+}
+setSignedOutHandler(sessionLost)
+watchSession(sessionLost)
 
 declare module '@tanstack/react-router' {
   interface Register {
