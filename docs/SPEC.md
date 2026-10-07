@@ -596,9 +596,12 @@ présence), fichiers des ressources recopiés quand on colle dans un autre proje
   Compiler mémorisait le canevas sur `session.assetUrl`, qui ne change jamais. `useAssetUrl()`
   donne une fonction qui change à l'arrivée d'un fichier.
 - Le test axe « accounts » se connectait au même `admin` dans ses quatre variantes en
-  parallèle, chacune réécrivant le thème du profil des autres ; `slow.test.ts` attendait des
-  délais fixes. Chacun a désormais son compte, et les tests du ralenti attendent l'état du
-  moteur.
+  parallèle : toutes recevaient le thème et le mode du profil de ce compte (le profil
+  l'emporte), fixés par la première connectée ; la variante « sombre » pouvait s'afficher en
+  clair (vérifié). Chaque variante a désormais son administrateur, et vérifie son thème et son
+  mode avant chaque mesure. `slow.test.ts` attendait des délais fixes (20 à 60 ms) des étapes
+  minutées : il attend l'état du moteur (en pause, bloc allumé, valeur écrite). Les deux
+  passent 20 fois de suite (80 passages pour les quatre variantes d'axe).
 
 **Contrats pour les jalons suivants**
 

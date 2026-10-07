@@ -3,9 +3,10 @@ import { expect, type Page, test } from '@playwright/test'
 import { ADMIN, addComponent, newProject, openBlocks, signIn, unique, usePrefs } from './helpers.ts'
 
 /**
- * A new administrator of its own. The four variants run in parallel: signed in as the shared
- * `admin`, each one rewrote the profile (theme, mode) that the others then received on their
- * next page load, so a page could switch theme while axe measured its contrasts.
+ * A new administrator of its own. Signed in as the shared `admin`, the four variants (run in
+ * parallel) all received the theme and mode of its profile, set by whichever signed in first
+ * (the profile wins over the browser): a variant could check the other theme than its own, or
+ * switch theme between two pages.
  */
 async function ownAdmin(page: Page): Promise<string> {
   const username = `axe-admin-${unique().toLowerCase()}`
@@ -68,6 +69,9 @@ for (const mode of ['junior', 'studio'] as const) {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await usePrefs(page, { mode, theme, locale: 'fr' })
       const check = async (where: string) => {
+        // The page shows this variant's theme and mode, not those of another profile.
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+        await expect(page.locator('html')).toHaveAttribute('data-mode', mode)
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
           .exclude('[data-testid=preview-frame]')
