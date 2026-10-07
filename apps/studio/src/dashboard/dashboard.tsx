@@ -32,6 +32,7 @@ import { relativeTime } from '../lib/time.ts'
 import { guestBackend, serverBackend } from '../storage/backend.ts'
 import type { ProjectSummary } from '../storage/projects.ts'
 import { GuestImport } from './guest-import.tsx'
+import { ImportButton } from './import-button.tsx'
 import { useProjectMutation, useProjects } from './queries.ts'
 import { ProjectThumbnail } from './thumbnail.tsx'
 
@@ -160,14 +161,17 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
             <h1 className="text-ui-xl font-strong tracking-tight">{t('dashboard.title')}</h1>
             {signedIn ? null : <p className="mt-1 text-muted">{t('guest.explain')}</p>}
           </div>
-          <Button
-            variant="primary"
-            size="lg"
-            icon={<Plus size={18} />}
-            onClick={() => setCreating(true)}
-          >
-            {t('dashboard.newProject')}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {backend ? <ImportButton target={backend.kind} /> : null}
+            <Button
+              variant="primary"
+              size="lg"
+              icon={<Plus size={18} />}
+              onClick={() => setCreating(true)}
+            >
+              {t('dashboard.newProject')}
+            </Button>
+          </div>
         </div>
 
         {signedIn ? <GuestImport /> : null}

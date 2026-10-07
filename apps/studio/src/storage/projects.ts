@@ -117,6 +117,13 @@ export async function createProject(input: {
   return doc.meta.id
 }
 
+/** Adds a complete project to this browser (an imported `.rublox` file). */
+export async function addProject(doc: ProjectDoc): Promise<string> {
+  await storeDoc(doc)
+  await saveSummary(summarize(doc))
+  return doc.meta.id
+}
+
 /** Applies a change to a closed project's document (rename from the dashboard…). */
 async function withDoc<T>(id: string, change: (ydoc: Y.Doc) => T): Promise<T> {
   const { ydoc, persistence } = await openProjectDoc(id)

@@ -299,3 +299,26 @@ svg[display="none"] {
   stroke-width: 3px;
   stroke-dasharray: 6 3;
 }
+
+/* Printable QR code of a published app (J4): only the sheet is printed. */
+.print-sheet {
+  display: none;
+}
+@media print {
+  body > *:not(.print-sheet) {
+    /* biome-ignore lint/complexity/noImportantStyles: printing shows the sheet alone */
+    display: none !important;
+  }
+  .print-sheet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    min-height: 100vh;
+    color: #000;
+    background: #fff;
+    text-align: center;
+    font-family: var(--font-ui);
+  }
+}

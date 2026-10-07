@@ -116,6 +116,8 @@ describe('test on my phone', () => {
 
     const studio = editor(link.token)
     await studio.opened()
+    // The editor is in once the server has checked its session: it gets the phones.
+    await studio.next<LiveToStudio>((m) => m.type === 'phones')
     const device = phone(link.token)
     await device.opened()
     expect(await device.next<LiveToPhone>((m) => m.type === 'editor')).toEqual({

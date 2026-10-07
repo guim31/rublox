@@ -32,6 +32,11 @@ export const publish = {
     error: 'The test link could not be created.',
     pill: 'Live test: {{phones}}',
     reopen: 'Open the phone test',
+    ended: {
+      revoked: 'This link was stopped.',
+      expired: 'This link has expired.',
+      'not-found': 'This link no longer works.',
+    },
   },
   publish: {
     title: 'Publish “{{name}}”',

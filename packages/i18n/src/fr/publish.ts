@@ -33,6 +33,11 @@ export const publish = {
     error: 'Le lien de test n’a pas pu être créé.',
     pill: 'Test en direct : {{phones}}',
     reopen: 'Ouvrir le test sur téléphone',
+    ended: {
+      revoked: 'Ce lien a été arrêté.',
+      expired: 'Ce lien a expiré.',
+      'not-found': 'Ce lien ne marche plus.',
+    },
   },
   publish: {
     title: 'Publier « {{name}} »',
