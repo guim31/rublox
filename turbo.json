@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/turbo/schema.json",
   "ui": "stream",
+  "globalDependencies": ["content/**"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

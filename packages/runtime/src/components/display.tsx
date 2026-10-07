@@ -75,7 +75,7 @@ export const SpinnerRenderer: Renderer = (p) => {
 
 export const RichTextRenderer: Renderer = (p) => {
   const text = String(p.props.text ?? '')
-  const link = cssColor(p.props.linkColor) ?? 'var(--rx-primary)'
+  const link = cssColor(p.props.linkColor) ?? 'var(--rx-primary-text)'
   return (
     <div
       {...rootAttributes(p, 'RichText')}
