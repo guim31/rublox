@@ -3,7 +3,7 @@ import type { ProjectDoc } from '@rublox/schema'
 import { type ReactNode, useLayoutEffect, useRef, useState } from 'react'
 import { cn } from '../lib/cn.ts'
 import { usePrefs } from '../lib/prefs.ts'
-import { findTarget, flyoutRect } from './targets.ts'
+import { anchorOf, findTarget, flyoutRect } from './targets.ts'
 
 type Rect = { left: number; top: number; width: number; height: number }
 
@@ -127,7 +127,33 @@ export function Bubble({
       const own = bubble.current?.getBoundingClientRect()
       const size = { width: own?.width ?? 340, height: own?.height ?? 160 }
       const flyout = flyoutRect()
-      const position = place(size, spot, flyout ? [flyout] : [], fallback)
+      const anchor = element ? anchorOf(element).getBoundingClientRect() : null
+      // In Blocks, the bubble waits at the bottom of the workspace, beside the toolbox and its
+      // flyout: blocks are dropped higher up, and the bubble must not be in their way.
+      const workspace =
+        target && /^(toolbox|toolbox-category|workspace)(:|$)/.test(target)
+          ? findTarget('workspace', doc, locale)?.getBoundingClientRect()
+          : undefined
+      const toolbox = document.querySelector('.blocklyToolbox')?.getBoundingClientRect()
+      const docked = workspace
+        ? {
+            left: Math.min(
+              Math.max(flyout?.right ?? 0, toolbox?.right ?? workspace.left) + GAP,
+              workspace.right - size.width - GAP,
+            ),
+            top: workspace.bottom - size.height - GAP,
+          }
+        : null
+      const position =
+        docked ??
+        place(
+          size,
+          anchor && spot
+            ? { left: anchor.left, top: spot.top, width: anchor.width, height: spot.height }
+            : spot,
+          [...(spot ? [spot] : []), ...(flyout ? [flyout] : [])],
+          fallback,
+        )
       const next = { spot, ...position }
       const key = JSON.stringify(next)
       if (key !== last) {

@@ -1,4 +1,4 @@
-import { BADGES, type BadgeId, badgesFromProgress, badgesFromProject } from '@rublox/learn'
+import { BADGES, type BadgeId, badgesFromProject } from '@rublox/learn'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -8,7 +8,7 @@ import { usePrefs } from '../lib/prefs.ts'
 import { play } from './sounds.ts'
 import { awardBadge, useLearn } from './store.ts'
 
-/** Looks for badges earned by the project being edited, and by the progression. */
+/** Looks for badges earned by the project being edited. */
 export function BadgeWatcher() {
   const doc = useDoc()
   const progress = useLearn((s) => s.progress)
@@ -16,7 +16,7 @@ export function BadgeWatcher() {
   useEffect(() => {
     if (!loaded) return
     const timer = setTimeout(() => {
-      for (const id of new Set([...badgesFromProject(doc), ...badgesFromProgress(progress)])) {
+      for (const id of badgesFromProject(doc)) {
         if (!progress.badges[id]) void awardBadge(id)
       }
     }, 600)
@@ -49,7 +49,7 @@ export function BadgeToasts() {
           description: texts.text,
           icon:
             mode === 'junior' ? (
-              <Mascot size={30} mood="cheer" />
+              <Mascot size={22} mood="cheer" />
             ) : (
               <span aria-hidden="true">{badge?.icon}</span>
             ),

@@ -1,5 +1,6 @@
 import { getComponentDef } from '@rublox/catalog'
 import type { ComponentId, Screen } from '@rublox/schema'
+import { isTouchDragging } from './touch-drag.ts'
 
 /** What is being dragged: a new component from the palette, or an existing one. */
 export type DragPayload = { kind: 'new'; type: string } | { kind: 'move'; id: ComponentId }
@@ -10,9 +11,19 @@ export const DRAG_MIME = 'application/x-rublox'
 let current: DragPayload | null = null
 
 export function startDrag(event: React.DragEvent, payload: DragPayload): void {
+  // A finger is dragging through the pointer fallback (`touch-drag.ts`): no native drag.
+  if (isTouchDragging()) {
+    event.preventDefault()
+    return
+  }
   current = payload
   event.dataTransfer.setData(DRAG_MIME, JSON.stringify(payload))
   event.dataTransfer.effectAllowed = payload.kind === 'new' ? 'copy' : 'move'
+}
+
+/** Set by the touch fallback, which has no `dataTransfer` of its own. */
+export function setDrag(payload: DragPayload | null): void {
+  current = payload
 }
 
 export function currentDrag(): DragPayload | null {

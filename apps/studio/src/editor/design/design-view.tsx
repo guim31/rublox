@@ -26,7 +26,7 @@ export function DesignView({ screenId }: { screenId: ScreenId }) {
       >
         <PanelGroup id={`design-left-${mode}`} orientation="vertical" className="h-full">
           <Panel id="palette" defaultSize="55%" minSize={120} className="flex h-full flex-col">
-            <div className="flex h-full min-h-0 flex-col" data-tour="palette">
+            <div className="flex h-full min-h-0 flex-col" data-tour="palette" data-tour-anchor>
               <Palette screenId={screenId} />
             </div>
           </Panel>

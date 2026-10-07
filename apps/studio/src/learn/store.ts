@@ -1,5 +1,6 @@
 import {
   type BadgeId,
+  badgesFromProgress,
   type ChallengeProgress,
   EMPTY_PROGRESS,
   type LearningProgress,
@@ -78,6 +79,7 @@ export async function saveTutorial(entry: TutorialProgress): Promise<void> {
     progress: { ...state.progress, tutorials: { ...state.progress.tutorials, [entry.id]: entry } },
   }))
   await store.saveTutorial(entry)
+  awardProgressBadges()
 }
 
 export async function saveChallenge(entry: ChallengeProgress): Promise<void> {
@@ -88,6 +90,12 @@ export async function saveChallenge(entry: ChallengeProgress): Promise<void> {
     },
   }))
   await store.saveChallenge(entry)
+  awardProgressBadges()
+}
+
+/** Badges of the progression itself (tutorials finished, three stars), right when earned. */
+function awardProgressBadges(): void {
+  for (const id of badgesFromProgress(useLearn.getState().progress)) void awardBadge(id)
 }
 
 /** Records a badge; `true` when it is new (it is then queued to be shown). */

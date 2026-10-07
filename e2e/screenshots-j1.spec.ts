@@ -16,7 +16,12 @@ async function open(browser: Browser, prefs: Prefs): Promise<Page> {
   })
   const page = await context.newPage()
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await usePrefs(page, { ...prefs, locale: 'fr' })
+  await usePrefs(page, {
+    ...prefs,
+    locale: 'fr',
+    welcomed: true,
+    toursSeen: { junior: true, studio: true },
+  })
   return page
 }
 

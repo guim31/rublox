@@ -19,6 +19,7 @@ import { ComponentIcon } from '../component-icon.tsx'
 import { useDoc, useSession } from '../context.tsx'
 import { useEditor } from '../store.ts'
 import { currentDrag, endDrag, isContainer, parentOf, startDrag, validTarget } from './dnd.ts'
+import { touchDrag } from './touch-drag.ts'
 
 type Row = { id: ComponentId; depth: number }
 type Zone = { id: ComponentId; where: 'before' | 'after' | 'inside' }
@@ -230,6 +231,11 @@ export function Layers({ screenId }: { screenId: ScreenId }) {
               tabIndex={active ? 0 : -1}
               draggable={!isRoot && !node.locked && renaming !== id}
               onDragStart={(event) => startDrag(event, { kind: 'move', id })}
+              onPointerDown={
+                !isRoot && !node.locked && renaming !== id
+                  ? touchDrag(() => ({ kind: 'move', id }), node.name)
+                  : undefined
+              }
               onDragEnd={() => {
                 endDrag()
                 setZone(null)

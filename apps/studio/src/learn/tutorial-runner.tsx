@@ -110,15 +110,19 @@ function Runner({ tab, workspace }: { tab: 'design' | 'blocks'; workspace: strin
     advancing.current = false
   }
 
-  // A step is validated as soon as its check holds.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `advance` reads the latest state
+  // A step is validated as soon as its check holds…
   useEffect(() => {
     if (!step?.check || step.check.kind === 'manual' || done || active?.paused) return
-    if (!evaluate(step.check, state)) return
-    setDone(true)
+    if (evaluate(step.check, state)) setDone(true)
+  }, [state, step, done, active?.paused])
+
+  // …then "Nice one!" stays a moment, whatever else changes meanwhile.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `advance` reads the latest state
+  useEffect(() => {
+    if (!done) return
     const timer = setTimeout(() => void advance(), STEP_DONE_MS)
     return () => clearTimeout(timer)
-  }, [state, step, done, active?.paused])
+  }, [done])
 
   if (!active || !tutorial || !texts) return null
 

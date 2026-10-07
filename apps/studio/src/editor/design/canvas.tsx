@@ -23,6 +23,7 @@ import {
   startDrag,
   validTarget,
 } from './dnd.ts'
+import { touchDrag } from './touch-drag.ts'
 
 type Box = { left: number; top: number; width: number; height: number }
 
@@ -206,7 +207,8 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
         onDragOver={(event) => {
           if (!currentDrag()) return
           event.preventDefault()
-          event.dataTransfer.dropEffect = currentDrag()?.kind === 'new' ? 'copy' : 'move'
+          if (event.dataTransfer)
+            event.dataTransfer.dropEffect = currentDrag()?.kind === 'new' ? 'copy' : 'move'
           setDrop(computeDrop(event))
         }}
         onDragLeave={(event) => {
@@ -252,6 +254,11 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
               canMove={Boolean(canEditBox)}
               canResize={Boolean(canEditBox)}
               onDragHandle={(event) => selected && startDrag(event, { kind: 'move', id: selected })}
+              onTouchHandle={touchDrag(
+                () => (selected ? { kind: 'move', id: selected } : null),
+                selectedNode?.name ?? '',
+                true,
+              )}
               onResize={(dimension, value) => {
                 if (!selected) return
                 if (dimension !== 'height')
@@ -305,6 +312,7 @@ function Overlay(props: {
   canMove: boolean
   canResize: boolean
   onDragHandle: (event: React.DragEvent) => void
+  onTouchHandle: (event: React.PointerEvent) => void
   onResize: (
     dimension: 'width' | 'height' | 'both',
     size: { width: number; height: number },
@@ -342,11 +350,16 @@ function Overlay(props: {
         <div
           className="absolute rounded-[3px] outline-[1.5px] outline-dashed outline-primary/70"
           style={hovered}
+        />
+      ) : null}
+      {hovered && props.hoveredLabel && !(selected && Math.abs(selected.top - hovered.top) < 24) ? (
+        // Names sit outside the phone, on the left: they never hide a neighbour (J0 review).
+        <span
+          className="absolute right-[calc(100%+14px)] rounded bg-primary/80 px-1.5 text-[11px] leading-5 whitespace-nowrap text-white"
+          style={{ top: hovered.top }}
         >
-          <span className="absolute -top-5 left-0 rounded bg-primary/80 px-1 text-[10px] leading-4 whitespace-nowrap text-white">
-            {props.hoveredLabel}
-          </span>
-        </div>
+          {props.hoveredLabel}
+        </span>
       ) : null}
       {selected ? (
         <div
@@ -354,23 +367,6 @@ function Overlay(props: {
           style={selected}
           data-testid="selection-box"
         >
-          <div className="pointer-events-auto absolute -top-6 left-0 flex h-5 items-center gap-0.5 rounded bg-primary pr-1.5 pl-0.5 text-[11px] font-semibold whitespace-nowrap text-white shadow-1">
-            {props.canMove ? (
-              <span
-                draggable
-                onDragStart={props.onDragHandle}
-                onDragEnd={endDrag}
-                className="cursor-grab"
-                role="img"
-                aria-label={props.selectedLabel}
-              >
-                <GripVertical size={13} />
-              </span>
-            ) : (
-              <span className="w-1" />
-            )}
-            {props.selectedLabel}
-          </div>
           {props.canResize ? (
             <>
               <Handle
@@ -390,6 +386,35 @@ function Overlay(props: {
               />
             </>
           ) : null}
+        </div>
+      ) : null}
+      {selected ? (
+        <div
+          className="pointer-events-auto absolute right-[calc(100%+14px)] flex h-6 items-center gap-0.5 rounded-md bg-primary pr-2 pl-0.5 text-[12px] font-semibold whitespace-nowrap text-white shadow-1"
+          style={{ top: selected.top }}
+          data-testid="selection-label"
+        >
+          {props.canMove ? (
+            <span
+              draggable
+              onDragStart={props.onDragHandle}
+              onDragEnd={endDrag}
+              onPointerDown={props.onTouchHandle}
+              className="cursor-grab touch-none"
+              role="img"
+              aria-label={props.selectedLabel}
+            >
+              <GripVertical size={14} />
+            </span>
+          ) : (
+            <span className="w-1.5" />
+          )}
+          {props.selectedLabel}
+          <span
+            aria-hidden="true"
+            className="absolute top-1/2 left-full h-px bg-primary/70"
+            style={{ width: 14 + selected.left }}
+          />
         </div>
       ) : null}
       {props.drop ? (

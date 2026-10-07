@@ -32,6 +32,7 @@ export function findTarget(
   const nth = n ? Number(n) : 1
   switch (kind) {
     case 'palette':
+      if (!value) return visible(document.querySelector('[data-tour="palette"]'))
       return visible(document.querySelector(`[data-testid="palette-${CSS.escape(value)}"]`))
     case 'layer':
       return doc
@@ -58,6 +59,14 @@ export function findTarget(
     default:
       return visible(document.querySelector(`[data-tour="${CSS.escape(target)}"]`))
   }
+}
+
+/**
+ * What a bubble sits beside: the panel holding the target when it is marked
+ * `data-tour-anchor` (the palette), so that the bubble does not hide the target's neighbours.
+ */
+export function anchorOf(element: HTMLElement): HTMLElement {
+  return element.closest<HTMLElement>('[data-tour-anchor]') ?? element
 }
 
 /** The open flyout of the toolbox, which a bubble must not cover. */
