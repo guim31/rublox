@@ -169,6 +169,8 @@ test('slow motion lights the blocks up and stops on a breakpoint', async ({ page
 
 test('a finger drags a component from the palette onto the canvas', async ({ page }) => {
   await newProject(page)
+  // The full catalog (J2) pushes the Button below the fold of Junior's palette.
+  await page.getByTestId('palette-Button').scrollIntoViewIfNeeded()
   const from = await page.getByTestId('palette-Button').boundingBox()
   const to = await page.getByTestId('canvas-screen').boundingBox()
   if (!from || !to) throw new Error('not visible')
