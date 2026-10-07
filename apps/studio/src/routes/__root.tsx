@@ -1,11 +1,12 @@
 import { QueryClientProvider } from '@tanstack/react-query'
-import { createRootRoute, type ErrorComponentProps, Link, Outlet } from '@tanstack/react-router'
+import { createRootRoute, type ErrorComponentProps, Outlet } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Toaster } from 'sonner'
 import { Mascot } from '../components/brand.tsx'
 import { CommandPalette } from '../components/command-palette.tsx'
 import { Button } from '../components/ui/button.tsx'
+import { LinkButton } from '../components/ui/link-button.tsx'
 import { TooltipProvider } from '../components/ui/tooltip.tsx'
 import { BadgeToasts } from '../learn/badges.tsx'
 import { useLearningSync } from '../learn/sync.ts'
@@ -84,9 +85,9 @@ function NotFound() {
         <Mascot size={110} />
         <h1 className="text-ui-xl font-strong">{t('notFound.title')}</h1>
         <p className="text-muted">{t('notFound.text')}</p>
-        <Link to="/">
-          <Button variant="primary">{t('notFound.action')}</Button>
-        </Link>
+        <LinkButton to="/" variant="primary">
+          {t('notFound.action')}
+        </LinkButton>
       </div>
     </main>
   )

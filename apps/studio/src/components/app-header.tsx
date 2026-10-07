@@ -10,8 +10,8 @@ import { signOut, useMe } from '../lib/session.ts'
 import { Avatar } from './avatar.tsx'
 import { Logo } from './brand.tsx'
 import { ModeSwitch, PrefsMenu } from './prefs-controls.tsx'
-import { Button } from './ui/button.tsx'
 import { Kbd } from './ui/kbd.tsx'
+import { LinkButton } from './ui/link-button.tsx'
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from './ui/menu.tsx'
 
 /** The top bar of every page but the editor: navigation, preferences and account. */
@@ -64,11 +64,9 @@ export function AppHeader() {
         {me.isPending ? null : user ? (
           <UserMenu name={user.displayName} avatar={user.avatar} />
         ) : (
-          <Link to="/login">
-            <Button variant="soft" icon={<LogIn size={16} />}>
-              {t('userMenu.signIn')}
-            </Button>
-          </Link>
+          <LinkButton to="/login" variant="soft" icon={<LogIn size={16} />}>
+            {t('userMenu.signIn')}
+          </LinkButton>
         )}
       </div>
     </header>

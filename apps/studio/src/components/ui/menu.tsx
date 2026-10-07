@@ -1,8 +1,15 @@
 import { DropdownMenu } from 'radix-ui'
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '../../lib/cn.ts'
 
-export const Menu = DropdownMenu.Root
+/**
+ * A menu that does not hide the rest of the page from assistive technologies: a modal Radix
+ * menu sets `aria-hidden` on everything else while it is open, around elements that can
+ * still take the focus (axe `aria-hidden-focus`). Escape and a click outside still close it.
+ */
+export function Menu(props: ComponentProps<typeof DropdownMenu.Root>) {
+  return <DropdownMenu.Root modal={false} {...props} />
+}
 export const MenuTrigger = DropdownMenu.Trigger
 
 export function MenuContent({

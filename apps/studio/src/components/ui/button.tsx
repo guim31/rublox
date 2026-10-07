@@ -27,6 +27,20 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   ref?: Ref<HTMLButtonElement>
 }
 
+/** The look of a button, for a link that looks like one (`LinkButton`). */
+export function buttonClasses(
+  variant: Variant = 'secondary',
+  size: Size = 'md',
+  className?: string,
+) {
+  return cn(
+    'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap rounded-ui font-strong transition-[background,color,border,filter,transform] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
+    VARIANTS[variant],
+    SIZES[size],
+    className,
+  )
+}
+
 export function Button({
   variant = 'secondary',
   size = 'md',
@@ -36,16 +50,7 @@ export function Button({
   ...rest
 }: ButtonProps) {
   return (
-    <button
-      type="button"
-      className={cn(
-        'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap rounded-ui font-strong transition-[background,color,border,filter,transform] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
-        VARIANTS[variant],
-        SIZES[size],
-        className,
-      )}
-      {...rest}
-    >
+    <button type="button" className={buttonClasses(variant, size, className)} {...rest}>
       {icon}
       {children}
     </button>

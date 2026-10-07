@@ -226,7 +226,7 @@ body {
   margin: 4px 0 0;
   text-align: center;
   font-size: 13px;
-  color: #8a8799;
+  color: #615e74;
 }
 .install-sheet {
   position: fixed;
@@ -281,6 +281,7 @@ body {
     color: #f2f1f8;
   }
   .install-head p,
+  .install-footer,
   .waiting {
     color: #a9a6bb;
   }

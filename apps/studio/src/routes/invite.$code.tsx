@@ -9,6 +9,7 @@ import { PrefsMenu } from '../components/prefs-controls.tsx'
 import { Button } from '../components/ui/button.tsx'
 import { describedBy, Field } from '../components/ui/field.tsx'
 import { Input } from '../components/ui/input.tsx'
+import { LinkButton } from '../components/ui/link-button.tsx'
 import { ApiError, api, call } from '../lib/api.ts'
 import { errorMessage } from '../lib/errors.ts'
 import { refreshMe } from '../lib/session.ts'
@@ -92,9 +93,9 @@ function Invite() {
             <Mascot size={110} />
             <h1 className="text-ui-xl font-strong">{t('invite.invalidTitle')}</h1>
             <p className="text-muted">{t('invite.invalidText')}</p>
-            <Link to="/login">
-              <Button variant="primary">{t('userMenu.signIn')}</Button>
-            </Link>
+            <LinkButton to="/login" variant="primary">
+              {t('userMenu.signIn')}
+            </LinkButton>
           </div>
         ) : (
           <div className="w-full max-w-md rounded-ui-lg border border-border bg-surface p-6 shadow-2 junior:p-8 rx-anim-in">

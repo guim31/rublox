@@ -59,7 +59,7 @@ export function PresenceAvatars({ projectId }: { projectId: string }) {
   const shown = people.slice(0, MAX_AVATARS)
   const label = t('collab.presence.count', { count: people.length })
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root modal={false}>
       <Tooltip content={label}>
         <DropdownMenu.Trigger asChild>
           <button

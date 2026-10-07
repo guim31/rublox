@@ -1,5 +1,4 @@
 import { messages } from '@rublox/i18n'
-import { Link } from '@tanstack/react-router'
 import {
   ArrowLeft,
   BookOpen,
@@ -14,6 +13,7 @@ import {
 import { useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, IconButton } from '../components/ui/button.tsx'
+import { LinkButton } from '../components/ui/link-button.tsx'
 import { Segmented } from '../components/ui/segmented.tsx'
 import { ComponentIcon } from '../editor/component-icon.tsx'
 import { startTour } from '../learn/tour.tsx'
@@ -131,7 +131,8 @@ export function HelpPanel() {
         />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: it scrolls; keyboard users must reach it (WCAG 2.1.1) */}
+      <div className="min-h-0 flex-1 overflow-y-auto p-3" tabIndex={0}>
         {sheet ? (
           <article className="flex flex-col gap-3 rx-anim-in" data-testid="help-sheet">
             <button
@@ -248,11 +249,15 @@ export function HelpPanel() {
       </div>
 
       <footer className="flex flex-wrap items-center gap-2 border-t border-border p-3">
-        <Link to="/learn" onClick={close}>
-          <Button size="sm" variant="soft" icon={<GraduationCap size={15} />}>
-            {t('help.tutorials')}
-          </Button>
-        </Link>
+        <LinkButton
+          to="/learn"
+          onClick={close}
+          size="sm"
+          variant="soft"
+          icon={<GraduationCap size={15} />}
+        >
+          {t('help.tutorials')}
+        </LinkButton>
         <Button
           size="sm"
           icon={<Compass size={15} />}

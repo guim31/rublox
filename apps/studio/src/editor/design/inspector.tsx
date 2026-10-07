@@ -156,7 +156,7 @@ export function Inspector({ screenId }: { screenId: ScreenId }) {
                           aria-label={`${t('editor.inspector.reset')} (${strings?.props[key] ?? key})`}
                           title={t('editor.inspector.reset')}
                           onClick={() => setProp(session.ydoc, screenId, id, key, undefined)}
-                          className="grid size-5 place-items-center rounded text-muted hover:bg-surface-2 hover:text-text"
+                          className="grid size-6 place-items-center rounded text-muted hover:bg-surface-2 hover:text-text"
                         >
                           <RotateCcw size={12} />
                         </button>
