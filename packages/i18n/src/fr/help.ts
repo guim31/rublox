@@ -57,7 +57,8 @@ export const helpContent = {
     rx_event_value: {
       title: '… de l’événement',
       text: 'Une valeur que l’événement apporte : le temps écoulé depuis l’image d’avant, l’endroit touché par le doigt, l’autre lutin touché… Le bloc ne marche qu’à l’intérieur de son bloc « quand … ».',
-      example: 'quand on touche Jardin : faire glisser Panier vers x (x du doigt de l’événement) y 590 en 0.25 s',
+      example:
+        'quand on touche Jardin : faire glisser Panier vers x (x du doigt de l’événement) y 590 en 0.25 s',
     },
     controls_if: {
       title: 'si … alors',

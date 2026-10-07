@@ -55,7 +55,14 @@ export default defineConfig({
   projects: [
     {
       name: 'e2e',
-      testIgnore: /screenshots.*\.spec\.ts/,
+      testIgnore: [/screenshots.*\.spec\.ts/, /-perf\.spec\.ts/],
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+    // Measurements run alone, once the other tests are done: they need an idle CPU.
+    {
+      name: 'perf',
+      testMatch: /-perf\.spec\.ts/,
+      dependencies: ['e2e'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
     {

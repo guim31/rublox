@@ -67,8 +67,9 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - `cd packages/blocks && npx vitest run -u` : régénérer les instantanés du générateur, puis
   relire le diff du code produit (`pnpm --filter … test -- -u` n'écrit que les nouveaux).
 - Mode jeu : `npx playwright test --project=e2e e2e/game.spec.ts` (la démo jouée, le designer) et
-  `e2e/game-perf.spec.ts` (50 lutins : débit d'images et JavaScript par image, processeur
-  ralenti ×4 ; les chiffres s'affichent dans la sortie). Captures :
+  `npx playwright test --project=perf --no-deps` (50 lutins : débit d'images et JavaScript par
+  image, processeur ralenti ×4 ; les chiffres s'affichent dans la sortie). Le projet `perf`
+  attend la fin des autres tests (`dependencies`) : mesurer sous charge ne veut rien dire. Captures :
   `npx playwright test --project=screenshots e2e/screenshots-j7.spec.ts` → `docs/screenshots/j7/`.
 - `pnpm --filter @rublox/server db:generate` : migration Drizzle après un changement de
   `apps/server/src/db/schema.ts`.

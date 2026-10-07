@@ -17,7 +17,7 @@
     "lint": "biome check --error-on-warnings .",
     "format": "biome check --write .",
     "check": "biome check --error-on-warnings . && turbo run typecheck test build",
-    "test:e2e": "turbo run build && playwright test --project=e2e",
+    "test:e2e": "turbo run build && playwright test --project=e2e --project=perf",
     "screenshots": "turbo run build && playwright test --project=screenshots"
   },
   "devDependencies": {
