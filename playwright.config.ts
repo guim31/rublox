@@ -10,7 +10,7 @@ import { defineConfig, devices } from '@playwright/test'
 const port = Number(process.env.E2E_PORT ?? 4310)
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`
 /** The server with the AI assistant (J6) and its fake Claude API. */
-const AI_PORT = Number(process.env.E2E_AI_PORT ?? 4320)
+const AI_PORT = 4320
 const FAKE_ANTHROPIC_PORT = 4329
 
 /**
@@ -91,10 +91,9 @@ export default defineConfig({
         // J6: a second server with the AI assistant, answered by a fake Claude API. No real
         // key ever: the SDK sends its requests to `ANTHROPIC_BASE_URL`.
         {
-          command: 'node e2e/fake-anthropic.mjs',
+          command: `node e2e/fake-anthropic.mjs ${FAKE_ANTHROPIC_PORT}`,
           port: FAKE_ANTHROPIC_PORT,
           reuseExistingServer: !process.env.CI,
-          env: { FAKE_ANTHROPIC_PORT: String(FAKE_ANTHROPIC_PORT) },
         },
         {
           command: 'node apps/server/dist/index.js',

@@ -193,7 +193,7 @@ export async function openDemo(page: Page, name: RegExp, query = 'démo de jeu')
 export const EMPTY_STATE = { cookies: [], origins: [] }
 
 /** The server with the AI assistant and a fake Claude API (J6, `playwright.config.ts`). */
-export const AI_URL = `http://localhost:${process.env.E2E_AI_PORT ?? 4320}`
+export const AI_URL = 'http://localhost:4320'
 
 /** A returning guest of the AI server (welcome page and tours already seen). */
 export const AI_STATE = {

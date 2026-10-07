@@ -19,7 +19,12 @@ async function open(browser: Browser, prefs: Prefs, name: string, base?: string)
   })
   const page = await context.newPage()
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await usePrefs(page, { ...prefs, locale: 'fr', welcomed: true, toursSeen: { junior: true, studio: true } })
+  await usePrefs(page, {
+    ...prefs,
+    locale: 'fr',
+    welcomed: true,
+    toursSeen: { junior: true, studio: true },
+  })
   await page.goto('/login')
   const headers = { origin: new URL(page.url()).origin }
   const post = async (path: string, data: unknown, method = 'POST') => {
@@ -32,7 +37,11 @@ async function open(browser: Browser, prefs: Prefs, name: string, base?: string)
   await post('/api/admin/users', { username, displayName: name, password: `${username}-pw-123` })
   await page.context().clearCookies()
   await post('/api/auth/sign-in/username', { username, password: `${username}-pw-123` })
-  await post('/api/me', { uiMode: prefs.mode, theme: prefs.theme, locale: 'fr', avatar: 'fox' }, 'PATCH')
+  await post(
+    '/api/me',
+    { uiMode: prefs.mode, theme: prefs.theme, locale: 'fr', avatar: 'fox' },
+    'PATCH',
+  )
   return page
 }
 
@@ -97,7 +106,10 @@ for (const [mode, theme] of VARIANTS) {
     const ai = await open(browser, { mode, theme }, 'Alex', AI_URL)
     await ai.goto('/')
     await ai.getByTestId('ai-create-open').click()
-    await ai.getByRole('dialog').getByRole('textbox').fill('Une appli qui tire au sort qui fait la vaisselle')
+    await ai
+      .getByRole('dialog')
+      .getByRole('textbox')
+      .fill('Une appli qui tire au sort qui fait la vaisselle')
     await ai.screenshot({ path: `${DIR}/${mode}-${theme}-ai-ask.png` })
     await ai.getByRole('dialog').getByRole('button', { name: 'Proposer une appli' }).click()
     await expect(ai.getByTestId('ai-proposal')).toBeVisible()

@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 
-const port = Number(process.env.FAKE_ANTHROPIC_PORT ?? 4329)
+const port = Number(process.argv[2] ?? 4329)
 const create = readFileSync(new URL('./fixtures/ai-create.json', import.meta.url), 'utf8')
 
 /** Answers kept short: the studio shows them in its panel. */
@@ -15,7 +15,9 @@ function answer(body) {
     return create
   }
   if (system.includes('component of an app built with Rublox')) {
-    return prompt.includes('blague') ? 'Pourquoi les chats aiment-ils les ordinateurs ? Pour la souris !' : 'Bonjour !'
+    return prompt.includes('blague')
+      ? 'Pourquoi les chats aiment-ils les ordinateurs ? Pour la souris !'
+      : 'Bonjour !'
   }
   if (prompt.includes('Why doesn') || prompt.includes('doesn’t it work')) {
     return JSON.stringify({
@@ -30,7 +32,9 @@ function answer(body) {
 createServer((request, response) => {
   if (request.method !== 'POST' || !request.url?.startsWith('/v1/messages')) {
     response.writeHead(404, { 'content-type': 'application/json' })
-    response.end(JSON.stringify({ type: 'error', error: { type: 'not_found_error', message: 'not found' } }))
+    response.end(
+      JSON.stringify({ type: 'error', error: { type: 'not_found_error', message: 'not found' } }),
+    )
     return
   }
   let raw = ''

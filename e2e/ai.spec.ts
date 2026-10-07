@@ -27,7 +27,9 @@ test('"Create with AI" proposes a valid app, declined then kept, and undoable', 
   const open = page.getByTestId('ai-create-open')
   await open.click()
   const dialog = page.getByRole('dialog')
-  await dialog.getByRole('button', { name: 'Une appli qui tire au sort qui fait la vaisselle' }).click()
+  await dialog
+    .getByRole('button', { name: 'Une appli qui tire au sort qui fait la vaisselle' })
+    .click()
   await dialog.getByRole('button', { name: 'Proposer une appli' }).click()
   const proposal = dialog.getByTestId('ai-proposal')
   await expect(proposal).toBeVisible()
