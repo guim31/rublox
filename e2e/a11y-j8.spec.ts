@@ -162,7 +162,10 @@ for (const mode of ['junior', 'studio'] as const) {
       await page.getByRole('button', { name: `Actions sur ${name}` }).click()
       await expect(page.getByRole('menuitem', { name: 'Supprimer' })).toBeVisible()
       await axe(page, 'project menu')
-      // The scan moves the focus, which closes a menu that is not modal: open it again.
+      // The scan may move the focus, which closes a menu that is not modal (or not): close it
+      // for sure, then open it again.
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menuitem', { name: 'Supprimer' })).toHaveCount(0)
       await page.getByRole('button', { name: `Actions sur ${name}` }).click()
       await page.getByRole('menuitem', { name: 'Supprimer' }).click()
       await page.getByRole('radio', { name: 'Corbeille' }).click()

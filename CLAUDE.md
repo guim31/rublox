@@ -338,8 +338,8 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **Écritures et corbeille** : `requireProject(…, 'write')` répond 409 `in_trash` ; une route
   qui doit agir sur un projet à la corbeille (dépublier) prend `'read'` puis vérifie `canWrite`.
 - **Menus Radix** : `Menu` (`components/ui/menu.tsx`) n'est pas modal (sinon `aria-hidden` sur
-  le reste de la page, axe `aria-hidden-focus`) ; l'analyse d'axe déplace le focus et le ferme :
-  le rouvrir dans un test après `analyze()`.
+  le reste de la page, axe `aria-hidden-focus`) ; l'analyse d'axe le ferme parfois (focus) :
+  dans un test, Échap, attendre qu'il soit fermé, puis le rouvrir.
 - **Lien en forme de bouton** : `LinkButton`, jamais un `Button` dans un `Link` (deux contrôles
   imbriqués).
 - **Couleurs des applis** : le texte sur une couleur pleine passe par `textOn()` et la couleur
