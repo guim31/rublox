@@ -149,6 +149,25 @@ describe('presence', () => {
     b.close()
     c.close()
   })
+
+  it('leaves the visitors of a gallery project out of the presence', async () => {
+    const id = await newProject('Gallery')
+    await owner.request('PATCH', '/api/admin/settings', { galleryEnabled: true })
+    expect(
+      (await owner.request('PUT', `/api/gallery/${id}/sharing`, { shared: true })).status,
+    ).toBe(200)
+    const visitor = await createUser('collab-visitor')
+    const a = await server.tab(owner, id)
+    const v = await server.tab(visitor, id)
+    expect(v.readOnly).toBe(true)
+    v.provider.setAwarenessField('view', { tab: 'design', screen: 'peeking' })
+    a.provider.setAwarenessField('view', { tab: 'design', screen: 'here' })
+    const later = await server.tab(owner, id)
+    await until(() => peers(later).has(a.ydoc.clientID), 'the owner in the presence')
+    expect(peers(later).has(v.ydoc.clientID)).toBe(false)
+    expect(peers(a).has(v.ydoc.clientID)).toBe(false)
+    for (const tab of [a, v, later]) tab.close()
+  })
 })
 
 describe('editing together', () => {

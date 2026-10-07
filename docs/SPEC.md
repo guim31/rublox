@@ -583,6 +583,10 @@ présence), fichiers des ressources recopiés quand on colle dans un autre proje
   peut toujours essayer dans son onglet sans rien enregistrer (§ 0.2), le serveur refusant toute
   mise à jour (`connectionConfig.readOnly`).
 - **Plusieurs onglets d'un même compte** ne s'affichent pas comme quelqu'un d'autre.
+- **Visiteurs d'un projet de la galerie** (J6, accès `gallery`) : ils ne sont pas des
+  éditeurs du projet et n'apparaissent pas dans sa présence (le serveur ignore leur état) ; leur
+  studio n'affiche pas non plus la présence. Le protocole leur envoie tout de même l'état des
+  éditeurs présents (Hocuspocus ne filtre pas l'awareness par connexion) : nom, avatar, écran.
 - **Barre du haut de Junior** : à 1 440 px, elle débordait déjà (le menu des préférences était
   coupé) ; les libellés de « Tester », « Partager » et « Publier » ne s'affichent en Junior
   qu'à partir de 1 536 px (icône et infobulle en dessous).

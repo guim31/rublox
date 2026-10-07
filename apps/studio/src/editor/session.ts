@@ -50,7 +50,11 @@ export class ProjectSession {
     this.doc = yDocToProject(ydoc)
     // Only this tab's edits: the others' (provider, cache) are not taken back.
     this.undo = createUndoManager(ydoc, [BLOCKLY_ORIGIN])
-    const awareness = source instanceof ServerSource ? source.provider.awareness : null
+    // Visitors of a gallery project (J6) are not among its editors: no presence for them.
+    const awareness =
+      source instanceof ServerSource && source.access !== 'gallery'
+        ? source.provider.awareness
+        : null
     this.presence = awareness ? new Presence(awareness, currentUserId()) : null
     this.undo.on('stack-item-added', () => this.emit())
     this.undo.on('stack-item-popped', () => this.emit())

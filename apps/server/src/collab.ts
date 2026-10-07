@@ -34,6 +34,8 @@ export interface PresenceUser {
 interface CollabContext {
   userId: string
   user?: PresenceUser
+  /** A visitor of a gallery project (J6): not one of its editors, never in the presence. */
+  visitor?: boolean
 }
 
 interface CollabDeps {
@@ -70,6 +72,7 @@ export class Collab {
         const user = session.user as typeof session.user & { avatar?: string | null }
         return {
           userId: user.id,
+          visitor: found.access === 'gallery',
           user: {
             id: user.id,
             name: user.name,
@@ -91,6 +94,10 @@ export class Collab {
       // for its own clients (it cannot rewrite or remove the state of another editor).
       beforeHandleAwareness: async ({ states, context, connection, document }) => {
         if (!context?.user || !connection) return
+        if (context.visitor) {
+          states.clear()
+          return
+        }
         const others = new Set<number>()
         for (const [other, { clients }] of document.connections) {
           if (other !== connection) for (const client of clients) others.add(client)
