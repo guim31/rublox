@@ -54,8 +54,11 @@ export function Preview({
         setReady(true)
       } else if (message.type === 'rx:log') useEditor.getState().log(message.entry)
       else if (message.type === 'rx:state') {
-        useEditor.getState().set({ running: message.running })
-        useLearn.setState({ previewScreen: message.screenId })
+        // Sent on every change of the app: only store what differs.
+        if (useEditor.getState().running !== message.running)
+          useEditor.getState().set({ running: message.running })
+        if (useLearn.getState().previewScreen !== message.screenId)
+          useLearn.setState({ previewScreen: message.screenId })
       } else if (message.type === 'rx:event') recordEvent(message.event)
       else if (message.type === 'rx:step') onStep(message.step)
     }

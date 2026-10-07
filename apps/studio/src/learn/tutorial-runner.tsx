@@ -33,8 +33,11 @@ export function TutorialRunner({
   const active = useLearn((s) => (s.tutorial?.projectId === projectId ? s.tutorial : null))
 
   // Opening a project whose tutorial is not finished picks it up where it stopped.
+  const loaded = useLearn((s) => s.loaded)
   useEffect(() => {
     let cancelled = false
+    // Waits for the progression of whoever is signed in (`sync.ts`).
+    if (!loaded) return
     void ensureProgress().then((progress) => {
       const state = useLearn.getState()
       if (cancelled || state.tutorial?.projectId === projectId) return
@@ -51,7 +54,7 @@ export function TutorialRunner({
     return () => {
       cancelled = true
     }
-  }, [projectId])
+  }, [projectId, loaded])
 
   if (!active) return null
   return <Runner key={active.id} tab={tab} workspace={workspace} />

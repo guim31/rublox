@@ -24,8 +24,11 @@ export function ChallengePanel({
 }) {
   const active = useLearn((s) => (s.challenge?.projectId === projectId ? s.challenge : null))
 
+  const loaded = useLearn((s) => s.loaded)
   useEffect(() => {
     let cancelled = false
+    // Waits for the progression of whoever is signed in (`sync.ts`).
+    if (!loaded) return
     void ensureProgress().then((progress) => {
       if (cancelled || useLearn.getState().challenge?.projectId === projectId) return
       const entry = Object.values(progress.challenges).find((c) => c.projectId === projectId)
@@ -35,7 +38,7 @@ export function ChallengePanel({
     return () => {
       cancelled = true
     }
-  }, [projectId])
+  }, [projectId, loaded])
 
   const challenge = active ? getChallenge(active.id) : undefined
   if (!active || !challenge) return null

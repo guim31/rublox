@@ -40,11 +40,16 @@ type LearnState = {
 }
 
 /** Where the progression is saved: this browser for now (SPEC § 4.10). */
-let store: ProgressStore = browserProgressStore
+let store: ProgressStore = browserProgressStore()
 
 export function setProgressStore(next: ProgressStore): void {
   store = next
-  useLearn.setState({ loaded: false })
+  useLearn.setState({
+    loaded: false,
+    progress: structuredClone(EMPTY_PROGRESS),
+    tutorial: null,
+    challenge: null,
+  })
   void loadProgress()
 }
 
@@ -62,10 +67,16 @@ export const useLearn = create<LearnState>()(() => ({
 let loading: Promise<void> | undefined
 
 export function loadProgress(): Promise<void> {
-  loading = store
+  const from = store
+  // A load from a store that was replaced meanwhile (sign-in) is dropped.
+  loading = from
     .load()
-    .then((progress) => useLearn.setState({ progress, loaded: true }))
-    .catch(() => useLearn.setState({ loaded: true }))
+    .then((progress) => {
+      if (store === from) useLearn.setState({ progress, loaded: true })
+    })
+    .catch(() => {
+      if (store === from) useLearn.setState({ loaded: true })
+    })
   return loading
 }
 
