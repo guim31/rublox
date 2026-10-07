@@ -1,14 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
-import {
-  ADMIN,
-  addComponent,
-  newProject,
-  openBlocks,
-  signIn,
-  unique,
-  usePrefs,
-} from './helpers.ts'
+import { ADMIN, addComponent, newProject, openBlocks, signIn, unique, usePrefs } from './helpers.ts'
 
 /**
  * A new administrator of its own. The four variants run in parallel: signed in as the shared
