@@ -260,7 +260,9 @@ export class ServerSource implements DocSource {
   }
 
   private refresh = () => {
-    const connected = this.provider.isSynced && this.provider.isAuthenticated
+    // Without a network the socket only closes once its closing handshake gives up: the
+    // browser's own state says it at once.
+    const connected = navigator.onLine && this.provider.isSynced && this.provider.isAuthenticated
     const next: SaveState = this.readOnly
       ? 'readonly'
       : !connected
