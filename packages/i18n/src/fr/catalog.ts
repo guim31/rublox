@@ -5,6 +5,38 @@
  */
 export const catalog = {
   studio: {
+    app: {
+      tab: 'Appli',
+      screenTab: 'Écran',
+      theme: 'Thème de l’appli',
+      themeHint:
+        'Les composants prennent ces couleurs et ces arrondis, sauf ceux que tu as réglés toi-même.',
+      presets: 'Thèmes tout prêts',
+      primary: 'Couleur principale',
+      secondary: 'Couleur secondaire',
+      background: 'Fond',
+      font: 'Police',
+      fonts: {
+        system: 'Du téléphone',
+        rounded: 'Arrondie',
+        serif: 'À empattements',
+        mono: 'Machine à écrire',
+      },
+      radius: 'Arrondis',
+      scheme: 'Clair ou sombre',
+      schemes: { light: 'Clair', dark: 'Sombre', auto: 'Comme le téléphone' },
+      navigation: 'Navigation',
+      kinds: { stack: 'Pile', tabs: 'Onglets', drawer: 'Tiroir' },
+      kindHints: {
+        stack: 'Les écrans s’empilent : « aller à l’écran » en ouvre un, le bouton retour revient.',
+        tabs: 'Une barre d’onglets en bas de l’appli. Choisis les écrans, leur icône et leur nom.',
+        drawer: 'Un menu qui s’ouvre sur le côté, avec le bouton ☰. Choisis les écrans du menu.',
+      },
+      entries: 'Écrans du menu',
+      inMenu: 'Mettre {{name}} dans le menu',
+      label: 'Nom affiché pour {{name}}',
+      open: 'Thème et navigation de l’appli',
+    },
     nonVisual: { title: 'Composants invisibles' },
     list: {
       linesHint: 'Un élément par ligne.',

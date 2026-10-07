@@ -2,6 +2,32 @@ import type { Messages } from '../types.ts'
 
 export const catalog: Messages['catalog'] = {
   studio: {
+    app: {
+      tab: 'App',
+      screenTab: 'Screen',
+      theme: 'App theme',
+      themeHint: 'Components take these colors and corners, except the ones you set yourself.',
+      presets: 'Ready-made themes',
+      primary: 'Main color',
+      secondary: 'Second color',
+      background: 'Background',
+      font: 'Font',
+      fonts: { system: 'The phone’s', rounded: 'Rounded', serif: 'Serif', mono: 'Typewriter' },
+      radius: 'Corners',
+      scheme: 'Light or dark',
+      schemes: { light: 'Light', dark: 'Dark', auto: 'Like the phone' },
+      navigation: 'Navigation',
+      kinds: { stack: 'Stack', tabs: 'Tabs', drawer: 'Drawer' },
+      kindHints: {
+        stack: 'Screens stack up: "go to screen" opens one, the back button comes back.',
+        tabs: 'A tab bar at the bottom of the app. Choose the screens, their icon and their name.',
+        drawer: 'A menu that opens from the side, with the ☰ button. Choose the menu’s screens.',
+      },
+      entries: 'Menu screens',
+      inMenu: 'Put {{name}} in the menu',
+      label: 'Name shown for {{name}}',
+      open: 'App theme and navigation',
+    },
     nonVisual: { title: 'Non-visual components' },
     list: {
       linesHint: 'One item per line.',

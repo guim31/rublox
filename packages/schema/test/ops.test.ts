@@ -15,7 +15,9 @@ import {
   removeScreen,
   renameComponent,
   setBlockStack,
+  setNavigation,
   setProp,
+  setTheme,
   updateVariable,
   yDocToProject,
 } from '../src/index.ts'
@@ -151,5 +153,33 @@ describe('undo', () => {
     expect(yDocToProject(ydoc)).toEqual(before)
     undo.redo()
     expect(yDocToProject(ydoc)).toEqual(after)
+  })
+})
+
+describe('app settings', () => {
+  it('changes the theme and the navigation, and forgets removed screens', () => {
+    const ydoc = projectToYDoc(fixture())
+    setTheme(ydoc, { primary: '#ff0000', scheme: 'auto', radius: 4 })
+    const second = addScreen(ydoc, {
+      name: 'Deux',
+      root: { type: 'Screen', name: 'Deux', props: {}, children: [] },
+    })
+    setNavigation(ydoc, {
+      kind: 'tabs',
+      items: [
+        { screen: 's1', icon: 'house', label: 'Accueil' },
+        { screen: second, icon: 'star' },
+        { screen: 'nope' },
+      ],
+    })
+    let doc = valid(ydoc)
+    expect(doc.settings.theme).toMatchObject({ primary: '#ff0000', scheme: 'auto', radius: 4 })
+    expect(doc.settings.navigation.kind).toBe('tabs')
+    expect(doc.settings.navigation.items?.map((item) => item.screen)).toEqual(['s1', second])
+    removeScreen(ydoc, second)
+    doc = valid(ydoc)
+    expect(doc.settings.navigation.items?.map((item) => item.screen)).toEqual(['s1'])
+    setNavigation(ydoc, { items: null })
+    expect(valid(ydoc).settings.navigation.items).toBeUndefined()
   })
 })

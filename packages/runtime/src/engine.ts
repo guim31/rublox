@@ -143,6 +143,8 @@ export type EngineSnapshot = {
   screen: Instance | null
   depth: number
   running: boolean
+  /** The screen at the bottom of the stack: the current tab with tabs or drawer. */
+  root: ScreenId | null
   dialogs: readonly Dialog[]
   toasts: readonly Toast[]
   overlays: readonly Overlay[]
@@ -208,6 +210,8 @@ export class Engine {
   private readonly assetUrl: (value: string) => string | undefined
   private overlays: Overlay[] = []
   private stack: Instance[] = []
+  /** Tabs and drawer: the instance of each top-level screen, kept while another one shows. */
+  private readonly roots = new Map<ScreenId, Instance>()
   private running = false
   private generation = 0
   private nextKey = 1
@@ -263,6 +267,7 @@ export class Engine {
     return {
       doc: this.doc,
       screen: this.stack.at(-1) ?? null,
+      root: this.stack[0]?.screenId ?? null,
       depth: this.stack.length,
       running: this.running,
       dialogs: [...this.dialogs],
@@ -318,6 +323,8 @@ export class Engine {
     this.running = false
     this.generation += 1
     for (const instance of this.stack) this.disposeInstance(instance)
+    for (const instance of this.roots.values()) this.disposeInstance(instance)
+    this.roots.clear()
     for (const entry of this.timers) {
       clearTimeout(entry.timer)
       entry.reject(new StopSignal())
@@ -364,6 +371,14 @@ export class Engine {
     if (this.stack.some((instance) => !doc.screens[instance.screenId])) {
       await this.restart()
       return
+    }
+    // Hidden tabs whose blocks changed start again the next time they show.
+    for (const [screenId, instance] of this.roots) {
+      if (this.stack.includes(instance)) continue
+      if (previous[screenId]?.code !== code[screenId]?.code || !doc.screens[screenId]) {
+        this.disposeInstance(instance)
+        this.roots.delete(screenId)
+      }
     }
     this.initVariables()
     const restarts: Promise<void>[] = []
@@ -447,6 +462,7 @@ export class Engine {
 
   private async push(screenId: ScreenId): Promise<void> {
     const instance = this.newInstance(screenId)
+    if (this.stack.length === 0 && this.isTopLevel(screenId)) this.roots.set(screenId, instance)
     this.stack.push(instance)
     this.notify()
     await this.runModule(screenId, instance)
@@ -462,6 +478,7 @@ export class Engine {
     // What the renderers exposed stays valid: they are not redrawn for a code change.
     for (const [id, handle] of old.handles) instance.handles.set(id, handle)
     this.stack[index] = instance
+    if (this.roots.get(old.screenId) === old) this.roots.set(old.screenId, instance)
     await this.runModule(instance.screenId, instance)
     this.mountBehaviors(instance)
     if (this.stack.at(-1) === instance) this.fireOpen(instance)
@@ -583,6 +600,39 @@ export class Engine {
       this.log('warn', format(messages[this.locale].runtime.noScreen, { name }))
       return
     }
+    if (this.isTopLevel(screenId)) this.switchTo(screenId)
+    else void this.push(screenId)
+  }
+
+  // Tabs and drawer (SPEC § 4.1): their screens are top-level, each keeps its state
+
+  /** The screens of the tab bar or the drawer: the navigation items, or every screen. */
+  navigationScreens(): ScreenId[] {
+    const navigation = this.doc.settings.navigation
+    if (navigation.kind === 'stack') return []
+    const items = navigation.items?.map((item) => item.screen) ?? this.doc.screenOrder
+    return items.filter((id) => this.doc.screens[id])
+  }
+
+  private isTopLevel(screenId: ScreenId): boolean {
+    return this.navigationScreens().includes(screenId)
+  }
+
+  /** Shows a tab (or a drawer entry): closes the screens opened above, keeps the tab's state. */
+  switchTo(screenId: ScreenId): void {
+    if (!this.running || !this.doc.screens[screenId]) return
+    const [root, ...above] = this.stack
+    if (root?.screenId === screenId && above.length === 0) return
+    for (const instance of above) this.disposeInstance(instance)
+    if (root && !this.roots.has(root.screenId)) this.disposeInstance(root)
+    const kept = this.roots.get(screenId)
+    if (kept?.alive) {
+      this.stack = [kept]
+      this.notify()
+      this.fireOpen(kept)
+      return
+    }
+    this.stack = []
     void this.push(screenId)
   }
 

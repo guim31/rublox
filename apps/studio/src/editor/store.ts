@@ -34,6 +34,8 @@ type EditorState = {
   /** Live region message for screen readers (drag and drop, additions). */
   announcement: string
   slow: SlowState
+  /** With the screen selected: its properties, or the app's theme and navigation. */
+  inspectorTab: 'screen' | 'app'
   select(id: ComponentId | null): void
   hover(id: ComponentId | null): void
   set(
@@ -62,6 +64,7 @@ export const useEditor = create<EditorState>()((set) => ({
   focusBlock: null,
   announcement: '',
   slow: { enabled: false, step: null, breakpoints: [] },
+  inspectorTab: 'screen',
   select: (selected) => set({ selected }),
   hover: (hovered) => set({ hovered }),
   set: (patch) => set(patch),

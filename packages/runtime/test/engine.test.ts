@@ -353,3 +353,27 @@ describe('engine, J2 mechanisms', () => {
     engine.dispose()
   })
 })
+
+describe('tabs and drawer navigation', () => {
+  it('switches tabs, keeps each tab’s state, and stacks other screens above', async () => {
+    const { doc, home } = project()
+    doc.settings.navigation = {
+      kind: 'tabs',
+      startScreen: home,
+      items: [{ screen: home }, { screen: 'second', icon: 'star', label: 'Deux' }],
+    }
+    const { engine } = engineFor(doc)
+    await engine.start()
+    expect(engine.navigationScreens()).toEqual([home, 'second'])
+    engine.setValue('input', 'text', 'gardé')
+    engine.switchTo('second')
+    await sleep(10)
+    expect(engine.getSnapshot().root).toBe('second')
+    expect(engine.getSnapshot().depth).toBe(1)
+    engine.switchTo(home)
+    await sleep(10)
+    expect(engine.getSnapshot().root).toBe(home)
+    expect(value(engine, 'input', 'text')).toBe('gardé')
+    engine.dispose()
+  })
+})

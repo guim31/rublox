@@ -1,5 +1,5 @@
 import { componentLabel, getComponentDef } from '@rublox/catalog'
-import { AppSurface, ScreenView } from '@rublox/runtime'
+import { AppIcon, AppSurface, navigationItems, ScreenView } from '@rublox/runtime'
 import { type ComponentId, type Screen, type ScreenId, setProp } from '@rublox/schema'
 import { GripVertical, Minus, Moon, Plus, RotateCcw, Scan, Sun } from 'lucide-react'
 import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -221,30 +221,33 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
           <div ref={stageRef} className="relative">
             <PhoneFrame width={width} height={height} scale={scale} dark={appScheme === 'dark'}>
               <AppSurface theme={doc.settings.theme} scheme={appScheme}>
-                {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer selection; the layers panel is the keyboard path */}
-                {/* biome-ignore lint/a11y/useKeyWithClickEvents: same */}
-                <div
-                  ref={screenRef}
-                  className="size-full"
-                  data-testid="canvas-screen"
-                  onClick={(event) => select(componentAt(event.target) ?? screen.rootId)}
-                  onMouseMove={(event) => {
-                    const id = componentAt(event.target)
-                    if (id !== useEditor.getState().hovered) hover(id)
-                  }}
-                  onMouseLeave={() => hover(null)}
-                >
-                  <ScreenView
-                    screen={screen}
-                    locale={doc.meta.locale}
-                    mode="design"
-                    assetUrl={session.assetUrl}
-                    decorateChildren={(parentId, children) =>
-                      children.length
-                        ? children
-                        : [<EmptyHint key="empty" root={parentId === screen.rootId} />]
-                    }
-                  />
+                <div className="flex size-full flex-col">
+                  {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer selection; the layers panel is the keyboard path */}
+                  {/* biome-ignore lint/a11y/useKeyWithClickEvents: same */}
+                  <div
+                    ref={screenRef}
+                    className="min-h-0 flex-1"
+                    data-testid="canvas-screen"
+                    onClick={(event) => select(componentAt(event.target) ?? screen.rootId)}
+                    onMouseMove={(event) => {
+                      const id = componentAt(event.target)
+                      if (id !== useEditor.getState().hovered) hover(id)
+                    }}
+                    onMouseLeave={() => hover(null)}
+                  >
+                    <ScreenView
+                      screen={screen}
+                      locale={doc.meta.locale}
+                      mode="design"
+                      assetUrl={session.assetUrl}
+                      decorateChildren={(parentId, children) =>
+                        children.length
+                          ? children
+                          : [<EmptyHint key="empty" root={parentId === screen.rootId} />]
+                      }
+                    />
+                  </div>
+                  <TabBarPreview screenId={screenId} />
                 </div>
               </AppSurface>
             </PhoneFrame>
@@ -288,6 +291,31 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
         </div>
       </div>
     </section>
+  )
+}
+
+/** With tab navigation, the tab bar the app will show under this screen (not interactive). */
+function TabBarPreview({ screenId }: { screenId: ScreenId }) {
+  const doc = useDoc()
+  const navigation = doc.settings.navigation
+  if (navigation.kind !== 'tabs') return null
+  const screens = (navigation.items?.map((item) => item.screen) ?? doc.screenOrder).filter(
+    (id) => doc.screens[id],
+  )
+  if (!screens.includes(screenId)) return null
+  return (
+    <div className="rx-tabs" aria-hidden="true" data-testid="canvas-tabs">
+      {navigationItems(doc, screens).map((item) => (
+        <span
+          key={item.screen}
+          className="rx-tab"
+          aria-current={item.screen === screenId ? 'page' : undefined}
+        >
+          <AppIcon name={item.icon} size={22} />
+          <span>{item.label}</span>
+        </span>
+      ))}
+    </div>
   )
 }
 

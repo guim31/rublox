@@ -5,9 +5,12 @@ import type {
   BlocklyJson,
   ComponentId,
   ComponentNode,
+  NavItem,
   ProjectMeta,
+  ProjectSettings,
   Screen,
   ScreenId,
+  Theme,
   VarDecl,
   VarKind,
   WorkspaceKey,
@@ -185,6 +188,12 @@ export function removeScreen(ydoc: Y.Doc, screenId: ScreenId, origin?: Origin) {
     yBlocks(ydoc).delete(screenId)
     const navigation = ySettings(ydoc).get('navigation') as YMap
     if (navigation.get('startScreen') === screenId) navigation.set('startScreen', order.get(0))
+    const items = navigation.get('items') as NavItem[] | undefined
+    if (items?.some((item) => item.screen === screenId))
+      navigation.set(
+        'items',
+        items.filter((item) => item.screen !== screenId),
+      )
   }, origin)
 }
 
@@ -504,4 +513,45 @@ export function addAsset(ydoc: Y.Doc, asset: Asset, id = newId(), origin?: Origi
 
 export function removeAsset(ydoc: Y.Doc, assetId: string, origin?: Origin) {
   ydoc.transact(() => yAssets(ydoc).delete(assetId), origin)
+}
+
+// App settings: theme and navigation (SPEC § 4.1)
+
+/** Changes some fields of the app theme (colors, font, corners, light or dark). */
+export function setTheme(ydoc: Y.Doc, patch: Partial<Theme>, origin?: Origin) {
+  ydoc.transact(() => {
+    const settings = ySettings(ydoc)
+    let theme = settings.get('theme') as YMap | undefined
+    if (!theme) {
+      theme = mapFrom({})
+      settings.set('theme', theme)
+    }
+    for (const [key, value] of Object.entries(patch)) {
+      if (value !== undefined && theme.get(key) !== value) theme.set(key, value)
+    }
+  }, origin)
+}
+
+/**
+ * Changes the navigation: its kind (stack, tabs, drawer) and the screens of the tab bar or
+ * the drawer, with their icon and label. `items: undefined` keeps them; `null` removes them
+ * (every screen, in order).
+ */
+export function setNavigation(
+  ydoc: Y.Doc,
+  patch: { kind?: ProjectSettings['navigation']['kind']; items?: NavItem[] | null },
+  origin?: Origin,
+) {
+  ydoc.transact(() => {
+    const navigation = ySettings(ydoc).get('navigation') as YMap
+    if (patch.kind && navigation.get('kind') !== patch.kind) navigation.set('kind', patch.kind)
+    if (patch.items === null) navigation.delete('items')
+    else if (patch.items) {
+      const screens = yScreens(ydoc)
+      navigation.set(
+        'items',
+        patch.items.filter((item) => screens.has(item.screen)).map((item) => ({ ...item })),
+      )
+    }
+  }, origin)
 }

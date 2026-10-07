@@ -450,6 +450,101 @@
   display: block;
 }
 
+/* Tabs and drawer navigation */
+.rx-tabs {
+  display: flex;
+  border-top: 1px solid var(--rx-border);
+  background: var(--rx-background);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.rx-tab {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--rx-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.rx-tab span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rx-tab[aria-current="page"] {
+  color: var(--rx-primary);
+}
+.rx-tab:focus-visible,
+.rx-drawer-item:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--rx-primary) 55%, transparent);
+  outline-offset: -3px;
+}
+.rx-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  background: rgba(10, 8, 30, 0.45);
+  animation: rx-fade-in 150ms ease-out;
+}
+.rx-drawer-close {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.rx-drawer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(78%, 300px);
+  height: 100%;
+  padding: 16px 10px;
+  background: var(--rx-background);
+  box-shadow: 8px 0 32px rgba(10, 8, 30, 0.25);
+  animation: rx-drawer-in 180ms ease-out;
+}
+.rx-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--rx-text);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.rx-drawer-item[aria-current="page"] {
+  background: color-mix(in srgb, var(--rx-primary) 14%, transparent);
+  color: var(--rx-primary);
+}
+@keyframes rx-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rx-drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
 /* Full-screen panels (QR scanner) */
 .rx-overlay {
   position: absolute;
