@@ -265,6 +265,12 @@ export function createDemoProject(input: {
     c('list', 'ListView', { items: L.list }),
     c('cards', 'DataList', { items: L.cards, buttonText: L.see }),
     c('tiles', 'DataGrid', { items: L.tiles, columns: 3 }),
+    // Maps and charts (J5).
+    c('map', 'Map', {
+      height: 220,
+      markers: [{ latitude: '48.8584', longitude: '2.2945', title: 'Tour Eiffel' }],
+    }),
+    c('chart', 'Chart', { height: 180 }),
   ])
 
   const media = buildScreen(input.locale, L.media, L.media, 'r-media', [
@@ -331,6 +337,7 @@ export function createDemoProject(input: {
       c('clipboard', 'Clipboard'),
       c('notifier', 'Notifier'),
       c('scanner', 'QrScanner'),
+      c('sheet', 'GoogleSheet'),
       ...(input.ai ? [c('ai', 'AI')] : []),
     ],
   )

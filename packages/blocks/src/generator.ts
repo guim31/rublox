@@ -1,9 +1,10 @@
 import { COMPONENTS, type ComponentDef } from '@rublox/catalog'
 import { format, messages } from '@rublox/i18n'
-import { APP_WORKSPACE, isValidName } from '@rublox/schema'
+import { APP_WORKSPACE } from '@rublox/schema'
 import type * as Blockly from 'blockly/core'
 import { JavascriptGenerator, javascriptGenerator, Order } from 'blockly/javascript'
 import { type BlocksContext, contextOf } from './context.ts'
+import { installDataGenerators } from './data-blocks.ts'
 import {
   BLOCK_TYPES,
   eventArgsOf,
@@ -15,6 +16,9 @@ import {
 } from './definitions.ts'
 import { ANY } from './fields.ts'
 import { registerColourBlocks } from './setup.ts'
+import { capitalize, member, quote } from './text.ts'
+
+export { quote } from './text.ts'
 
 /** Parameters every generated module receives (SPEC § 6.5). */
 export const MODULE_PARAMS = [
@@ -30,50 +34,15 @@ export const MODULE_PARAMS = [
 
 /** Shared functions of the `app` workspace: a parameter only of modules that use them. */
 export const FUNCTIONS_PARAM = 'functions'
+/** Tables and data events (J5), and API connections: parameters of the modules that use them. */
+export const DATA_PARAM = 'data'
+export const WEB_PARAM = 'web'
 
 // Statement markers, stripped after generation to build the line → block map. Private-use
 // characters: `quote` escapes them, so text typed in a block can never forge one.
 const MARK_START = ''
 const MARK_END = ''
 const MARKER = new RegExp(`^\\s*${MARK_START}'((?:[^'\\\\]|\\\\.)*)'${MARK_END}\\s*$`)
-
-/**
- * A JavaScript string literal for any text: quotes, backslashes, line breaks, `</script>`,
- * `${…}` and invisible characters all stay inside the string.
- */
-export function quote(text: string): string {
-  let out = "'"
-  for (const char of text) {
-    const code = char.codePointAt(0) ?? 0
-    if (char === '\\') out += '\\\\'
-    else if (char === "'") out += "\\'"
-    else if (char === '\n') out += '\\n'
-    else if (char === '\r') out += '\\r'
-    else if (char === '\t') out += '\\t'
-    else if (
-      code < 0x20 ||
-      code === 0x7f ||
-      code === 0x2028 ||
-      code === 0x2029 ||
-      (code >= 0xe000 && code <= 0xf8ff) ||
-      (code >= 0xd800 && code <= 0xdfff)
-    ) {
-      out += `\\u${code.toString(16).padStart(4, '0')}`
-    } else out += char
-  }
-  return `${out}'`
-}
-
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1)
-}
-
-/** `app.score`, or `app['mon score']` when the name is not an identifier. */
-function member(object: string, name: string): string {
-  return isValidName(name) || /^[\p{L}_$][\p{L}\p{N}_$]*$/u.test(name)
-    ? `${object}.${name}`
-    : `${object}[${quote(name)}]`
-}
 
 /**
  * Generates the readable module of one workspace. Built on Blockly's JavaScript generator,
@@ -90,6 +59,9 @@ export class RubloxGenerator extends JavascriptGenerator {
   readonly usedComponents = new Set<string>()
   /** The module reads or writes `functions` (shared functions of the app). */
   usesFunctions = false
+  /** The module uses tables or data events (`data`), or API connections (`web`). */
+  usesData = false
+  usesWeb = false
   /** Variable ids of the parameters of the function being generated. */
   private parameters = new Set<string>()
   private workspace?: Blockly.Workspace
@@ -100,7 +72,9 @@ export class RubloxGenerator extends JavascriptGenerator {
     Object.assign(this.forBlock, javascriptGenerator.forBlock)
     this.INFINITE_LOOP_TRAP = 'await rx.tick();\n'
     this.STATEMENT_PREFIX = `${MARK_START}%1${MARK_END}\n`
-    this.addReservedWords([...MODULE_PARAMS, FUNCTIONS_PARAM, 'event'].join(','))
+    this.addReservedWords(
+      [...MODULE_PARAMS, FUNCTIONS_PARAM, DATA_PARAM, WEB_PARAM, 'event'].join(','),
+    )
     installBlockGenerators(this)
   }
 
@@ -110,6 +84,8 @@ export class RubloxGenerator extends JavascriptGenerator {
     this.context = contextOf(workspace)
     this.usedComponents.clear()
     this.usesFunctions = false
+    this.usesData = false
+    this.usesWeb = false
     this.parameters.clear()
     // App variables live in `app`, not in local declarations.
     delete this.definitions_.variables
@@ -181,6 +157,7 @@ export class RubloxGenerator extends JavascriptGenerator {
 function isHat(block: Blockly.Block): boolean {
   return (
     block.type === BLOCK_TYPES.appStart ||
+    block.type === 'rx_shared_on_change' ||
     block.type.startsWith('procedures_def') ||
     /^rx_\w+_on_\w+$/.test(block.type)
   )
@@ -313,6 +290,8 @@ function installBlockGenerators(generator: Gen): void {
       ? [`event.${arg}`, Order.MEMBER]
       : ['undefined', Order.ATOMIC]
   }
+
+  installDataGenerators(generator)
 
   for (const def of COMPONENTS) {
     for (const event of Object.keys(def.events)) {
@@ -459,7 +438,12 @@ export function workspaceToModule(
   ]
   for (const helper of helpers) header.push(helper, '')
 
-  const names = generator.usesFunctions ? [...MODULE_PARAMS, FUNCTIONS_PARAM] : MODULE_PARAMS
+  const names = [
+    ...MODULE_PARAMS,
+    ...(generator.usesFunctions ? [FUNCTIONS_PARAM] : []),
+    ...(generator.usesData ? [DATA_PARAM] : []),
+    ...(generator.usesWeb ? [WEB_PARAM] : []),
+  ]
   const params = `{ ${names.join(', ')} }`
   const used = [...generator.usedComponents].sort((a, b) => a.localeCompare(b))
   const bodyRaw = chunks.join('\n')

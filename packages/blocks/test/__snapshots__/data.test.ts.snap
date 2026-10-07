@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`data blocks (J5) > adds, changes and deletes rows, and listens to changes 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx, data }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    await data.Contacts.add({ 'Nom': 'Léa', 'Âge': 9 });
+    await data.Contacts.set(1, 'Âge', 10);
+    await data.Contacts.remove(1);
+  });
+
+  data.Contacts.onChange(async () => {
+    rx.log(data.Contacts.rows());
+  });
+
+  data.onShared('score', async () => {
+    rx.log('!');
+  });
+}
+"
+`;
+
+exports[`data blocks (J5) > reads, filters, sorts and counts a table 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx, data }) {
+  const { Bouton1 } = components;
+
+  Bouton1.onClick(async () => {
+    shared.score = data.Contacts.sort(data.Contacts.where('Nom', 'contains', 'a'), 'Âge', false);
+    rx.log(data.Contacts.count());
+  });
+}
+"
+`;

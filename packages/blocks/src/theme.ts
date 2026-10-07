@@ -21,6 +21,8 @@ const OWN_STYLES: Record<string, BlockCategory> = {
   rx_screen: 'screens',
   rx_interface: 'interface',
   rx_debug: 'debug',
+  rx_data: 'data',
+  rx_object: 'objects',
 }
 
 function shade(hex: string, amount: number): string {

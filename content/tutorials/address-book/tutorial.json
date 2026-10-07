@@ -1,0 +1,55 @@
+{
+  "id": "address-book",
+  "mode": "studio",
+  "order": 3,
+  "minutes": 15,
+  "accent": "mint",
+  "icon": "📇",
+  "requires": ["TextInput", "Button", "DataList"],
+  "starter": {
+    "components": [
+      { "type": "TextInput", "props": { "placeholder": { "fr": "Nom", "en": "Name" } } },
+      { "type": "TextInput", "props": { "placeholder": { "fr": "Téléphone", "en": "Phone" } } },
+      { "type": "Button", "props": { "text": { "fr": "Ajouter", "en": "Add" } } },
+      { "type": "DataList", "props": { "items": [] } }
+    ]
+  },
+  "steps": [
+    { "id": "welcome", "mood": "wave" },
+    { "id": "go-data", "target": "tab:data", "check": { "kind": "tab", "tab": "data" } },
+    { "id": "add-table", "target": "data:add-table", "check": { "kind": "table" } },
+    {
+      "id": "columns",
+      "target": "data:grid",
+      "check": { "kind": "table", "minColumns": 2 }
+    },
+    {
+      "id": "rows",
+      "target": "data:add-row",
+      "check": { "kind": "table", "minColumns": 2, "minRows": 2 }
+    },
+    { "id": "go-design", "target": "tab:design", "check": { "kind": "tab", "tab": "design" } },
+    {
+      "id": "bind",
+      "target": "inspector:source",
+      "check": { "kind": "prop", "type": "DataList", "prop": "source" }
+    },
+    { "id": "go-blocks", "target": "tab:blocks", "check": { "kind": "tab", "tab": "blocks" } },
+    {
+      "id": "add-block",
+      "target": "toolbox-category:data",
+      "check": { "kind": "block", "type": "rx_table_add", "inside": ["rx_Button_on_click"] }
+    },
+    {
+      "id": "fill",
+      "target": "toolbox:TextInput",
+      "check": { "kind": "block", "type": "rx_TextInput_get", "inside": ["rx_table_add"] }
+    },
+    {
+      "id": "run",
+      "target": "preview",
+      "mood": "cheer",
+      "check": { "kind": "preview", "event": "click", "type": "Button" }
+    }
+  ]
+}

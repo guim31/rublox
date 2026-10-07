@@ -804,3 +804,165 @@
   background: currentColor;
   box-shadow: 0 3px 10px rgba(20, 16, 50, 0.3);
 }
+
+/* Maps and charts (J5) */
+.rx-map {
+  position: relative;
+  overflow: hidden;
+  background: var(--rx-surface);
+  min-height: 120px;
+}
+.rx-map-canvas {
+  position: absolute;
+  inset: 0;
+}
+.rx-map-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  color: var(--rx-muted);
+  text-align: center;
+  font-size: 14px;
+  background: var(--rx-surface);
+}
+.rx-map-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid var(--rx-border);
+  border-top-color: var(--rx-primary);
+  animation: rx-spin 0.9s linear infinite;
+}
+@keyframes rx-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.rx-map-marker {
+  width: 26px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background:
+    no-repeat center / contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 34'%3E%3Cpath d='M13 33s11-11.2 11-19.5A11 11 0 0 0 2 13.5C2 21.8 13 33 13 33z' fill='%23e8453c' stroke='white' stroke-width='2'/%3E%3Ccircle cx='13' cy='13' r='4' fill='white'/%3E%3C/svg%3E");
+}
+.rx-map-me {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2f80ed;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 6px rgb(47 128 237 / 0.25);
+}
+.rx-map-sketch {
+  --rx-map-land: #eef0e6;
+  --rx-map-road: #ffffff;
+  --rx-map-water: #b6d6ec;
+  --rx-map-park: #cfe5c0;
+  background: var(--rx-map-land);
+}
+.rx-map-sketch[data-style="dark"] {
+  --rx-map-land: #23262e;
+  --rx-map-road: #3b404b;
+  --rx-map-water: #1c3346;
+  --rx-map-park: #263a2a;
+}
+.rx-map-sketch > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.rx-map-road {
+  fill: none;
+  stroke: var(--rx-map-road);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.rx-map-minor {
+  stroke-width: 3;
+}
+.rx-map-water {
+  fill: var(--rx-map-water);
+}
+.rx-map-park {
+  fill: var(--rx-map-park);
+}
+.rx-map-sketch-label {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #1b1a24;
+  background: rgb(255 255 255 / 0.9);
+}
+.rx-map-count {
+  color: #615e74;
+}
+.rx-chart {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 80px;
+}
+.rx-chart svg {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+.rx-chart-title {
+  font-weight: 700;
+  text-align: center;
+}
+.rx-chart-point {
+  cursor: pointer;
+}
+.rx-chart-value,
+.rx-chart-label {
+  font-size: 11px;
+  fill: var(--rx-muted);
+}
+.rx-chart-value {
+  fill: var(--rx-text);
+  font-weight: 600;
+}
+.rx-chart-slice {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #ffffff;
+  paint-order: stroke;
+  stroke: rgb(0 0 0 / 0.25);
+  stroke-width: 2px;
+}
+.rx-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.rx-map-sketch-pin {
+  position: absolute;
+  width: 18px;
+  height: 24px;
+  margin: -24px 0 0 -9px;
+  background:
+    no-repeat center / contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 34'%3E%3Cpath d='M13 33s11-11.2 11-19.5A11 11 0 0 0 2 13.5C2 21.8 13 33 13 33z' fill='%23e8453c' stroke='white' stroke-width='2'/%3E%3Ccircle cx='13' cy='13' r='4' fill='white'/%3E%3C/svg%3E");
+}

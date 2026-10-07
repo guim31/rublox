@@ -73,6 +73,11 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   image, processeur ralenti ×4 ; les chiffres s'affichent dans la sortie). Le projet `perf`
   attend la fin des autres tests (`dependencies`) : mesurer sous charge ne veut rien dire. Captures :
   `npx playwright test --project=screenshots e2e/screenshots-j7.spec.ts` → `docs/screenshots/j7/`.
+- Données et services (J5) : `npx playwright test --project=e2e e2e/data.spec.ts` (tutoriel Météo
+  de bout en bout, Tchat familial entre deux navigateurs) et `e2e/a11y-j5.spec.ts` ; le relais et
+  les adresses privées : `cd apps/server && npx vitest run test/relay.test.ts test/shared.test.ts`.
+  Captures : `npx playwright test --project=screenshots e2e/screenshots-j5.spec.ts` →
+  `docs/screenshots/j5/`.
 - IA (J6) : `pnpm test:e2e` lance aussi un second serveur avec l'IA (`localhost:4320`, base en
   mémoire) branché sur un faux Claude (`e2e/fake-anthropic.mjs`, port 4329, réponses dans
   `e2e/fixtures/`) : `npx playwright test --project=e2e e2e/ai.spec.ts`. En développement :
@@ -113,6 +118,13 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `accepts` de la scène) ; son dessin à l'exécution va dans `World` (`runtime/src/game/`), pas
   dans React. Une démo : `packages/catalog/src/demos/` (blocs écrits en JSON avec
   `blocks-json.ts`), puis une entrée dans `apps/studio/src/storage/demos.ts`.
+- Un bloc de données (table, API, objet) : `packages/blocks/src/data-blocks.ts` (définition,
+  générateur, boîte à outils) et son type dans `data-types.ts`, ce qu'il appelle dans
+  `packages/runtime/src/data/api.ts` (`data`, `web`, `rx.get`), sa fiche dans
+  `packages/i18n/src/{fr,en}/data.ts` (`blockSheets`).
+- Ce qu'une appli demande au serveur (relais, données partagées) : le protocole dans
+  `packages/schema/src/services.ts`, le serveur dans `apps/server/src/data/`, le client dans
+  `apps/player/src/data.ts` ; toute nouvelle façon d'entrer passe par `resolveCredential`.
 - Un modèle de projet : un dossier `content/templates/<id>/` (`template.json` : la recette
   `AppSpec`, `fr.json`, `en.json`), puis une ligne dans `packages/templates/src/content.ts`. Dans
   les blocs d'une recette, composants, écrans et variables se nomment par leur `key` (ou leur
@@ -243,6 +255,24 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   va dans `e2e/helpers.ts`. Le canevas de l'aperçu n'existe que dans la vue Blocs.
 - **Shell** : `pkill -f <motif>` ou `pgrep -f vite | xargs kill` tue aussi le shell qui le lance ;
   arrêter les serveurs par PID ou par port.
+- **`.gitignore` et `data/`** : seuls `/data/` et `apps/*/data/` (base PGlite) sont ignorés. Un
+  `data/` plus large cachait des dossiers de sources (`apps/server/src/data/`…) : vérifier
+  `git status` après avoir créé un dossier, Biome ne lit pas non plus les fichiers ignorés.
+- **Relais et tests** : il refuse 127.0.0.1, donc un serveur de test local ; `Relay` prend
+  `resolve` (faux DNS) et `allowAddress` pour les tests (`test/relay.test.ts`), jamais par une
+  variable d'environnement. En e2e, `context.route('**/_rx/proxy')` intercepte aussi les appels
+  de l'aperçu (iframe d'une autre origine) : pas de dépendance au réseau.
+- **Session cloud** : `tiles.openfreemap.org` et `api.open-meteo.com` sont refusés par le proxy ;
+  la carte affiche alors « ne peut pas s'afficher ici » (attendu), le canevas montre une esquisse.
+- **MapLibre 6** cherche son worker à côté de son module : le bundle le déplace, d'où
+  `setWorkerUrl` avec un import `?url` (`runtime/src/components/map-loader.ts`, types dans
+  `runtime/src/assets.d.ts`).
+- **Blockly en e2e** : un bloc créé par le code (« Essayer » de l'onglet Données) peut être très
+  large et l'espace de travail défile à chaque dépôt ; saisir un bloc par **son propre** champ
+  (`locator(':scope > .blocklyEditableField')`), sinon on attrape un bloc imbriqué, et mesurer
+  sa position avant `mouse.down()` (pendant le glisser, il quitte l'espace de travail).
+- **Variables de Blockly** : `variables_set` sur une variable partagée génère `shared.x = …`,
+  envoyé au serveur ; `data.onShared` ne se déclenche que si la valeur change (pas d'écho).
 - **Claude (J6)** : SDK `@anthropic-ai/sdk` 0.131, côté serveur seulement (`apps/server/src/ai/`).
   Structured outputs par `client.beta.messages.parse` + `betaZodOutputFormat` ; pas de schéma
   récursif (d'où la réponse « à plat » de `prompts.ts`). Opus 5.5 : ni `thinking` désactivé ni

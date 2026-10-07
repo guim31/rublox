@@ -1,0 +1,49 @@
+{
+  "id": "my-places",
+  "mode": "studio",
+  "order": 4,
+  "minutes": 15,
+  "accent": "coral",
+  "icon": "🗺️",
+  "requires": ["Map"],
+  "starter": {
+    "components": [{ "type": "Map", "props": { "height": 420 } }]
+  },
+  "steps": [
+    { "id": "welcome", "mood": "wave" },
+    { "id": "go-data", "target": "tab:data", "check": { "kind": "tab", "tab": "data" } },
+    { "id": "add-table", "target": "data:add-table", "check": { "kind": "table" } },
+    {
+      "id": "columns",
+      "target": "data:grid",
+      "check": { "kind": "table", "minColumns": 3 }
+    },
+    {
+      "id": "rows",
+      "target": "data:add-row",
+      "check": { "kind": "table", "minColumns": 3, "minRows": 2 }
+    },
+    { "id": "go-design", "target": "tab:design", "check": { "kind": "tab", "tab": "design" } },
+    {
+      "id": "bind",
+      "target": "inspector:source",
+      "check": { "kind": "prop", "type": "Map", "prop": "source" }
+    },
+    { "id": "go-blocks", "target": "tab:blocks", "check": { "kind": "tab", "tab": "blocks" } },
+    {
+      "id": "on-marker",
+      "target": "toolbox:Map",
+      "check": {
+        "kind": "block",
+        "type": ["rx_ui_toast", "rx_ui_alert"],
+        "inside": ["rx_Map_on_markerClick"]
+      }
+    },
+    {
+      "id": "run",
+      "target": "preview",
+      "mood": "cheer",
+      "check": { "kind": "preview", "event": "markerClick", "type": "Map" }
+    }
+  ]
+}

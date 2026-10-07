@@ -3,6 +3,7 @@ import { messages } from '@rublox/i18n'
 import { APP_WORKSPACE } from '@rublox/schema'
 import type * as Blockly from 'blockly/core'
 import { type BlocksContext, contextOf } from './context.ts'
+import { DATA_BLOCK_TYPES, dataCategory, objectsCategory } from './data-blocks.ts'
 import {
   BLOCK_TYPES,
   eventBlockType,
@@ -275,6 +276,12 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
     custom: VARIABLES_CATEGORY,
   } as Item)
 
+  // Data and services (J5): tables and APIs of the Data tab, and objects to read answers.
+  if (all || context.tables?.length || context.apis?.length) {
+    contents.push(dataCategory(context, 'rx_data_category'))
+  }
+  if (all) contents.push(objectsCategory(context, 'rx_object_category'))
+
   if (all) {
     contents.push({
       kind: 'category',
@@ -356,6 +363,7 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
 export const VARIABLES_CATEGORY = 'RX_VARIABLES'
 export const CREATE_APP_VARIABLE = 'rxCreateAppVariable'
 export const CREATE_STORED_VARIABLE = 'rxCreateStoredVariable'
+export const CREATE_SHARED_VARIABLE = 'rxCreateSharedVariable'
 
 function variableBlocks(variable: { id: string }): Item[] {
   const field = { VAR: { id: variable.id } }
@@ -378,6 +386,8 @@ export function variablesFlyout(workspace: Blockly.Workspace): Item[] {
   const exists = (id: string) => Boolean(workspace.getVariableMap().getVariableById(id))
   const app = variables.filter((v) => v.kind === 'app' && exists(v.id))
   const stored = variables.filter((v) => v.kind === 'stored' && exists(v.id))
+  const shared = variables.filter((v) => v.kind === 'shared' && exists(v.id))
+  const all = context.mode === 'studio' || context.showAll
   const items: Item[] = [
     { kind: 'button', text: strings.createVariable, callbackKey: CREATE_APP_VARIABLE } as Item,
     {
@@ -385,6 +395,15 @@ export function variablesFlyout(workspace: Blockly.Workspace): Item[] {
       text: strings.createStoredVariable,
       callbackKey: CREATE_STORED_VARIABLE,
     } as Item,
+    ...(all || shared.length
+      ? [
+          {
+            kind: 'button',
+            text: messages[context.locale].blocks.data.createSharedVariable,
+            callbackKey: CREATE_SHARED_VARIABLE,
+          } as Item,
+        ]
+      : []),
   ]
   if (app.length) {
     items.push({ kind: 'label', text: strings.appVariables } as Item)
@@ -393,6 +412,18 @@ export function variablesFlyout(workspace: Blockly.Workspace): Item[] {
   if (stored.length) {
     items.push({ kind: 'label', text: strings.storedVariables } as Item)
     for (const variable of stored) items.push(...variableBlocks(variable))
+  }
+  if (shared.length) {
+    items.push({
+      kind: 'label',
+      text: messages[context.locale].blocks.data.sharedVariables,
+    } as Item)
+    for (const variable of shared) {
+      items.push(
+        block(DATA_BLOCK_TYPES.sharedOnChange, { fields: { VAR: variable.id } }),
+        ...variableBlocks(variable),
+      )
+    }
   }
   return items
 }

@@ -9,6 +9,7 @@ import {
 } from '@rublox/schema'
 import { useEffect, useRef, useState } from 'react'
 import { serverAi } from './ai.ts'
+import { serverServices } from './data.ts'
 import { deviceLabel } from './page.ts'
 import { assetResolver, Message, RunningApp } from './run.tsx'
 
@@ -58,6 +59,7 @@ export function LiveView({ token }: { token: string }) {
             locale: next.meta.locale,
             mode: next.meta.mode,
             appId: `live:${next.meta.id}`,
+            services: serverServices(() => ({ kind: 'live', token })),
             ai: serverAi({ token }),
             host: {
               log: (entry) =>

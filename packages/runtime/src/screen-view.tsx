@@ -2,6 +2,7 @@ import { getComponentDef, resolveProps } from '@rublox/catalog'
 import type { ComponentId, Locale, Screen, Theme } from '@rublox/schema'
 import { type CSSProperties, type ReactNode, useMemo, useRef } from 'react'
 import { RENDERERS } from './components/registry.ts'
+import type { TableRows } from './components/types.ts'
 import { commonStyle } from './styles.ts'
 import { type Scheme, themeVariables } from './theme.ts'
 
@@ -17,6 +18,8 @@ export type ScreenViewProps = {
   assetUrl?: (value: string) => string | undefined
   /** Renderers hand their imperative handle to the engine through this (run mode). */
   expose?: (componentId: ComponentId, handle: unknown) => void
+  /** Rows of the tables of the Data tab, for components bound to one (J5). */
+  tableRows?: TableRows
   /** Lets the editor add elements (drop markers…) among a container's children. */
   decorateChildren?: (parentId: ComponentId, children: ReactNode[]) => ReactNode[]
 }
@@ -71,6 +74,7 @@ export function ScreenView(props: ScreenViewProps): ReactNode {
         setValue={(prop, value) => props.setValue?.(id, prop, value)}
         assetUrl={props.assetUrl ?? httpsOnly}
         locale={props.locale}
+        tableRows={props.tableRows}
       >
         {children}
       </Renderer>

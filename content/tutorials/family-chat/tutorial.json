@@ -1,0 +1,61 @@
+{
+  "id": "family-chat",
+  "mode": "studio",
+  "order": 5,
+  "minutes": 20,
+  "accent": "yellow",
+  "icon": "💬",
+  "requires": ["TextInput", "Button", "DataList"],
+  "starter": {
+    "components": [
+      { "type": "DataList", "props": { "items": [], "grow": true } },
+      {
+        "type": "TextInput",
+        "props": { "placeholder": { "fr": "Ton prénom", "en": "Your name" } }
+      },
+      {
+        "type": "TextInput",
+        "props": { "placeholder": { "fr": "Ton message", "en": "Your message" } }
+      },
+      { "type": "Button", "props": { "text": { "fr": "Envoyer", "en": "Send" } } }
+    ]
+  },
+  "steps": [
+    { "id": "welcome", "mood": "wave" },
+    { "id": "go-data", "target": "tab:data", "check": { "kind": "tab", "tab": "data" } },
+    { "id": "add-table", "target": "data:add-table", "check": { "kind": "table" } },
+    {
+      "id": "shared",
+      "target": "data:mode",
+      "check": { "kind": "table", "mode": "shared" }
+    },
+    {
+      "id": "columns",
+      "target": "data:grid",
+      "check": { "kind": "table", "mode": "shared", "minColumns": 2 }
+    },
+    { "id": "go-design", "target": "tab:design", "check": { "kind": "tab", "tab": "design" } },
+    {
+      "id": "bind",
+      "target": "inspector:source",
+      "check": { "kind": "prop", "type": "DataList", "prop": "source" }
+    },
+    { "id": "go-blocks", "target": "tab:blocks", "check": { "kind": "tab", "tab": "blocks" } },
+    {
+      "id": "send",
+      "target": "toolbox-category:data",
+      "check": {
+        "kind": "block",
+        "type": "rx_TextInput_get",
+        "min": 2,
+        "inside": ["rx_table_add", "rx_Button_on_click"]
+      }
+    },
+    {
+      "id": "run",
+      "target": "preview",
+      "check": { "kind": "preview", "event": "click", "type": "Button" }
+    },
+    { "id": "two-phones", "target": "preview", "mood": "cheer", "check": { "kind": "manual" } }
+  ]
+}

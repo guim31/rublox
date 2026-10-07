@@ -38,13 +38,20 @@ export function appsCsp(studioUrl: string): string {
     "img-src 'self' data: blob: https:",
     "media-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    "connect-src 'self'",
+    // The relay and shared data are `'self'`; the only other address is the map tiles.
+    `connect-src 'self' ${MAP_TILES_ORIGIN}`,
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
     `frame-ancestors 'self' ${studioUrl}`,
   ].join('; ')
 }
+
+/**
+ * Vector tiles of the Map component (SPEC § 4.5): OpenFreeMap, free and without a key. Its
+ * style, tiles, glyphs and sprites all come from this one origin.
+ */
+export const MAP_TILES_ORIGIN = 'https://tiles.openfreemap.org'
 
 /** `Permissions-Policy` (structured header syntax): `camera=(self "https://studio"), …`. */
 export function appsPermissionsPolicy(studioUrl: string): string {

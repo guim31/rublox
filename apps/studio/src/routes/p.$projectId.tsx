@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { EditorPage } from '../editor/editor-page.tsx'
 
-export type EditorTab = 'design' | 'blocks'
+export type EditorTab = 'design' | 'blocks' | 'data'
 type Search = { tab: EditorTab; screen?: string }
 
 export const Route = createFileRoute('/p/$projectId')({
   validateSearch: (search: Record<string, unknown>): Search => ({
-    tab: search.tab === 'blocks' ? 'blocks' : 'design',
+    tab: search.tab === 'blocks' || search.tab === 'data' ? search.tab : 'design',
     ...(typeof search.screen === 'string' ? { screen: search.screen } : {}),
   }),
   component: Editor,

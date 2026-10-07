@@ -23,6 +23,7 @@ export type BlockAccess = 'get-set' | 'get' | 'set' | 'none'
  * - `any`: any value (an event argument, a method result)
  * - `images`: a list of images, each an asset id, an `https:` address or an emoji (the
  *   costumes of a sprite)
+ * - `binding`: `null`, or a table of the Data tab and a column per field (`Binding`)
  */
 export type PropKind =
   | 'string'
@@ -39,6 +40,13 @@ export type PropKind =
   | 'date'
   | 'time'
   | 'any'
+  | 'binding'
+
+/**
+ * A component drawn from a table of the Data tab (J5, SPEC § 4.5): the table, and the column
+ * chosen for each field the component shows (`image`, `title`, `subtitle`…), by column id.
+ */
+export type Binding = { table: string; fields: Record<string, string> }
 
 /** Fields of the items of a list of objects (a data list item: image, title, subtitle). */
 export type ItemFields = Record<string, 'string' | 'asset'>
@@ -79,6 +87,8 @@ export type PropDef<T = unknown> = {
   assetKind?: 'image' | 'sound' | 'video' | 'lottie'
   /** Fields of each item (list of objects). */
   itemFields?: ItemFields
+  /** What a binding fills (binding): field names, with their kind. */
+  bindingFields?: ItemFields
   /** Turns any value into a valid one, or `undefined` when it cannot. */
   coerce: (value: unknown) => T | undefined
 }
@@ -356,6 +366,28 @@ export const prop = {
 
   any(options: PropOptions<unknown>): PropDef<unknown> {
     return { ...defaults('any', options), coerce: (value) => value }
+  },
+
+  /** Draws the component from a table (J5): `null` until a table is chosen. */
+  binding(
+    options: Omit<PropOptions<Binding | null>, 'default'> & { fields: ItemFields },
+  ): PropDef<Binding | null> {
+    return {
+      ...defaults<Binding | null>('binding', { ...options, default: null }),
+      bindingFields: options.fields,
+      coerce: (value) => {
+        if (value === null || value === undefined || value === '') return null
+        if (typeof value !== 'object' || Array.isArray(value)) return undefined
+        const { table, fields } = value as Partial<Binding>
+        if (typeof table !== 'string') return undefined
+        const clean: Record<string, string> = {}
+        for (const key of Object.keys(options.fields)) {
+          const column = fields?.[key]
+          if (typeof column === 'string' && column) clean[key] = column
+        }
+        return { table, fields: clean }
+      },
+    }
   },
 }
 

@@ -30,6 +30,8 @@ function categoryOf(type: string): BlockCategory {
   if (type.startsWith('lists_')) return 'lists'
   if (type.startsWith('colour_')) return 'colour'
   if (type.startsWith('procedures_')) return 'functions'
+  if (type.startsWith('rx_object_') || type.startsWith('rx_json_')) return 'objects'
+  if (type.startsWith('rx_table_') || type.startsWith('rx_api_')) return 'data'
   return 'debug'
 }
 
@@ -47,10 +49,15 @@ const CATEGORY_KEYS: Record<BlockCategory, string> = {
   interface: 'interface',
   debug: 'debug',
   colour: 'colors',
+  data: 'data',
+  objects: 'objects',
 }
 
 function categoryLabel(category: BlockCategory, locale: Locale): string {
-  const labels = messages[locale].blocks.categories as Record<string, string>
+  const labels = {
+    ...messages[locale].blocks.categories,
+    ...messages[locale].blocks.data.categories,
+  } as Record<string, string>
   return labels[CATEGORY_KEYS[category]] ?? category
 }
 

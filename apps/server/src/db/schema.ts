@@ -415,6 +415,63 @@ export const liveLinks = pgTable(
   (t) => [index('live_links_project_idx').on(t.projectId)],
 )
 
+// ---- Data and services (J5, SPEC § 4.5, § 6.9) ---------------------------------------------
+
+/**
+ * API keys of a project, never written into the project nor into a published app: the relay
+ * of the apps origin puts them into the calls. Encrypted with AES-256-GCM under a key derived
+ * from `RUBLOX_SECRET` (`data/secrets.ts`).
+ */
+export const projectSecrets = pgTable(
+  'project_secrets',
+  {
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    /** `base64(iv | tag | ciphertext)`. */
+    value: text('value').notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [primaryKey({ columns: [t.projectId, t.name] })],
+)
+
+/** Shared variables of an app (SPEC § 4.2): one value per project and variable id. */
+export const sharedVars = pgTable(
+  'shared_vars',
+  {
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    varId: text('var_id').notNull(),
+    value: jsonb('value'),
+    updatedAt: updatedAt(),
+  },
+  (t) => [primaryKey({ columns: [t.projectId, t.varId] })],
+)
+
+/** Rows of the shared tables of an app (SPEC § 4.5), cells by column id. */
+export const sharedRows = pgTable(
+  'shared_rows',
+  {
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    tableId: text('table_id').notNull(),
+    rowId: text('row_id').notNull(),
+    values: jsonb('values').notNull(),
+    /** Insertion order. */
+    seq: bigint('seq', { mode: 'number' }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.tableId, t.rowId] }),
+    index('shared_rows_order_idx').on(t.projectId, t.tableId, t.seq),
+  ],
+)
+
 // ---- Gallery and AI assistant (J6, SPEC § 4.11, § 4.12) -----------------------------------
 
 /** "I like" on a gallery project: one per account and project. */

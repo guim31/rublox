@@ -1,0 +1,35 @@
+{
+  "title": "The weather",
+  "summary": "An app that asks a real weather service on the Internet for the temperature (Open-Meteo, free and without a key).",
+  "done": "Your app talks to a real service on the Internet! A connection, a call, a field of the answer: that is how most apps work. Try showing the wind too (current=temperature_2m,wind_speed_10m).",
+  "steps": {
+    "welcome": {
+      "text": "We will ask **Open-Meteo**, a free weather service, for the temperature in Paris. Calls go through the Rublox server: you need to be signed in."
+    },
+    "go-data": {
+      "text": "Open the **Data** tab: tables and API connections live there."
+    },
+    "add-api": {
+      "text": "Create an **API connection** with the **+** next to “API connections”."
+    },
+    "base-url": {
+      "text": "In **Base address**, write `https://api.open-meteo.com/v1`. You can also rename the connection “Weather”."
+    },
+    "params": {
+      "text": "Add three **parameters**: `latitude` = 48.85, `longitude` = 2.35 and `current` = temperature_2m.",
+      "hint": "The server adds them to each call: …/forecast?latitude=48.85&longitude=2.35&current=temperature_2m"
+    },
+    "try": {
+      "text": "Write `/forecast` in **Path** and press **Try**. In the answer, open **current** and click **temperature_2m**: Rublox creates the block that reads this field."
+    },
+    "go-blocks": {
+      "text": "Go to the **Blocks** tab: your new block is waiting there."
+    },
+    "wire": {
+      "text": "Add [when {{Button}} is clicked], put [set text of {{Text}} to …] inside, and plug your [current.temperature_2m of answer of …] block into it."
+    },
+    "run": {
+      "text": "In the preview, press the button: the temperature in Paris shows up, in degrees!"
+    }
+  }
+}

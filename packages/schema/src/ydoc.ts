@@ -1,4 +1,5 @@
 import * as Y from 'yjs'
+import type { Table } from './data.ts'
 import {
   type BlocklyJson,
   type ComponentNode,
@@ -21,7 +22,8 @@ import {
  * - `blocks`: workspace key → map { top block id → Blockly JSON (plain object) }
  * - `variables`: `app`, `stored`, `shared` → arrays of plain `VarDecl`
  * - `assets`: asset id → plain object
- * - `data`: `tables`, `apis` → maps of plain objects
+ * - `data`: `tables` → table id → map { name, mode, access, columns (plain array), rows (array
+ *   of plain rows) }; `apis` → map of plain objects
  *
  * One map per level so that concurrent edits of different fields merge, and blocks stored per
  * stack so that two people working on different stacks never conflict.
@@ -99,6 +101,20 @@ export function screenToY(screen: Screen): YMap {
   return map
 }
 
+export function tableToY(table: Table): YMap {
+  const map = mapFrom({
+    name: table.name,
+    mode: table.mode,
+    access: table.access,
+    columns: table.columns.map((column) => ({ ...column })),
+  })
+  map.set(
+    'rows',
+    Y.Array.from(table.rows.map((row) => ({ id: row.id, values: { ...row.values } }))),
+  )
+  return map
+}
+
 /** Writes `doc` into an empty `Y.Doc` (a new one by default) in a single transaction. */
 export function projectToYDoc(doc: ProjectDoc, ydoc: Y.Doc = new Y.Doc()): Y.Doc {
   ydoc.transact(() => {
@@ -137,7 +153,11 @@ export function projectToYDoc(doc: ProjectDoc, ydoc: Y.Doc = new Y.Doc()): Y.Doc
     for (const [assetId, asset] of Object.entries(doc.assets)) assets.set(assetId, asset)
 
     const data = yData(ydoc)
-    data.set('tables', mapFrom(doc.data.tables))
+    const tables: YMap = new Y.Map()
+    for (const [tableId, table] of Object.entries(doc.data.tables)) {
+      tables.set(tableId, tableToY(table))
+    }
+    data.set('tables', tables)
     data.set('apis', mapFrom(doc.data.apis))
   })
   return ydoc

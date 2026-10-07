@@ -63,6 +63,7 @@ async function main() {
   const upgrades = new Upgrades()
   upgrades.add(services.collab.route())
   for (const route of services.live.routes()) upgrades.add(route)
+  upgrades.add(services.sharedHub.route())
   upgrades.attach(server as Server)
 
   let shuttingDown = false
@@ -72,6 +73,7 @@ async function main() {
     clearInterval(purgeTimer)
     services.live.close()
     services.collab.close()
+    services.sharedHub.close()
     logger.info({ signal }, 'shutting down')
     const timer = setTimeout(() => {
       logger.error('graceful shutdown timed out')

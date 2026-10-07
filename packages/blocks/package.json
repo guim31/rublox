@@ -6,7 +6,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./colors": "./src/colors.ts"
+    "./colors": "./src/colors.ts",
+    "./data-types": "./src/data-types.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

@@ -11,7 +11,6 @@ import { hc } from 'hono/client'
 import { WebSocket } from 'ws'
 import * as Y from 'yjs'
 import { bootstrapAdmin } from '../src/accounts.ts'
-import type { AiClient } from '../src/ai/client.ts'
 import type { Api } from '../src/api.ts'
 import { createApp } from '../src/app.ts'
 import { COLLAB_PATH } from '../src/collab.ts'
@@ -30,7 +29,7 @@ const STUDIO_HOST = new URL(STUDIO).host
  */
 export async function createTestServer(
   env: Record<string, string> = {},
-  options: { aiClient?: AiClient } = {},
+  options: Parameters<typeof createServices>[3] = {},
 ) {
   const dataDir = mkdtempSync(join(tmpdir(), 'rublox-data-'))
   const config = loadConfig({
@@ -67,6 +66,7 @@ export async function createTestServer(
       // The same router as `index.ts`: documents and the live test side by side.
       const upgrades = new Upgrades().add(services.collab.route())
       for (const route of services.live.routes()) upgrades.add(route)
+      upgrades.add(services.sharedHub.route())
       upgrades.attach(server as Server)
     })
     return listening
@@ -86,6 +86,7 @@ export async function createTestServer(
     close: async () => {
       await services.collab.flush()
       services.live.close()
+      services.sharedHub.close()
       if (listening) {
         const { server } = await listening
         server.closeAllConnections()

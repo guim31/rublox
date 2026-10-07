@@ -8,6 +8,16 @@ export type VariableRef = { id: string; name: string; kind: 'app' | 'stored' | '
 /** A function of the `app` workspace, callable from every screen (`functions.name`). */
 export type AppFunctionRef = { name: string; params: string[]; returns: boolean }
 
+/** A table of the Data tab and its columns (J5). */
+export type TableRef = {
+  id: string
+  name: string
+  mode: 'local' | 'shared'
+  columns: { id: string; name: string; type: string }[]
+}
+/** An API connection of the Data tab (J5). */
+export type ApiRef = { id: string; name: string }
+
 /**
  * What the blocks of one workspace need to know about the project: dropdowns list these
  * components and screens, labels use this language, the toolbox follows this mode.
@@ -25,6 +35,9 @@ export type BlocksContext = {
   variables?: VariableRef[]
   /** Functions defined in the `app` workspace. */
   appFunctions?: AppFunctionRef[]
+  /** Tables and API connections of the project (J5). */
+  tables?: TableRef[]
+  apis?: ApiRef[]
 }
 
 const contexts = new WeakMap<Blockly.Workspace, () => BlocksContext>()

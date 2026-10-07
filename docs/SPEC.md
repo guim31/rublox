@@ -13,7 +13,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J2 | Catalogue complet des composants et de leurs blocs | fait (PR #4), voir § 0.4 ; essai sur téléphones à faire (`docs/compatibilite.md`) |
 | J3 | Expérience Junior et Studio, apprentissage, accueil | fait (PR #7), voir § 0.3 |
 | J4 | Collaboration, test sur téléphone, publication PWA, export | fait sauf l’édition à plusieurs (PR #6), voir § 0.5 |
-| J5 | Données et services : tables, variables, API web, cartes, graphiques | à faire |
+| J5 | Données et services : tables, variables, API web, cartes, graphiques | fait (PR #8), voir § 0.8 ; essai sur téléphones à faire (`docs/compatibilite.md`) |
 | J6 | Galerie, remix, modèles, assistant IA | fait (PR #10), voir § 0.7 |
 | J7 | Mode jeu : scène, lutins, physique | fait (PR #5), voir § 0.6 |
 | J8 | Finitions : accessibilité, performances, sécurité, mise en production | à faire |
@@ -553,6 +553,97 @@ d'usage, consignes adaptées aux enfants ; badge « premier remix ».
   pour tout ce qui touche l'IA ; `createDemoProject({ ai })`. Chaînes du J6 :
   `packages/i18n/src/{fr,en}/gallery.ts` (`gallery`, `templates`, `ai` dans `studio`, `ai` dans
   `runtime`).
+
+### 0.8 Ce que le J5 a fixé (07/10/2026)
+
+**Fait** : onglet Données (tables éditables comme un tableur, colonnes typées, mode local ou
+partagé avec droits, import et export CSV ; connexions API avec en-têtes, paramètres, secrets,
+« Essayer » et réponse en arbre dont un clic crée le bloc qui lit le champ ; secrets chiffrés ;
+valeurs des variables partagées), relais `/_rx/proxy`, variables et tables partagées par
+`/_rx/shared`, liaison de la Liste de données, de la Grille de données, de la Carte et du
+Graphique à une table, blocs de table, d'API et d'objets, composants Carte, Graphique et Feuille
+Google (P2), tutoriels La météo, Carnet d'adresses, Carte de mes lieux et Tchat familial.
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Tables et connexions API ne sont pas des composants** (le § 4.4 les rangeait dans
+  « Données (invisibles) ») : elles vivent dans l'onglet Données et leurs blocs sont des blocs
+  généraux (catégorie « Données ») utilisables dans tous les écrans et dans l'espace « Appli ».
+  Un composant par écran aurait obligé à le recréer sur chaque écran pour la même table. La
+  **Feuille Google**, elle, est un composant invisible (une adresse à lire, sans colonnes à
+  déclarer).
+- Code généré : deux paramètres de module de plus, présents seulement quand un module s'en sert
+  (comme `functions`) : `data` (`data.Contacts.rows()`, `await data.Contacts.add({…})`,
+  `data.Contacts.onChange(…)`, `data.onShared('score', …)`) et `web` (`await
+  web.Meteo.get('/forecast', paramètres)`). Les objets se lisent par `rx.get(objet,
+  'current.temperature_2m')` (un champ absent donne `null`, pas d'erreur). `data` est un nom
+  réservé (`GENERATED_CODE_NAMES`).
+- Une **table locale** livre ses lignes avec l'appli ; l'appli peut les modifier sur l'appareil
+  (`localStorage['rublox:<appId>:tables']`). Si les lignes sont modifiées ensuite dans l'onglet
+  Données, la copie de l'appareil est oubliée (empreinte des lignes du projet).
+- Une **table partagée** et les **variables partagées** sont **par projet** : l'aperçu de
+  l'éditeur, le test sur téléphone et l'appli publiée voient les mêmes données (comme Thunkable
+  avec sa base en ligne). Les lignes d'une table partagée ne sont pas dans le projet : ni copiées
+  par « Dupliquer », ni dans l'export `.rublox`. Les secrets non plus.
+- **« Quand la variable partagée change »** se déclenche pour tout changement de valeur, y
+  compris celui fait par l'appareil lui-même, mais pas pour la valeur reçue à l'ouverture.
+- **Projet invité** : pas de relais ni de données partagées (le serveur ne peut pas savoir que
+  le projet est ouvert) : les blocs d'API disent « connecte-toi », une table partagée fonctionne
+  en mémoire avec un avertissement. **Site web exporté** : les connexions sans secret sont
+  appelées directement par le navigateur (si l'API accepte CORS), pas de données partagées.
+- **Relais** : l'appli n'envoie que l'identifiant de la connexion, le chemin, des paramètres et
+  un corps ; l'adresse de base, les en-têtes et les secrets viennent du projet côté serveur
+  (document vivant pour l'éditeur et le test sur téléphone, version publiée pour une appli). Le
+  chemin ne peut pas sortir de l'adresse de base. Les en-têtes de la connexion ne suivent pas
+  une redirection vers une autre origine. Limites : 10 s, 2 Mo (décompressé), 120 appels par
+  minute et par projet, 4 redirections. Le résolveur de noms vérifie **toutes** les adresses
+  d'un nom et la connexion se fait sur l'adresse vérifiée (pas de « DNS rebinding »).
+- **Ticket de l'éditeur** : l'aperçu (origine des applis, sans cookie) reçoit du studio un
+  ticket HMAC valable 12 h, demandé par `POST /api/projects/:id/data/ticket` (droit de lecture)
+  et passé dans `rx:load`. Il n'est revérifié que par sa signature et la corbeille : retirer un
+  partage ne le révoque pas avant son expiration.
+- **Carte** : MapLibre GL 6 (BSD-3), chargé à la demande, avec les styles d'OpenFreeMap
+  (`tiles.openfreemap.org`, gratuit, sans clé ni compte, vérifié le 07/10/2026 ; données ©
+  OpenStreetMap, attribution affichée). La CSP de l'origine des applis ajoute ce seul hôte à
+  `connect-src`. Sur le **canevas** et les miniatures, la carte est une esquisse (repères placés
+  d'après leurs coordonnées) : ni tuile chargée depuis le studio, ni contexte WebGL par
+  miniature. Une carte avec des repères s'ouvre en les montrant tous.
+- **Graphique** : dessiné en SVG par Rublox (barres, courbe, secteurs) plutôt qu'avec Chart.js :
+  quelques kilo-octets, rendu identique sur le canevas, valeurs lisibles par un lecteur d'écran.
+- Liaison : propriété `source` (nouveau genre `binding` : `{ table, fields }`, colonnes par
+  identifiant). Quand elle est réglée, les éléments propres du composant sont ignorés (et
+  masqués dans l'inspecteur) ; les événements portent en plus la ligne touchée (`row`).
+- Quotas des données partagées : 16 Ko par valeur ou par ligne, 5 000 lignes par table,
+  30 écritures d'affilée puis 10 par seconde par connexion, 200 connexions par projet. Les
+  secrets : 30 par projet, 4 Ko chacun.
+- Le tutoriel « Tchat familial » finit par « Tester sur mon téléphone » ; la synchronisation
+  entre deux navigateurs est vérifiée sur l'appli publiée (`e2e/data.spec.ts`).
+
+**Contrats pour les jalons suivants**
+
+- Format : `packages/schema/src/data.ts` (`Table`, `Column`, `Row` avec cellules par
+  identifiant de colonne, `ApiConnection`, `coerceCell`, `rowToObject`, `buildApiUrl`,
+  `{{secret:NOM}}`), opérations dans `data-ops.ts` (`addTable`, `addColumn`, `addRows`,
+  `importTable`, `addApi`…), CSV dans `csv.ts`, protocole des services dans `services.ts`
+  (`DataCredential`, `RelayRequest`, messages `SharedFromApp` / `SharedToApp`). Dans Yjs, chaque
+  table est une `Y.Map` dont les lignes sont un `Y.Array` ; l'onglet Données est annulable.
+  `formatVersion` reste 1 (une table d'avant le J5 se lit avec des valeurs par défaut).
+- Base : `project_secrets`, `shared_vars`, `shared_rows` (migration `0004_data`). Serveur :
+  `apps/server/src/data/` (`SecretStore` et `Tickets`, `resolveCredential`, `Relay` et
+  `isPublicAddress`, `SharedData` et `SharedHub`) ; routes `apps/server/src/routes/data.ts`.
+- Moteur : `EngineOptions.services` (`DataServices` : `request`, `sheet`, `shared`) ;
+  `engine.data` (`DataStore`) ; `engine.tableRows(id)` pour les composants liés. Les rendus
+  reçoivent `tableRows` (`RendererProps`, `ScreenView`). Le lecteur fournit les services
+  (`apps/player/src/data.ts`).
+- Blocs : `DATA_BLOCK_TYPES` (`@rublox/blocks/data-types`, sans Blockly) ; `BlocksContext`
+  gagne `tables` et `apis` ; `refreshDataBlocks` après un changement de l'onglet Données.
+- Studio : `useDataTicket`, `useCanvasTableRows`, `createReadBlock` (`editor/data/`) ;
+  `useEditor().dataItem` ; chaînes du J5 dans `packages/i18n/src/{fr,en}/data.ts` (`studio.data`,
+  `blocks.data`, `runtime.data`, `runtime.friendly`).
+- Apprentissage : conditions `table` et `api`, `variables` avec `scope` ; cibles `tab:data` et
+  `data:*` (`data-tour`).
+- Modèles et IA (J6) : une recette `AppSpec` ne décrit pas encore de tables ni de connexions ;
+  les y ajouter demande de les déclarer dans `appSpecSchema` et le constructeur.
 
 ## 1. En bref
 

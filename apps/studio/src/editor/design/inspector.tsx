@@ -49,7 +49,11 @@ export function Inspector({ screenId }: { screenId: ScreenId }) {
   const essential = mode === 'studio' || more
   const showApp = isRoot && tab === 'app'
 
-  const entries = Object.entries(def.props).filter(([, prop]) => !prop.state)
+  // Bound to a table (J5): its own items are not used, the binding replaces them.
+  const bound = Boolean(node.props.source)
+  const entries = Object.entries(def.props).filter(
+    ([, prop]) => !prop.state && !(bound && prop.kind === 'list' && prop.itemFields),
+  )
   const grouped = PROP_GROUPS.map((group) => ({
     group,
     props: entries.filter(([, prop]) => prop.group === group && (essential || prop.junior)),

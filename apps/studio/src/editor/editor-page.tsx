@@ -31,6 +31,9 @@ import { TopBar } from './top-bar.tsx'
 
 // Blockly is heavy: loaded only when the Blocks tab opens (SPEC § 7, performance).
 const BlocksView = lazy(() => import('./blocks/blocks-view.tsx'))
+const DataTab = lazy(() =>
+  import('./data/data-view.tsx').then((module) => ({ default: module.DataTab })),
+)
 
 type Props = { projectId: string; tab: EditorTab; screen?: string }
 
@@ -117,6 +120,10 @@ function Editor({ projectId, tab, screen }: Props) {
         <div className="min-h-0 flex-1">
           {tab === 'design' ? (
             <DesignView screenId={screenId} />
+          ) : tab === 'data' ? (
+            <Suspense fallback={<Loading />}>
+              <DataTab screenId={screenId} />
+            </Suspense>
           ) : (
             <Suspense fallback={<Loading />}>
               <BlocksView

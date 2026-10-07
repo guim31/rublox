@@ -53,6 +53,20 @@ export function contextFromDoc(
     })),
     variables: projectVariables(doc),
     appFunctions: appFunctionsOf(doc.blocks[APP_WORKSPACE] ?? {}),
+    ...dataRefs(doc),
+  }
+}
+
+/** Tables (with their columns) and API connections of a project, for the data blocks. */
+export function dataRefs(doc: ProjectDoc): Pick<BlocksContext, 'tables' | 'apis'> {
+  return {
+    tables: Object.entries(doc.data.tables).map(([id, table]) => ({
+      id,
+      name: table.name,
+      mode: table.mode,
+      columns: table.columns.map((column) => ({ ...column })),
+    })),
+    apis: Object.entries(doc.data.apis).map(([id, api]) => ({ id, name: api.name })),
   }
 }
 

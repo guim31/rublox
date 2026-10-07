@@ -1,0 +1,58 @@
+{
+  "id": "weather",
+  "mode": "studio",
+  "order": 2,
+  "minutes": 15,
+  "accent": "indigo",
+  "icon": "🌤️",
+  "requires": ["Button", "Text"],
+  "starter": {
+    "components": [
+      {
+        "type": "Button",
+        "props": { "text": { "fr": "Quel temps fait-il ?", "en": "What's the weather?" } }
+      },
+      { "type": "Text", "props": { "text": { "fr": "—", "en": "—" } } }
+    ]
+  },
+  "steps": [
+    { "id": "welcome", "mood": "wave" },
+    { "id": "go-data", "target": "tab:data", "check": { "kind": "tab", "tab": "data" } },
+    { "id": "add-api", "target": "data:add-api", "check": { "kind": "api" } },
+    {
+      "id": "base-url",
+      "target": "data:base-url",
+      "check": { "kind": "api", "urlContains": "api.open-meteo.com/v1" }
+    },
+    {
+      "id": "params",
+      "target": "data:params",
+      "check": {
+        "kind": "api",
+        "urlContains": "api.open-meteo.com/v1",
+        "params": ["latitude", "longitude", "current"]
+      }
+    },
+    {
+      "id": "try",
+      "target": "data:try",
+      "check": { "kind": "block", "type": "rx_object_get", "filled": ["PATH"] }
+    },
+    { "id": "go-blocks", "target": "tab:blocks", "check": { "kind": "tab", "tab": "blocks" } },
+    {
+      "id": "wire",
+      "target": "toolbox:Button",
+      "check": {
+        "kind": "block",
+        "type": "rx_object_get",
+        "inside": ["rx_Text_set", "rx_Button_on_click"]
+      }
+    },
+    {
+      "id": "run",
+      "target": "preview",
+      "mood": "cheer",
+      "check": { "kind": "preview", "event": "click", "type": "Button" }
+    }
+  ]
+}

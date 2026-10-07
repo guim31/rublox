@@ -44,7 +44,7 @@ function endTour(): void {
 }
 
 /** Shown in Design: the tour of the current mode, by itself the first time. */
-export function TourRunner({ tab }: { tab: 'design' | 'blocks' }) {
+export function TourRunner({ tab }: { tab: 'design' | 'blocks' | 'data' }) {
   const { t } = useTranslation()
   const mode = usePrefs((s) => s.mode)
   const seen = usePrefs((s) => s.toursSeen[mode])

@@ -1,6 +1,6 @@
 import type { Messages } from '../types.ts'
 
-export const blocks: Omit<Messages['blocks'], 'game'> = {
+export const blocks: Omit<Messages['blocks'], 'game' | 'data'> = {
   categories: {
     components: 'Components',
     control: 'Control',

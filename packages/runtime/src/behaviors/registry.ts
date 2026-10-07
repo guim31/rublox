@@ -10,6 +10,7 @@ import {
   videoBehavior,
   webViewBehavior,
 } from './basic.ts'
+import { chartBehavior, googleSheetBehavior, mapBehavior } from './data-behaviors.ts'
 import {
   audioRecorderBehavior,
   cameraBehavior,
@@ -57,5 +58,8 @@ export const BEHAVIORS: Record<string, Behavior> = {
   Clipboard: clipboardBehavior,
   Notifier: notifierBehavior,
   QrScanner: qrScannerBehavior,
+  Map: mapBehavior,
+  Chart: chartBehavior,
+  GoogleSheet: googleSheetBehavior,
   AI: aiBehavior,
 }

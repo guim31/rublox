@@ -15,8 +15,9 @@ playwright-report/
 test-results/
 blob-report/
 
-# Local data (PGlite database, uploaded assets)
-data/
+# Local data (PGlite database, uploaded assets) — not the `data/` folders of the source
+/data/
+apps/*/data/
 .data/
 
 # Environment

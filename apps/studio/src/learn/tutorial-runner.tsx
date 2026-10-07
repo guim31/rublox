@@ -27,7 +27,7 @@ export function TutorialRunner({
   workspace,
 }: {
   projectId: string
-  tab: 'design' | 'blocks'
+  tab: 'design' | 'blocks' | 'data'
   workspace: string
 }) {
   const active = useLearn((s) => (s.tutorial?.projectId === projectId ? s.tutorial : null))
@@ -60,7 +60,7 @@ export function TutorialRunner({
   return <Runner key={active.id} tab={tab} workspace={workspace} />
 }
 
-function Runner({ tab, workspace }: { tab: 'design' | 'blocks'; workspace: string }) {
+function Runner({ tab, workspace }: { tab: 'design' | 'blocks' | 'data'; workspace: string }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const doc = useDoc()

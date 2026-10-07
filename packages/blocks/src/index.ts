@@ -1,6 +1,7 @@
 export * from './codegen.ts'
 export * from './colors.ts'
 export * from './context.ts'
+export * from './data-blocks.ts'
 export * from './definitions.ts'
 export * from './fields.ts'
 export * from './generator.ts'

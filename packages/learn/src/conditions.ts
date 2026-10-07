@@ -13,7 +13,7 @@ export type PreviewEvent = {
 /** What a step or a star is checked against: the project, the editor and the preview. */
 export type LearnState = {
   doc: ProjectDoc
-  tab: 'design' | 'blocks'
+  tab: 'design' | 'blocks' | 'data'
   /** The screen (or `app`) being edited. */
   workspace: string
   /** Type of the selected component in Design. */
@@ -62,7 +62,7 @@ export type Condition =
   /** At most `max` blocks in the whole project. */
   | { kind: 'blockCount'; max: number }
   /** The editor shows this tab. */
-  | { kind: 'tab'; tab: 'design' | 'blocks' }
+  | { kind: 'tab'; tab: 'design' | 'blocks' | 'data' }
   /** The editor is on the start screen, another screen, or the `app` workspace. */
   | { kind: 'workspace'; screen: 'start' | 'other' | 'app' }
   /** The selected component is of this type. */
@@ -72,8 +72,21 @@ export type Condition =
   /** The preview shows the start screen, or another one. */
   | { kind: 'previewScreen'; screen: 'start' | 'other' }
   | { kind: 'slowMotion' }
-  /** At least `min` app variables. */
-  | { kind: 'variables'; min: number }
+  /** At least `min` variables of the app (or of `scope`: stored, shared). */
+  | { kind: 'variables'; min: number; scope?: 'app' | 'stored' | 'shared' }
+  /**
+   * A table of the Data tab (J5): at least `min` (1) tables in `mode`, with `minColumns`
+   * columns and `minRows` rows (a shared table's rows live on the server: not counted).
+   */
+  | {
+      kind: 'table'
+      min?: number
+      mode?: 'local' | 'shared'
+      minColumns?: number
+      minRows?: number
+    }
+  /** An API connection whose address contains `urlContains`, with these `params` (J5). */
+  | { kind: 'api'; urlContains?: string; params?: string[] }
   | { kind: 'all'; of: Condition[] }
   | { kind: 'any'; of: Condition[] }
   | { kind: 'not'; of: Condition }
@@ -158,7 +171,24 @@ export function evaluate(condition: Condition, state: LearnState): boolean {
     case 'slowMotion':
       return state.slowMotion
     case 'variables':
-      return doc.variables.app.length >= condition.min
+      return doc.variables[condition.scope ?? 'app'].length >= condition.min
+    case 'table':
+      return (
+        Object.values(doc.data.tables).filter(
+          (table) =>
+            (!condition.mode || table.mode === condition.mode) &&
+            table.columns.length >= (condition.minColumns ?? 0) &&
+            table.rows.length >= (condition.minRows ?? 0),
+        ).length >= (condition.min ?? 1)
+      )
+    case 'api':
+      return Object.values(doc.data.apis).some(
+        (api) =>
+          api.baseUrl.toLowerCase().includes((condition.urlContains ?? '').toLowerCase()) &&
+          (condition.params ?? []).every((key) =>
+            api.params.some((pair) => pair.key.trim() === key && pair.value.trim() !== ''),
+          ),
+      )
     case 'all':
       return condition.of.every((c) => evaluate(c, state))
     case 'any':

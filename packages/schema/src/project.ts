@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { apiConnectionSchema, tableSchema } from './data.ts'
 
 /** Identifies a Rublox project file, whatever its version. */
 export const PROJECT_FORMAT = 'rublox/project'
@@ -67,10 +68,6 @@ export const assetSchema = z.object({
   size: z.number().int().nonnegative(),
   sha256: z.string().regex(/^[0-9a-f]{64}$/),
 })
-
-/** Shapes are settled at J5; until then only the name is required. */
-export const tableSchema = z.looseObject({ name: z.string() })
-export const apiConnectionSchema = z.looseObject({ name: z.string() })
 
 export const projectMetaSchema = z.object({
   id,
@@ -146,6 +143,28 @@ export const projectDocSchema = z
         code: 'custom',
         path: ['settings', 'navigation', 'startScreen'],
         message: 'unknown start screen',
+      })
+    }
+    const tableNames = new Set<string>()
+    for (const [tableId, table] of Object.entries(doc.data.tables)) {
+      if (tableNames.has(table.name)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['data', 'tables', tableId, 'name'],
+          message: 'duplicate',
+        })
+      }
+      tableNames.add(table.name)
+      const columns = new Set<string>()
+      table.columns.forEach((column, index) => {
+        if (columns.has(column.name)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['data', 'tables', tableId, 'columns', index, 'name'],
+            message: 'duplicate',
+          })
+        }
+        columns.add(column.name)
       })
     }
     const screenNames = new Set<string>()

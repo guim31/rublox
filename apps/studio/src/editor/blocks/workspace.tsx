@@ -3,9 +3,11 @@ import {
   blocklyTheme,
   buildToolbox,
   CREATE_APP_VARIABLE,
+  CREATE_SHARED_VARIABLE,
   CREATE_STORED_VARIABLE,
   contextFromDoc,
   injectWorkspace,
+  refreshDataBlocks,
   refreshReferences,
   setBlocksContext,
   setupBlocks,
@@ -171,19 +173,26 @@ export function BlocksWorkspace({
     workspace.registerButtonCallback(CREATE_APP_VARIABLE, () =>
       Blockly.Variables.createVariableButtonHandler(workspace),
     )
-    workspace.registerButtonCallback(CREATE_STORED_VARIABLE, () => {
+    // Stored variables (kept on the device) and shared ones (on the server, J5).
+    const createVariable = (kind: 'stored' | 'shared', prompt: string) => {
       const strings = messages[locale].catalog.blocks
-      void askName(strings.storedPrompt, '').then((name) => {
+      void askName(prompt, '').then((name) => {
         const trimmed = name?.trim()
         if (!trimmed) return
         if (!isValidName(trimmed) || allVariableNames(session.ydoc).includes(trimmed)) {
           toast.error(strings.nameTaken)
           return
         }
-        addVariable(session.ydoc, 'stored', { name: trimmed, initial: 0 })
+        addVariable(session.ydoc, kind, { name: trimmed, initial: 0 })
         workspace.refreshToolboxSelection()
       })
-    })
+    }
+    workspace.registerButtonCallback(CREATE_STORED_VARIABLE, () =>
+      createVariable('stored', messages[locale].catalog.blocks.storedPrompt),
+    )
+    workspace.registerButtonCallback(CREATE_SHARED_VARIABLE, () =>
+      createVariable('shared', messages[locale].studio.data.sharedPrompt),
+    )
     loadFromProject(session, workspaceKey, workspace)
     workspace.addChangeListener(Blockly.Events.disableOrphans)
 
@@ -248,6 +257,8 @@ export function BlocksWorkspace({
     contextRef.current.components,
     contextRef.current.screens,
     contextRef.current.appFunctions,
+    contextRef.current.tables,
+    contextRef.current.apis,
     moreBlocks,
   ])
   // biome-ignore lint/correctness/useExhaustiveDependencies: toolboxKey sums up the context
@@ -255,6 +266,7 @@ export function BlocksWorkspace({
     const workspace = workspaceRef.current
     if (!workspace) return
     workspace.updateToolbox(buildToolbox(contextRef.current))
+    refreshDataBlocks(workspace)
     refreshReferences(workspace)
   }, [toolboxKey])
 
