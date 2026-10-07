@@ -46,11 +46,43 @@ export async function openBlocks(page: Page) {
   await expect(page.locator('.blocklySvg').first()).toBeVisible()
 }
 
-/** Opens a toolbox category by its label. */
+/** The blocks of the open flyout, as text (empty when none is open). */
+function flyoutText(page: Page): Promise<string> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('.blocklyFlyout .blocklyBlockCanvas > .blocklyDraggable')]
+      .map((block) => block.textContent ?? '')
+      .join('|'),
+  )
+}
+
+/**
+ * Opens a toolbox category by its label, and waits until its flyout is drawn and still: the
+ * flyout of the previous category stays on screen for a moment after the category is
+ * selected, and may hold a block of the same name ("set text of Bouton1" while "Texte1"
+ * opens), which a drag would then miss.
+ */
 export async function openCategory(page: Page, label: string) {
   const label_ = page.locator('.blocklyToolboxCategoryLabel', { hasText: new RegExp(`^${label}$`) })
-  await page.locator('.blocklyToolboxCategory').filter({ has: label_ }).last().click()
+  const row = page.locator('.blocklyToolboxCategory').filter({ has: label_ }).last()
+  const item = page.getByRole('treeitem', { name: label, exact: true }).last()
+  // Already open: its flyout is the one on screen.
+  const previous =
+    (await item.getAttribute('aria-selected')) === 'true' ? null : await flyoutText(page)
+  await expect(async () => {
+    // Clicking the selected category would close it.
+    if ((await item.getAttribute('aria-selected')) !== 'true') await row.click()
+    await expect(item).toHaveAttribute('aria-selected', 'true', { timeout: 1000 })
+  }).toPass()
   await expect(page.locator('.blocklyFlyout').first()).toBeVisible()
+  let last = ''
+  await expect
+    .poll(async () => {
+      const now = await flyoutText(page)
+      const still = now !== '' && now !== previous && now === last
+      last = now
+      return still
+    })
+    .toBe(true)
 }
 
 /** A block in the open flyout, by its text. */
@@ -61,10 +93,42 @@ export function flyoutBlock(page: Page, text: RegExp | string): Locator {
     .first()
 }
 
+/**
+ * Where an element is once it stays there. Blockly draws blocks on the next animation frame:
+ * right after a drop, a block (and its fields) may still be where it was before it snapped,
+ * and a flyout being drawn still shows the previous category's blocks.
+ */
+export async function stableBox(locator: Locator) {
+  let box = await locator.boundingBox()
+  await expect
+    .poll(async () => {
+      const again = await locator.boundingBox()
+      const still = again !== null && JSON.stringify(again) === JSON.stringify(box)
+      box = again
+      return still
+    })
+    .toBe(true)
+  if (!box) throw new Error('element not visible')
+  return box
+}
+
+/** Clicks a block's text field and waits for its editor (the click is tried again if the
+ * block was still being drawn). Returns the editor's input. */
+export async function editField(page: Page, field: Locator): Promise<Locator> {
+  const input = page.locator('.blocklyHtmlInput')
+  await expect(async () => {
+    if (await input.isVisible()) return
+    const box = await stableBox(field)
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+    await expect(input).toBeVisible({ timeout: 2000 })
+  }).toPass()
+  return input
+}
+
 /** Drags a block by its top-left corner so that this corner lands on `to`. */
 export async function dragBlock(page: Page, block: Locator, to: { x: number; y: number }) {
-  const box = await block.boundingBox()
-  if (!box) throw new Error('block not visible')
+  // Grab the block only once it stays where it is (a flyout being drawn moves its blocks).
+  const box = await stableBox(block)
   // Grab inside the block's body (a hat block's top corner is empty space).
   const offset = { x: 10, y: Math.min(box.height / 2, 36) }
   const grab = { x: box.x + offset.x, y: box.y + offset.y }
@@ -97,8 +161,7 @@ export async function buildHelloBlocks(page: Page, text = 'Bonjour', target = 'T
   })
   const event = workspaceBlocks(page).first()
   await expect(event).toBeVisible()
-  const eventBox = await event.boundingBox()
-  if (!eventBox) throw new Error('no event block')
+  const eventBox = await stableBox(event)
 
   await openCategory(page, target)
   await dragBlock(page, flyoutBlock(page, /^mettre\s*texte|^set\s*text/), {
@@ -108,12 +171,7 @@ export async function buildHelloBlocks(page: Page, text = 'Bonjour', target = 'T
   // One stack: the setter snapped inside the event block.
   await expect(workspaceBlocks(page)).toHaveCount(1)
 
-  const field = event.locator('.blocklyTextInputField').first()
-  const box = await field.boundingBox()
-  if (!box) throw new Error('no text field')
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
-  const input = page.locator('.blocklyHtmlInput')
-  await expect(input).toBeVisible()
+  const input = await editField(page, event.locator('.blocklyTextInputField').first())
   await input.fill(text)
   await input.press('Enter')
 }
