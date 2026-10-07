@@ -10,6 +10,7 @@ import {
 import { messages } from '@rublox/i18n'
 import * as Blockly from 'blockly/core'
 import { contextOf, getBlocksLocale } from './context.ts'
+import { defineDataBlocks } from './data-blocks.ts'
 import {
   ANY,
   AppFunctionField,
@@ -412,6 +413,7 @@ export function defineBlocks(): void {
   if (defined) return
   defined = true
   defineGeneralBlocks()
+  defineDataBlocks()
   for (const def of COMPONENTS) defineComponentBlocks(def)
 }
 

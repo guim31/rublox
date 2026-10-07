@@ -29,6 +29,7 @@ export const GENERATED_CODE_NAMES = new Set([
   'device',
   'rx',
   'functions',
+  'data',
   'Math',
   'Number',
   'String',

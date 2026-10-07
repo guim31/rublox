@@ -1,3 +1,4 @@
+import { RELAY_LIMITS, RELAY_PATH, relayRequestSchema } from '@rublox/schema'
 import { eq } from 'drizzle-orm'
 import { type Context, Hono } from 'hono'
 import type { Logger } from 'pino'
@@ -6,6 +7,7 @@ import { createApi } from './api.ts'
 import { AUTH_ROUTES, CLIENT_IP_HEADER, SIGN_IN_ROUTES } from './auth.ts'
 import { getClientIp } from './client-ip.ts'
 import { type Config, normalizeHost } from './config.ts'
+import { RELAY_STATUS, RelayFailure } from './data/relay.ts'
 import { assets } from './db/schema.ts'
 import { isSha256 } from './files.ts'
 import { PublishedApps } from './published.ts'
@@ -76,6 +78,7 @@ export function createApp({ config, services, ping, logger }: AppDeps) {
   const apps = new Hono()
     .use(appsSecurityHeaders(config.studioUrl))
     .get('/assets/:hash', (c) => serveAsset(services, c.req.param('hash')))
+    .post(RELAY_PATH, (c) => relay(services, c.req.raw, config.appsUrl))
     // The AI component of published apps and live tests (J6).
     .post(APP_AI_PATH, (c) =>
       appAi.handle(c.req.raw, getClientIp(c, services.config.trustProxy) ?? 'unknown'),
@@ -186,4 +189,40 @@ async function serveAsset(services: Services, hash: string): Promise<Response> {
     'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
   })
   return new Response(bytes, { headers })
+}
+
+/**
+ * `POST /_rx/proxy` on the apps origin (SPEC § 6.9): an app calls one of its API connections
+ * (or reads a published Google sheet) through the server. Only from a page of the apps
+ * origin, and only with a credential that names a project open in the editor, a live link or
+ * a published app.
+ */
+async function relay(services: Services, raw: Request, appsUrl: string): Promise<Response> {
+  const refuse = (error: string, status: number) => Response.json({ error }, { status })
+  if (raw.headers.get('origin') !== appsUrl) return refuse('forbidden', 403)
+  const length = Number(raw.headers.get('content-length') ?? 0)
+  if (length > RELAY_LIMITS.maxRequestBytes + 4096) return refuse('too_large', 413)
+  let input: unknown
+  try {
+    const text = await raw.text()
+    if (text.length > RELAY_LIMITS.maxRequestBytes + 4096) return refuse('too_large', 413)
+    input = JSON.parse(text)
+  } catch {
+    return refuse('invalid', 400)
+  }
+  const parsed = relayRequestSchema.safeParse(input)
+  if (!parsed.success) return refuse('invalid', 400)
+  const request = parsed.data
+  const source = await services.resolveData(request.credential)
+  if (!source) return refuse('forbidden', 403)
+  try {
+    const response =
+      'sheet' in request
+        ? await services.relay.sheet(source, request.sheet)
+        : await services.relay.call(source, request)
+    return Response.json(response, { headers: { 'Cache-Control': 'no-store' } })
+  } catch (error) {
+    if (error instanceof RelayFailure) return refuse(error.code, RELAY_STATUS[error.code])
+    throw error
+  }
 }

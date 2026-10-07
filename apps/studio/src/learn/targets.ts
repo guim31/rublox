@@ -45,7 +45,10 @@ export function findTarget(
     case 'toolbox':
       return doc ? toolboxCategory(nameOf(doc, type, nth, doc.meta.locale)) : null
     case 'toolbox-category': {
-      const labels = messages[locale].blocks.categories as Record<string, string>
+      const labels = {
+        ...messages[locale].blocks.categories,
+        ...messages[locale].blocks.data.categories,
+      } as Record<string, string>
       return toolboxCategory(labels[value] ?? value)
     }
     case 'canvas':

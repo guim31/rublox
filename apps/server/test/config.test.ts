@@ -36,6 +36,16 @@ describe('loadConfig', () => {
     expect(config.appsHost).toBe('apps.example.com')
   })
 
+  it('reads the relay deny list and refuses a bad entry', () => {
+    expect(loadConfig({}).relayDeny).toEqual([])
+    expect(
+      loadConfig({ RUBLOX_RELAY_DENY: ' example.com, 203.0.113.0/24 ,2001:db8::/32,' }).relayDeny,
+    ).toEqual(['example.com', '203.0.113.0/24', '2001:db8::/32'])
+    for (const bad of ['10.0.0.0/33', 'not a name', '::/129', 'example.com/8']) {
+      expect(() => loadConfig({ RUBLOX_RELAY_DENY: bad }), bad).toThrow(ConfigError)
+    }
+  })
+
   it('parses booleans and numbers', () => {
     const config = loadConfig({ TRUST_PROXY: 'true', PORT: '8080', MAX_UPLOAD_MB: '5' })
     expect(config.trustProxy).toBe(true)

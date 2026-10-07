@@ -1,5 +1,6 @@
 import { ButtonRenderer } from './button.tsx'
 import { CanvasRenderer } from './canvas.tsx'
+import { ChartRenderer } from './chart.tsx'
 import {
   BoxRenderer,
   ColumnRenderer,
@@ -28,6 +29,7 @@ import {
   TimePickerRenderer,
 } from './inputs.tsx'
 import { DataGridRenderer, DataListRenderer, ListViewRenderer } from './lists.tsx'
+import { MapRenderer } from './map.tsx'
 import { CameraViewRenderer, LottieRenderer, VideoRenderer, WebViewRenderer } from './media.tsx'
 import { NonVisualRenderer } from './non-visual.tsx'
 import { TextRenderer } from './text.tsx'
@@ -67,6 +69,8 @@ export const RENDERERS: Record<string, Renderer> = {
   WebView: WebViewRenderer,
   CameraView: CameraViewRenderer,
   Canvas: CanvasRenderer,
+  Map: MapRenderer,
+  Chart: ChartRenderer,
   // Non-visual components: listed under the screen in the editor, nothing in the app.
   Location: NonVisualRenderer,
   Motion: NonVisualRenderer,
@@ -85,6 +89,7 @@ export const RENDERERS: Record<string, Renderer> = {
   Notifier: NonVisualRenderer,
   AI: NonVisualRenderer,
   QrScanner: NonVisualRenderer,
+  GoogleSheet: NonVisualRenderer,
   GameScene: GameSceneRenderer,
   Sprite: SpriteRenderer,
   SceneText: SceneTextRenderer,

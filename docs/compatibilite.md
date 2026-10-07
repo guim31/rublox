@@ -103,6 +103,24 @@ Légende de la colonne « attendu » : ce que le code prévoit, d'après les nav
 | Thème « Auto » : suit le réglage clair ou sombre du téléphone | oui | | |
 | Navigation par tiroir : le bouton ☰ ouvre le menu, toucher à côté le ferme | oui | | |
 
+## Données et services (J5)
+
+Sur l'écran « Listes » de la démo, et avec le tutoriel « Tchat familial » publié. Nécessite un
+compte (le relais d'API et les données partagées passent par le serveur).
+
+| Vérification | Attendu | Android | iPhone |
+|---|---|---|---|
+| Carte : le fond (OpenFreeMap) s'affiche, se déplace au doigt, s'agrandit à deux doigts | oui (WebGL requis) | | |
+| Carte : toucher le repère « Tour Eiffel » déclenche « quand un repère est touché » | oui | | |
+| Carte : « montrer ma position » demande l'autorisation, puis un point bleu suit le téléphone | oui ; refus → message de l'événement « a un problème » | | |
+| Carte hors ligne | message « La carte ne peut pas s'afficher ici » | | |
+| Graphique : barres, courbe, secteurs ; toucher une barre déclenche « quand un point est touché » | oui | | |
+| Tchat familial : un message envoyé d'un téléphone apparaît sur l'autre en moins d'une seconde | oui | | |
+| Tchat familial : couper le réseau puis le rétablir ; les messages envoyés entre-temps partent | oui (renvoyés à la reconnexion) | | |
+| Table locale : une ligne ajoutée reste après fermeture de l'appli | oui (gardée sur l'appareil) | | |
+| Feuille Google publiée en CSV : « lignes de Feuille1 » | oui | | |
+
+
 ## Résultats
 
 Date de l'essai, modèles et versions (par exemple « Pixel 7, Android 15, Chrome 140 » et

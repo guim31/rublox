@@ -1,5 +1,11 @@
-import type { Locale } from '@rublox/schema'
+import type { Locale, Row, RowObject } from '@rublox/schema'
 import { type CSSProperties, type ReactElement, type ReactNode, useEffect } from 'react'
+
+/** A row of a table, as stored (cells by column id) and as the code sees it (by name). */
+export type BoundRow = { row: Row; object: RowObject }
+
+/** Rows of a table of the Data tab, for components bound to one (J5); `undefined`: none. */
+export type TableRows = (tableId: string) => BoundRow[] | undefined
 
 export type RendererProps = {
   id: string
@@ -27,6 +33,8 @@ export type RendererProps = {
    * Use `useExpose`.
    */
   expose: (handle: unknown) => void
+  /** Rows of the tables, for a component bound to one (`source`, J5). */
+  tableRows?: TableRows
 }
 
 /**

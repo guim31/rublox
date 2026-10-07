@@ -1,0 +1,34 @@
+{
+  "title": "Carnet d’adresses",
+  "summary": "Une table de contacts, une liste branchée dessus, et un formulaire pour en ajouter.",
+  "done": "Ton carnet d’adresses range ses contacts dans une table, et la liste les montre toute seule. Les contacts ajoutés restent sur le téléphone, même après l’avoir fermé. Essaie [supprimer de … la ligne …] quand on touche un contact.",
+  "steps": {
+    "welcome": {
+      "text": "Une **table** range des informations en lignes et en colonnes, comme un tableur. On va en faire un carnet d’adresses."
+    },
+    "go-data": { "text": "Ouvre l’onglet **Données**." },
+    "add-table": {
+      "text": "Crée une **table** avec le **+** à côté de « Tables », et appelle-la « Contacts »."
+    },
+    "columns": {
+      "text": "Renomme la première colonne « Nom » (clique sur son titre), puis ajoute une colonne « Téléphone »."
+    },
+    "rows": {
+      "text": "Ajoute deux contacts avec **Ajouter une ligne** : écris directement dans les cases."
+    },
+    "go-design": { "text": "Reviens dans l’onglet **Design**." },
+    "bind": {
+      "text": "Sélectionne la **Liste de données** et, dans **source (table)**, choisis « Contacts ». Le canevas montre aussitôt tes contacts."
+    },
+    "go-blocks": { "text": "Passe dans l’onglet **Blocs**." },
+    "add-block": {
+      "text": "Pose [quand {{Button}} est cliqué] et, depuis la catégorie **Données**, mets dedans [ajouter une ligne à Contacts]."
+    },
+    "fill": {
+      "text": "Branche [texte de {{TextInput}}] dans « Nom » et [texte de {{TextInput.2}}] dans « Téléphone »."
+    },
+    "run": {
+      "text": "Dans l’aperçu, écris un nom et un numéro, puis appuie sur **{{Button}}** : le contact apparaît dans la liste."
+    }
+  }
+}

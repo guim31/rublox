@@ -1,10 +1,15 @@
 import { messages } from '@rublox/i18n'
+import type { RowObject } from '@rublox/schema'
 import { cssColor } from '../theme.ts'
+import { boundItems } from './bound.ts'
 import { type Renderer, type RendererProps, rootAttributes } from './types.ts'
 
-type Item = { image?: string; title?: string; subtitle?: string }
+type Item = { image?: string; title?: string; subtitle?: string; row?: RowObject }
 
+/** The items: the rows of the bound table (J5), or the component's own list. */
 function itemsOf(p: RendererProps): Item[] {
+  const bound = boundItems(p, ['image', 'title', 'subtitle'])
+  if (bound) return bound.map((item) => ({ ...item.fields, row: item.row.object }))
   return Array.isArray(p.props.items)
     ? p.props.items.map((item) =>
         item && typeof item === 'object' ? (item as Item) : { title: String(item) },
@@ -65,7 +70,12 @@ export const DataListRenderer: Renderer = (p) => {
   const card = cssColor(p.props.cardColor) ?? 'var(--rx-surface)'
   const pick = (i: number, item: Item) => {
     p.setValue('selectedIndex', i + 1)
-    return { index: i + 1, title: item.title ?? '', subtitle: item.subtitle ?? '' }
+    return {
+      index: i + 1,
+      title: item.title ?? '',
+      subtitle: item.subtitle ?? '',
+      row: item.row ?? null,
+    }
   }
   return (
     <div
@@ -75,8 +85,7 @@ export const DataListRenderer: Renderer = (p) => {
     >
       {items.length === 0 ? <Empty p={p} /> : null}
       {items.map((item, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: items have no identity of their own
-        <div key={i} className="rx-card" style={{ background: card }}>
+        <div key={item.row?.id ?? i} className="rx-card" style={{ background: card }}>
           <button
             type="button"
             className="rx-card-main"
@@ -96,8 +105,8 @@ export const DataListRenderer: Renderer = (p) => {
               tabIndex={p.design ? -1 : undefined}
               onClick={() => {
                 if (p.design) return
-                const { index, title } = pick(i, item)
-                p.emit('buttonClick', { index, title })
+                const { index, title, row } = pick(i, item)
+                p.emit('buttonClick', { index, title, row })
               }}
             >
               {button}
@@ -135,7 +144,7 @@ export const DataGridRenderer: Renderer = (p) => {
           onClick={() => {
             if (p.design) return
             p.setValue('selectedIndex', i + 1)
-            p.emit('itemClick', { index: i + 1, title: item.title ?? '' })
+            p.emit('itemClick', { index: i + 1, title: item.title ?? '', row: item.row ?? null })
           }}
         >
           <Thumb p={p} src={item.image} />

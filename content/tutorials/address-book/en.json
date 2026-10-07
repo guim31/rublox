@@ -1,0 +1,34 @@
+{
+  "title": "Address book",
+  "summary": "A table of contacts, a list bound to it, and a form to add more.",
+  "done": "Your address book keeps its contacts in a table, and the list shows them by itself. Added contacts stay on the phone, even after closing the app. Try [delete from … row …] when a contact is tapped.",
+  "steps": {
+    "welcome": {
+      "text": "A **table** keeps information in rows and columns, like a spreadsheet. We will make an address book with one."
+    },
+    "go-data": { "text": "Open the **Data** tab." },
+    "add-table": {
+      "text": "Create a **table** with the **+** next to “Tables”, and call it “Contacts”."
+    },
+    "columns": {
+      "text": "Rename the first column “Name” (click its title), then add a “Phone” column."
+    },
+    "rows": {
+      "text": "Add two contacts with **Add a row**: type right into the cells."
+    },
+    "go-design": { "text": "Go back to the **Design** tab." },
+    "bind": {
+      "text": "Select the **Data list** and, in **source (table)**, choose “Contacts”. The canvas shows your contacts at once."
+    },
+    "go-blocks": { "text": "Go to the **Blocks** tab." },
+    "add-block": {
+      "text": "Add [when {{Button}} is clicked] and, from the **Data** category, put [add a row to Contacts] inside."
+    },
+    "fill": {
+      "text": "Plug [text of {{TextInput}}] into “Name” and [text of {{TextInput.2}}] into “Phone”."
+    },
+    "run": {
+      "text": "In the preview, type a name and a number, then press **{{Button}}**: the contact shows up in the list."
+    }
+  }
+}

@@ -33,6 +33,8 @@ export type BehaviorContext = {
   alive(): boolean
   /** Shows a full-screen panel over the app (QR scanner…) until it answers. */
   overlay<T>(kind: string, data?: unknown): Promise<T>
+  /** The text of a Google sheet published as CSV, through the server's relay (J5). */
+  sheet(url: string): Promise<string>
   /** The AI assistant, when the player offers it (J6): the AI component asks it. */
   readonly ai: AiProvider | undefined
 }

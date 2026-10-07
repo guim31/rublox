@@ -15,6 +15,7 @@ import { usePrefs } from '../../lib/prefs.ts'
 import { queryClient } from '../../lib/query.ts'
 import { ME_KEY } from '../../lib/session.ts'
 import { useAssetsVersion, useSession } from '../context.tsx'
+import { useDataTicket } from '../data/ticket.ts'
 import type { ProjectSession } from '../session.ts'
 import { DEVICES, useEditor } from '../store.ts'
 import { onStep, SlowMotionBar, SlowMotionToggle } from './slow-motion.tsx'
@@ -62,6 +63,7 @@ export function Preview({
   const [ready, setReady] = useState(false)
   const [scale, setScale] = useState(0.8)
   const sentAssets = useRef(-1)
+  const ticket = useDataTicket(session)
   const { width, height } = DEVICES.phone
 
   const post = (message: StudioToPlayer) =>
@@ -102,18 +104,39 @@ export function Preview({
   // Send the project whenever it (or its code) changes.
   // biome-ignore lint/correctness/useExhaustiveDependencies: `post` only reads a ref
   useEffect(() => {
-    if (!ready) return
+    if (!ready || !ticket.ready) return
     let cancelled = false
     void (async () => {
       const assets = sentAssets.current !== assetsVersion ? await session.assetBlobs() : undefined
       if (cancelled) return
       sentAssets.current = assetsVersion
-      post({ type: 'rx:load', doc, code, assets, locale, mode, scheme: appScheme, screenId })
+      post({
+        type: 'rx:load',
+        doc,
+        code,
+        assets,
+        locale,
+        mode,
+        scheme: appScheme,
+        screenId,
+        services: ticket.credential,
+      })
     })()
     return () => {
       cancelled = true
     }
-  }, [ready, doc, code, assetsVersion, locale, mode, screenId, session])
+  }, [
+    ready,
+    doc,
+    code,
+    assetsVersion,
+    locale,
+    mode,
+    screenId,
+    session,
+    ticket.ready,
+    ticket.credential,
+  ])
 
   // The preview follows the screen being edited.
   const shownScreen = useRef(screenId)

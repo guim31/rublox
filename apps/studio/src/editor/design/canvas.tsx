@@ -13,6 +13,7 @@ import { usePrefs } from '../../lib/prefs.ts'
 import { addComponentOfType, moveComponentTo } from '../actions.ts'
 import { ComponentIcon } from '../component-icon.tsx'
 import { useAssetsVersion, useDoc, useSession } from '../context.tsx'
+import { useCanvasTableRows } from '../data/rows.ts'
 import { DEVICES, type Device, useEditor } from '../store.ts'
 import {
   axisOf,
@@ -39,6 +40,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
   const { t } = useTranslation()
   const doc = useDoc()
   const session = useSession()
+  const tableRows = useCanvasTableRows()
   useAssetsVersion()
   const screen = doc.screens[screenId]
   const { device, landscape, zoom, appScheme, selected, hovered, set, select, hover } = useEditor()
@@ -414,6 +416,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
                       locale={doc.meta.locale}
                       mode="design"
                       assetUrl={session.assetUrl}
+                      tableRows={tableRows}
                       decorateChildren={(parentId, children) =>
                         children.length
                           ? children

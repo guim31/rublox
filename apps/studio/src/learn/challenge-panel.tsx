@@ -19,7 +19,7 @@ export function ChallengePanel({
   workspace,
 }: {
   projectId: string
-  tab: 'design' | 'blocks'
+  tab: 'design' | 'blocks' | 'data'
   workspace: string
 }) {
   const active = useLearn((s) => (s.challenge?.projectId === projectId ? s.challenge : null))
@@ -63,7 +63,7 @@ function Panel({
   challenge: Challenge
   projectId: string
   collapsed: boolean
-  tab: 'design' | 'blocks'
+  tab: 'design' | 'blocks' | 'data'
   workspace: string
 }) {
   const { t } = useTranslation()

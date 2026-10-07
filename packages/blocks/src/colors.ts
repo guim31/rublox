@@ -16,6 +16,8 @@ export const CATEGORY_COLORS = {
   interface: '#1883b8',
   debug: '#5d6b7e',
   colour: '#b0396b',
+  data: '#a35f00',
+  objects: '#4f6d2a',
 } as const
 
 export type BlockCategory = keyof typeof CATEGORY_COLORS

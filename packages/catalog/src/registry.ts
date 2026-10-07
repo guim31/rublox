@@ -7,6 +7,7 @@ import { Button } from './components/button.ts'
 import { Camera } from './components/camera.ts'
 import { CameraView } from './components/camera-view.ts'
 import { Canvas } from './components/canvas.ts'
+import { Chart } from './components/chart.ts'
 import { Checkbox } from './components/checkbox.ts'
 import { Clipboard } from './components/clipboard.ts'
 import { Column } from './components/column.ts'
@@ -15,6 +16,7 @@ import { DatePicker } from './components/date-picker.ts'
 import { Divider } from './components/divider.ts'
 import { Dropdown } from './components/dropdown.ts'
 import { GameScene } from './components/game-scene.ts'
+import { GoogleSheet } from './components/google-sheet.ts'
 import { Grid } from './components/grid.ts'
 import { Icon } from './components/icon.ts'
 import { Image } from './components/image.ts'
@@ -22,6 +24,7 @@ import { Joystick } from './components/joystick.ts'
 import { ListView } from './components/list-view.ts'
 import { Location } from './components/location.ts'
 import { Lottie } from './components/lottie.ts'
+import { MapComponent } from './components/map.ts'
 import { Motion } from './components/motion.ts'
 import { Network } from './components/network.ts'
 import { Notifier } from './components/notifier.ts'
@@ -92,6 +95,8 @@ export const COMPONENTS: readonly ComponentDef[] = [
   WebView,
   CameraView,
   Canvas,
+  MapComponent,
+  Chart,
   Location,
   Motion,
   Battery,
@@ -108,6 +113,7 @@ export const COMPONENTS: readonly ComponentDef[] = [
   Clipboard,
   Notifier,
   QrScanner,
+  GoogleSheet,
   AI,
   GameScene,
   Sprite,

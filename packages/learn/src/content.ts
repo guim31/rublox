@@ -20,6 +20,14 @@ import helperFunctionEn from '../../../content/challenges/helper-function/en.jso
 import helperFunctionFr from '../../../content/challenges/helper-function/fr.json' with {
   type: 'json',
 }
+import addressBookEn from '../../../content/tutorials/address-book/en.json' with { type: 'json' }
+import addressBookFr from '../../../content/tutorials/address-book/fr.json' with { type: 'json' }
+import addressBook from '../../../content/tutorials/address-book/tutorial.json' with {
+  type: 'json',
+}
+import familyChatEn from '../../../content/tutorials/family-chat/en.json' with { type: 'json' }
+import familyChatFr from '../../../content/tutorials/family-chat/fr.json' with { type: 'json' }
+import familyChat from '../../../content/tutorials/family-chat/tutorial.json' with { type: 'json' }
 import firstButtonEn from '../../../content/tutorials/first-button/en.json' with { type: 'json' }
 import firstButtonFr from '../../../content/tutorials/first-button/fr.json' with { type: 'json' }
 import firstButton from '../../../content/tutorials/first-button/tutorial.json' with {
@@ -28,12 +36,18 @@ import firstButton from '../../../content/tutorials/first-button/tutorial.json' 
 import magicDiceEn from '../../../content/tutorials/magic-dice/en.json' with { type: 'json' }
 import magicDiceFr from '../../../content/tutorials/magic-dice/fr.json' with { type: 'json' }
 import magicDice from '../../../content/tutorials/magic-dice/tutorial.json' with { type: 'json' }
+import myPlacesEn from '../../../content/tutorials/my-places/en.json' with { type: 'json' }
+import myPlacesFr from '../../../content/tutorials/my-places/fr.json' with { type: 'json' }
+import myPlaces from '../../../content/tutorials/my-places/tutorial.json' with { type: 'json' }
 import quizEn from '../../../content/tutorials/quiz/en.json' with { type: 'json' }
 import quizFr from '../../../content/tutorials/quiz/fr.json' with { type: 'json' }
 import quiz from '../../../content/tutorials/quiz/tutorial.json' with { type: 'json' }
 import twoScreensEn from '../../../content/tutorials/two-screens/en.json' with { type: 'json' }
 import twoScreensFr from '../../../content/tutorials/two-screens/fr.json' with { type: 'json' }
 import twoScreens from '../../../content/tutorials/two-screens/tutorial.json' with { type: 'json' }
+import weatherEn from '../../../content/tutorials/weather/en.json' with { type: 'json' }
+import weatherFr from '../../../content/tutorials/weather/fr.json' with { type: 'json' }
+import weather from '../../../content/tutorials/weather/tutorial.json' with { type: 'json' }
 import type { Challenge, ChallengeTexts, Tutorial, TutorialTexts } from './model.ts'
 
 // Content is data (`content/`, SPEC § 6.2): a tutorial is a `tutorial.json` (steps, checks,
@@ -58,6 +72,11 @@ export const ALL_TUTORIALS: readonly Tutorial[] = [
   tutorial(magicDice, magicDiceFr, magicDiceEn),
   tutorial(quiz, quizFr, quizEn),
   tutorial(twoScreens, twoScreensFr, twoScreensEn),
+  // J5: data and services.
+  tutorial(weather, weatherFr, weatherEn),
+  tutorial(addressBook, addressBookFr, addressBookEn),
+  tutorial(myPlaces, myPlacesFr, myPlacesEn),
+  tutorial(familyChat, familyChatFr, familyChatEn),
 ]
 
 export const ALL_CHALLENGES: readonly Challenge[] = [

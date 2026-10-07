@@ -47,7 +47,7 @@ function conditions(condition: Condition): Condition[] {
 }
 
 const TARGET =
-  /^(palette|layer|toolbox):[A-Z]\w*(\.\d+)?$|^inspector:\w+$|^toolbox-category:\w+$|^(tab:design|tab:blocks|screen-picker|canvas|preview|slow-motion|help|workspace)$/
+  /^(palette|layer|toolbox):[A-Z]\w*(\.\d+)?$|^inspector:\w+$|^toolbox-category:\w+$|^(tab:design|tab:blocks|tab:data|screen-picker|canvas|preview|slow-motion|help|workspace)$|^data:[a-z-]+$/
 
 describe('content', () => {
   setupBlocks('fr')

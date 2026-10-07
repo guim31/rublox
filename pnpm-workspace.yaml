@@ -51,6 +51,7 @@ minimumReleaseAgeExclude:
   - '@radix-ui/react-visually-hidden@1.2.12'
   - radix-ui@1.7.0
   - react-i18next@17.0.16
+  - maplibre-gl@6.13.0
 
 # Dependencies allowed to run install scripts (pnpm blocks them by default).
 allowBuilds:

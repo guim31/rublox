@@ -5,12 +5,16 @@ import {
   type ComponentId,
   type Locale,
   type ProjectDoc,
+  rowToObject,
   type ScreenId,
   type UiMode,
   type WorkspaceKey,
 } from '@rublox/schema'
 import { BEHAVIORS } from './behaviors/registry.ts'
 import type { AiProvider, BehaviorContext } from './behaviors/types.ts'
+import type { BoundRow } from './components/types.ts'
+import { createDataApi, createWebApi, fromJson, objectGet, objectSet, toJson } from './data/api.ts'
+import { type DataServices, DataStore } from './data/store.ts'
 import { friendlyError, listItem, StopSignal } from './errors.ts'
 import { FrameClock } from './game/clock.ts'
 import { GameInstance } from './game/instance.ts'
@@ -81,6 +85,8 @@ export type EngineOptions = {
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null
   /** URL of an asset property value, for behaviors (a sound to play). */
   assetUrl?: (value: string) => string | undefined
+  /** The API relay and the shared data (J5); without them, only local tables work. */
+  services?: DataServices
   /** The AI assistant for the AI component (J6); absent, the component answers nothing. */
   ai?: AiProvider
 }
@@ -102,6 +108,10 @@ export type ModuleApi = {
   app: Record<string, Value>
   stored: Record<string, Value>
   shared: Record<string, Value>
+  /** Tables (`data.Contacts.rows()`) and "when a shared variable changes" (J5). */
+  data: Record<string, Value>
+  /** API connections (`await web.Meteo.get('/forecast')`, J5). */
+  web: Record<string, Value>
   screens: { open(name: string): void; back(): void }
   ui: {
     alert(message: Value): Promise<void>
@@ -119,6 +129,12 @@ export type ModuleApi = {
     step(blockId: string): Promise<void>
     /** Item `index` (from 1) of a list, with an error a child can read when it is missing. */
     item(list: Value, index: Value): Value
+    /** A field of an object by its path (`current.temperature_2m`, `items[0].name`). */
+    get(object: Value, path: Value): Value
+    /** Sets a field of an object (creates the object when it is not one). */
+    set(object: Value, key: Value, value: Value): Value
+    fromJson(text: Value): Value
+    toJson(value: Value): string
   }
 }
 
@@ -132,6 +148,8 @@ type Instance = {
   game?: GameInstance
   /** Proxy of a scene body (a clone), set when the screen's module runs. */
   proxyOf?: (body: Body) => Value
+  /** Handlers of data events (`table:<id>`, `var:<id>`). */
+  dataHandlers: Map<string, HandlerEntry[]>
   /** What renderers exposed (`useExpose`), by component. */
   handles: Map<ComponentId, unknown>
   /** Behavior contexts, created when the screen opens or a method is first called. */
@@ -263,6 +281,10 @@ export class Engine {
   /** "Next block": pause again at the next step. */
   private stepping = false
   private active = 0
+  /** Tables, shared variables and APIs (J5). */
+  readonly data: DataStore
+  /** Data handlers of the `app` module (it has no screen instance). */
+  private appDataHandlers = new Map<string, HandlerEntry[]>()
 
   constructor(options: EngineOptions) {
     this.doc = options.doc
@@ -277,6 +299,14 @@ export class Engine {
     this.appId = options.appId ?? options.doc.meta.id
     this.storage = options.storage === undefined ? defaultStorage() : options.storage
     this.assetUrl = options.assetUrl ?? httpsOnly
+    this.data = new DataStore({
+      doc: options.doc,
+      appId: this.appId,
+      storage: this.storage,
+      services: options.services,
+      changed: (key) => this.dataChanged(key),
+      warn: (key) => this.log('warn', messages[this.locale].runtime.data[key]),
+    })
     this.ai = options.ai
     this.snapshot = this.makeSnapshot(0)
   }
@@ -326,6 +356,8 @@ export class Engine {
     this.generation += 1
     this.appVars.clear()
     this.functions = {}
+    this.appDataHandlers = new Map()
+    this.data.start()
     this.loadStored()
     this.initVariables()
     this.lastYield = now()
@@ -349,6 +381,7 @@ export class Engine {
     if (!this.running) return
     this.running = false
     this.generation += 1
+    this.data.stop()
     for (const instance of this.stack) this.disposeInstance(instance)
     this.clock.release()
     for (const instance of this.roots.values()) this.disposeInstance(instance)
@@ -387,6 +420,7 @@ export class Engine {
     const previous = this.code
     this.doc = doc
     this.code = code
+    this.data.setDoc(doc)
     this.forgetUnusedModules()
     if (!this.running) {
       this.notify()
@@ -487,6 +521,7 @@ export class Engine {
       screenId,
       overrides: new Map(),
       handlers: new Map(),
+      dataHandlers: new Map(),
       alive: true,
       handles: new Map(),
       contexts: new Map(),
@@ -598,6 +633,7 @@ export class Engine {
       },
       alive: () => instance.alive && this.running,
       overlay: <T>(kind: string, data?: unknown) => this.overlay(kind, data) as Promise<T>,
+      sheet: (url) => this.data.sheet(url),
       ai: this.ai,
     }
     instance.contexts.set(componentId, ctx)
@@ -704,6 +740,34 @@ export class Engine {
     this.notify()
     const top = this.stack.at(-1)
     if (top) this.fireOpen(top)
+  }
+
+  // Data events (J5): a table or a shared variable changed
+
+  private dataChanged(key: string): void {
+    this.notify()
+    if (!this.running) return
+    const instances = new Set([...this.stack, ...this.roots.values()])
+    const lists = [this.appDataHandlers, ...[...instances].map((i) => i.dataHandlers)]
+    for (const handlers of lists) {
+      for (const entry of handlers.get(key) ?? []) {
+        if (entry.busy) continue
+        entry.busy = true
+        this.lastYield = now()
+        void this.track(() => Promise.resolve().then(() => entry.fn()))
+          .catch((error) => this.report(error))
+          .finally(() => {
+            entry.busy = false
+          })
+      }
+    }
+  }
+
+  /** Rows of a table, for the components bound to it (`source`). */
+  tableRows = (tableId: string): BoundRow[] | undefined => {
+    const table = this.doc.data.tables[tableId]
+    if (!table) return undefined
+    return this.data.rows(tableId).map((row) => ({ row, object: rowToObject(table.columns, row) }))
   }
 
   // Events from the rendering
@@ -1107,7 +1171,7 @@ export class Engine {
       },
     })
 
-    // Stored variables are kept on the device; shared ones arrive at J5 (in memory until then).
+    // Stored variables are kept on the device, shared ones on the server (J5).
     const stored = new Proxy({} as Record<string, Value>, {
       get: (_, key) => (typeof key === 'string' ? (this.storedVars.get(key) ?? 0) : undefined),
       set: (_, key, value) => {
@@ -1118,14 +1182,17 @@ export class Engine {
         return true
       },
     })
-    const sharedVars = new Map<string, unknown>()
     const shared = new Proxy({} as Record<string, Value>, {
-      get: (_, key) => (typeof key === 'string' ? (sharedVars.get(key) ?? 0) : undefined),
+      get: (_, key) => (typeof key === 'string' ? this.data.getShared(key) : undefined),
       set: (_, key, value) => {
-        if (typeof key === 'string') sharedVars.set(key, value)
+        if (typeof key === 'string') this.data.setShared(key, value)
         return true
       },
     })
+    const onData = (key: string, fn: Handler) => {
+      const handlers = instance ? instance.dataHandlers : this.appDataHandlers
+      handlers.set(key, [...(handlers.get(key) ?? []), { fn, filter: null, busy: false }])
+    }
 
     const check = () => this.ensureAlive(instance, generation)
 
@@ -1134,6 +1201,14 @@ export class Engine {
       app,
       stored,
       shared,
+      data: createDataApi(this.data, onData, () => check()),
+      web: createWebApi(
+        this.data,
+        () => check(),
+        () => {
+          this.lastYield = now()
+        },
+      ),
       device: {},
       functions: this.functions,
       screens: {
@@ -1194,6 +1269,10 @@ export class Engine {
         // Slow motion: lights the block up in the editor, then waits (or pauses).
         step: (blockId) => this.step(String(blockId), instance?.screenId ?? APP_WORKSPACE, check),
         item: (list, index) => listItem(list, index),
+        get: objectGet,
+        set: objectSet,
+        fromJson,
+        toJson,
       },
     }
   }

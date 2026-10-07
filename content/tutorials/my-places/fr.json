@@ -1,0 +1,32 @@
+{
+  "title": "Carte de mes lieux",
+  "summary": "Une carte avec tes endroits préférés, rangés dans une table, et un message quand on touche un repère.",
+  "done": "Ta carte lit ses repères dans une table : ajoute une ligne, un repère apparaît. Essaie [centrer … sur ma position] pour te retrouver sur la carte.",
+  "steps": {
+    "welcome": {
+      "text": "Une **Carte** est déjà sur l’écran. On va y placer tes lieux préférés, rangés dans une table."
+    },
+    "go-data": { "text": "Ouvre l’onglet **Données**." },
+    "add-table": {
+      "text": "Crée une **table** et appelle-la « Lieux »."
+    },
+    "columns": {
+      "text": "Il lui faut trois colonnes : « Nom » (texte), « Latitude » et « Longitude » (de type **Nombre**)."
+    },
+    "rows": {
+      "text": "Ajoute au moins deux lieux. Par exemple Tour Eiffel : 48.8584, 2.2945 ; Capitole de Toulouse : 43.6045, 1.4440.",
+      "hint": "Pour trouver les coordonnées d’un lieu, cherche-le sur openstreetmap.org : elles s’affichent dans l’adresse de la page."
+    },
+    "go-design": { "text": "Reviens dans l’onglet **Design**." },
+    "bind": {
+      "text": "Sélectionne la **Carte** et, dans **source (table)**, choisis « Lieux ». Vérifie que Latitude, Longitude et Titre pointent vers les bonnes colonnes."
+    },
+    "go-blocks": { "text": "Passe dans l’onglet **Blocs**." },
+    "on-marker": {
+      "text": "Pose [quand un repère de {{Map}} est touché] et mets dedans [afficher un message bref …] avec la [valeur titre de l’événement]."
+    },
+    "run": {
+      "text": "Dans l’aperçu, touche un repère sur la carte : son nom s’affiche."
+    }
+  }
+}

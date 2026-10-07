@@ -50,6 +50,7 @@ export class ProjectSession {
         ydoc.getMap(Y_ROOTS.blocks),
         ydoc.getMap(Y_ROOTS.variables),
         ydoc.getMap(Y_ROOTS.assets),
+        ydoc.getMap(Y_ROOTS.data),
       ],
       { captureTimeout: 400, trackedOrigins: new Set([null, BLOCKLY_ORIGIN]) },
     )

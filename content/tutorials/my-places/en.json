@@ -1,0 +1,32 @@
+{
+  "title": "Map of my places",
+  "summary": "A map of your favourite places, kept in a table, with a message when a marker is tapped.",
+  "done": "Your map reads its markers from a table: add a row, a marker appears. Try [center … on my position] to find yourself on the map.",
+  "steps": {
+    "welcome": {
+      "text": "A **Map** is already on the screen. We will put your favourite places on it, kept in a table."
+    },
+    "go-data": { "text": "Open the **Data** tab." },
+    "add-table": {
+      "text": "Create a **table** and call it “Places”."
+    },
+    "columns": {
+      "text": "It needs three columns: “Name” (text), “Latitude” and “Longitude” (of type **Number**)."
+    },
+    "rows": {
+      "text": "Add at least two places. For example Eiffel Tower: 48.8584, 2.2945; Toulouse Capitole: 43.6045, 1.4440.",
+      "hint": "To find the coordinates of a place, look it up on openstreetmap.org: they show in the address of the page."
+    },
+    "go-design": { "text": "Go back to the **Design** tab." },
+    "bind": {
+      "text": "Select the **Map** and, in **source (table)**, choose “Places”. Check that Latitude, Longitude and Title point to the right columns."
+    },
+    "go-blocks": { "text": "Go to the **Blocks** tab." },
+    "on-marker": {
+      "text": "Add [when a marker of {{Map}} is tapped] and put [show a short message …] inside, with the [event value title]."
+    },
+    "run": {
+      "text": "In the preview, tap a marker on the map: its name shows up."
+    }
+  }
+}

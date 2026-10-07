@@ -2,7 +2,9 @@ import type { learning as fr } from '../fr/learn.ts'
 import type { Messages } from '../types.ts'
 import { helpContent } from './help.ts'
 
-type Learning = Pick<Messages['studio'], keyof typeof fr>
+type Learning = Omit<Pick<Messages['studio'], keyof typeof fr>, 'blockSheets'> & {
+  blockSheets: typeof helpContent.blockSheets
+}
 
 /** Strings of the learning experience, the welcome page, the tour and the help (J3). */
 export const learning: Learning = {

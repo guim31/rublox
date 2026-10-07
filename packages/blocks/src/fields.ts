@@ -28,6 +28,11 @@ export abstract class ReferenceField extends Blockly.FieldDropdown {
     return `⚠ ${id ? '?' : '…'}`
   }
 
+  /** The warning of a block whose reference is missing (`undefined`: the default one). */
+  missingWarning(): string | undefined {
+    return undefined
+  }
+
   isMissing(): boolean {
     const value = this.getValue()
     return !this.available().some(([, id]) => id === value)
@@ -254,9 +259,10 @@ export function refreshReferences(workspace: Blockly.Workspace): void {
           field.refresh()
           if (field.isMissing()) {
             warning =
-              field instanceof ScreenField
+              field.missingWarning() ??
+              (field instanceof ScreenField
                 ? messages[locale].blocks.missingScreen
-                : messages[locale].blocks.missingComponent
+                : messages[locale].blocks.missingComponent)
           }
         }
       }

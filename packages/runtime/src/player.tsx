@@ -102,6 +102,7 @@ export function PlayerApp(props: PlayerAppProps): ReactNode {
               setValue={(id, prop, value) => engine.setValue(id, prop, value)}
               expose={(id, handle) => engine.expose(screen.key, id, handle)}
               assetUrl={(value) => props.assetUrl?.(value) ?? engine.resolveAsset(value)}
+              tableRows={engine.tableRows}
             />
           ) : null}
         </main>

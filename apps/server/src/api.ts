@@ -5,6 +5,7 @@ import { getClientIp } from './client-ip.ts'
 import { type ApiEnv, fail } from './http.ts'
 import { adminRoutes } from './routes/admin.ts'
 import { aiRoutes } from './routes/ai.ts'
+import { dataRoutes } from './routes/data.ts'
 import { galleryRoutes } from './routes/gallery.ts'
 import { invitesRoutes } from './routes/invites.ts'
 import { meRoutes } from './routes/me.ts'
@@ -66,6 +67,7 @@ export function createApi(services: Services) {
       .route('/admin', adminRoutes(services))
       .route('/projects', projectsRoutes(services))
       .route('/projects', publishRoutes(services))
+      .route('/projects', dataRoutes(services))
       .route('/gallery', galleryRoutes(services))
       .route('/ai', aiRoutes(services))
       .all('*', (c) => c.json({ error: 'not_found' }, 404))

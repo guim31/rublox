@@ -1,0 +1,35 @@
+{
+  "title": "La météo",
+  "summary": "Une appli qui demande la température à un vrai service météo sur Internet (Open-Meteo, gratuit et sans clé).",
+  "done": "Ton appli parle à un vrai service sur Internet ! Une connexion API, un appel, un champ de la réponse : c’est ainsi que fonctionnent la plupart des applis. Essaie d’afficher aussi le vent (current=temperature_2m,wind_speed_10m).",
+  "steps": {
+    "welcome": {
+      "text": "On va demander la température de Paris à **Open-Meteo**, un service météo gratuit. Les appels passent par le serveur Rublox : il faut être connecté."
+    },
+    "go-data": {
+      "text": "Ouvre l’onglet **Données** : c’est là que vivent les tables et les connexions API."
+    },
+    "add-api": {
+      "text": "Crée une **connexion API** avec le **+** à côté de « Connexions API »."
+    },
+    "base-url": {
+      "text": "Dans **Adresse de base**, écris `https://api.open-meteo.com/v1`. Tu peux aussi renommer la connexion « Meteo »."
+    },
+    "params": {
+      "text": "Ajoute trois **paramètres** : `latitude` = 48.85, `longitude` = 2.35 et `current` = temperature_2m.",
+      "hint": "Le serveur les ajoutera à chaque appel : …/forecast?latitude=48.85&longitude=2.35&current=temperature_2m"
+    },
+    "try": {
+      "text": "Écris `/forecast` dans **Chemin** et appuie sur **Essayer**. Dans la réponse, ouvre **current** et clique sur **temperature_2m** : Rublox crée le bloc qui lit ce champ."
+    },
+    "go-blocks": {
+      "text": "Passe dans l’onglet **Blocs** : ton nouveau bloc t’y attend."
+    },
+    "wire": {
+      "text": "Pose [quand {{Button}} est cliqué], mets dedans [mettre texte de {{Text}} à …] et branche-y ton bloc [current.temperature_2m de réponse de …]."
+    },
+    "run": {
+      "text": "Dans l’aperçu, appuie sur le bouton : la température de Paris s’affiche, en degrés !"
+    }
+  }
+}

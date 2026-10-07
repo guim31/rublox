@@ -19,6 +19,13 @@ export type PreviewControls = { restart(): void; stop(): void; resume(step: bool
 /** Slow motion (SPEC § 4.3): on or off, the block running now, the breakpoints (block ids). */
 export type SlowState = { enabled: boolean; step: StepInfo | null; breakpoints: string[] }
 
+/** What the Data tab shows: a table, an API connection, the secrets or the shared variables. */
+export type DataItem =
+  | { kind: 'table'; id: string }
+  | { kind: 'api'; id: string }
+  | { kind: 'secrets' }
+  | { kind: 'variables' }
+
 type EditorState = {
   selected: ComponentId | null
   hovered: ComponentId | null
@@ -39,6 +46,8 @@ type EditorState = {
   inspectorTab: 'screen' | 'app'
   /** Every selected component (Studio's multiple selection); `selected` is the last one. */
   selection: ComponentId[]
+  /** The Data tab's selection (J5). */
+  dataItem: DataItem | null
   select(id: ComponentId | null): void
   /** Adds a component to the selection, or takes it out (Shift or Ctrl + click, Studio). */
   toggle(id: ComponentId): void
@@ -71,6 +80,7 @@ export const useEditor = create<EditorState>()((set) => ({
   slow: { enabled: false, step: null, breakpoints: [] },
   inspectorTab: 'screen',
   selection: [],
+  dataItem: null,
   select: (selected) => set({ selected, selection: selected ? [selected] : [] }),
   toggle: (id) =>
     set((state) => {
@@ -102,6 +112,7 @@ export function resetEditor(): void {
     preview: null,
     focusBlock: null,
     slow: { enabled: false, step: null, breakpoints: [] },
+    dataItem: null,
   })
 }
 

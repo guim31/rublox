@@ -10,9 +10,10 @@ import {
   type SlowMotion,
   type StudioToPlayer,
 } from '@rublox/runtime'
-import type { Locale } from '@rublox/schema'
+import type { DataCredential, Locale } from '@rublox/schema'
 import { useEffect, useRef, useState } from 'react'
 import { studioAi } from './ai.ts'
+import { serverServices } from './data.ts'
 import { Stopped } from './run.tsx'
 
 const config = readConfig()
@@ -41,6 +42,8 @@ export function Preview() {
   const engineRef = useRef<Engine | null>(null)
   const assets = useRef(new Map<string, string>())
   const slow = useRef<SlowMotion>({ enabled: false, delay: 500, breakpoints: [] })
+  // The editor's ticket for the API relay and the shared data (renewed by the editor).
+  const credential = useRef<DataCredential | null>(null)
 
   useEffect(() => {
     const onMessage = async (event: MessageEvent) => {
@@ -57,6 +60,7 @@ export function Preview() {
           ai.answer(message.id, message.reply)
           return
         case 'rx:load': {
+          if (message.services !== undefined) credential.current = message.services
           if (message.assets) {
             for (const url of assets.current.values()) URL.revokeObjectURL(url)
             assets.current = new Map(
@@ -79,6 +83,8 @@ export function Preview() {
             initialScreen: message.screenId,
             slow: slow.current,
             assetUrl: (value) => assets.current.get(value),
+            // A guest's project has no ticket: no relay, no shared data (the engine says why).
+            services: credential.current ? serverServices(() => credential.current) : undefined,
             ai: ai.provider,
             host: {
               log: (entry) => send({ type: 'rx:log', entry }),

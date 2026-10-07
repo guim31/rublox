@@ -1,0 +1,34 @@
+{
+  "title": "Tchat familial",
+  "summary": "Un tchat pour toute la famille : les messages vivent dans une table partagée, que chaque téléphone voit en direct.",
+  "done": "Ton tchat est partagé : chaque message envoyé arrive aussitôt sur tous les téléphones qui ont l’appli ouverte. Publie-la pour l’installer sur les téléphones de la famille.",
+  "steps": {
+    "welcome": {
+      "text": "Les messages d’un tchat doivent être les mêmes pour tout le monde : on va les ranger dans une table **partagée**, gardée par le serveur. Il faut être connecté."
+    },
+    "go-data": { "text": "Ouvre l’onglet **Données**." },
+    "add-table": {
+      "text": "Crée une **table** et appelle-la « Messages »."
+    },
+    "shared": {
+      "text": "Dans **Où vivent les lignes**, choisis **Partagée** : les lignes seront sur le serveur, communes à tous. Laisse « lire et modifier »."
+    },
+    "columns": {
+      "text": "Il faut deux colonnes : « Auteur » et « Texte »."
+    },
+    "go-design": { "text": "Reviens dans l’onglet **Design**." },
+    "bind": {
+      "text": "Sélectionne la **Liste de données** et branche-la sur « Messages » : le titre sur « Texte », le sous-titre sur « Auteur »."
+    },
+    "go-blocks": { "text": "Passe dans l’onglet **Blocs**." },
+    "send": {
+      "text": "Pose [quand {{Button}} est cliqué] puis [ajouter une ligne à Messages] : branche [texte de {{TextInput}}] dans « Auteur » et [texte de {{TextInput.2}}] dans « Texte »."
+    },
+    "run": {
+      "text": "Dans l’aperçu, écris ton prénom et un message, puis appuie sur **{{Button}}**."
+    },
+    "two-phones": {
+      "text": "Ouvre **Tester** et scanne le QR code avec un téléphone : envoie un message de là-bas, il apparaît aussi ici !"
+    }
+  }
+}

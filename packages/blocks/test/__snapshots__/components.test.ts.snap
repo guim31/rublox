@@ -218,6 +218,44 @@ exports[`generated code of each component > Canvas 1`] = `
 "
 `;
 
+exports[`generated code of each component > Chart 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Graphique1 } = components;
+
+  Accueil.onOpen(async () => {
+    Graphique1.visible = true;
+    Graphique1.width = 120;
+    Graphique1.height = 120;
+    Graphique1.background = '#ff6b5c';
+    Graphique1.opacity = 2;
+    Graphique1.chartType = 'x';
+    Graphique1.title = 'abc';
+    Graphique1.points = 'a, b';
+    Graphique1.color = '#ff6b5c';
+    Graphique1.showValues = true;
+    Graphique1.addPoint('abc', 2);
+    Graphique1.clear();
+    rx.log(Graphique1.visible);
+    rx.log(Graphique1.width);
+    rx.log(Graphique1.height);
+    rx.log(Graphique1.background);
+    rx.log(Graphique1.opacity);
+    rx.log(Graphique1.chartType);
+    rx.log(Graphique1.title);
+    rx.log(Graphique1.points);
+    rx.log(Graphique1.color);
+    rx.log(Graphique1.showValues);
+  });
+
+  Graphique1.onPointClick(async (event) => {
+    rx.log(event.index);
+    rx.log(event.label);
+    rx.log(event.value);
+  });
+}
+"
+`;
+
 exports[`generated code of each component > Checkbox 1`] = `
 "export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
   const { Accueil, Case1 } = components;
@@ -312,6 +350,7 @@ exports[`generated code of each component > DataGrid 1`] = `
   GrilleDonnees1.onItemClick(async (event) => {
     rx.log(event.index);
     rx.log(event.title);
+    rx.log(event.row);
   });
 }
 "
@@ -346,11 +385,13 @@ exports[`generated code of each component > DataList 1`] = `
     rx.log(event.index);
     rx.log(event.title);
     rx.log(event.subtitle);
+    rx.log(event.row);
   });
 
   ListeDonnees1.onButtonClick(async (event) => {
     rx.log(event.index);
     rx.log(event.title);
+    rx.log(event.row);
   });
 }
 "
@@ -481,6 +522,27 @@ exports[`generated code of each component > GameScene 1`] = `
   Scene1.onTap(async (event) => {
     rx.log(event.x);
     rx.log(event.y);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > GoogleSheet 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Feuille1 } = components;
+
+  Accueil.onOpen(async () => {
+    Feuille1.url = 'abc';
+    rx.log(await Feuille1.rows());
+    rx.log(Feuille1.url);
+  });
+
+  Feuille1.onLoaded(async () => {
+    rx.log('abc');
+  });
+
+  Feuille1.onError(async (event) => {
+    rx.log(event.message);
   });
 }
 "
@@ -681,6 +743,60 @@ exports[`generated code of each component > Lottie 1`] = `
   });
 
   Animation1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Map 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Carte1 } = components;
+
+  Accueil.onOpen(async () => {
+    Carte1.visible = true;
+    Carte1.width = 120;
+    Carte1.height = 120;
+    Carte1.background = '#ff6b5c';
+    Carte1.opacity = 2;
+    Carte1.latitude = 2;
+    Carte1.longitude = 2;
+    Carte1.zoom = 2;
+    Carte1.markers = 'a, b';
+    Carte1.mapStyle = 'x';
+    Carte1.showLocation = true;
+    Carte1.addMarker(2, 2, 'abc');
+    Carte1.clearMarkers();
+    Carte1.moveTo(2, 2, 2);
+    await Carte1.centerOnMe();
+    rx.log(Carte1.visible);
+    rx.log(Carte1.width);
+    rx.log(Carte1.height);
+    rx.log(Carte1.background);
+    rx.log(Carte1.opacity);
+    rx.log(Carte1.latitude);
+    rx.log(Carte1.longitude);
+    rx.log(Carte1.zoom);
+    rx.log(Carte1.markers);
+    rx.log(Carte1.mapStyle);
+    rx.log(Carte1.showLocation);
+    rx.log(Carte1.available);
+  });
+
+  Carte1.onMarkerClick(async (event) => {
+    rx.log(event.index);
+    rx.log(event.title);
+    rx.log(event.latitude);
+    rx.log(event.longitude);
+    rx.log(event.row);
+  });
+
+  Carte1.onMapClick(async (event) => {
+    rx.log(event.latitude);
+    rx.log(event.longitude);
+  });
+
+  Carte1.onError(async (event) => {
     rx.log(event.message);
   });
 }

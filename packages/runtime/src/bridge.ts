@@ -1,5 +1,6 @@
 import type {
   ComponentId,
+  DataCredential,
   Locale,
   ProjectDoc,
   ScreenId,
@@ -26,6 +27,11 @@ export type StudioToPlayer =
       scheme?: Scheme
       /** Screen the editor is on: shown when the app (re)starts. */
       screenId?: ScreenId
+      /**
+       * What lets the preview use the API relay and the shared data (J5): a ticket of the
+       * editor for a project of the server; absent for a guest's project.
+       */
+      services?: DataCredential | null
     }
   | { type: 'rx:restart'; screenId?: ScreenId }
   | { type: 'rx:stop' }

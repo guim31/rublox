@@ -6,6 +6,7 @@ import type { Locale } from '@rublox/schema'
 import * as Blockly from 'blockly/core'
 import { javascriptGenerator } from 'blockly/javascript'
 import { setBlocksLocaleValue } from './context.ts'
+import { registerDataFields } from './data-blocks.ts'
 import { defineBlocks } from './definitions.ts'
 import { registerFields } from './fields.ts'
 
@@ -26,6 +27,7 @@ const BLOCKLY_MESSAGES = { fr: Fr, en: En } as const
  */
 export function setupBlocks(locale: Locale): void {
   registerFields()
+  registerDataFields()
   registerColourBlocks()
   defineBlocks()
   Blockly.setLocale(BLOCKLY_MESSAGES[locale] as unknown as Record<string, string>)

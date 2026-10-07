@@ -56,7 +56,6 @@ import { Tooltip } from '../components/ui/tooltip.tsx'
 import { HelpButton } from '../help/help-panel.tsx'
 import { cn } from '../lib/cn.ts'
 import { useCommands } from '../lib/commands.ts'
-import { usePrefs } from '../lib/prefs.ts'
 import type { EditorTab } from '../routes/p.$projectId.tsx'
 import { addNewScreen } from './actions.ts'
 import { useDoc, useSaveState, useSession, useUndoState } from './context.tsx'
@@ -77,7 +76,6 @@ export function TopBar({ projectId, tab, screenId }: Props) {
   const visitor = session.source.access === 'gallery'
   const { canUndo, canRedo } = useUndoState()
   const go = useEditorNavigate(projectId)
-  const mode = usePrefs((s) => s.mode)
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-surface px-2 junior:h-16 junior:gap-3 junior:px-3">
       <Tooltip content={t('editor.home')}>
@@ -113,17 +111,18 @@ export function TopBar({ projectId, tab, screenId }: Props) {
         >
           {t('editor.tabs.blocks')}
         </TabLink>
-        {mode === 'studio' ? (
-          <Tooltip content={t('editor.dataSoon')}>
-            <span>
-              <TabLink active={false} disabled icon={<Table2 size={16} />}>
-                {t('editor.tabs.data')}
-              </TabLink>
-            </span>
-          </Tooltip>
-        ) : null}
+        <TabLink
+          tour="tab:data"
+          active={tab === 'data'}
+          onClick={() =>
+            go({ tab: 'data', screen: screenId === APP_WORKSPACE ? undefined : screenId })
+          }
+          icon={<Table2 size={16} />}
+        >
+          {t('editor.tabs.data')}
+        </TabLink>
       </nav>
-      <ScreenPicker projectId={projectId} tab={tab} current={screenId} />
+      {tab !== 'data' ? <ScreenPicker projectId={projectId} tab={tab} current={screenId} /> : null}
       <div className="flex items-center">
         <IconButton
           label={t('editor.undo')}

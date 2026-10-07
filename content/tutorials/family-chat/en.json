@@ -1,0 +1,34 @@
+{
+  "title": "Family chat",
+  "summary": "A chat for the whole family: messages live in a shared table that every phone sees live.",
+  "done": "Your chat is shared: each message sent arrives at once on every phone that has the app open. Publish it to install it on the family's phones.",
+  "steps": {
+    "welcome": {
+      "text": "Chat messages must be the same for everyone: we will keep them in a **shared** table, kept by the server. You need to be signed in."
+    },
+    "go-data": { "text": "Open the **Data** tab." },
+    "add-table": {
+      "text": "Create a **table** and call it “Messages”."
+    },
+    "shared": {
+      "text": "In **Where the rows live**, choose **Shared**: the rows will be on the server, the same for everyone. Keep “read and change”."
+    },
+    "columns": {
+      "text": "It needs two columns: “Author” and “Text”."
+    },
+    "go-design": { "text": "Go back to the **Design** tab." },
+    "bind": {
+      "text": "Select the **Data list** and bind it to “Messages”: the title to “Text”, the subtitle to “Author”."
+    },
+    "go-blocks": { "text": "Go to the **Blocks** tab." },
+    "send": {
+      "text": "Add [when {{Button}} is clicked] then [add a row to Messages]: plug [text of {{TextInput}}] into “Author” and [text of {{TextInput.2}}] into “Text”."
+    },
+    "run": {
+      "text": "In the preview, type your name and a message, then press **{{Button}}**."
+    },
+    "two-phones": {
+      "text": "Open **Test** and scan the QR code with a phone: send a message from there, it shows up here too!"
+    }
+  }
+}

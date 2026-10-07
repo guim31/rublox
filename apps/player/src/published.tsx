@@ -3,6 +3,7 @@ import { Engine } from '@rublox/runtime'
 import type { PublishedApp } from '@rublox/schema'
 import { useCallback, useEffect, useState } from 'react'
 import { serverAi } from './ai.ts'
+import { directServices, serverServices } from './data.ts'
 import { InstallButton, InstallHelp } from './install.tsx'
 import { assetResolver, Message, RunningApp } from './run.tsx'
 
@@ -43,6 +44,10 @@ export function PublishedView({
         locale: app.doc.meta.locale,
         mode: app.doc.meta.mode,
         appId: `app:${app.appId}`,
+        // On the apps origin, the server's relay and shared data; an exported site has none.
+        services: slug
+          ? serverServices(() => ({ kind: 'app', slug }))
+          : directServices(() => app.doc),
         // The AI component works if the owner allowed it (J6); an exported site has none.
         ai: slug ? serverAi({ slug }) : undefined,
         host: { log: () => {} },
