@@ -128,6 +128,7 @@ describe('publishing an app', () => {
     const sw = await (await apps(admin, '/a/le-de/sw.js')).text()
     expect(sw).toContain('/_app/player-def456.js')
     expect(sw).toContain('"/a/le-de/app.json"')
+    expect(sw).toContain("addEventListener('notificationclick'")
 
     expect((await apps(admin, '/a/le-de')).status).toBe(301)
     expect((await apps(admin, '/a/le-de/install')).status).toBe(200)

@@ -163,6 +163,17 @@ async function cacheFirst(request) {
   return response
 }
 
+// A notification of the app (Notifications component): a tap brings the app back.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((client) => new URL(client.url).pathname.startsWith(BASE))
+      return open ? open.focus() : self.clients.openWindow(BASE)
+    }),
+  )
+})
+
 self.addEventListener('fetch', (event) => {
   const request = event.request
   if (request.method !== 'GET') return

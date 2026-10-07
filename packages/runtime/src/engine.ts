@@ -911,12 +911,7 @@ export class Engine {
 
     // Stored variables are kept on the device; shared ones arrive at J5 (in memory until then).
     const stored = new Proxy({} as Record<string, Value>, {
-      get: (_, key) => {
-        if (typeof key !== 'string') return undefined
-        const value = this.storage.get(key)
-        if (value !== undefined) return value
-        return this.doc.variables.stored.find((v) => v.name === key)?.initial ?? 0
-      },
+      get: (_, key) => (typeof key === 'string' ? (this.storedVars.get(key) ?? 0) : undefined),
       set: (_, key, value) => {
         if (typeof key === 'string') {
           this.storedVars.set(key, value)

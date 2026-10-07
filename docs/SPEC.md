@@ -354,9 +354,9 @@ composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
   des chemins relatifs (hébergeable dans n'importe quel dossier) ; **sans service worker** (son
   adresse n'est pas connue d'avance). Le studio lit le lecteur construit sur l'origine des applis
   (`/_rx/kit.json` et `/_app/*`, CORS réservé à l'origine du studio).
-- **Variables stockées** : gardées dans `localStorage` sous `rublox:<appId>:` (`app:<publication>`,
-  `live:<projet>`, `site:<projet>`), en mémoire dans l'aperçu. Les variables partagées restent
-  au J5.
+- **Variables stockées** (moteur du J2, `rublox:<appId>:stored`) : le lecteur donne à chaque
+  appli son identifiant (`app:<publication>`, `live:<projet>`, `site:<projet>`), si bien que deux
+  applis de l'origine des applis ne mélangent pas leurs valeurs.
 
 **Contrats pour les jalons suivants**
 
@@ -375,8 +375,11 @@ composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
 - **WebSockets** : un seul écouteur `upgrade`, `Upgrades` (`apps/server/src/upgrades.ts`) ; chaque
   point d'entrée s'y ajoute (origine, chemin, `Origin` exigé). Hocuspocus (`/ws/collab`) doit y
   passer aussi : un second écouteur qui ferme les sockets inconnues casserait les autres.
-- Moteur : option `storage` (`AppStorage`, `localAppStorage(appId)`) ; le J5 y branche les
-  variables stockées et partagées.
+- Moteur : le lecteur passe `appId` à `Engine` (stockage du J2) pour l'appli publiée, le test
+  en direct et le site exporté.
+- Service worker d'une appli publiée : il sert aussi aux notifications du composant Notifications
+  (J2, `registration.showNotification`) ; toucher une notification rouvre l'appli
+  (`notificationclick`).
 - Studio : `buildBundle(doc)` (`editor/publish/bundle.ts`, Blockly chargé à la demande),
   `useLive` / `live.start(session)` (`editor/publish/live.ts`), `drawIcons`, `exportProject`,
   `importArchive`, `exportSite` (`storage/archive.ts`). Les messages de la console peuvent porter
