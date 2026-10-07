@@ -99,7 +99,12 @@ test('50 sprites stay well within the frame budget', async ({ page }, testInfo) 
     timeout: 15_000,
   })
   await page.waitForTimeout(1500)
-  const session = await page.context().newCDPSession(frame)
+  // The preview is on the other origin: its own process when the browser isolates sites,
+  // otherwise the page's (then throttling and profiling the page covers it too).
+  const session = await page
+    .context()
+    .newCDPSession(frame)
+    .catch(() => page.context().newCDPSession(page))
   const normal = await gameScriptPerFrame(session, frame, 4)
   await session.send('Emulation.setCPUThrottlingRate', { rate: 4 })
   const phone = await gameScriptPerFrame(session, frame, 4)
