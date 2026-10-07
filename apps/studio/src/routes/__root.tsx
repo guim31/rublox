@@ -12,7 +12,7 @@ import { BadgeToasts } from '../learn/badges.tsx'
 import { useLearningSync } from '../learn/sync.ts'
 import { useCommands } from '../lib/commands.ts'
 import { isMod, useKeydown } from '../lib/hotkeys.ts'
-import { i18next } from '../lib/i18n.ts'
+import { setLanguage } from '../lib/i18n.ts'
 import { isDark, usePrefs } from '../lib/prefs.ts'
 import { useProfileSync } from '../lib/profile-sync.ts'
 import { queryClient } from '../lib/query.ts'
@@ -39,7 +39,7 @@ function usePrefsOnDocument() {
   }, [mode, theme])
   useEffect(() => {
     document.documentElement.lang = locale
-    void i18next.changeLanguage(locale)
+    void setLanguage(locale)
   }, [locale])
 }
 

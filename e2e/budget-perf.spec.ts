@@ -67,8 +67,12 @@ test('the preview shows a change in less than 300 ms', async ({ page }, info) =>
   await newProject(page, 'Mesure')
   await addComponent(page, 'Button')
   const text = page.getByRole('textbox', { name: 'texte', exact: true })
+  // Apart enough to be two steps of the undo history (edits close in time are merged).
+  await page.waitForTimeout(1200)
   await text.fill('Avant')
+  await page.waitForTimeout(1200)
   await text.fill('Après')
+  await page.waitForTimeout(1200)
   await openBlocks(page)
   const frame = await previewFrame(page)
   const button = frame.locator('[data-rx-name="Bouton1"]')

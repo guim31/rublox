@@ -9,8 +9,6 @@ import { markSignedOut, watchSession } from './lib/session.ts'
 import { routeTree } from './routeTree.gen.ts'
 import './styles/app.css'
 
-initI18n(usePrefs.getState().locale)
-
 const router = createRouter({ routeTree, defaultPreload: 'intent', scrollRestoration: true })
 
 // A session that expired or was revoked elsewhere: say it once, then offer to sign in again.
@@ -30,7 +28,9 @@ declare module '@tanstack/react-router' {
 }
 
 const root = document.getElementById('root')
+// The strings of the language in use come first: nothing is drawn in a missing language.
 if (root) {
+  await initI18n(usePrefs.getState().locale)
   createRoot(root).render(
     <StrictMode>
       <RouterProvider router={router} />

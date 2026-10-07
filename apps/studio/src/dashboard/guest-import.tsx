@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Button } from '../components/ui/button.tsx'
-import { guestProjectsToImport, importGuestProjects } from '../storage/import.ts'
+import { getAll, STORES } from '../storage/db.ts'
+import type { ProjectSummary } from '../storage/summaries.ts'
 import { PROJECTS_KEY } from './queries.ts'
 
 const DISMISSED = 'rublox:import-later'
@@ -23,12 +24,18 @@ export function GuestImport() {
   const client = useQueryClient()
   const [hidden, setHidden] = useState(dismissed)
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
-  const guest = useQuery({ queryKey: ['guest-projects'], queryFn: guestProjectsToImport })
+  // The summaries only: moving the projects (Yjs, the format) is loaded when asked.
+  const guest = useQuery({
+    queryKey: ['guest-projects'],
+    queryFn: async () =>
+      (await getAll<ProjectSummary>(STORES.projects)).filter((project) => !project.deletedAt),
+  })
   const count = guest.data?.length ?? 0
   if (hidden || count === 0) return null
 
   const run = async () => {
     setProgress({ done: 0, total: count })
+    const { importGuestProjects } = await import('../storage/import.ts')
     const result = await importGuestProjects((done, total) => setProgress({ done, total }))
     setProgress(null)
     if (result.imported) toast.success(t('importGuest.done', { count: result.imported }))

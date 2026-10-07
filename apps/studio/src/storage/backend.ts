@@ -1,10 +1,13 @@
-import { createProject as newProjectDoc } from '@rublox/catalog'
-import { type Locale, type ProjectDoc, projectToYDoc, type UiMode } from '@rublox/schema'
-import * as Y from 'yjs'
+import type { Locale, ProjectDoc, UiMode } from '@rublox/schema'
 import { api, call } from '../lib/api.ts'
-import { toBase64 } from '../lib/base64.ts'
-import type { ProjectSummary } from './projects.ts'
-import * as guest from './projects.ts'
+import { getAll, STORES } from './db.ts'
+import { type ProjectSummary, TRASH_DAYS } from './summaries.ts'
+
+/**
+ * The project format, the catalog and Yjs are loaded only to change a project: listing them
+ * reads the summaries alone, so the dashboard stays within its budget (SPEC § 7).
+ */
+const guest = () => import('./projects.ts')
 
 /**
  * Where the dashboard's projects live: this browser (guest mode, J0) or the server (signed
@@ -26,29 +29,23 @@ export interface ProjectsBackend {
 export const guestBackend: ProjectsBackend = {
   kind: 'guest',
   list: async () => {
-    await guest.purgeExpired()
-    return guest.listProjects()
+    const all = await getAll<ProjectSummary>(STORES.projects)
+    const limit = TRASH_DAYS * 24 * 3600 * 1000
+    const expired = all.filter((p) => p.deletedAt && Date.now() - Date.parse(p.deletedAt) > limit)
+    if (!expired.length) return all
+    await (await guest()).purgeExpired()
+    return (await guest()).listProjects()
   },
-  create: guest.createProject,
-  rename: guest.renameProject,
-  duplicate: guest.duplicateProject,
-  setFavorite: guest.setFavorite,
-  trash: guest.moveToTrash,
-  restore: guest.restoreFromTrash,
-  deleteForever: guest.deleteForever,
+  create: async (input) => (await guest()).createProject(input),
+  rename: async (id, name) => (await guest()).renameProject(id, name),
+  duplicate: async (id, name) => (await guest()).duplicateProject(id, name),
+  setFavorite: async (id, favorite) => (await guest()).setFavorite(id, favorite),
+  trash: async (id) => (await guest()).moveToTrash(id),
+  restore: async (id) => (await guest()).restoreFromTrash(id),
+  deleteForever: async (id) => (await guest()).deleteForever(id),
 }
 
 const project = api.projects[':projectId']
-
-/** The Yjs state of a new project, built by the studio (the server validates it). */
-export function newProjectState(input: {
-  name: string
-  locale: Locale
-  mode: UiMode
-  doc?: ProjectDoc
-}): string {
-  return toBase64(Y.encodeStateAsUpdate(projectToYDoc(input.doc ?? newProjectDoc(input))))
-}
 
 export const serverBackend: ProjectsBackend = {
   kind: 'server',
@@ -60,6 +57,7 @@ export const serverBackend: ProjectsBackend = {
     }))
   },
   create: async (input) => {
+    const { newProjectState } = await import('./new-state.ts')
     const { id } = await call(api.projects.$post({ json: { state: newProjectState(input) } }))
     return id
   },

@@ -1,4 +1,4 @@
-import { detectLocale, type Locale } from '@rublox/i18n'
+import { detectLocale, type Locale } from '@rublox/i18n/locale'
 import type { UiMode } from '@rublox/schema'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'

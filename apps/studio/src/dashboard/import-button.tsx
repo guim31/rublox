@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Button } from '../components/ui/button.tsx'
 import { errorMessage } from '../lib/errors.ts'
-import { ARCHIVE_EXTENSION, ArchiveReadError, importArchive } from '../storage/archive.ts'
 import { useProjectMutation } from './queries.ts'
 
 /** Imports a `.rublox` file as a new project (SPEC § 4.6), then opens it. */
@@ -13,7 +12,11 @@ export function ImportButton({ target }: { target: 'guest' | 'server' }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const input = useRef<HTMLInputElement>(null)
-  const run = useProjectMutation((file: File) => importArchive(file, target))
+  // The archive reader (zip) is loaded when a file is chosen.
+  const archive = () => import('../storage/archive.ts')
+  const run = useProjectMutation(async (file: File) =>
+    (await archive()).importArchive(file, target),
+  )
 
   const onFile = async (file: File) => {
     const id = toast.loading(t('transfer.importing', { file: file.name }))
@@ -22,6 +25,7 @@ export function ImportButton({ target }: { target: 'guest' | 'server' }) {
       toast.success(t('transfer.imported', { name: file.name.replace(/\.rublox$/i, '') }), { id })
       await navigate({ to: '/p/$projectId', params: { projectId }, search: { tab: 'design' } })
     } catch (error) {
+      const { ArchiveReadError } = await archive()
       toast.error(
         error instanceof ArchiveReadError
           ? error.code === 'too-new'
@@ -50,7 +54,9 @@ export function ImportButton({ target }: { target: 'guest' | 'server' }) {
       <input
         ref={input}
         type="file"
-        accept={`${ARCHIVE_EXTENSION},application/zip`}
+        // `ARCHIVE_EXTENSION` of @rublox/schema, written out: importing it would bring its
+        // module's Zod schemas into the dashboard's first download.
+        accept=".rublox,application/zip"
         className="hidden"
         aria-label={t('transfer.importTitle')}
         data-testid="import-file"
