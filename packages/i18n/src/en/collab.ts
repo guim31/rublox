@@ -11,7 +11,7 @@ export const collab = {
     join: 'Go there',
     joinHint: 'Opens the screen {{name}} is on',
     more: '+{{count}}',
-    tabs: { design: 'Design', blocks: 'Blocks' },
+    tabs: { design: 'Design', blocks: 'Blocks', data: 'Data' },
     app: 'App',
     selects: '{{name}} picked this component',
     onBlock: '{{name}} is on this stack',

@@ -637,7 +637,6 @@ function CellEditor({
   const text = value === null || value === undefined ? '' : String(value)
   const [draft, setDraft] = useState(text)
   useEffect(() => setDraft(text), [text])
-  const session = useSession()
   const assetUrl = useAssetUrl()
 
   if (column.type === 'boolean') {
