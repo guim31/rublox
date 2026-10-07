@@ -12,12 +12,16 @@ import {
 import { clearDocument, IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
 import { get, getAll, put, remove, STORES } from './db.ts'
+import { replayJournal, UpdateJournal } from './journal.ts'
 import { type ProjectSummary, TRASH_DAYS } from './summaries.ts'
 
 export type { ProjectAccess, ProjectOwner, ProjectSummary } from './summaries.ts'
 export { TRASH_DAYS } from './summaries.ts'
 
 const docName = (id: string) => `rublox-project-${id}`
+
+/** The edits of a guest project that IndexedDB has not confirmed yet (`journal.ts`). */
+export const projectJournal = (id: string) => new UpdateJournal(docName(id))
 
 export function summarize(doc: ProjectDoc, previous?: Partial<ProjectSummary>): ProjectSummary {
   const start =
@@ -58,6 +62,8 @@ export async function openProjectDoc(
   const ydoc = new Y.Doc()
   const persistence = new IndexeddbPersistence(docName(id), ydoc)
   await persistence.whenSynced
+  // What an earlier page edited just before leaving, if IndexedDB lost it.
+  await replayJournal(ydoc, persistence, projectJournal(id))
   return { ydoc, persistence }
 }
 
@@ -140,6 +146,7 @@ export async function restoreFromTrash(id: string): Promise<void> {
 }
 
 export async function deleteForever(id: string): Promise<void> {
+  projectJournal(id).clear()
   await clearDocument(docName(id))
   await remove(STORES.projects, id)
 }
