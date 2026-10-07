@@ -75,6 +75,7 @@ export function HelpPanel() {
   const offered = useOfferedType()
   const components = componentSheets(locale).filter((sheet) => offered(sheet.type))
   const glossary = Object.entries(messages[locale].studio.glossary)
+  const keys = messages[locale].studio.help.keys
 
   if (!open) return null
   const close = () => useHelp.setState({ open: false })
@@ -125,6 +126,7 @@ export function HelpPanel() {
             { value: 'blocks', label: t('help.tabs.blocks') },
             { value: 'components', label: t('help.tabs.components') },
             { value: 'glossary', label: t('help.tabs.glossary') },
+            { value: 'keys', label: t('help.tabs.keys') },
           ]}
         />
       </div>
@@ -196,6 +198,29 @@ export function HelpPanel() {
                 </li>
               ))}
           </ul>
+        ) : tab === 'keys' ? (
+          <div className="flex flex-col gap-4" data-testid="help-keys">
+            <p className="text-ui-sm text-muted">{keys.intro}</p>
+            {(['everywhere', 'design', 'blocks'] as const).map((group) => (
+              <section key={group}>
+                <h3 className="mb-1.5 font-strong">{keys.groups[group]}</h3>
+                <dl className="flex flex-col gap-1.5">
+                  {keys[group]
+                    .filter(([combo, text]) => match(combo, text))
+                    .map(([combo, text]) => (
+                      <div key={combo} className="flex items-baseline gap-3 text-ui-sm">
+                        <dt className="w-36 shrink-0">
+                          <kbd className="rounded border border-border bg-surface-2 px-1.5 py-0.5 font-mono text-[12px]">
+                            {combo}
+                          </kbd>
+                        </dt>
+                        <dd className="leading-relaxed">{text}</dd>
+                      </div>
+                    ))}
+                </dl>
+              </section>
+            ))}
+          </div>
         ) : (
           <dl className="flex flex-col gap-3">
             {glossary
@@ -214,7 +239,10 @@ export function HelpPanel() {
               ))}
           </dl>
         )}
-        {!sheet && needle && noResult(tab, blocks, components, glossary, match) ? (
+        {!sheet &&
+        needle &&
+        tab !== 'keys' &&
+        noResult(tab, blocks, components, glossary, match) ? (
           <p className="py-6 text-center text-ui-sm text-muted">{t('help.noResult', { query })}</p>
         ) : null}
       </div>
