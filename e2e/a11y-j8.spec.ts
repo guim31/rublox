@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { type Browser, expect, type Page, test } from '@playwright/test'
-import { ADMIN, openBlocks, openDemo, unique, usePrefs } from './helpers.ts'
+import { ADMIN, openBlocks, openDemo, settled, unique, usePrefs } from './helpers.ts'
 
 /**
  * Axe on every page and dialog the other accessibility specs leave out (J8, SPEC § 5.1): the
@@ -15,6 +15,7 @@ type Mode = 'junior' | 'studio'
 type Theme = 'light' | 'dark'
 
 async function axe(page: Page, where: string, options: { dialog?: boolean } = {}) {
+  await settled(page)
   let builder = new AxeBuilder({ page }).withTags(TAGS)
   // The app being built is the learner's own content: checked on the apps origin below.
   builder = builder.exclude('[data-testid=preview-frame]').exclude('[data-testid=canvas-screen]')
@@ -220,6 +221,7 @@ for (const template of TEMPLATES) {
         await page.getByRole('button', { name: 'Appli en sombre' }).first().click()
         await expect(app.locator('.rx-app[data-scheme=dark]').first()).toBeVisible()
       }
+      await settled(page)
       const results = await new AxeBuilder({ page })
         .withTags(TAGS)
         .include('[data-testid=preview-frame]')

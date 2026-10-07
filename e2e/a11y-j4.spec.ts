@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
-import { ADMIN, addComponent, newProject, unique, usePrefs } from './helpers.ts'
+import { ADMIN, addComponent, newProject, settled, unique, usePrefs } from './helpers.ts'
 
 /** A fresh account whose profile holds the mode and theme (the profile wins over the browser). */
 async function account(page: Page, mode: 'junior' | 'studio', theme: 'light' | 'dark') {
@@ -26,6 +26,7 @@ for (const mode of ['junior', 'studio'] as const) {
       await usePrefs(page, { mode, theme, locale: 'fr' })
       await account(page, mode, theme)
       const check = async (where: string) => {
+        await settled(page)
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
           .include('[role=dialog]')

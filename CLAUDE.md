@@ -351,3 +351,6 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **Lancer un serveur e2e à la main** : `lsof -t -iTCP:4310 -sTCP:LISTEN` pour retrouver son PID
   (`ss` n'existe pas en session cloud) ; reconstruire (`pnpm build`) pendant une suite Playwright
   remplace `dist/` sous ses pieds.
+- **axe et animations** : sous charge, un dialogue encore en fondu (même de 1 ms avec le
+  mouvement réduit) donne de faux contrastes ; `await settled(page)` (`e2e/helpers.ts`) avant
+  chaque `AxeBuilder`.
