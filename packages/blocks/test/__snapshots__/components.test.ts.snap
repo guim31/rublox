@@ -1,0 +1,1218 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generated code of each component > AudioRecorder 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Enregistreur1 } = components;
+
+  Accueil.onOpen(async () => {
+    await Enregistreur1.start();
+    rx.log(await Enregistreur1.stop());
+    rx.log(Enregistreur1.recording);
+    rx.log(Enregistreur1.lastRecording);
+    rx.log(Enregistreur1.available);
+  });
+
+  Enregistreur1.onDone(async (event) => {
+    rx.log(event.sound);
+  });
+
+  Enregistreur1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Battery 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Batterie1 } = components;
+
+  Accueil.onOpen(async () => {
+    rx.log(Batterie1.level);
+    rx.log(Batterie1.charging);
+    rx.log(Batterie1.available);
+  });
+
+  Batterie1.onChange(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Box 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Boite1 } = components;
+
+  Accueil.onOpen(async () => {
+    Boite1.visible = true;
+    Boite1.width = 120;
+    Boite1.height = 120;
+    Boite1.background = '#ff6b5c';
+    Boite1.opacity = 2;
+    rx.log(Boite1.visible);
+    rx.log(Boite1.width);
+    rx.log(Boite1.height);
+    rx.log(Boite1.background);
+    rx.log(Boite1.opacity);
+  });
+
+  Boite1.onClick(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Button 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Bouton1 } = components;
+
+  Accueil.onOpen(async () => {
+    Bouton1.visible = true;
+    Bouton1.width = 120;
+    Bouton1.height = 120;
+    Bouton1.background = '#ff6b5c';
+    Bouton1.opacity = 2;
+    Bouton1.text = 'abc';
+    Bouton1.color = '#ff6b5c';
+    Bouton1.textColor = '#ff6b5c';
+    Bouton1.fontSize = 2;
+    Bouton1.disabled = true;
+    rx.log(Bouton1.visible);
+    rx.log(Bouton1.width);
+    rx.log(Bouton1.height);
+    rx.log(Bouton1.background);
+    rx.log(Bouton1.opacity);
+    rx.log(Bouton1.text);
+    rx.log(Bouton1.color);
+    rx.log(Bouton1.textColor);
+    rx.log(Bouton1.fontSize);
+    rx.log(Bouton1.disabled);
+  });
+
+  Bouton1.onClick(async () => {
+    rx.log('abc');
+  });
+
+  Bouton1.onLongPress(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Camera 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Photo1 } = components;
+
+  Accueil.onOpen(async () => {
+    rx.log(await Photo1.takePhoto());
+    rx.log(Photo1.lastPhoto);
+  });
+
+  Photo1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > CameraView 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, VueCamera1 } = components;
+
+  Accueil.onOpen(async () => {
+    VueCamera1.visible = true;
+    VueCamera1.width = 120;
+    VueCamera1.height = 120;
+    VueCamera1.background = '#ff6b5c';
+    VueCamera1.opacity = 2;
+    VueCamera1.facing = 'x';
+    await VueCamera1.start();
+    VueCamera1.stop();
+    rx.log(VueCamera1.takePhoto());
+    rx.log(VueCamera1.visible);
+    rx.log(VueCamera1.width);
+    rx.log(VueCamera1.height);
+    rx.log(VueCamera1.background);
+    rx.log(VueCamera1.opacity);
+    rx.log(VueCamera1.facing);
+    rx.log(VueCamera1.running);
+    rx.log(VueCamera1.available);
+  });
+
+  VueCamera1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Canvas 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Dessin1 } = components;
+
+  Accueil.onOpen(async () => {
+    Dessin1.visible = true;
+    Dessin1.width = 120;
+    Dessin1.height = 120;
+    Dessin1.background = '#ff6b5c';
+    Dessin1.opacity = 2;
+    Dessin1.backgroundColor = '#ff6b5c';
+    Dessin1.penColor = '#ff6b5c';
+    Dessin1.penWidth = 2;
+    Dessin1.fingerDrawing = true;
+    Dessin1.clear();
+    Dessin1.drawLine(2, 2, 2, 2);
+    Dessin1.drawCircle(2, 2, 2);
+    Dessin1.drawRect(2, 2, 2, 2);
+    Dessin1.drawText('abc', 2, 2);
+    rx.log(Dessin1.getImage());
+    rx.log(Dessin1.visible);
+    rx.log(Dessin1.width);
+    rx.log(Dessin1.height);
+    rx.log(Dessin1.background);
+    rx.log(Dessin1.opacity);
+    rx.log(Dessin1.backgroundColor);
+    rx.log(Dessin1.penColor);
+    rx.log(Dessin1.penWidth);
+    rx.log(Dessin1.fingerDrawing);
+  });
+
+  Dessin1.onTouch(async (event) => {
+    rx.log(event.x);
+    rx.log(event.y);
+  });
+
+  Dessin1.onDrag(async (event) => {
+    rx.log(event.x);
+    rx.log(event.y);
+  });
+
+  Dessin1.onRelease(async (event) => {
+    rx.log(event.x);
+    rx.log(event.y);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Checkbox 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Case1 } = components;
+
+  Accueil.onOpen(async () => {
+    Case1.visible = true;
+    Case1.width = 120;
+    Case1.height = 120;
+    Case1.background = '#ff6b5c';
+    Case1.opacity = 2;
+    Case1.text = 'abc';
+    Case1.checked = true;
+    Case1.disabled = true;
+    rx.log(Case1.visible);
+    rx.log(Case1.width);
+    rx.log(Case1.height);
+    rx.log(Case1.background);
+    rx.log(Case1.opacity);
+    rx.log(Case1.text);
+    rx.log(Case1.checked);
+    rx.log(Case1.disabled);
+  });
+
+  Case1.onChange(async (event) => {
+    rx.log(event.checked);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Clipboard 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, PressePapiers1 } = components;
+
+  Accueil.onOpen(async () => {
+    await PressePapiers1.copy('abc');
+    rx.log(await PressePapiers1.paste());
+  });
+
+  PressePapiers1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Column 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Colonne1 } = components;
+
+  Accueil.onOpen(async () => {
+    Colonne1.visible = true;
+    Colonne1.width = 120;
+    Colonne1.height = 120;
+    Colonne1.background = '#ff6b5c';
+    Colonne1.opacity = 2;
+    rx.log(Colonne1.visible);
+    rx.log(Colonne1.width);
+    rx.log(Colonne1.height);
+    rx.log(Colonne1.background);
+    rx.log(Colonne1.opacity);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > DataGrid 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, GrilleDonnees1 } = components;
+
+  Accueil.onOpen(async () => {
+    GrilleDonnees1.visible = true;
+    GrilleDonnees1.width = 120;
+    GrilleDonnees1.height = 120;
+    GrilleDonnees1.background = '#ff6b5c';
+    GrilleDonnees1.opacity = 2;
+    GrilleDonnees1.items = 'a, b';
+    GrilleDonnees1.columns = 2;
+    GrilleDonnees1.addItem('abc', 'https://example.com/a.png');
+    GrilleDonnees1.removeItem(2);
+    GrilleDonnees1.clear();
+    rx.log(GrilleDonnees1.visible);
+    rx.log(GrilleDonnees1.width);
+    rx.log(GrilleDonnees1.height);
+    rx.log(GrilleDonnees1.background);
+    rx.log(GrilleDonnees1.opacity);
+    rx.log(GrilleDonnees1.items);
+    rx.log(GrilleDonnees1.columns);
+    rx.log(GrilleDonnees1.selectedIndex);
+  });
+
+  GrilleDonnees1.onItemClick(async (event) => {
+    rx.log(event.index);
+    rx.log(event.title);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > DataList 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, ListeDonnees1 } = components;
+
+  Accueil.onOpen(async () => {
+    ListeDonnees1.visible = true;
+    ListeDonnees1.width = 120;
+    ListeDonnees1.height = 120;
+    ListeDonnees1.background = '#ff6b5c';
+    ListeDonnees1.opacity = 2;
+    ListeDonnees1.items = 'a, b';
+    ListeDonnees1.buttonText = 'abc';
+    ListeDonnees1.addItem('abc', 'abc', 'https://example.com/a.png');
+    ListeDonnees1.removeItem(2);
+    ListeDonnees1.clear();
+    rx.log(ListeDonnees1.visible);
+    rx.log(ListeDonnees1.width);
+    rx.log(ListeDonnees1.height);
+    rx.log(ListeDonnees1.background);
+    rx.log(ListeDonnees1.opacity);
+    rx.log(ListeDonnees1.items);
+    rx.log(ListeDonnees1.buttonText);
+    rx.log(ListeDonnees1.selectedIndex);
+  });
+
+  ListeDonnees1.onItemClick(async (event) => {
+    rx.log(event.index);
+    rx.log(event.title);
+    rx.log(event.subtitle);
+  });
+
+  ListeDonnees1.onButtonClick(async (event) => {
+    rx.log(event.index);
+    rx.log(event.title);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > DatePicker 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Date_1 } = components;
+
+  Accueil.onOpen(async () => {
+    Date_1.visible = true;
+    Date_1.width = 120;
+    Date_1.height = 120;
+    Date_1.background = '#ff6b5c';
+    Date_1.opacity = 2;
+    Date_1.value = '2026-10-06';
+    Date_1.min = '2026-10-06';
+    Date_1.max = '2026-10-06';
+    Date_1.disabled = true;
+    rx.log(Date_1.visible);
+    rx.log(Date_1.width);
+    rx.log(Date_1.height);
+    rx.log(Date_1.background);
+    rx.log(Date_1.opacity);
+    rx.log(Date_1.value);
+    rx.log(Date_1.min);
+    rx.log(Date_1.max);
+    rx.log(Date_1.disabled);
+  });
+
+  Date_1.onChange(async (event) => {
+    rx.log(event.value);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Divider 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Separateur1 } = components;
+
+  Accueil.onOpen(async () => {
+    Separateur1.visible = true;
+    Separateur1.width = 120;
+    Separateur1.height = 120;
+    Separateur1.opacity = 2;
+    Separateur1.color = '#ff6b5c';
+    rx.log(Separateur1.visible);
+    rx.log(Separateur1.width);
+    rx.log(Separateur1.height);
+    rx.log(Separateur1.opacity);
+    rx.log(Separateur1.color);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Dropdown 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Choix1 } = components;
+
+  Accueil.onOpen(async () => {
+    Choix1.visible = true;
+    Choix1.width = 120;
+    Choix1.height = 120;
+    Choix1.background = '#ff6b5c';
+    Choix1.opacity = 2;
+    Choix1.options = 'a, b';
+    Choix1.selected = 'abc';
+    Choix1.placeholder = 'abc';
+    Choix1.disabled = true;
+    rx.log(Choix1.visible);
+    rx.log(Choix1.width);
+    rx.log(Choix1.height);
+    rx.log(Choix1.background);
+    rx.log(Choix1.opacity);
+    rx.log(Choix1.options);
+    rx.log(Choix1.selected);
+    rx.log(Choix1.placeholder);
+    rx.log(Choix1.selectedIndex);
+    rx.log(Choix1.disabled);
+  });
+
+  Choix1.onChange(async (event) => {
+    rx.log(event.value);
+    rx.log(event.index);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Grid 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Grille1 } = components;
+
+  Accueil.onOpen(async () => {
+    Grille1.visible = true;
+    Grille1.width = 120;
+    Grille1.height = 120;
+    Grille1.background = '#ff6b5c';
+    Grille1.opacity = 2;
+    Grille1.columns = 2;
+    rx.log(Grille1.visible);
+    rx.log(Grille1.width);
+    rx.log(Grille1.height);
+    rx.log(Grille1.background);
+    rx.log(Grille1.opacity);
+    rx.log(Grille1.columns);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Icon 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Icone1 } = components;
+
+  Accueil.onOpen(async () => {
+    Icone1.visible = true;
+    Icone1.width = 120;
+    Icone1.height = 120;
+    Icone1.background = '#ff6b5c';
+    Icone1.opacity = 2;
+    Icone1.icon = 'x';
+    Icone1.size = 2;
+    Icone1.color = '#ff6b5c';
+    rx.log(Icone1.visible);
+    rx.log(Icone1.width);
+    rx.log(Icone1.height);
+    rx.log(Icone1.background);
+    rx.log(Icone1.opacity);
+    rx.log(Icone1.icon);
+    rx.log(Icone1.size);
+    rx.log(Icone1.color);
+  });
+
+  Icone1.onClick(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Image 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Image1 } = components;
+
+  Accueil.onOpen(async () => {
+    Image1.visible = true;
+    Image1.width = 120;
+    Image1.height = 120;
+    Image1.background = '#ff6b5c';
+    Image1.opacity = 2;
+    Image1.src = 'https://example.com/a.png';
+    rx.log(Image1.visible);
+    rx.log(Image1.width);
+    rx.log(Image1.height);
+    rx.log(Image1.background);
+    rx.log(Image1.opacity);
+    rx.log(Image1.src);
+  });
+
+  Image1.onClick(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > ListView 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Liste1 } = components;
+
+  Accueil.onOpen(async () => {
+    Liste1.visible = true;
+    Liste1.width = 120;
+    Liste1.height = 120;
+    Liste1.background = '#ff6b5c';
+    Liste1.opacity = 2;
+    Liste1.items = 'a, b';
+    Liste1.addItem('abc');
+    Liste1.removeItem(2);
+    Liste1.clear();
+    rx.log(Liste1.visible);
+    rx.log(Liste1.width);
+    rx.log(Liste1.height);
+    rx.log(Liste1.background);
+    rx.log(Liste1.opacity);
+    rx.log(Liste1.items);
+    rx.log(Liste1.selectedItem);
+    rx.log(Liste1.selectedIndex);
+  });
+
+  Liste1.onItemClick(async (event) => {
+    rx.log(event.item);
+    rx.log(event.index);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Location 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Position1 } = components;
+
+  Accueil.onOpen(async () => {
+    await Position1.update();
+    Position1.start();
+    Position1.stop();
+    rx.log(Position1.latitude);
+    rx.log(Position1.longitude);
+    rx.log(Position1.accuracy);
+    rx.log(Position1.available);
+  });
+
+  Position1.onChange(async (event) => {
+    rx.log(event.latitude);
+    rx.log(event.longitude);
+    rx.log(event.accuracy);
+  });
+
+  Position1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Lottie 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Animation1 } = components;
+
+  Accueil.onOpen(async () => {
+    Animation1.visible = true;
+    Animation1.width = 120;
+    Animation1.height = 120;
+    Animation1.background = '#ff6b5c';
+    Animation1.opacity = 2;
+    Animation1.loop = true;
+    Animation1.speed = 2;
+    Animation1.play();
+    Animation1.pause();
+    Animation1.stop();
+    rx.log(Animation1.visible);
+    rx.log(Animation1.width);
+    rx.log(Animation1.height);
+    rx.log(Animation1.background);
+    rx.log(Animation1.opacity);
+    rx.log(Animation1.loop);
+    rx.log(Animation1.speed);
+  });
+
+  Animation1.onComplete(async () => {
+    rx.log('abc');
+  });
+
+  Animation1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Motion 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Mouvement1 } = components;
+
+  Accueil.onOpen(async () => {
+    await Mouvement1.start();
+    Mouvement1.stop();
+    rx.log(Mouvement1.x);
+    rx.log(Mouvement1.y);
+    rx.log(Mouvement1.z);
+    rx.log(Mouvement1.alpha);
+    rx.log(Mouvement1.beta);
+    rx.log(Mouvement1.gamma);
+    rx.log(Mouvement1.available);
+  });
+
+  Mouvement1.onChange(async () => {
+    rx.log('abc');
+  });
+
+  Mouvement1.onShake(async () => {
+    rx.log('abc');
+  });
+
+  Mouvement1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Network 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Reseau1 } = components;
+
+  Accueil.onOpen(async () => {
+    rx.log(Reseau1.online);
+  });
+
+  Reseau1.onOnline(async () => {
+    rx.log('abc');
+  });
+
+  Reseau1.onOffline(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Notifier 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Notification1 } = components;
+
+  Accueil.onOpen(async () => {
+    await Notification1.notify('abc', 'abc');
+    await Notification1.notifyLater(2, 'abc', 'abc');
+    rx.log(Notification1.available);
+  });
+
+  Notification1.onClick(async () => {
+    rx.log('abc');
+  });
+
+  Notification1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > PhotoPicker 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Galerie1 } = components;
+
+  Accueil.onOpen(async () => {
+    rx.log(await Galerie1.pick());
+    rx.log(Galerie1.lastPhoto);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > ProgressBar 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Progression1 } = components;
+
+  Accueil.onOpen(async () => {
+    Progression1.visible = true;
+    Progression1.width = 120;
+    Progression1.height = 120;
+    Progression1.background = '#ff6b5c';
+    Progression1.opacity = 2;
+    Progression1.value = 2;
+    Progression1.color = '#ff6b5c';
+    rx.log(Progression1.visible);
+    rx.log(Progression1.width);
+    rx.log(Progression1.height);
+    rx.log(Progression1.background);
+    rx.log(Progression1.opacity);
+    rx.log(Progression1.value);
+    rx.log(Progression1.color);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > QrCode 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, QRcode1 } = components;
+
+  Accueil.onOpen(async () => {
+    QRcode1.visible = true;
+    QRcode1.width = 120;
+    QRcode1.height = 120;
+    QRcode1.background = '#ff6b5c';
+    QRcode1.opacity = 2;
+    QRcode1.text = 'abc';
+    rx.log(QRcode1.visible);
+    rx.log(QRcode1.width);
+    rx.log(QRcode1.height);
+    rx.log(QRcode1.background);
+    rx.log(QRcode1.opacity);
+    rx.log(QRcode1.text);
+  });
+
+  QRcode1.onClick(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > QrScanner 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Scanner1 } = components;
+
+  Accueil.onOpen(async () => {
+    rx.log(await Scanner1.scan());
+    rx.log(Scanner1.lastText);
+    rx.log(Scanner1.available);
+  });
+
+  Scanner1.onScan(async (event) => {
+    rx.log(event.text);
+  });
+
+  Scanner1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Rating 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Note1 } = components;
+
+  Accueil.onOpen(async () => {
+    Note1.visible = true;
+    Note1.width = 120;
+    Note1.height = 120;
+    Note1.background = '#ff6b5c';
+    Note1.opacity = 2;
+    Note1.value = 2;
+    Note1.readOnly = true;
+    rx.log(Note1.visible);
+    rx.log(Note1.width);
+    rx.log(Note1.height);
+    rx.log(Note1.background);
+    rx.log(Note1.opacity);
+    rx.log(Note1.value);
+    rx.log(Note1.readOnly);
+  });
+
+  Note1.onChange(async (event) => {
+    rx.log(event.value);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > RichText 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, TexteRiche1 } = components;
+
+  Accueil.onOpen(async () => {
+    TexteRiche1.visible = true;
+    TexteRiche1.width = 120;
+    TexteRiche1.height = 120;
+    TexteRiche1.background = '#ff6b5c';
+    TexteRiche1.opacity = 2;
+    TexteRiche1.text = 'abc';
+    TexteRiche1.fontSize = 2;
+    rx.log(TexteRiche1.visible);
+    rx.log(TexteRiche1.width);
+    rx.log(TexteRiche1.height);
+    rx.log(TexteRiche1.background);
+    rx.log(TexteRiche1.opacity);
+    rx.log(TexteRiche1.text);
+    rx.log(TexteRiche1.fontSize);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Row 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Ligne1 } = components;
+
+  Accueil.onOpen(async () => {
+    Ligne1.visible = true;
+    Ligne1.width = 120;
+    Ligne1.height = 120;
+    Ligne1.background = '#ff6b5c';
+    Ligne1.opacity = 2;
+    rx.log(Ligne1.visible);
+    rx.log(Ligne1.width);
+    rx.log(Ligne1.height);
+    rx.log(Ligne1.background);
+    rx.log(Ligne1.opacity);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Share 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Partage1 } = components;
+
+  Accueil.onOpen(async () => {
+    await Partage1.share('abc', 'abc');
+    rx.log(Partage1.available);
+  });
+
+  Partage1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Slider 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Curseur1 } = components;
+
+  Accueil.onOpen(async () => {
+    Curseur1.visible = true;
+    Curseur1.width = 120;
+    Curseur1.height = 120;
+    Curseur1.background = '#ff6b5c';
+    Curseur1.opacity = 2;
+    Curseur1.value = 2;
+    Curseur1.min = 2;
+    Curseur1.max = 2;
+    Curseur1.step = 2;
+    Curseur1.disabled = true;
+    rx.log(Curseur1.visible);
+    rx.log(Curseur1.width);
+    rx.log(Curseur1.height);
+    rx.log(Curseur1.background);
+    rx.log(Curseur1.opacity);
+    rx.log(Curseur1.value);
+    rx.log(Curseur1.min);
+    rx.log(Curseur1.max);
+    rx.log(Curseur1.step);
+    rx.log(Curseur1.disabled);
+  });
+
+  Curseur1.onChange(async (event) => {
+    rx.log(event.value);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Sound 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Son1 } = components;
+
+  Accueil.onOpen(async () => {
+    Son1.src = 'https://example.com/a.png';
+    Son1.volume = 2;
+    Son1.loop = true;
+    Son1.play();
+    await Son1.playUntilDone();
+    Son1.pause();
+    Son1.stop();
+    rx.log(Son1.src);
+    rx.log(Son1.volume);
+    rx.log(Son1.loop);
+    rx.log(Son1.playing);
+  });
+
+  Son1.onEnded(async () => {
+    rx.log('abc');
+  });
+
+  Son1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Spacer 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Espace1 } = components;
+
+  Accueil.onOpen(async () => {
+    Espace1.visible = true;
+    Espace1.width = 120;
+    Espace1.height = 120;
+    rx.log(Espace1.visible);
+    rx.log(Espace1.width);
+    rx.log(Espace1.height);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > SpeechRecognition 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Ecoute1 } = components;
+
+  Accueil.onOpen(async () => {
+    Ecoute1.language = 'x';
+    rx.log(await Ecoute1.listen());
+    Ecoute1.stop();
+    rx.log(Ecoute1.language);
+    rx.log(Ecoute1.listening);
+    rx.log(Ecoute1.lastText);
+    rx.log(Ecoute1.available);
+  });
+
+  Ecoute1.onResult(async (event) => {
+    rx.log(event.text);
+  });
+
+  Ecoute1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Spinner 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Chargement1 } = components;
+
+  Accueil.onOpen(async () => {
+    Chargement1.visible = true;
+    Chargement1.width = 120;
+    Chargement1.height = 120;
+    Chargement1.background = '#ff6b5c';
+    Chargement1.opacity = 2;
+    Chargement1.color = '#ff6b5c';
+    Chargement1.spinning = true;
+    rx.log(Chargement1.visible);
+    rx.log(Chargement1.width);
+    rx.log(Chargement1.height);
+    rx.log(Chargement1.background);
+    rx.log(Chargement1.opacity);
+    rx.log(Chargement1.color);
+    rx.log(Chargement1.spinning);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Switch 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Interrupteur1 } = components;
+
+  Accueil.onOpen(async () => {
+    Interrupteur1.visible = true;
+    Interrupteur1.width = 120;
+    Interrupteur1.height = 120;
+    Interrupteur1.background = '#ff6b5c';
+    Interrupteur1.opacity = 2;
+    Interrupteur1.text = 'abc';
+    Interrupteur1.on = true;
+    Interrupteur1.disabled = true;
+    rx.log(Interrupteur1.visible);
+    rx.log(Interrupteur1.width);
+    rx.log(Interrupteur1.height);
+    rx.log(Interrupteur1.background);
+    rx.log(Interrupteur1.opacity);
+    rx.log(Interrupteur1.text);
+    rx.log(Interrupteur1.on);
+    rx.log(Interrupteur1.disabled);
+  });
+
+  Interrupteur1.onChange(async (event) => {
+    rx.log(event.on);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Text 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Texte1 } = components;
+
+  Accueil.onOpen(async () => {
+    Texte1.visible = true;
+    Texte1.width = 120;
+    Texte1.height = 120;
+    Texte1.background = '#ff6b5c';
+    Texte1.opacity = 2;
+    Texte1.text = 'abc';
+    Texte1.fontSize = 2;
+    Texte1.color = '#ff6b5c';
+    Texte1.bold = true;
+    rx.log(Texte1.visible);
+    rx.log(Texte1.width);
+    rx.log(Texte1.height);
+    rx.log(Texte1.background);
+    rx.log(Texte1.opacity);
+    rx.log(Texte1.text);
+    rx.log(Texte1.fontSize);
+    rx.log(Texte1.color);
+    rx.log(Texte1.bold);
+  });
+
+  Texte1.onClick(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > TextInput 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Champ1 } = components;
+
+  Accueil.onOpen(async () => {
+    Champ1.visible = true;
+    Champ1.width = 120;
+    Champ1.height = 120;
+    Champ1.background = '#ff6b5c';
+    Champ1.opacity = 2;
+    Champ1.text = 'abc';
+    Champ1.placeholder = 'abc';
+    Champ1.disabled = true;
+    Champ1.focus();
+    Champ1.clear();
+    rx.log(Champ1.visible);
+    rx.log(Champ1.width);
+    rx.log(Champ1.height);
+    rx.log(Champ1.background);
+    rx.log(Champ1.opacity);
+    rx.log(Champ1.text);
+    rx.log(Champ1.placeholder);
+    rx.log(Champ1.disabled);
+  });
+
+  Champ1.onChange(async () => {
+    rx.log('abc');
+  });
+
+  Champ1.onSubmit(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;
+
+exports[`generated code of each component > TextToSpeech 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Voix1 } = components;
+
+  Accueil.onOpen(async () => {
+    Voix1.language = 'x';
+    Voix1.rate = 2;
+    Voix1.pitch = 2;
+    await Voix1.say('abc');
+    Voix1.stop();
+    rx.log(Voix1.language);
+    rx.log(Voix1.rate);
+    rx.log(Voix1.pitch);
+    rx.log(Voix1.available);
+  });
+
+  Voix1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > TimePicker 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Heure1 } = components;
+
+  Accueil.onOpen(async () => {
+    Heure1.visible = true;
+    Heure1.width = 120;
+    Heure1.height = 120;
+    Heure1.background = '#ff6b5c';
+    Heure1.opacity = 2;
+    Heure1.value = '09:30';
+    Heure1.disabled = true;
+    rx.log(Heure1.visible);
+    rx.log(Heure1.width);
+    rx.log(Heure1.height);
+    rx.log(Heure1.background);
+    rx.log(Heure1.opacity);
+    rx.log(Heure1.value);
+    rx.log(Heure1.disabled);
+  });
+
+  Heure1.onChange(async (event) => {
+    rx.log(event.value);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Timer 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Minuteur1 } = components;
+
+  Accueil.onOpen(async () => {
+    Minuteur1.interval = 2;
+    Minuteur1.repeat = true;
+    Minuteur1.start();
+    Minuteur1.stop();
+    rx.log(Minuteur1.interval);
+    rx.log(Minuteur1.repeat);
+    rx.log(Minuteur1.running);
+    rx.log(Minuteur1.ticks);
+  });
+
+  Minuteur1.onTick(async (event) => {
+    rx.log(event.count);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Vibrator 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Vibreur1 } = components;
+
+  Accueil.onOpen(async () => {
+    Vibreur1.vibrate(2);
+    rx.log(Vibreur1.available);
+  });
+
+  Vibreur1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > Video 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, Video1 } = components;
+
+  Accueil.onOpen(async () => {
+    Video1.visible = true;
+    Video1.width = 120;
+    Video1.height = 120;
+    Video1.background = '#ff6b5c';
+    Video1.opacity = 2;
+    Video1.src = 'https://example.com/a.png';
+    Video1.loop = true;
+    Video1.muted = true;
+    Video1.play();
+    Video1.pause();
+    Video1.stop();
+    rx.log(Video1.visible);
+    rx.log(Video1.width);
+    rx.log(Video1.height);
+    rx.log(Video1.background);
+    rx.log(Video1.opacity);
+    rx.log(Video1.src);
+    rx.log(Video1.loop);
+    rx.log(Video1.muted);
+    rx.log(Video1.playing);
+    rx.log(Video1.position);
+  });
+
+  Video1.onEnded(async () => {
+    rx.log('abc');
+  });
+
+  Video1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
+exports[`generated code of each component > WebView 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, PageWeb1 } = components;
+
+  Accueil.onOpen(async () => {
+    PageWeb1.visible = true;
+    PageWeb1.width = 120;
+    PageWeb1.height = 120;
+    PageWeb1.background = '#ff6b5c';
+    PageWeb1.opacity = 2;
+    PageWeb1.url = 'abc';
+    PageWeb1.reload();
+    rx.log(PageWeb1.visible);
+    rx.log(PageWeb1.width);
+    rx.log(PageWeb1.height);
+    rx.log(PageWeb1.background);
+    rx.log(PageWeb1.opacity);
+    rx.log(PageWeb1.url);
+  });
+
+  PageWeb1.onLoad(async () => {
+    rx.log('abc');
+  });
+}
+"
+`;

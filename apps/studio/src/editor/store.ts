@@ -34,11 +34,17 @@ type EditorState = {
   /** Live region message for screen readers (drag and drop, additions). */
   announcement: string
   slow: SlowState
+  /** With the screen selected: its properties, or the app's theme and navigation. */
+  inspectorTab: 'screen' | 'app'
+  /** Every selected component (Studio's multiple selection); `selected` is the last one. */
+  selection: ComponentId[]
   select(id: ComponentId | null): void
+  /** Adds a component to the selection, or takes it out (Shift or Ctrl + click, Studio). */
+  toggle(id: ComponentId): void
   hover(id: ComponentId | null): void
   set(
     patch: Partial<
-      Omit<EditorState, 'select' | 'hover' | 'set' | 'log' | 'clearLogs' | 'announce'>
+      Omit<EditorState, 'select' | 'toggle' | 'hover' | 'set' | 'log' | 'clearLogs' | 'announce'>
     >,
   ): void
   log(entry: LogEntry): void
@@ -62,7 +68,21 @@ export const useEditor = create<EditorState>()((set) => ({
   focusBlock: null,
   announcement: '',
   slow: { enabled: false, step: null, breakpoints: [] },
-  select: (selected) => set({ selected }),
+  inspectorTab: 'screen',
+  selection: [],
+  select: (selected) => set({ selected, selection: selected ? [selected] : [] }),
+  toggle: (id) =>
+    set((state) => {
+      const current = state.selection.length
+        ? state.selection
+        : state.selected
+          ? [state.selected]
+          : []
+      const selection = current.includes(id)
+        ? current.filter((other) => other !== id)
+        : [...current, id]
+      return { selection, selected: selection.at(-1) ?? null }
+    }),
   hover: (hovered) => set({ hovered }),
   set: (patch) => set(patch),
   log: (entry) =>
@@ -74,6 +94,7 @@ export const useEditor = create<EditorState>()((set) => ({
 export function resetEditor(): void {
   useEditor.setState({
     selected: null,
+    selection: [],
     hovered: null,
     logs: [],
     running: false,

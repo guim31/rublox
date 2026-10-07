@@ -1,7 +1,9 @@
 import { messages } from '@rublox/i18n'
-import type { Locale } from '@rublox/schema'
+import type { Locale, ProjectDoc, ScreenId } from '@rublox/schema'
 import { type ReactNode, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { Engine } from './engine.ts'
+import { AppIcon } from './icons.tsx'
+import { OVERLAYS } from './overlays/registry.ts'
 import { AppSurface, ScreenView } from './screen-view.tsx'
 import { resolveScheme, type Scheme } from './theme.ts'
 
@@ -37,15 +39,32 @@ export function PlayerApp(props: PlayerAppProps): ReactNode {
   const scheme = resolveScheme(doc.settings.theme, prefersDark, props.scheme)
   const strings = messages[props.locale].runtime
   const current = screen ? doc.screens[screen.screenId] : undefined
+  const navigation = doc.settings.navigation
+  const items = navigationItems(doc, engine.navigationScreens())
+  const drawer = navigation.kind === 'drawer' && items.length > 0
+  const tabs = navigation.kind === 'tabs' && items.length > 0
+  const [menuOpen, setMenuOpen] = useState(false)
   const title = current
     ? String(current.components[current.rootId]?.props.title ?? '') ||
-      (snapshot.depth > 1 ? current.name : '')
+      (snapshot.depth > 1 || drawer ? current.name : '')
     : ''
+  const nav = messages[props.locale].catalog.runtime
   return (
     <AppSurface theme={doc.settings.theme} scheme={scheme}>
       <div className="rx-player">
-        {snapshot.depth > 1 || title ? (
+        {snapshot.depth > 1 || title || drawer ? (
           <header className="rx-bar">
+            {drawer && snapshot.depth <= 1 ? (
+              <button
+                type="button"
+                className="rx-bar-back"
+                aria-label={nav.menu}
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen(true)}
+              >
+                <AppIcon name="menu" size={22} />
+              </button>
+            ) : null}
             {snapshot.depth > 1 ? (
               <button
                 type="button"
@@ -76,15 +95,63 @@ export function PlayerApp(props: PlayerAppProps): ReactNode {
               locale={doc.meta.locale}
               mode="run"
               overrides={screen.overrides}
-              emit={(id, event) => {
+              emit={(id, event, args) => {
                 if (props.onInspect && event === 'click') props.onInspect(id)
-                else engine.emit(id, event)
+                else engine.emit(id, event, args)
               }}
               setValue={(id, prop, value) => engine.setValue(id, prop, value)}
-              assetUrl={props.assetUrl}
+              expose={(id, handle) => engine.expose(screen.key, id, handle)}
+              assetUrl={(value) => props.assetUrl?.(value) ?? engine.resolveAsset(value)}
             />
           ) : null}
         </main>
+        {tabs ? (
+          <nav className="rx-tabs" aria-label={nav.tabs}>
+            {items.map((item) => (
+              <button
+                key={item.screen}
+                type="button"
+                className="rx-tab"
+                aria-current={snapshot.root === item.screen ? 'page' : undefined}
+                onClick={() => engine.switchTo(item.screen)}
+              >
+                <AppIcon name={item.icon} size={22} />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        ) : null}
+        {drawer && menuOpen ? (
+          <div className="rx-drawer-backdrop">
+            <button
+              type="button"
+              className="rx-drawer-close"
+              aria-label={nav.closeMenu}
+              onClick={() => setMenuOpen(false)}
+            />
+            <nav className="rx-drawer" aria-label={nav.menu}>
+              {items.map((item) => (
+                <button
+                  key={item.screen}
+                  type="button"
+                  className="rx-drawer-item"
+                  aria-current={snapshot.root === item.screen ? 'page' : undefined}
+                  onClick={() => {
+                    setMenuOpen(false)
+                    engine.switchTo(item.screen)
+                  }}
+                >
+                  <AppIcon name={item.icon} size={20} />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        ) : null}
+        {snapshot.overlays.map((overlay) => {
+          const View = OVERLAYS[overlay.kind]
+          return View ? <View key={overlay.id} overlay={overlay} locale={props.locale} /> : null
+        })}
         {snapshot.dialogs[0] ? (
           <DialogView key={snapshot.dialogs[0].id} engine={engine} locale={props.locale} />
         ) : null}
@@ -98,6 +165,24 @@ export function PlayerApp(props: PlayerAppProps): ReactNode {
       </div>
     </AppSurface>
   )
+}
+
+/** The entries of the tab bar or the drawer: label and icon of each top-level screen. */
+export function navigationItems(
+  doc: ProjectDoc,
+  screens: ScreenId[],
+): { screen: ScreenId; label: string; icon: string }[] {
+  const items = doc.settings.navigation.items ?? []
+  return screens.map((screen, index) => {
+    const item = items.find((entry) => entry.screen === screen)
+    const node = doc.screens[screen]
+    const title = String(node?.components[node.rootId]?.props.title ?? '')
+    return {
+      screen,
+      label: item?.label || title || node?.name || screen,
+      icon: item?.icon || (index === 0 ? 'house' : 'star'),
+    }
+  })
 }
 
 function DialogView({ engine, locale }: { engine: Engine; locale: Locale }) {

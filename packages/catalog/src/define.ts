@@ -15,7 +15,12 @@ export type BlockAccess = 'get-set' | 'get' | 'set' | 'none'
  * - `size`: `'auto'`, `'fill'`, a number of pixels or a percentage string (`'50%'`)
  * - `spacing`: one number, or `[top, right, bottom, left]`
  * - `color`: `''` (none), `#rrggbb`, `#rrggbbaa`, or a theme token (`@primary`, `@text`…)
- * - `asset`: an asset id of the project, or an `https:` address
+ * - `asset`: an asset id of the project, an `https:` address, or a `blob:` or `data:` address
+ *   made while the app runs (a photo just taken)
+ * - `icon`: a name from `ICON_NAMES` (the runtime draws it)
+ * - `list`: an array of texts, or of objects when `itemFields` is set (data lists)
+ * - `date`: `'YYYY-MM-DD'` or `''`; `time`: `'HH:MM'` or `''`
+ * - `any`: any value (an event argument, a method result)
  */
 export type PropKind =
   | 'string'
@@ -27,6 +32,13 @@ export type PropKind =
   | 'spacing'
   | 'asset'
   | 'icon'
+  | 'list'
+  | 'date'
+  | 'time'
+  | 'any'
+
+/** Fields of the items of a list of objects (a data list item: image, title, subtitle). */
+export type ItemFields = Record<string, 'string' | 'asset'>
 
 export type SizeValue = 'auto' | 'fill' | number | `${number}%`
 export type SpacingValue = number | [number, number, number, number]
@@ -38,6 +50,11 @@ type PropOptions<T> = {
   /** Shown in Junior without opening "More options". */
   junior?: boolean
   blocks?: BlockAccess
+  /**
+   * Set by the component while the app runs (a position, "available"): never in the
+   * inspector nor in the project, readable by blocks (`blocks: 'get'` by default).
+   */
+  state?: boolean
 }
 
 export type PropDef<T = unknown> = {
@@ -46,6 +63,8 @@ export type PropDef<T = unknown> = {
   group: PropGroup
   junior: boolean
   blocks: BlockAccess
+  /** Set while the app runs, never stored (see `PropOptions.state`). */
+  state: boolean
   /** Enum values. */
   values?: readonly string[]
   min?: number
@@ -55,6 +74,8 @@ export type PropDef<T = unknown> = {
   multiline?: boolean
   /** Asset kind accepted (asset). */
   assetKind?: 'image' | 'sound' | 'video' | 'lottie'
+  /** Fields of each item (list of objects). */
+  itemFields?: ItemFields
   /** Turns any value into a valid one, or `undefined` when it cannot. */
   coerce: (value: unknown) => T | undefined
 }
@@ -85,13 +106,87 @@ function clamp(n: number, min?: number, max?: number): number {
 }
 
 function defaults<T>(kind: PropKind, options: PropOptions<T>) {
+  const state = options.state ?? false
   return {
     kind,
     default: options.default,
     group: options.group,
     junior: options.junior ?? false,
-    blocks: options.blocks ?? 'none',
+    blocks: options.blocks ?? (state ? 'get' : 'none'),
+    state,
   }
+}
+
+const DATE = /^(\d{4})-(\d{2})-(\d{2})$/
+const TIME = /^(\d{1,2}):(\d{2})$/
+
+function pad(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+/** `'2026-10-06'` for a valid date (a string or a `Date`), `''` for nothing, else undefined. */
+export function coerceDate(value: unknown): string | undefined {
+  if (value === null || value === undefined || value === '') return ''
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime())
+      ? undefined
+      : `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`
+  }
+  if (typeof value !== 'string') return undefined
+  const match = DATE.exec(value.trim().slice(0, 10))
+  if (!match) return undefined
+  const [, y, m, d] = match.map(Number) as [number, number, number, number]
+  const date = new Date(y, m - 1, d)
+  return date.getMonth() === m - 1 && date.getDate() === d ? value.trim().slice(0, 10) : undefined
+}
+
+/** `'09:30'` for a valid time, `''` for nothing, else undefined. */
+export function coerceTime(value: unknown): string | undefined {
+  if (value === null || value === undefined || value === '') return ''
+  if (value instanceof Date) return `${pad(value.getHours())}:${pad(value.getMinutes())}`
+  if (typeof value !== 'string') return undefined
+  const match = TIME.exec(value.trim().slice(0, 5))
+  if (!match) return undefined
+  const h = Number(match[1])
+  const m = Number(match[2])
+  return h < 24 && m < 60 ? `${pad(h)}:${pad(m)}` : undefined
+}
+
+function itemText(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(value)
+  }
+}
+
+/**
+ * Any value as a list: an array stays one, a text becomes one item per line (or per comma
+ * when it has no line break), so that a block can set `"rouge, vert, bleu"`.
+ */
+export function coerceList(value: unknown, fields?: ItemFields): unknown[] | undefined {
+  let items: unknown[]
+  if (Array.isArray(value)) items = value
+  else if (value === null || value === undefined || value === '') items = []
+  else if (typeof value === 'string') {
+    items = value
+      .split(value.includes('\n') ? '\n' : ',')
+      .map((item) => item.trim())
+      .filter((item) => item !== '')
+  } else if (typeof value === 'number' || typeof value === 'boolean') items = [value]
+  else return undefined
+  if (!fields) return items.map(itemText)
+  const keys = Object.keys(fields)
+  return items.map((item) => {
+    const source =
+      item && typeof item === 'object' && !Array.isArray(item)
+        ? (item as Record<string, unknown>)
+        : { [keys[0] ?? 'title']: item }
+    return Object.fromEntries(keys.map((key) => [key, itemText(source[key])]))
+  })
 }
 
 /** Property builders, used in `defineComponent({ props })`. */
@@ -220,13 +315,42 @@ export const prop = {
       coerce: (value) => (typeof value === 'string' ? value : value == null ? '' : undefined),
     }
   },
+
+  list(options: PropOptions<unknown[]> & { itemFields?: ItemFields }): PropDef<unknown[]> {
+    return {
+      ...defaults('list', options),
+      itemFields: options.itemFields,
+      coerce: (value) => coerceList(value, options.itemFields),
+    }
+  },
+
+  date(options: PropOptions<string>): PropDef<string> {
+    return { ...defaults('date', options), coerce: coerceDate }
+  },
+
+  time(options: PropOptions<string>): PropDef<string> {
+    return { ...defaults('time', options), coerce: coerceTime }
+  },
+
+  any(options: PropOptions<unknown>): PropDef<unknown> {
+    return { ...defaults('any', options), coerce: (value) => value }
+  },
 }
 
 export type ArgDef = { kind: PropKind }
 
+/** An argument of an event or a method: `arg('number')`. */
+export function arg(kind: PropKind): ArgDef {
+  return { kind }
+}
+
 export type EventDef = {
   junior: boolean
-  /** Values passed to the handler, in order. */
+  /**
+   * Values the event carries (the item clicked, the new value…). The handler receives them
+   * as one object, `event`, and the "value of the event" block reads them. Their labels are
+   * in `strings.args`.
+   */
   args: Record<string, ArgDef>
 }
 
@@ -305,6 +429,8 @@ export type ComponentStrings = {
   methods: Record<string, string>
   /** Labels of enum values: `{ variant: { filled: 'Plein', … } }`. */
   enums: Record<string, Record<string, string>>
+  /** Labels of event arguments: `{ item: 'élément' }` (required for each one). */
+  args?: Record<string, string>
 }
 
 export type ComponentDef = {

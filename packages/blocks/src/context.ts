@@ -3,6 +3,10 @@ import type * as Blockly from 'blockly/core'
 
 export type ComponentRef = { id: string; name: string; type: string }
 export type ScreenRef = { id: string; name: string }
+/** A variable of the project and where it lives (`app.x`, `stored.x`, `shared.x`). */
+export type VariableRef = { id: string; name: string; kind: 'app' | 'stored' | 'shared' }
+/** A function of the `app` workspace, callable from every screen (`functions.name`). */
+export type AppFunctionRef = { name: string; params: string[]; returns: boolean }
 
 /**
  * What the blocks of one workspace need to know about the project: dropdowns list these
@@ -17,6 +21,10 @@ export type BlocksContext = {
   /** Components of the workspace's screen (none for the `app` workspace). */
   components: ComponentRef[]
   screens: ScreenRef[]
+  /** Every variable of the project, with its kind. */
+  variables?: VariableRef[]
+  /** Functions defined in the `app` workspace. */
+  appFunctions?: AppFunctionRef[]
 }
 
 const contexts = new WeakMap<Blockly.Workspace, () => BlocksContext>()

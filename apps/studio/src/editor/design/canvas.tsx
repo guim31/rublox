@@ -1,5 +1,5 @@
 import { componentLabel, getComponentDef } from '@rublox/catalog'
-import { AppSurface, ScreenView } from '@rublox/runtime'
+import { AppIcon, AppSurface, navigationItems, ScreenView } from '@rublox/runtime'
 import { type ComponentId, type Screen, type ScreenId, setProp } from '@rublox/schema'
 import { GripVertical, Minus, Moon, Plus, RotateCcw, Scan, Sun } from 'lucide-react'
 import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -11,6 +11,7 @@ import { Tooltip } from '../../components/ui/tooltip.tsx'
 import { cn } from '../../lib/cn.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { addComponentOfType, moveComponentTo } from '../actions.ts'
+import { ComponentIcon } from '../component-icon.tsx'
 import { useAssetsVersion, useDoc, useSession } from '../context.tsx'
 import { DEVICES, type Device, useEditor } from '../store.ts'
 import {
@@ -39,13 +40,14 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
   useAssetsVersion()
   const screen = doc.screens[screenId]
   const { device, landscape, zoom, appScheme, selected, hovered, set, select, hover } = useEditor()
-  const locale = usePrefs((s) => s.locale)
+  const { locale, mode } = usePrefs()
+  const selection = useEditor((s) => s.selection)
   const areaRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const screenRef = useRef<HTMLDivElement>(null)
   const [fit, setFit] = useState(1)
   const [drop, setDrop] = useState<(DropTarget & { line: Box }) | null>(null)
-  const [boxes, setBoxes] = useState<{ selected?: Box; hovered?: Box; parent?: Box }>({})
+  const [boxes, setBoxes] = useState<{ selected?: Box; hovered?: Box; others?: Box[] }>({})
 
   const size = DEVICES[device]
   const width = landscape ? size.height : size.width
@@ -95,6 +97,10 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
       const next = {
         selected: boxOf(elementOf(selected)),
         hovered: hovered !== selected ? boxOf(elementOf(hovered)) : undefined,
+        others: selection
+          .filter((id) => id !== selected)
+          .map((id) => boxOf(elementOf(id)))
+          .filter((box): box is Box => Boolean(box)),
       }
       const key = JSON.stringify(next)
       if (key !== last) {
@@ -105,7 +111,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     }
     frame = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(frame)
-  }, [selected, hovered, boxOf, elementOf])
+  }, [selected, hovered, selection, boxOf, elementOf])
 
   if (!screen) return null
 
@@ -216,34 +222,43 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
         }}
         onDrop={onDrop}
       >
-        <div className="flex min-h-full min-w-full items-center justify-center p-8">
+        <div className="flex min-h-full min-w-full flex-col items-center justify-center gap-4 p-8">
           <div ref={stageRef} className="relative">
             <PhoneFrame width={width} height={height} scale={scale} dark={appScheme === 'dark'}>
               <AppSurface theme={doc.settings.theme} scheme={appScheme}>
-                {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer selection; the layers panel is the keyboard path */}
-                {/* biome-ignore lint/a11y/useKeyWithClickEvents: same */}
-                <div
-                  ref={screenRef}
-                  className="size-full"
-                  data-testid="canvas-screen"
-                  onClick={(event) => select(componentAt(event.target) ?? screen.rootId)}
-                  onMouseMove={(event) => {
-                    const id = componentAt(event.target)
-                    if (id !== useEditor.getState().hovered) hover(id)
-                  }}
-                  onMouseLeave={() => hover(null)}
-                >
-                  <ScreenView
-                    screen={screen}
-                    locale={doc.meta.locale}
-                    mode="design"
-                    assetUrl={session.assetUrl}
-                    decorateChildren={(parentId, children) =>
-                      children.length
-                        ? children
-                        : [<EmptyHint key="empty" root={parentId === screen.rootId} />]
-                    }
-                  />
+                <div className="flex size-full flex-col">
+                  {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer selection; the layers panel is the keyboard path */}
+                  {/* biome-ignore lint/a11y/useKeyWithClickEvents: same */}
+                  <div
+                    ref={screenRef}
+                    className="min-h-0 flex-1"
+                    data-testid="canvas-screen"
+                    onClick={(event) => {
+                      const id = componentAt(event.target) ?? screen.rootId
+                      // Studio: Shift or Ctrl/Cmd + click builds a multiple selection.
+                      if (mode === 'studio' && (event.shiftKey || event.metaKey || event.ctrlKey))
+                        useEditor.getState().toggle(id)
+                      else select(id)
+                    }}
+                    onMouseMove={(event) => {
+                      const id = componentAt(event.target)
+                      if (id !== useEditor.getState().hovered) hover(id)
+                    }}
+                    onMouseLeave={() => hover(null)}
+                  >
+                    <ScreenView
+                      screen={screen}
+                      locale={doc.meta.locale}
+                      mode="design"
+                      assetUrl={session.assetUrl}
+                      decorateChildren={(parentId, children) =>
+                        children.length
+                          ? children
+                          : [<EmptyHint key="empty" root={parentId === screen.rootId} />]
+                      }
+                    />
+                  </div>
+                  <TabBarPreview screenId={screenId} />
                 </div>
               </AppSurface>
             </PhoneFrame>
@@ -283,8 +298,83 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
               }
             />
           </div>
+          <NonVisualTray screen={screen} selected={selected} onSelect={select} />
         </div>
       </div>
+    </section>
+  )
+}
+
+/** With tab navigation, the tab bar the app will show under this screen (not interactive). */
+function TabBarPreview({ screenId }: { screenId: ScreenId }) {
+  const doc = useDoc()
+  const navigation = doc.settings.navigation
+  if (navigation.kind !== 'tabs') return null
+  const screens = (navigation.items?.map((item) => item.screen) ?? doc.screenOrder).filter(
+    (id) => doc.screens[id],
+  )
+  if (!screens.includes(screenId)) return null
+  return (
+    <div className="rx-tabs" aria-hidden="true" data-testid="canvas-tabs">
+      {navigationItems(doc, screens).map((item) => (
+        <span
+          key={item.screen}
+          className="rx-tab"
+          aria-current={item.screen === screenId ? 'page' : undefined}
+        >
+          <AppIcon name={item.icon} size={22} />
+          <span>{item.label}</span>
+        </span>
+      ))}
+    </div>
+  )
+}
+
+/** Non-visual components (timer, sound, sensors…), listed under the phone (SPEC § 3). */
+function NonVisualTray({
+  screen,
+  selected,
+  onSelect,
+}: {
+  screen: Screen
+  selected: ComponentId | null
+  onSelect: (id: ComponentId) => void
+}) {
+  const { t } = useTranslation('catalog')
+  const locale = usePrefs((s) => s.locale)
+  if (!screen.nonVisual.length) return null
+  return (
+    <section
+      aria-label={t('studio.nonVisual.title')}
+      className="flex max-w-[480px] flex-wrap items-center justify-center gap-1.5"
+      data-testid="non-visual-tray"
+    >
+      <span className="w-full text-center text-ui-sm text-muted">
+        {t('studio.nonVisual.title')}
+      </span>
+      {screen.nonVisual.map((id) => {
+        const node = screen.components[id]
+        if (!node) return null
+        return (
+          <button
+            key={id}
+            type="button"
+            data-rx-id={id}
+            aria-pressed={selected === id}
+            title={componentLabel(node.type, locale)}
+            onClick={() => onSelect(id)}
+            className={cn(
+              'inline-flex h-control-sm items-center gap-1.5 rounded-full border bg-surface px-3 text-ui-sm font-strong shadow-1',
+              selected === id
+                ? 'border-primary text-primary-text ring-2 ring-primary/25'
+                : 'border-border hover:border-border-strong',
+            )}
+          >
+            <ComponentIcon type={node.type} size={14} />
+            {node.name}
+          </button>
+        )
+      })}
     </section>
   )
 }
@@ -305,7 +395,7 @@ function EmptyHint({ root }: { root: boolean }) {
 }
 
 function Overlay(props: {
-  boxes: { selected?: Box; hovered?: Box }
+  boxes: { selected?: Box; hovered?: Box; others?: Box[] }
   drop?: Box
   selectedLabel: string
   hoveredLabel: string
@@ -346,6 +436,14 @@ function Overlay(props: {
   }
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
+      {props.boxes.others?.map((box) => (
+        <div
+          key={`${box.left},${box.top}`}
+          className="absolute rounded-[3px] outline-2 outline-primary/70 outline-dashed"
+          style={box}
+          data-testid="selection-extra"
+        />
+      ))}
       {hovered ? (
         <div
           className="absolute rounded-[3px] outline-[1.5px] outline-dashed outline-primary/70"

@@ -1,6 +1,6 @@
 import { getComponentDef, resolveProps } from '@rublox/catalog'
 import type { ComponentId, Locale, Screen, Theme } from '@rublox/schema'
-import { type CSSProperties, type ReactNode, useMemo } from 'react'
+import { type CSSProperties, type ReactNode, useMemo, useRef } from 'react'
 import { RENDERERS } from './components/registry.ts'
 import { commonStyle } from './styles.ts'
 import { type Scheme, themeVariables } from './theme.ts'
@@ -12,19 +12,36 @@ export type ScreenViewProps = {
   mode: 'run' | 'design'
   /** Values set while running, over the project's values. */
   overrides?: ReadonlyMap<ComponentId, Readonly<Record<string, unknown>>>
-  emit?: (componentId: ComponentId, event: string) => void
+  emit?: (componentId: ComponentId, event: string, args?: Record<string, unknown>) => void
   setValue?: (componentId: ComponentId, prop: string, value: unknown) => void
   assetUrl?: (value: string) => string | undefined
+  /** Renderers hand their imperative handle to the engine through this (run mode). */
+  expose?: (componentId: ComponentId, handle: unknown) => void
   /** Lets the editor add elements (drop markers…) among a container's children. */
   decorateChildren?: (parentId: ComponentId, children: ReactNode[]) => ReactNode[]
 }
 
 const noop = () => {}
-const httpsOnly = (value: string) => (/^https:\/\//i.test(value) ? value : undefined)
+const httpsOnly = (value: string) =>
+  /^https:\/\//i.test(value) || /^(blob:|data:(image|audio|video)\/)/i.test(value)
+    ? value
+    : undefined
 
 /** Draws the component tree of a screen with the catalog renderers. */
 export function ScreenView(props: ScreenViewProps): ReactNode {
   const design = props.mode === 'design'
+  // One stable function per component, so that `useExpose` does not run on every render.
+  const exposers = useRef(new Map<ComponentId, (handle: unknown) => void>())
+  const exposeRef = useRef(props.expose)
+  exposeRef.current = props.expose
+  const exposeFor = (id: ComponentId) => {
+    let fn = exposers.current.get(id)
+    if (!fn) {
+      fn = (handle: unknown) => exposeRef.current?.(id, handle)
+      exposers.current.set(id, fn)
+    }
+    return fn
+  }
   const render = (id: ComponentId): ReactNode => {
     const node = props.screen.components[id]
     if (!node) return null
@@ -45,10 +62,12 @@ export function ScreenView(props: ScreenViewProps): ReactNode {
       <Renderer
         id={id}
         name={node.name}
+        type={node.type}
         props={values}
-        style={commonStyle(values, design)}
+        style={commonStyle(values, design, node.props)}
         design={design}
-        emit={(event) => props.emit?.(id, event)}
+        emit={(event, args) => props.emit?.(id, event, args)}
+        expose={exposeFor(id)}
         setValue={(prop, value) => props.setValue?.(id, prop, value)}
         assetUrl={props.assetUrl ?? httpsOnly}
         locale={props.locale}

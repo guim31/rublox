@@ -1,5 +1,7 @@
 export * from './common.ts'
 export * from './component.ts'
 export * from './define.ts'
+export * from './demo/demo.ts'
+export * from './icons.ts'
 export * from './project.ts'
 export * from './registry.ts'

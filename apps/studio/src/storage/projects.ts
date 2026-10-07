@@ -109,8 +109,9 @@ export async function createProject(input: {
   name: string
   locale: Locale
   mode: UiMode
+  doc?: ProjectDoc
 }): Promise<string> {
-  const doc = newProjectDoc(input)
+  const doc = input.doc ?? newProjectDoc(input)
   await storeDoc(doc)
   await saveSummary(summarize(doc))
   return doc.meta.id

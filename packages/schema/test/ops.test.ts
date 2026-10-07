@@ -4,18 +4,22 @@ import {
   addComponent,
   addScreen,
   addVariable,
+  copyComponents,
   duplicateComponent,
   duplicateScreen,
   moveComponent,
   moveScreen,
   ProjectOpError,
+  pasteComponents,
   projectDocSchema,
   projectToYDoc,
   removeComponent,
   removeScreen,
   renameComponent,
   setBlockStack,
+  setNavigation,
   setProp,
+  setTheme,
   updateVariable,
   yDocToProject,
 } from '../src/index.ts'
@@ -151,5 +155,69 @@ describe('undo', () => {
     expect(yDocToProject(ydoc)).toEqual(before)
     undo.redo()
     expect(yDocToProject(ydoc)).toEqual(after)
+  })
+})
+
+describe('app settings', () => {
+  it('changes the theme and the navigation, and forgets removed screens', () => {
+    const ydoc = projectToYDoc(fixture())
+    setTheme(ydoc, { primary: '#ff0000', scheme: 'auto', radius: 4 })
+    const second = addScreen(ydoc, {
+      name: 'Deux',
+      root: { type: 'Screen', name: 'Deux', props: {}, children: [] },
+    })
+    setNavigation(ydoc, {
+      kind: 'tabs',
+      items: [
+        { screen: 's1', icon: 'house', label: 'Accueil' },
+        { screen: second, icon: 'star' },
+        { screen: 'nope' },
+      ],
+    })
+    let doc = valid(ydoc)
+    expect(doc.settings.theme).toMatchObject({ primary: '#ff0000', scheme: 'auto', radius: 4 })
+    expect(doc.settings.navigation.kind).toBe('tabs')
+    expect(doc.settings.navigation.items?.map((item) => item.screen)).toEqual(['s1', second])
+    removeScreen(ydoc, second)
+    doc = valid(ydoc)
+    expect(doc.settings.navigation.items?.map((item) => item.screen)).toEqual(['s1'])
+    setNavigation(ydoc, { items: null })
+    expect(valid(ydoc).settings.navigation.items).toBeUndefined()
+  })
+})
+
+describe('copy and paste', () => {
+  it('copies subtrees and pastes them with new ids and free names', () => {
+    const ydoc = projectToYDoc(fixture())
+    const row = addComponent(
+      ydoc,
+      's1',
+      { type: 'Row', name: 'Ligne1', props: {}, children: [] },
+      'r1',
+    )
+    addComponent(ydoc, 's1', { type: 'Button', name: 'Bouton9', props: { text: 'A' } }, row)
+    const timer = addComponent(ydoc, 's1', { type: 'Timer', name: 'Minuteur1', props: {} }, null)
+    const clips = copyComponents(ydoc, 's1', [row, timer, 'r1'])
+    expect(clips).toHaveLength(2)
+    expect(Object.keys(clips[0]!.nodes)).toHaveLength(2)
+    const pasted = pasteComponents(ydoc, 's1', clips, 'r1', 0, (type) => type !== 'Timer')
+    const doc = valid(ydoc)
+    const screen = doc.screens.s1!
+    expect(pasted).toHaveLength(2)
+    expect(screen.components[screen.rootId]!.children![0]).toBe(pasted[0])
+    expect(screen.nonVisual).toContain(pasted[1])
+    expect(screen.components[pasted[0]!]!.name).toMatch(/^Ligne[2-9]$/)
+    // Into another screen, names stay when they are free.
+    const elsewhere = pasteComponents(
+      ydoc,
+      's2',
+      clips,
+      valid(ydoc).screens.s2!.rootId,
+      0,
+      () => true,
+    )
+    expect(valid(ydoc).screens.s2!.components[elsewhere[0]!]!.name).toBe(
+      clips[0]!.nodes[clips[0]!.rootId]!.name,
+    )
   })
 })

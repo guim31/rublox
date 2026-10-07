@@ -7,7 +7,12 @@ import {
   type WorkspaceKey,
 } from '@rublox/schema'
 import * as Blockly from 'blockly/core'
-import { type BlocksContext, setBlocksContext } from './context.ts'
+import {
+  type AppFunctionRef,
+  type BlocksContext,
+  setBlocksContext,
+  type VariableRef,
+} from './context.ts'
 import {
   type GeneratedCode,
   type GenerateOptions,
@@ -46,7 +51,34 @@ export function contextFromDoc(
       id,
       name: doc.screens[id]?.name ?? id,
     })),
+    variables: projectVariables(doc),
+    appFunctions: appFunctionsOf(doc.blocks[APP_WORKSPACE] ?? {}),
   }
+}
+
+/** Every variable of a project, with its kind. */
+export function projectVariables(doc: ProjectDoc): VariableRef[] {
+  return (['app', 'stored', 'shared'] as const).flatMap((kind) =>
+    doc.variables[kind].map((variable) => ({ id: variable.id, name: variable.name, kind })),
+  )
+}
+
+/** The functions defined in the `app` workspace, read from its saved stacks. */
+export function appFunctionsOf(stacks: Record<string, BlocklyJson>): AppFunctionRef[] {
+  const result: AppFunctionRef[] = []
+  for (const json of Object.values(stacks)) {
+    if (json.type !== 'procedures_defnoreturn' && json.type !== 'procedures_defreturn') continue
+    if ((json as { enabled?: boolean }).enabled === false) continue
+    const name = (json as { fields?: { NAME?: unknown } }).fields?.NAME
+    if (typeof name !== 'string' || !name) continue
+    const params = (json as { extraState?: { params?: { name?: unknown }[] } }).extraState?.params
+    result.push({
+      name,
+      params: (params ?? []).map((param) => String(param.name ?? '')),
+      returns: json.type === 'procedures_defreturn',
+    })
+  }
+  return result.sort((a, b) => a.name.localeCompare(b.name))
 }
 
 /**
@@ -101,7 +133,7 @@ export function generateProjectCode(
   doc: ProjectDoc,
   options: GenerateOptions = {},
 ): Record<WorkspaceKey, GeneratedCode> {
-  const variables = [...doc.variables.app, ...doc.variables.stored, ...doc.variables.shared]
+  const variables = projectVariables(doc)
   const result: Record<WorkspaceKey, GeneratedCode> = {}
   for (const key of [APP_WORKSPACE, ...doc.screenOrder]) {
     result[key] = generateWorkspaceCode(

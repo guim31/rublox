@@ -2,7 +2,7 @@ import { getComponentDef, resolveDefault, SCREEN_TYPE } from '@rublox/catalog'
 import { messages } from '@rublox/i18n'
 import { APP_WORKSPACE } from '@rublox/schema'
 import type * as Blockly from 'blockly/core'
-import type { BlocksContext } from './context.ts'
+import { type BlocksContext, contextOf } from './context.ts'
 import {
   BLOCK_TYPES,
   eventBlockType,
@@ -34,6 +34,10 @@ function componentItems(id: string, type: string, all: boolean): Item[] {
   for (const [event, info] of Object.entries(def.events)) {
     if (all || info.junior) {
       items.push(block(eventBlockType(type, event), { fields: { COMPONENT: id } }))
+      // What the event brings, ready to drop inside it.
+      for (const arg of Object.keys(info.args)) {
+        items.push(block(BLOCK_TYPES.eventValue, { fields: { ARG: arg } }))
+      }
     }
   }
   const setters = propertyKeys(def, 'set').filter((entry) => all || entry.junior)
@@ -241,7 +245,7 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
     kind: 'category',
     name: t.variables,
     categorystyle: 'variable_category',
-    custom: 'VARIABLE',
+    custom: VARIABLES_CATEGORY,
   } as Item)
 
   if (all) {
@@ -250,6 +254,24 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
       name: t.functions,
       categorystyle: 'procedure_category',
       custom: 'PROCEDURE',
+    } as Item)
+  }
+
+  if (context.workspace !== APP_WORKSPACE && (all || context.appFunctions?.length)) {
+    const extra = messages[context.locale].catalog.blocks
+    const functions = context.appFunctions ?? []
+    contents.push({
+      kind: 'category',
+      name: extra.appFunctions,
+      categorystyle: 'procedure_category',
+      contents: functions.length
+        ? functions.map((fn) =>
+            block(fn.returns ? BLOCK_TYPES.appCallValue : BLOCK_TYPES.appCall, {
+              fields: { FUNCTION: fn.name },
+              extraState: { params: fn.params },
+            }),
+          )
+        : [{ kind: 'label', text: extra.noAppFunctions } as Item],
     } as Item)
   }
 
@@ -301,4 +323,49 @@ export function buildToolbox(context: BlocksContext): Blockly.utils.toolbox.Tool
   } as Item)
 
   return { kind: 'categoryToolbox', contents }
+}
+
+/** Name of the custom Variables category: app variables, then stored ones (SPEC § 4.2). */
+export const VARIABLES_CATEGORY = 'RX_VARIABLES'
+export const CREATE_APP_VARIABLE = 'rxCreateAppVariable'
+export const CREATE_STORED_VARIABLE = 'rxCreateStoredVariable'
+
+function variableBlocks(variable: { id: string }): Item[] {
+  const field = { VAR: { id: variable.id } }
+  return [
+    block('variables_set', { fields: field, inputs: { VALUE: numberShadow(0) } }),
+    block('math_change', { fields: field, inputs: { DELTA: numberShadow(1) } }),
+    block('variables_get', { fields: field }),
+  ]
+}
+
+/**
+ * Content of the Variables category of a workspace: a button and the blocks of each app
+ * variable, then of each stored variable (kept on the device). Registered by the studio with
+ * `registerToolboxCategoryCallback(VARIABLES_CATEGORY, …)`.
+ */
+export function variablesFlyout(workspace: Blockly.Workspace): Item[] {
+  const context = contextOf(workspace)
+  const strings = messages[context.locale].catalog.blocks
+  const variables = context.variables ?? []
+  const exists = (id: string) => Boolean(workspace.getVariableMap().getVariableById(id))
+  const app = variables.filter((v) => v.kind === 'app' && exists(v.id))
+  const stored = variables.filter((v) => v.kind === 'stored' && exists(v.id))
+  const items: Item[] = [
+    { kind: 'button', text: strings.createVariable, callbackKey: CREATE_APP_VARIABLE } as Item,
+    {
+      kind: 'button',
+      text: strings.createStoredVariable,
+      callbackKey: CREATE_STORED_VARIABLE,
+    } as Item,
+  ]
+  if (app.length) {
+    items.push({ kind: 'label', text: strings.appVariables } as Item)
+    for (const variable of app) items.push(...variableBlocks(variable))
+  }
+  if (stored.length) {
+    items.push({ kind: 'label', text: strings.storedVariables } as Item)
+    for (const variable of stored) items.push(...variableBlocks(variable))
+  }
+  return items
 }

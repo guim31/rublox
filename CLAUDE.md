@@ -62,7 +62,7 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome pnpm test:e2e`.
   Contre les serveurs de dev : `E2E_BASE_URL=http://localhost:5173 npx playwright test --project=e2e`.
 - `pnpm screenshots` : captures de PR (Junior, Studio, clair, sombre), une spec par jalon
-  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j3/`). Lancer seulement celle du jalon :
+  (`e2e/screenshots*.spec.ts` → `docs/screenshots/j0/`, `j1/`, `j2/`, `j3/`). Lancer seulement celle du jalon :
   `npx playwright test --project=screenshots e2e/screenshots-j1.spec.ts` après `pnpm build`.
 - `pnpm --filter @rublox/blocks test -- -u` : régénérer les instantanés du générateur, puis
   relire le diff du code produit.
@@ -73,12 +73,18 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 ## Où ajouter quoi
 
 - Un composant : `packages/catalog/src/components/<type>.ts` (déclaration et textes FR/EN),
-  `registry.ts`, rendu dans `packages/runtime/src/components/` + `RENDERERS`, icône dans
-  `apps/studio/src/editor/component-icon.tsx`. Ses blocs et son générateur en découlent ; les tests
-  de complétude disent ce qui manque. Voir `docs/SPEC.md` § 0.1 pour les contrats.
+  `registry.ts`, rendu dans `packages/runtime/src/components/` + `RENDERERS`, comportement
+  (méthodes, minuteurs, capteurs) dans `packages/runtime/src/behaviors/` + `BEHAVIORS`, icône dans
+  `apps/studio/src/editor/component-icon.tsx`, et une place dans l'appli de démonstration
+  (`packages/catalog/src/demo/demo.ts`). Ses blocs et son générateur en découlent ; les tests
+  de complétude disent ce qui manque. Voir `docs/SPEC.md` § 0.1 et § 0.4 pour les contrats.
+- Une fonction du navigateur (caméra, capteur…) : `availableProp()` et `errorEvent()` dans la
+  déclaration, `available` et `ctx.fail(...)` dans le comportement (messages de
+  `behaviors/device.ts`), une ligne dans `docs/compatibilite.md`.
 - Une chaîne d'interface : `packages/i18n/src/fr/*.ts` puis `en/*.ts` (TypeScript refuse une clé
   manquante ; `t('…')` est typé). Celles des comptes, espaces et administration sont dans
-  `accounts.ts`.
+  `accounts.ts`, celles du catalogue (J2) dans `catalog.ts` (espace `catalog` :
+  `useTranslation('catalog')`).
 - Un tutoriel ou un défi : un dossier `content/tutorials/<id>/` (`tutorial.json`, `fr.json`,
   `en.json`) ou `content/challenges/<id>/`, puis une ligne dans `packages/learn/src/content.ts`.
   Les vérifications et les cibles sont décrites dans `packages/learn/src/{conditions,model}.ts` ;
@@ -160,5 +166,13 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   (`e2e/learn.spec.ts`).
 - **Glisser-déposer tactile** : le repli (`touch-drag.ts`) rejoue des `DragEvent` construits ;
   leur `dataTransfer` peut manquer (vieux Safari) : ne jamais le lire sans test.
+- **Rendus et effets** : `p.emit` et `p.setValue` d'un rendu sont recréés à chaque rendu ; un
+  `useEffect` qui en dépend tourne à chaque fois. Les lire par une `ref`. Le moteur ignore une
+  écriture identique, mais un effet qui écrit une valeur différente à chaque fois figerait l'aperçu.
+- **Tailwind dans le canevas** : le preflight du studio s'applique aux composants dessinés dans le
+  canevas (titres, listes, marges) ; `styles.css` du moteur redonne explicitement ce qu'il faut
+  (`.rx-rich h1`, `ul`…), sinon le canevas diffère de l'aperçu.
+- **Composants invisibles** : ils vont dans `screen.nonVisual`, jamais dans l'arbre ; le canevas
+  les montre sous le téléphone (`non-visual-tray`).
 - **Shell** : `pkill -f <motif>` ou `pgrep -f vite | xargs kill` tue aussi le shell qui le lance ;
   arrêter les serveurs par PID ou par port.

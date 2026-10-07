@@ -1,3 +1,4 @@
+import { createDemoProject } from '@rublox/catalog'
 import { useNavigate } from '@tanstack/react-router'
 import {
   Copy,
@@ -7,6 +8,7 @@ import {
   Plus,
   RotateCcw,
   Search,
+  Sparkles,
   Star,
   Trash2,
 } from 'lucide-react'
@@ -53,6 +55,7 @@ function matches(project: ProjectSummary, filter: Filter): boolean {
  */
 export function Dashboard({ openNew }: { openNew: boolean }) {
   const { t, i18n } = useTranslation()
+  const { t: tc } = useTranslation('catalog')
   const navigate = useNavigate()
   const { mode, locale, theme } = usePrefs()
   const me = useMe()
@@ -72,9 +75,35 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
     if (openNew) setCreating(true)
   }, [openNew])
 
+  // The demo app (J2): every component, one click away from the command palette.
   useEffect(() => {
-    useCommands.getState().setPage([])
-  }, [])
+    useCommands.getState().setPage([
+      {
+        id: 'demo',
+        group: 'project',
+        label: tc('studio.demo.open'),
+        icon: <Sparkles size={16} />,
+        keywords: ['demo', 'démo', 'catalog', 'catalogue'],
+        run: () =>
+          void store
+            .create({
+              name: '',
+              locale,
+              mode,
+              doc: createDemoProject({ locale, mode }),
+            })
+            .then((id) =>
+              navigate({
+                to: '/p/$projectId',
+                params: { projectId: id },
+                search: { tab: 'design' },
+              }),
+            )
+            .catch(() => toast.error(tc('studio.demo.failed'))),
+      },
+    ])
+    return () => useCommands.getState().setPage([])
+  }, [store, locale, mode, navigate, tc])
 
   const create = useProjectMutation((name: string) => store.create({ name, locale, mode }))
   const rename = useProjectMutation(({ id, name }: { id: string; name: string }) =>

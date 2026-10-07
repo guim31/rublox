@@ -1,4 +1,4 @@
-import { type Localized, type PropDef, prop } from './define.ts'
+import { arg, type EventDef, event, type Localized, type PropDef, prop } from './define.ts'
 
 /** Properties every visible component has (SPEC § 4.4). */
 export function commonProps(): Record<string, PropDef> {
@@ -172,5 +172,36 @@ export const COMMON_STRINGS: Localized<{
         large: 'Large',
       },
     },
+  },
+}
+
+/**
+ * Browser features are not everywhere (SPEC § 4.4): a component that needs one has an
+ * `available` state property, set when the app starts.
+ */
+export function availableProp(): Record<string, PropDef> {
+  return { available: prop.boolean({ default: true, group: 'advanced', state: true }) }
+}
+
+/** The explicit error event of a component that needs a browser feature or a permission. */
+export function errorEvent(): Record<string, EventDef> {
+  return { error: event({ args: { message: arg('string') } }) }
+}
+
+/** Labels of `availableProp` and `errorEvent`, merged by `defineComponent` when used. */
+export const DEVICE_STRINGS: Localized<{
+  props: Record<string, string>
+  events: Record<string, string>
+  args: Record<string, string>
+}> = {
+  fr: {
+    props: { available: 'disponible' },
+    events: { error: 'quand %1 a un problème' },
+    args: { message: 'message' },
+  },
+  en: {
+    props: { available: 'available' },
+    events: { error: 'when %1 has a problem' },
+    args: { message: 'message' },
   },
 }
