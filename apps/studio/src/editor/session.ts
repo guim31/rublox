@@ -82,7 +82,7 @@ export class ProjectSession {
 
   private onUpdate = (_update: Uint8Array, origin: unknown) => {
     this.doc = yDocToProject(this.ydoc)
-    if (origin !== this.source.origin && origin !== SUMMARY_ORIGIN) this.source.edited()
+    if (!this.source.isOwnOrigin(origin) && origin !== SUMMARY_ORIGIN) this.source.edited()
     if (Object.keys(this.doc.assets).some((id) => !this.assetUrls.has(id))) void this.loadAssets()
     this.emit()
   }

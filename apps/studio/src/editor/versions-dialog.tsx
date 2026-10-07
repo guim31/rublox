@@ -51,7 +51,7 @@ export function VersionsDialog({ open, onClose }: { open: boolean; onClose: () =
     if (!value) return
     try {
       // Send pending edits first, so that the version holds what is on screen.
-      await (session.source as ServerSource).sync()
+      await (session.source as ServerSource).flushed()
       await call(project.versions.$post({ param: { projectId }, json: { name: value } }))
       toast.success(t('versions.saved', { name: value }))
       setName('')
@@ -169,14 +169,12 @@ export function VersionsDialog({ open, onClose }: { open: boolean; onClose: () =
             onClick={async () => {
               if (!restoring) return
               try {
-                const source = session.source as ServerSource
-                await source.sync()
+                await (session.source as ServerSource).flushed()
                 await call(
                   project.versions[':versionId'].restore.$post({
                     param: { projectId, versionId: restoring.id },
                   }),
                 )
-                await source.sync()
                 toast.success(t('versions.restored'))
                 setRestoring(null)
                 await client.invalidateQueries({ queryKey: key })

@@ -1,8 +1,9 @@
-import { type Asset, type AssetKind, setMeta, yDocToProject } from '@rublox/schema'
+import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider'
+import { type Asset, type AssetKind, hasProject, setMeta, yDocToProject } from '@rublox/schema'
 import type { IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
-import { ApiError, api, call } from '../lib/api.ts'
-import { fromBase64, toBase64 } from '../lib/base64.ts'
+import { ApiError, api, call, reportSignedOut } from '../lib/api.ts'
+import { currentUserId } from '../lib/session.ts'
 import { loadAssetFile, storeAssetFile } from '../storage/assets.ts'
 import {
   getSummary,
@@ -13,6 +14,7 @@ import {
   summarize,
 } from '../storage/projects.ts'
 import { downloadAsset, uploadAsset } from '../storage/server-assets.ts'
+import { cachedAccess, dropCache, openCache } from '../storage/server-cache.ts'
 
 export type SaveState = 'saved' | 'saving' | 'offline' | 'readonly'
 
@@ -23,8 +25,8 @@ export type SaveState = 'saved' | 'saving' | 'offline' | 'readonly'
 export interface DocSource {
   readonly kind: 'guest' | 'server'
   readonly ydoc: Y.Doc
-  /** Origin of the transactions the source applies itself (loading, server answers). */
-  readonly origin: unknown
+  /** Whether a transaction came from the source itself (loading, server), not an edit. */
+  isOwnOrigin(origin: unknown): boolean
   readonly access: ProjectAccess
   readonly owner: ProjectOwner | null
   saveState(): SaveState
@@ -57,8 +59,8 @@ export class GuestSource implements DocSource {
     private readonly persistence: IndexeddbPersistence,
   ) {}
 
-  get origin() {
-    return this.persistence
+  isOwnOrigin(origin: unknown) {
+    return origin === this.persistence
   }
 
   static async open(id: string): Promise<GuestSource> {
@@ -112,30 +114,26 @@ export class GuestSource implements DocSource {
   }
 }
 
-const SERVER_ORIGIN = { name: 'server' }
-const EMPTY_UPDATE = Y.encodeStateAsUpdate(new Y.Doc())
-const PUSH_DELAY = 600
-const PULL_INTERVAL = 15_000
-const MAX_RETRY = 30_000
+/** How long to wait for the server before opening a cached project offline. */
+const CONNECT_TIMEOUT = 6000
+/** How long closing waits for the last edits to reach the server. */
+const CLOSE_TIMEOUT = 3000
+
+/** Address of the project documents (Hocuspocus, SPEC § 6.7), on the studio origin. */
+function collabUrl() {
+  return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/collab`
+}
 
 /**
- * A project stored on the server (J1). Edits are merged with Yjs: the studio sends what the
- * server lacks (relative to the last state vector it received) and gets back what it lacks.
- * Collaboration in real time comes with Hocuspocus (J4); until then the document is also
- * pulled every 15 seconds and when the tab comes back.
+ * A project stored on the server: its Yjs document is kept by Hocuspocus over `/ws/collab`
+ * (authenticated by the session cookie), and cached in this browser by y-indexeddb so that
+ * edits survive a lost connection or a reload. Viewers and space managers get a read-only
+ * connection: they may try things, nothing is sent. J4 adds presence on the same provider.
  */
 export class ServerSource implements DocSource {
   readonly kind = 'server'
-  readonly origin = SERVER_ORIGIN
-  private serverVector: Uint8Array
-  private state: SaveState
-  private dirty = false
-  private inflight: Promise<void> | null = null
-  private timer?: ReturnType<typeof setTimeout>
-  private retryDelay = 0
-  private readonly pullTimer: ReturnType<typeof setInterval>
+  private state: SaveState = 'saving'
   private listener: () => void = () => {}
-  private closed = false
   private readonly blobs = new Map<string, Blob>()
 
   private constructor(
@@ -143,33 +141,104 @@ export class ServerSource implements DocSource {
     readonly ydoc: Y.Doc,
     public access: ProjectAccess,
     readonly owner: ProjectOwner | null,
+    private readonly socket: HocuspocusProviderWebsocket,
+    readonly provider: HocuspocusProvider,
+    private cache: IndexeddbPersistence | null,
   ) {
-    this.serverVector = Y.encodeStateVector(ydoc)
-    this.state = this.readOnly ? 'readonly' : 'saved'
-    this.pullTimer = setInterval(() => {
-      if (document.visibilityState === 'visible') void this.sync()
-    }, PULL_INTERVAL)
-    window.addEventListener('focus', this.onFocus)
-    window.addEventListener('online', this.onFocus)
+    provider.on('status', this.refresh)
+    provider.on('synced', this.refresh)
+    provider.on('unsyncedChanges', this.refresh)
+    provider.on('authenticated', ({ scope }: { scope: string }) => {
+      if (scope === 'readonly' && !this.readOnly) this.becomeReadOnly()
+      this.refresh()
+    })
+    provider.on('authenticationFailed', ({ reason }: { reason: string }) => this.refused(reason))
     window.addEventListener('beforeunload', this.onBeforeUnload)
+    // An open socket notices a lost network only after its ping times out (30 s): follow the
+    // browser instead, and connect again as soon as it is back.
+    window.addEventListener('offline', this.onOffline)
+    window.addEventListener('online', this.onOnline)
+    this.refresh()
   }
 
-  /** The project, or null when it does not exist or is not visible to this account. */
+  private onOffline = () => {
+    this.socket.disconnect()
+    this.refresh()
+  }
+
+  private onOnline = () => {
+    void this.socket.connect()
+  }
+
+  /**
+   * The project, or null when it does not exist or is not visible to this account. Without a
+   * connection, a project cached in this browser opens offline.
+   */
   static async open(id: string): Promise<ServerSource | null> {
+    const userId = currentUserId()
+    if (!userId) return null
+    let access: ProjectAccess
+    let owner: ProjectOwner | null = null
     try {
       const body = await call(api.projects[':projectId'].$get({ param: { projectId: id } }))
-      const ydoc = new Y.Doc()
-      Y.applyUpdate(ydoc, fromBase64(body.state), SERVER_ORIGIN)
-      const owner = body.owner ? { ...body.owner, username: body.owner.username ?? '' } : null
-      return new ServerSource(id, ydoc, body.access, owner)
+      access = body.access
+      owner = body.owner ? { ...body.owner, username: body.owner.username ?? '' } : null
     } catch (error) {
-      if (error instanceof ApiError && (error.status === 404 || error.status === 403)) return null
-      throw error
+      if (error instanceof ApiError && error.status === 404) {
+        await dropCache(id)
+        return null
+      }
+      const cached =
+        error instanceof ApiError && error.status === 0 ? cachedAccess(id, userId) : null
+      if (!cached) {
+        if (error instanceof ApiError && error.status === 403) return null
+        throw error
+      }
+      access = cached
     }
+    const ydoc = new Y.Doc()
+    const writable = access === 'owner' || access === 'editor'
+    // A read-only copy is never cached: trying things out must not outlive the tab.
+    const cache = writable ? await openCache(id, ydoc, access, userId) : null
+    if (!writable) await dropCache(id)
+    const socket = new HocuspocusProviderWebsocket({ url: collabUrl() })
+    const provider = new HocuspocusProvider({ websocketProvider: socket, name: id, document: ydoc })
+    provider.attach()
+    const outcome = await new Promise<'synced' | 'refused' | 'timeout'>((resolve) => {
+      const done = (result: 'synced' | 'refused' | 'timeout') => {
+        clearTimeout(timer)
+        provider.off('synced', onSynced)
+        provider.off('authenticationFailed', onRefused)
+        resolve(result)
+      }
+      const onSynced = () => done('synced')
+      const onRefused = ({ reason }: { reason: string }) => {
+        if (reason === 'signed-out') reportSignedOut()
+        done('refused')
+      }
+      const timer = setTimeout(() => done('timeout'), CONNECT_TIMEOUT)
+      provider.on('synced', onSynced)
+      provider.on('authenticationFailed', onRefused)
+    })
+    if (outcome === 'refused' || (outcome === 'timeout' && !hasProject(ydoc))) {
+      provider.destroy()
+      socket.destroy()
+      await cache?.destroy()
+      if (outcome === 'refused') await dropCache(id)
+      ydoc.destroy()
+      if (outcome === 'timeout') throw new ApiError(0, 'network')
+      return null
+    }
+    return new ServerSource(id, ydoc, access, owner, socket, provider, cache)
   }
 
   get readOnly() {
     return this.access !== 'owner' && this.access !== 'editor'
+  }
+
+  /** Transactions applied by the provider (server) or the cache are not local edits. */
+  isOwnOrigin(origin: unknown) {
+    return origin === this.provider || (this.cache !== null && origin === this.cache)
   }
 
   onChange(listener: () => void) {
@@ -180,73 +249,44 @@ export class ServerSource implements DocSource {
     return this.state
   }
 
-  private setState(state: SaveState) {
-    if (this.state === state) return
-    this.state = state
+  private refresh = () => {
+    const connected = this.provider.isSynced && this.provider.isAuthenticated
+    const next: SaveState = this.readOnly
+      ? 'readonly'
+      : !connected
+        ? 'offline'
+        : this.provider.hasUnsyncedChanges
+          ? 'saving'
+          : 'saved'
+    if (next === this.state) return
+    this.state = next
     this.listener()
   }
 
+  private becomeReadOnly() {
+    this.access = 'viewer'
+    const cache = this.cache
+    this.cache = null
+    void cache?.destroy().then(() => dropCache(this.id))
+  }
+
+  /** The server stopped accepting this tab: signed out, or the project is no longer visible. */
+  private refused(reason: string) {
+    if (reason === 'signed-out') reportSignedOut()
+    if (!this.readOnly) this.becomeReadOnly()
+    this.refresh()
+  }
+
   edited() {
-    if (this.readOnly) return
-    this.dirty = true
-    if (this.state !== 'offline') this.setState('saving')
-    this.schedule(PUSH_DELAY)
+    this.refresh()
   }
-
-  private schedule(delay: number) {
-    clearTimeout(this.timer)
-    this.timer = setTimeout(() => void this.sync(), delay)
-  }
-
-  private onFocus = () => void this.sync()
 
   private onBeforeUnload = (event: BeforeUnloadEvent) => {
-    if (this.dirty || this.inflight) event.preventDefault()
-  }
-
-  /** One round trip; edits made meanwhile leave with the next one. */
-  async sync(): Promise<void> {
-    if (this.closed && !this.dirty) return
-    if (this.inflight) {
-      await this.inflight
-      if (!this.dirty) return
+    // Without a cache (read-only), nothing is pending; with one, the edits are kept anyway,
+    // but warn while they have not reached the server.
+    if (!this.readOnly && this.provider.hasUnsyncedChanges && this.state !== 'offline') {
+      event.preventDefault()
     }
-    const sentVector = Y.encodeStateVector(this.ydoc)
-    const update = this.readOnly
-      ? EMPTY_UPDATE
-      : Y.encodeStateAsUpdate(this.ydoc, this.serverVector)
-    const pushing = this.dirty
-    this.dirty = false
-    this.inflight = (async () => {
-      try {
-        const answer = await call(
-          api.projects[':projectId'].sync.$post({
-            param: { projectId: this.id },
-            json: { update: toBase64(update), stateVector: toBase64(sentVector) },
-          }),
-        )
-        Y.applyUpdate(this.ydoc, fromBase64(answer.update), SERVER_ORIGIN)
-        this.serverVector = sentVector
-        this.retryDelay = 0
-        this.setState(this.readOnly ? 'readonly' : this.dirty ? 'saving' : 'saved')
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 403) {
-          this.access = 'viewer'
-          this.setState('readonly')
-          return
-        }
-        if (error instanceof ApiError && error.status === 401) return
-        // Network or server trouble: keep the edits and try again, waiting longer each time.
-        if (pushing) this.dirty = true
-        this.setState('offline')
-        this.retryDelay = Math.min(MAX_RETRY, this.retryDelay ? this.retryDelay * 2 : 2000)
-        if (!this.closed) this.schedule(this.retryDelay)
-      } finally {
-        this.inflight = null
-      }
-    })()
-    await this.inflight
-    if (this.dirty && !this.closed && this.retryDelay === 0) this.schedule(PUSH_DELAY)
   }
 
   async storeAsset(file: File) {
@@ -263,13 +303,25 @@ export class ServerSource implements DocSource {
     return blob
   }
 
+  /** Resolves once the server has every local edit (or after a few seconds offline). */
+  async flushed() {
+    const deadline = Date.now() + CLOSE_TIMEOUT
+    while (
+      this.provider.hasUnsyncedChanges &&
+      this.provider.isAuthenticated &&
+      Date.now() < deadline
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+  }
+
   async close() {
-    clearTimeout(this.timer)
-    clearInterval(this.pullTimer)
-    window.removeEventListener('focus', this.onFocus)
-    window.removeEventListener('online', this.onFocus)
     window.removeEventListener('beforeunload', this.onBeforeUnload)
-    if (this.dirty) await this.sync().catch(() => {})
-    this.closed = true
+    window.removeEventListener('offline', this.onOffline)
+    window.removeEventListener('online', this.onOnline)
+    await this.flushed()
+    this.provider.destroy()
+    this.socket.destroy()
+    await this.cache?.destroy()
   }
 }

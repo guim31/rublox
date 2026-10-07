@@ -92,6 +92,17 @@ export const accounts = {
     revoked: 'Device signed out.',
     unknownDevice: 'Unknown device',
     browserOn: '{{browser}} on {{os}}',
+    data: 'My data',
+    dataHint: 'Download everything Rublox keeps about you, or delete your account.',
+    export: 'Download my data',
+    exported: 'Your data is downloaded.',
+    deleteAccount: 'Delete my account',
+    deleteTitle: 'Delete your account?',
+    deleteText:
+      'Your account, all your projects, their versions and their files will be erased for good. Spaces where you are on your own go with it. Type your password to confirm.',
+    deleteConfirm: 'Delete for good',
+    deleted: 'Your account is deleted. See you, maybe!',
+    dataManaged: 'The manager of your space can download your data or delete your account.',
   },
   avatars: {
     none: 'None',
@@ -150,6 +161,7 @@ export const accounts = {
     addAccountHint:
       'No e-mail needed: you choose the username and the password, and can change it.',
     accountCreated: '{{name}}’s account is ready: username “{{username}}”.',
+    exportAccount: 'Download their data',
     resetPassword: 'Change the password',
     resetTitle: 'New password for {{name}}',
     resetDone: 'Password changed. {{name}} will have to sign in again.',
@@ -304,7 +316,7 @@ export const accounts = {
   sync: {
     saved: 'Saved',
     saving: 'Saving…',
-    offline: 'Offline, waiting',
+    offline: 'Offline',
     readOnly: 'Read-only',
     savedHint: 'Your project is saved on the server.',
     offlineHint: 'No connection to the server: your changes will leave as soon as it is back.',
@@ -338,6 +350,8 @@ export const accounts = {
     missing_asset: 'A file of the project is missing on the server: upload it again.',
     publish_forbidden: 'Your space does not allow publishing yet: ask your manager.',
     in_trash: 'This project is in the trash: restore it first.',
+    wrong_password: 'That is not the right password.',
+    last_admin: 'There must be at least one administrator.',
     unknown: 'Something went wrong. Try again.',
   },
 }

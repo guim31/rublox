@@ -12,6 +12,7 @@ import { BadgeWatcher } from '../learn/badges.tsx'
 import { ChallengePanel } from '../learn/challenge-panel.tsx'
 import { TourRunner } from '../learn/tour.tsx'
 import { TutorialRunner } from '../learn/tutorial-runner.tsx'
+import { ApiError } from '../lib/api.ts'
 import { errorMessage } from '../lib/errors.ts'
 import { usePrefs } from '../lib/prefs.ts'
 import { useMe } from '../lib/session.ts'
@@ -35,7 +36,7 @@ export function EditorPage(props: Props) {
   const { t } = useTranslation()
   const me = useMe()
   const kind = me.isPending ? null : me.data?.user ? 'server' : 'guest'
-  const [session, setSession] = useState<ProjectSession | null | 'missing'>(null)
+  const [session, setSession] = useState<ProjectSession | null | 'missing' | 'offline'>(null)
 
   useEffect(() => {
     if (!kind) return
@@ -51,7 +52,10 @@ export function EditorPage(props: Props) {
         opened = result
         setSession(result ?? 'missing')
       },
-      () => !cancelled && setSession('missing'),
+      // Not cached in this browser and no server to ask: say so, rather than "missing".
+      (error) =>
+        !cancelled &&
+        setSession(error instanceof ApiError && error.status === 0 ? 'offline' : 'missing'),
     )
     return () => {
       cancelled = true
@@ -60,13 +64,17 @@ export function EditorPage(props: Props) {
     }
   }, [props.projectId, kind])
 
-  if (session === 'missing') {
+  if (session === 'missing' || session === 'offline') {
     return (
       <main className="grid h-full place-items-center p-6 text-center">
         <div className="flex flex-col items-center gap-3">
           <Mascot size={110} />
           <h1 className="text-ui-xl font-strong">
-            {kind === 'server' ? t('sync.loadError') : t('editor.loadError')}
+            {session === 'offline'
+              ? t('errors.network')
+              : kind === 'server'
+                ? t('sync.loadError')
+                : t('editor.loadError')}
           </h1>
           <Link to="/">
             <Button variant="primary">{t('editor.loadErrorAction')}</Button>

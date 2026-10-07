@@ -1,52 +1,44 @@
 import { createProject } from '@rublox/catalog'
-import { addComponent, projectToYDoc, setMeta, yDocToProject } from '@rublox/schema'
+import { addComponent, type ProjectDoc, projectToYDoc, setMeta } from '@rublox/schema'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { WebSocket } from 'ws'
 import * as Y from 'yjs'
-import { projects, projectVersions } from '../src/db/schema.ts'
+import { projectDocs, projects, projectVersions } from '../src/db/schema.ts'
 import { purgeTrash, SNAPSHOT_INTERVAL_MS } from '../src/routes/projects.ts'
-import { ADMIN, type Client, createTestServer, json, type TestServer } from './server.ts'
+import {
+  ADMIN,
+  type Client,
+  createTestServer,
+  json,
+  type Tab,
+  type TestServer,
+  until,
+} from './server.ts'
 
 let server: TestServer
 let owner: Client
 let projectId: string
 
 const b64 = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64')
-const bytes = (text: string) => new Uint8Array(Buffer.from(text, 'base64'))
 
-/** An editor tab: a local Y.Doc kept in sync with the server, as the studio does. */
-class Tab {
-  ydoc = new Y.Doc()
-  private serverVector: Uint8Array = new Uint8Array([0])
+const storedJson = async (id: string) => {
+  await server.services.collab.flush()
+  const [row] = await server.services.db
+    .select({ json: projectDocs.json })
+    .from(projectDocs)
+    .where(eq(projectDocs.projectId, id))
+  return row?.json as ProjectDoc | undefined
+}
 
-  constructor(
-    private readonly client: Client,
-    private readonly id: string,
-  ) {}
-
-  async open() {
-    const res = await this.client.request('GET', `/api/projects/${this.id}`)
-    const body = await json<{ state: string }>(res)
-    Y.applyUpdate(this.ydoc, bytes(body.state), 'server')
-    this.serverVector = Y.encodeStateVector(this.ydoc)
-    return this
-  }
-
-  async sync() {
-    const update = Y.encodeStateAsUpdate(this.ydoc, this.serverVector)
-    const res = await this.client.request('POST', `/api/projects/${this.id}/sync`, {
-      update: b64(update),
-      stateVector: b64(Y.encodeStateVector(this.ydoc)),
-    })
-    if (res.status !== 200) return res.status
-    Y.applyUpdate(this.ydoc, bytes((await json<{ update: string }>(res)).update), 'server')
-    this.serverVector = Y.encodeStateVector(this.ydoc)
-    return 200
-  }
-
-  get doc() {
-    return yDocToProject(this.ydoc)
-  }
+async function createUser(username: string) {
+  const res = await owner.request('POST', '/api/admin/users', {
+    username,
+    displayName: username,
+    password: `${username}-password`,
+  })
+  expect(res.status).toBe(201)
+  return server.signIn(username, `${username}-password`, '203.0.113.9')
 }
 
 beforeAll(async () => {
@@ -60,83 +52,155 @@ beforeAll(async () => {
 })
 afterAll(() => server.close())
 
-describe('Yjs sync over HTTP', () => {
+describe('documents on /ws/collab', () => {
   it('gives the project its server id', async () => {
-    const tab = await new Tab(owner, projectId).open()
+    const tab = await server.tab(owner, projectId)
+    expect(tab.refused).toBeNull()
+    expect(tab.readOnly).toBe(false)
     expect(tab.doc.meta.id).toBe(projectId)
+    tab.close()
   })
 
-  it('merges the edits of two tabs', async () => {
-    const a = await new Tab(owner, projectId).open()
-    const b = await new Tab(owner, projectId).open()
+  it('merges the edits of two tabs live', async () => {
+    const a = await server.tab(owner, projectId)
+    const b = await server.tab(owner, projectId)
     const screen = a.doc.screenOrder[0] ?? ''
     const root = a.doc.screens[screen]?.rootId ?? ''
     addComponent(a.ydoc, screen, { type: 'Button', name: 'Bouton1', props: {} }, root)
     addComponent(b.ydoc, screen, { type: 'Text', name: 'Texte1', props: {} }, root)
-    expect(await a.sync()).toBe(200)
-    expect(await b.sync()).toBe(200)
-    expect(await a.sync()).toBe(200)
     const names = (tab: Tab) =>
       Object.values(tab.doc.screens[screen]?.components ?? {})
         .map((c) => c.name)
         .sort()
+    await until(() => names(a).length === 3 && names(b).length === 3, 'both edits')
     expect(names(a)).toEqual(['Accueil', 'Bouton1', 'Texte1'])
     expect(names(b)).toEqual(names(a))
+    a.close()
+    b.close()
+    const stored = await storedJson(projectId)
+    expect(Object.keys(stored?.screens[screen]?.components ?? {})).toHaveLength(3)
   })
 
   it('updates the dashboard name and thumbnail', async () => {
-    const tab = await new Tab(owner, projectId).open()
+    const tab = await server.tab(owner, projectId)
     setMeta(tab.ydoc, { name: 'Renamed in the editor' })
-    await tab.sync()
+    await tab.saved()
+    await server.services.collab.flush()
     const list = await json<{ projects: { id: string; name: string; preview: unknown }[] }>(
       await owner.request('GET', '/api/projects'),
     )
     const summary = list.projects.find((p) => p.id === projectId)
     expect(summary?.name).toBe('Renamed in the editor')
     expect(summary?.preview).toMatchObject({ locale: 'fr' })
+    tab.close()
   })
 
-  it('refuses an update that breaks the project format', async () => {
-    const tab = await new Tab(owner, projectId).open()
+  it('never stores an update that breaks the project format', async () => {
+    const tab = await server.tab(owner, projectId)
     tab.ydoc.getMap('settings').set('orientation', 42)
-    expect(await tab.sync()).toBe(400)
-    const fresh = await new Tab(owner, projectId).open()
-    expect(fresh.doc.settings.orientation).toBe('portrait')
+    await tab.saved()
+    expect((await storedJson(projectId))?.settings.orientation).toBe('portrait')
+    tab.ydoc.getMap('settings').set('orientation', 'portrait')
+    await tab.saved()
+    tab.close()
+  })
+
+  it('gives viewers a read-only connection: their edits never reach the server', async () => {
+    const viewer = await createUser('viewer')
+    await owner.request('PUT', `/api/projects/${projectId}/members`, {
+      username: 'viewer',
+      role: 'viewer',
+    })
+    const tab = await server.tab(viewer, projectId)
+    expect(tab.readOnly).toBe(true)
+    setMeta(tab.ydoc, { name: 'Changed by a viewer' })
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    expect((await storedJson(projectId))?.meta.name).not.toBe('Changed by a viewer')
+    tab.close()
+  })
+
+  it('refuses a project the account cannot see, and a missing session, without any 401', async () => {
+    const stranger = await createUser('stranger')
+    const hidden = await server.tab(stranger, projectId)
+    expect(hidden.refused).toBe('not-found')
+    expect(hidden.ydoc.share.size).toBe(0)
+    hidden.close()
+    const anonymous = await server.tab(server.client(), projectId)
+    expect(anonymous.refused).toBe('signed-out')
+    anonymous.close()
+  })
+
+  it('refuses the upgrade from another origin, and on the apps origin', async () => {
+    const { port } = await server.listen()
+    const status = (headers: Record<string, string>) =>
+      new Promise<number>((resolve) => {
+        const socket = new WebSocket(`ws://127.0.0.1:${port}/ws/collab`, { headers })
+        socket.on('unexpected-response', (_request, response) => resolve(response.statusCode ?? 0))
+        socket.on('open', () => {
+          socket.close()
+          resolve(101)
+        })
+        socket.on('error', () => resolve(-1))
+      })
+    expect(await status({ host: 'studio.example.com', origin: 'http://evil.example.com' })).toBe(
+      403,
+    )
+    expect(await status({ host: 'apps.example.com', origin: 'http://studio.example.com' })).toBe(
+      404,
+    )
+    expect(await status({ host: 'studio.example.com', origin: 'http://studio.example.com' })).toBe(
+      101,
+    )
+  })
+
+  it('lets the dashboard rename an open project: the tab receives it', async () => {
+    const tab = await server.tab(owner, projectId)
+    expect(
+      (await owner.request('PATCH', `/api/projects/${projectId}`, { name: 'From the dashboard' }))
+        .status,
+    ).toBe(200)
+    await until(() => tab.doc.meta.name === 'From the dashboard', 'the rename')
+    tab.close()
   })
 })
 
 describe('versions', () => {
   it('takes an automatic snapshot at most every 10 minutes of activity', async () => {
-    const versions = async () =>
-      (
+    const versions = async () => {
+      await server.services.collab.flush()
+      return (
         await server.services.db
           .select()
           .from(projectVersions)
           .where(eq(projectVersions.projectId, projectId))
       ).length
+    }
+    const tab = await server.tab(owner, projectId)
+    setMeta(tab.ydoc, { description: 'zero' })
+    await tab.saved()
     const before = await versions()
-    const tab = await new Tab(owner, projectId).open()
     setMeta(tab.ydoc, { description: 'one' })
-    await tab.sync()
+    await tab.saved()
     expect(await versions()).toBe(before)
     await server.services.db
       .update(projectVersions)
       .set({ createdAt: new Date(Date.now() - SNAPSHOT_INTERVAL_MS - 1000) })
       .where(eq(projectVersions.projectId, projectId))
     setMeta(tab.ydoc, { description: 'two' })
-    await tab.sync()
+    await tab.saved()
     expect(await versions()).toBe(before + 1)
+    tab.close()
   })
 
   it('restores a named version without destroying the current state', async () => {
-    const tab = await new Tab(owner, projectId).open()
+    const tab = await server.tab(owner, projectId)
     setMeta(tab.ydoc, { name: 'Version A' })
-    await tab.sync()
+    await tab.saved()
     expect(
       (await owner.request('POST', `/api/projects/${projectId}/versions`, { name: 'A' })).status,
     ).toBe(201)
     setMeta(tab.ydoc, { name: 'Version B' })
-    await tab.sync()
+    await tab.saved()
 
     const { versions } = await json<{ versions: { id: string; name: string | null }[] }>(
       await owner.request('GET', `/api/projects/${projectId}/versions`),
@@ -149,13 +213,15 @@ describe('versions', () => {
         .status,
     ).toBe(200)
     // The open tab receives the restored state as an ordinary edit.
-    await tab.sync()
-    expect(tab.doc.meta.name).toBe('Version A')
+    await until(() => tab.doc.meta.name === 'Version A', 'the restored state')
     expect(tab.doc.meta.id).toBe(projectId)
-    const after = await json<{ versions: unknown[] }>(
+    const after = await json<{ versions: { name: string | null }[] }>(
       await owner.request('GET', `/api/projects/${projectId}/versions`),
     )
     expect(after.versions.length).toBe(count + 1)
+    // The state before restoring was kept.
+    expect((await storedJson(projectId))?.meta.name).toBe('Version A')
+    tab.close()
   })
 })
 

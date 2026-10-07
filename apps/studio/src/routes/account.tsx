@@ -1,21 +1,23 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, Navigate } from '@tanstack/react-router'
+import { createFileRoute, Navigate, useNavigate } from '@tanstack/react-router'
 import type { TFunction } from 'i18next'
-import { Fingerprint, KeyRound, LogOut, MonitorSmartphone, Trash2 } from 'lucide-react'
+import { Download, Fingerprint, KeyRound, LogOut, MonitorSmartphone, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Page } from '../components/app-header.tsx'
 import { AvatarPicker } from '../components/avatar.tsx'
 import { Button, IconButton } from '../components/ui/button.tsx'
+import { Dialog } from '../components/ui/dialog.tsx'
 import { Badge, describedBy, Field, Section } from '../components/ui/field.tsx'
 import { Input } from '../components/ui/input.tsx'
 import { Segmented } from '../components/ui/segmented.tsx'
 import { api, call, type Profile } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
+import { downloadJson } from '../lib/download.ts'
 import { errorMessage } from '../lib/errors.ts'
 import { usePrefs } from '../lib/prefs.ts'
-import { ME_KEY, useMe } from '../lib/session.ts'
+import { forgetAccount, ME_KEY, useMe } from '../lib/session.ts'
 import { relativeTime } from '../lib/time.ts'
 
 export const Route = createFileRoute('/account')({ component: Account })
@@ -35,6 +37,7 @@ function Account() {
         <PasswordSection managed={user.managedBySpaceId !== null} />
         <PasskeysSection />
         <SessionsSection />
+        <DataSection user={user} />
       </div>
     </Page>
   )
@@ -408,6 +411,93 @@ function SessionsSection() {
           )
         })}
       </ul>
+    </Section>
+  )
+}
+
+/** RGPD (SPEC § 4.7): download everything, delete the account (member accounts: their manager). */
+function DataSection({ user }: { user: Profile }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const [deleting, setDeleting] = useState(false)
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const managed = user.managedBySpaceId !== null
+
+  const download = async () => {
+    try {
+      // The export is typed loosely: its full type is too deep for the checker.
+      const data: unknown = await call(api.me.export.$get() as unknown as Promise<Response>)
+      downloadJson(data, `rublox-${user.username}.json`)
+      toast.success(t('account.exported'))
+    } catch (caught) {
+      toast.error(errorMessage(t, caught))
+    }
+  }
+
+  const remove = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError('')
+    try {
+      await call(api.me.$delete({ json: { password } }))
+      await forgetAccount()
+      toast.success(t('account.deleted'))
+      void navigate({ to: '/' })
+    } catch (caught) {
+      setError(errorMessage(t, caught))
+    }
+  }
+
+  return (
+    <Section title={t('account.data')} description={t('account.dataHint')}>
+      <div className="flex flex-wrap gap-2">
+        <Button icon={<Download size={16} />} onClick={download}>
+          {t('account.export')}
+        </Button>
+        {managed ? null : (
+          <Button
+            variant="danger"
+            icon={<Trash2 size={16} />}
+            onClick={() => {
+              setPassword('')
+              setError('')
+              setDeleting(true)
+            }}
+          >
+            {t('account.deleteAccount')}
+          </Button>
+        )}
+      </div>
+      {managed ? <p className="mt-3 text-ui-sm text-muted">{t('account.dataManaged')}</p> : null}
+      <Dialog
+        open={deleting}
+        onOpenChange={setDeleting}
+        title={t('account.deleteTitle')}
+        description={t('account.deleteText')}
+      >
+        <form onSubmit={remove} className="flex flex-col gap-4">
+          <Field id="delete-password" label={t('account.currentPassword')}>
+            <Input
+              id="delete-password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </Field>
+          {error ? (
+            <p role="alert" className="text-ui-sm text-danger">
+              {error}
+            </p>
+          ) : null}
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setDeleting(false)}>{t('common.cancel')}</Button>
+            <Button type="submit" variant="danger" disabled={!password}>
+              {t('account.deleteConfirm')}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
     </Section>
   )
 }

@@ -97,6 +97,8 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   d'interface que la bulle doit montrer porte `data-tour="…"` (`apps/studio/src/learn/targets.ts`).
 - Les chaînes du J3 (apprentissage, accueil, aide, ralenti) sont dans `learn.ts`, les fiches des
   blocs et le glossaire dans `help.ts` (tout nouveau bloc général demande sa fiche).
+- Une écriture du serveur dans un projet : `services.collab.edit(id, userId, fn)` (jamais
+  directement dans `project_docs`, que Hocuspocus réécrirait).
 - Un composant de jeu : comme ci-dessus, avec `parents: ['GameScene']` (et l'ajouter aux
   `accepts` de la scène) ; son dessin à l'exécution va dans `World` (`runtime/src/game/`), pas
   dans React. Une démo : `packages/catalog/src/demos/` (blocs écrits en JSON avec
@@ -200,6 +202,20 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   (`.rx-rich h1`, `ul`…), sinon le canevas diffère de l'aperçu.
 - **Composants invisibles** : ils vont dans `screen.nonVisual`, jamais dans l'arbre ; le canevas
   les montre sous le téléphone (`non-visual-tray`).
+- **Hocuspocus 4** : `Hocuspocus` (sans son `Server`) se branche sur le serveur HTTP de
+  `@hono/node-server` par `ws` en `noServer`, comme route du routeur des WebSockets (`Collab.route()` dans
+  `upgrades.ts`, à côté du test sur téléphone) ; `handleConnection(ws, Request)`
+  puis `handleMessage` / `handleClose` à la main. `onAuthenticate` est appelé par document ;
+  `connectionConfig.readOnly` donne une connexion en lecture seule. Le provider prend un
+  `HocuspocusProviderWebsocket` (avec `WebSocketPolyfill` en Node pour poser les cookies, voir
+  `test/server.ts`) et `provider.attach()`. Une socket ouverte ne voit une coupure qu'au bout de
+  30 s : suivre `online` / `offline`. `flushPendingStores` ne rend pas de promesse :
+  `Collab.flush()` attend les écritures (tests, arrêt).
+- **TanStack Query** écoute `visibilitychange` sur `window`, pas sur `document` (à simuler ainsi
+  dans Playwright).
+- **Aucun 401** : une route protégée répond `fail(403, 'signed_out')` (`requireUser`) ; le studio
+  réagit au code `signed_out`, pas au statut. `markSignedOut` retire les requêtes au lieu de les
+  invalider (sinon elles redemandent des routes protégées).
 - **Mesurer le jeu** : le Chromium du conteneur n'a pas de GPU ; dès qu'un seul pixel bouge,
   l'aperçu plafonne vers 45 à 50 images par seconde, jeu ou pas (même un `<canvas>`). Comparer au
   plafond mesuré à côté, et juger le jeu sur son temps JavaScript par image (profileur CDP sur

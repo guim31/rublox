@@ -34,6 +34,7 @@
   --c-mint-soft: #d9f6ee;
   --c-mint-text: #0a6b52;
   --c-danger: #c8321f;
+  --c-on-danger: #ffffff;
   --c-overlay: rgb(20 16 48 / 0.45);
   --c-canvas: #e9e7f3;
   --shadow-1: 0 1px 2px rgb(24 20 60 / 0.06), 0 1px 3px rgb(24 20 60 / 0.08);
@@ -64,6 +65,8 @@
   --c-mint-soft: #13332b;
   --c-mint-text: #6ee3c3;
   --c-danger: #ff7a68;
+  /* White on this coral is 2.5:1: dark text instead (7:1). */
+  --c-on-danger: #2b0a05;
   --c-overlay: rgb(4 3 12 / 0.6);
   --c-canvas: #0b0a12;
   --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
@@ -121,6 +124,7 @@
   --color-mint-soft: var(--c-mint-soft);
   --color-mint-text: var(--c-mint-text);
   --color-danger: var(--c-danger);
+  --color-on-danger: var(--c-on-danger);
   --color-overlay: var(--c-overlay);
   --color-canvas: var(--c-canvas);
   --font-ui: var(--font-ui);

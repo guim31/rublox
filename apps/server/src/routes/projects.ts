@@ -3,7 +3,7 @@ import { and, desc, eq, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-
 import { alias } from 'drizzle-orm/pg-core'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
-import * as Y from 'yjs'
+import type * as Y from 'yjs'
 import { z } from 'zod'
 import { MANAGER_ROLES, type ProjectAccess, requireProject } from '../access.ts'
 import type { Database } from '../db/index.ts'
@@ -26,9 +26,9 @@ import {
   jsonBody,
   requireUser,
   type SessionUser,
-  toBase64,
 } from '../http.ts'
 import { uuidv7 } from '../ids.ts'
+import { snapshot } from '../projects/store.ts'
 import {
   copyDoc,
   encodeState,
@@ -45,8 +45,8 @@ import { sniff } from '../sniff.ts'
 import { publishedIconFiles } from './publish.ts'
 
 export const TRASH_DAYS = 30
-/** An automatic snapshot at most every 10 minutes of activity (SPEC § 4.8). */
-export const SNAPSHOT_INTERVAL_MS = 10 * 60 * 1000
+export { SNAPSHOT_INTERVAL_MS } from '../projects/store.ts'
+
 /** Largest document accepted (base64 of the Yjs state). */
 const MAX_STATE_CHARS = 30 * MB
 
@@ -57,76 +57,6 @@ const base64 = z
 const nameSchema = z.string().trim().min(1).max(80)
 
 type ProjectRow = typeof projects.$inferSelect
-
-/** One write at a time per project: syncs are read-modify-write of the Yjs state. */
-const queues = new Map<string, Promise<unknown>>()
-function serialize<T>(projectId: string, run: () => Promise<T>): Promise<T> {
-  const previous = queues.get(projectId) ?? Promise.resolve()
-  const next = previous.catch(() => {}).then(run)
-  queues.set(projectId, next)
-  next
-    .finally(() => {
-      if (queues.get(projectId) === next) queues.delete(projectId)
-    })
-    .catch(() => {})
-  return next
-}
-
-async function loadState(db: Database, projectId: string): Promise<Y.Doc> {
-  const [row] = await db
-    .select({ state: projectDocs.state })
-    .from(projectDocs)
-    .where(eq(projectDocs.projectId, projectId))
-  if (!row) fail(404, 'not_found')
-  return loadYDoc(row.state)
-}
-
-/** Stores the document and refreshes the dashboard fields of the project. */
-async function saveState(db: Database, projectId: string, ydoc: Y.Doc) {
-  const doc = readProject(ydoc)
-  if (!doc) fail(400, 'invalid_project')
-  const now = new Date()
-  await db
-    .insert(projectDocs)
-    .values({ projectId, state: encodeState(ydoc), json: doc, updatedAt: now })
-    .onConflictDoUpdate({
-      target: projectDocs.projectId,
-      set: { state: encodeState(ydoc), json: doc, updatedAt: now },
-    })
-  await db
-    .update(projects)
-    .set({
-      name: doc.meta.name.slice(0, 80) || '…',
-      description: doc.meta.description ?? null,
-      preview: previewOf(doc),
-      updatedAt: now,
-    })
-    .where(eq(projects.id, projectId))
-  return doc
-}
-
-async function snapshot(
-  db: Database,
-  projectId: string,
-  json: unknown,
-  createdById: string,
-  name: string | null,
-) {
-  await db.insert(projectVersions).values({ id: uuidv7(), projectId, name, json, createdById })
-}
-
-/** Takes an automatic snapshot unless one is less than 10 minutes old. */
-async function autoSnapshot(db: Database, projectId: string, json: unknown, userId: string) {
-  const [last] = await db
-    .select({ createdAt: projectVersions.createdAt })
-    .from(projectVersions)
-    .where(eq(projectVersions.projectId, projectId))
-    .orderBy(desc(projectVersions.createdAt))
-    .limit(1)
-  if (!last || Date.now() - last.createdAt.getTime() >= SNAPSHOT_INTERVAL_MS) {
-    await snapshot(db, projectId, json, userId, null)
-  }
-}
 
 /** Creates a project from a document state (new project, import, duplicate). */
 async function insertProject(
@@ -164,7 +94,15 @@ async function insertProject(
 }
 
 export function projectsRoutes(services: Services) {
-  const { db } = services
+  const { db, collab } = services
+
+  /** The validated current document of a project (the live one when it is open). */
+  const currentDoc = async (projectId: string) => {
+    const ydoc = await collab.read(projectId)
+    const doc = ydoc && readProject(ydoc)
+    if (!doc) fail(400, 'invalid_project')
+    return doc
+  }
 
   const summaries = async (me: SessionUser) => {
     const owner = alias(user, 'owner')
@@ -264,6 +202,7 @@ export function projectsRoutes(services: Services) {
           return c.json({ id }, 201)
         },
       )
+      // What the editor needs before opening the document on `/ws/collab`.
       .get('/:projectId', async (c) => {
         const me = requireUser(c)
         const { project, access } = await requireProject(
@@ -272,7 +211,6 @@ export function projectsRoutes(services: Services) {
           c.req.param('projectId'),
           'read',
         )
-        const ydoc = await loadState(db, project.id)
         const [owner] = await db
           .select({
             id: user.id,
@@ -284,50 +222,12 @@ export function projectsRoutes(services: Services) {
           .where(eq(user.id, project.ownerId))
         return c.json({
           id: project.id,
+          name: project.name,
           access,
           deletedAt: iso(project.deletedAt),
           owner: owner ?? null,
-          state: toBase64(encodeState(ydoc)),
         })
       })
-      // Two-way Yjs sync over HTTP: the studio sends what the server may lack (relative to the
-      // last state vector it got) and its own state vector; the server merges, stores, and
-      // answers with what the studio lacks. Yjs updates are idempotent, so a retry is harmless.
-      .post(
-        '/:projectId/sync',
-        jsonBody(z.object({ update: base64, stateVector: base64 })),
-        async (c) => {
-          const me = requireUser(c)
-          const projectId = c.req.param('projectId')
-          const { update, stateVector } = c.req.valid('json')
-          const found = await requireProject(db, me.id, projectId, 'read')
-          const answer = await serialize(projectId, async () => {
-            const ydoc = await loadState(db, projectId)
-            const before = Y.encodeStateVector(ydoc)
-            const bytes = fromBase64(update)
-            if (bytes.length > 2) {
-              if (found.access !== 'owner' && found.access !== 'editor') fail(403, 'forbidden')
-              try {
-                Y.applyUpdate(ydoc, bytes)
-              } catch {
-                fail(400, 'invalid_project')
-              }
-            }
-            if (!sameBytes(before, Y.encodeStateVector(ydoc))) {
-              // The id belongs to the server, whatever the client wrote.
-              if (ydoc.getMap('meta').get('id') !== projectId) writeMeta(ydoc, { id: projectId })
-              const doc = await saveState(db, projectId, ydoc)
-              await autoSnapshot(db, projectId, doc, me.id)
-            }
-            try {
-              return Y.encodeStateAsUpdate(ydoc, fromBase64(stateVector))
-            } catch {
-              return Y.encodeStateAsUpdate(ydoc)
-            }
-          })
-          return c.json({ update: toBase64(answer) })
-        },
-      )
       .patch(
         '/:projectId',
         jsonBody(
@@ -360,15 +260,13 @@ export function projectsRoutes(services: Services) {
               )
           }
           if (patch.name !== undefined || patch.description !== undefined) {
-            await serialize(found.project.id, async () => {
-              const ydoc = await loadState(db, projectId)
+            await collab.edit(found.project.id, me.id, (ydoc) =>
               writeMeta(ydoc, {
                 name: patch.name,
                 description: patch.description,
                 updatedAt: new Date().toISOString(),
-              })
-              await saveState(db, projectId, ydoc)
-            })
+              }),
+            )
           }
           return c.json({ ok: true })
         },
@@ -376,8 +274,7 @@ export function projectsRoutes(services: Services) {
       .post('/:projectId/duplicate', jsonBody(z.object({ name: nameSchema })), async (c) => {
         const me = requireUser(c)
         const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'read')
-        const source = readProject(await loadState(db, project.id))
-        if (!source) fail(400, 'invalid_project')
+        const source = await currentDoc(project.id)
         const now = new Date().toISOString()
         const ydoc = copyDoc(source, { id: 'pending', name: c.req.valid('json').name, now })
         const id = await insertProject(db, me, ydoc, { keepDates: true })
@@ -388,18 +285,21 @@ export function projectsRoutes(services: Services) {
         const me = requireUser(c)
         const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'owner')
         await db.update(projects).set({ deletedAt: new Date() }).where(eq(projects.id, project.id))
+        collab.reconnect(project.id)
         return c.json({ ok: true })
       })
       .post('/:projectId/restore', async (c) => {
         const me = requireUser(c)
         const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'owner')
         await db.update(projects).set({ deletedAt: null }).where(eq(projects.id, project.id))
+        collab.reconnect(project.id)
         return c.json({ ok: true })
       })
       .delete('/:projectId', async (c) => {
         const me = requireUser(c)
         const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'owner')
         await db.delete(projects).where(eq(projects.id, project.id))
+        collab.reconnect(project.id)
         return c.json({ ok: true })
       })
       // ---- Sharing (SPEC § 4.8) --------------------------------------------------------------
@@ -451,6 +351,7 @@ export function projectsRoutes(services: Services) {
               target: [projectMembers.projectId, projectMembers.userId],
               set: { role: input.role },
             })
+          collab.reconnect(project.id)
           return c.json({ ok: true })
         },
       )
@@ -472,6 +373,7 @@ export function projectsRoutes(services: Services) {
               eq(projectMembers.userId, targetId),
             ),
           )
+        collab.reconnect(c.req.param('projectId'))
         return c.json({ ok: true })
       })
       // Gives the project to one of its members; the former owner becomes an editor.
@@ -499,6 +401,7 @@ export function projectsRoutes(services: Services) {
             .where(eq(projects.id, project.id))
           await tx.update(assets).set({ ownerId: userId }).where(eq(assets.projectId, project.id))
         })
+        collab.reconnect(project.id)
         return c.json({ ok: true })
       })
       // ---- Versions (SPEC § 4.8) -------------------------------------------------------------
@@ -532,8 +435,7 @@ export function projectsRoutes(services: Services) {
         async (c) => {
           const me = requireUser(c)
           const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'write')
-          const doc = readProject(await loadState(db, project.id))
-          if (!doc) fail(400, 'invalid_project')
+          const doc = await currentDoc(project.id)
           await snapshot(db, project.id, doc, me.id, c.req.valid('json').name)
           return c.json({ ok: true }, 201)
         },
@@ -572,16 +474,13 @@ export function projectsRoutes(services: Services) {
             ),
           )
         if (!row) fail(404, 'not_found')
-        await serialize(project.id, async () => {
-          const ydoc = await loadState(db, project.id)
-          const current = readProject(ydoc)
-          const parsed = projectDocSchema.safeParse(row.json)
-          const target = parsed.success ? parsed.data : null
-          if (!target) fail(400, 'invalid_project')
-          if (current) await snapshot(db, project.id, current, me.id, null)
-          replaceContent(ydoc, target, new Date().toISOString())
-          await saveState(db, project.id, ydoc)
-        })
+        const parsed = projectDocSchema.safeParse(row.json)
+        if (!parsed.success) fail(400, 'invalid_project')
+        const current = await currentDoc(project.id)
+        await snapshot(db, project.id, current, me.id, null)
+        await collab.edit(project.id, me.id, (ydoc) =>
+          replaceContent(ydoc, parsed.data, new Date().toISOString()),
+        )
         return c.json({ ok: true })
       })
       // ---- Assets (SPEC § 4.1, § 6.9) --------------------------------------------------------
@@ -649,10 +548,6 @@ export function projectsRoutes(services: Services) {
         })
       })
   )
-}
-
-function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
-  return a.length === b.length && a.every((byte, i) => byte === b[i])
 }
 
 /** Bytes an account uses: each distinct file counted once. */

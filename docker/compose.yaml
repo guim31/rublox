@@ -19,7 +19,8 @@ services:
       DATABASE_URL: postgres://rublox:rublox@postgres:5432/rublox
       STUDIO_URL: http://localhost:8080
       APPS_URL: http://127.0.0.1:8080
-      # Placeholder: replace with a random value of 32 bytes or more, e.g. `openssl rand -base64 48`.
+      # Placeholder, refused at start: replace it with a random value of 32 bytes or more,
+      # e.g. `openssl rand -base64 48`.
       RUBLOX_SECRET: change-me-to-a-long-random-secret-of-32-bytes-or-more
       # First start only: the administrator account, created when the database has no account.
       # Remove both lines once you have signed in (and changed the password).
