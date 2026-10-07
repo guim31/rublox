@@ -9,6 +9,10 @@ import {
   removeComponent,
   type ScreenId,
 } from '@rublox/schema'
+import { toast } from 'sonner'
+import { errorMessage } from '../lib/errors.ts'
+import { i18next } from '../lib/i18n.ts'
+import { loadAssetFile } from '../storage/assets.ts'
 import { defaultTarget } from './actions.ts'
 import type { ProjectSession } from './session.ts'
 import { useEditor } from './store.ts'
@@ -107,6 +111,9 @@ export function pastePayload(
   const doc = session.getDoc()
   const target = defaultTarget(doc, screenId, useEditor.getState().selected)
   if (!target) return []
+  const missing = Object.entries(payload.assets)
+    .filter(([id]) => !doc.assets[id])
+    .map(([, asset]) => asset)
   let pasted: ComponentId[] = []
   session.ydoc.transact(() => {
     for (const [id, asset] of Object.entries(payload.assets)) {
@@ -124,5 +131,33 @@ export function pastePayload(
   const editor = useEditor.getState()
   editor.select(pasted.at(-1) ?? null)
   if (pasted.length > 1) useEditor.setState({ selection: pasted })
+  if (missing.length && pasted.length) void copyAssetFiles(session, missing)
   return pasted
+}
+
+/**
+ * The files of pasted assets that the project did not have: copied into it (sent to the
+ * server for a server project, kept in this browser for a guest one), so that they belong to
+ * its owner, count in their quota, go with its export and publication, and outlive the
+ * project they come from. The file is read from this browser (a guest project) or the server.
+ */
+async function copyAssetFiles(session: ProjectSession, assets: Asset[]): Promise<void> {
+  for (const asset of assets) {
+    try {
+      const blob = (await loadAssetFile(asset.sha256)) ?? (await session.loadAssetBlob(asset))
+      if (!blob) {
+        toast.error(i18next.t('collab.paste.missing', { name: asset.name }))
+        continue
+      }
+      await session.storeAsset(
+        new File([blob], asset.name, { type: asset.mime || blob.type }),
+        asset.kind,
+      )
+    } catch (error) {
+      toast.error(i18next.t('collab.paste.failed', { name: asset.name }), {
+        description: errorMessage(i18next.t, error),
+      })
+    }
+  }
+  await session.reloadAssets()
 }

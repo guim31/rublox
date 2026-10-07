@@ -22,4 +22,8 @@ export const collab = {
     someone: 'quelqu’un',
     show: 'Montrer',
   },
+  paste: {
+    missing: 'Le fichier de « {{name}} » est introuvable : remets-le dans ce projet.',
+    failed: 'Le fichier de « {{name}} » n’a pas pu être copié dans ce projet.',
+  },
 }

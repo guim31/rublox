@@ -19,6 +19,9 @@ import {
 
 export type { SaveState } from './sources.ts'
 
+/** How many times a missing asset file is looked for again (1 s, 2 s… apart). */
+const ASSET_RETRIES = 5
+
 /** Transactions written by the Blockly ⇄ Yjs bridge (undoable, but not echoed back to Blockly). */
 export const BLOCKLY_ORIGIN = { name: 'blockly' }
 
@@ -79,7 +82,12 @@ export class ProjectSession {
   private onUpdate = (_update: Uint8Array, origin: unknown) => {
     this.doc = yDocToProject(this.ydoc)
     if (!this.source.isOwnOrigin(origin) && origin !== SUMMARY_ORIGIN) this.source.edited()
-    if (Object.keys(this.doc.assets).some((id) => !this.assetUrls.has(id))) void this.loadAssets()
+    const ids = Object.keys(this.doc.assets)
+    if (ids.some((id) => !this.assetUrls.has(id))) {
+      // A new asset: its file gets a fresh round of tries.
+      if (ids.some((id) => !this.seenAssets.has(id))) this.assetTries = 0
+      void this.loadAssets()
+    }
     this.emit()
   }
 
@@ -88,21 +96,44 @@ export class ProjectSession {
     return this.source.storeAsset(file, kind)
   }
 
+  /** The file of an asset, wherever this project keeps it. */
+  loadAssetBlob(asset: Asset): Promise<Blob | undefined> {
+    return this.source.loadAsset(asset.sha256)
+  }
+
+  /** Looks again for the files of assets that had none (copied in after a paste). */
+  reloadAssets(): Promise<void> {
+    return this.loadAssets()
+  }
+
   private async loadAssets(): Promise<void> {
     let changed = false
+    let missing = false
     for (const [id, asset] of Object.entries(this.doc.assets)) {
+      this.seenAssets.add(id)
       if (this.assetUrls.has(id)) continue
       const blob = await this.source.loadAsset(asset.sha256)
       if (blob && !this.disposed) {
         this.assetUrls.set(id, URL.createObjectURL(blob))
         changed = true
-      }
+      } else missing = true
     }
     if (changed) {
       this.assetsVersion += 1
       this.emit()
     }
+    // Someone else's new asset can reach the document before its file reaches the server
+    // (it is being sent): look again a few times.
+    clearTimeout(this.assetRetry)
+    if (missing && !this.disposed && this.assetTries < ASSET_RETRIES) {
+      this.assetTries += 1
+      this.assetRetry = setTimeout(() => void this.loadAssets(), 1000 * this.assetTries)
+    } else if (!missing) this.assetTries = 0
   }
+
+  private assetRetry?: ReturnType<typeof setTimeout>
+  private assetTries = 0
+  private readonly seenAssets = new Set<string>()
 
   /** URL of an image property: an asset of the project, or an https: address. */
   assetUrl = (value: string): string | undefined => {
@@ -140,6 +171,7 @@ export class ProjectSession {
   async dispose(): Promise<void> {
     if (this.disposed) return
     this.disposed = true
+    clearTimeout(this.assetRetry)
     this.ydoc.off('update', this.onUpdate)
     this.undo.destroy()
     this.presence?.dispose()

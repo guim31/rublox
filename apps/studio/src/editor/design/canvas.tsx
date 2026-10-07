@@ -12,7 +12,7 @@ import { cn } from '../../lib/cn.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { addComponentOfType, moveComponentTo } from '../actions.ts'
 import { ComponentIcon } from '../component-icon.tsx'
-import { useAssetsVersion, useDoc, useSession } from '../context.tsx'
+import { useAssetUrl, useDoc, useSession } from '../context.tsx'
 import { useCanvasTableRows } from '../data/rows.ts'
 import { PeerSelections } from '../presence-ui.tsx'
 import { DEVICES, type Device, useEditor } from '../store.ts'
@@ -42,7 +42,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
   const doc = useDoc()
   const session = useSession()
   const tableRows = useCanvasTableRows()
-  useAssetsVersion()
+  const assetUrl = useAssetUrl()
   const screen = doc.screens[screenId]
   const { device, landscape, zoom, appScheme, selected, hovered, set, select, hover } = useEditor()
   const { locale, mode } = usePrefs()
@@ -418,7 +418,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
                       screen={screen}
                       locale={doc.meta.locale}
                       mode="design"
-                      assetUrl={session.assetUrl}
+                      assetUrl={assetUrl}
                       tableRows={tableRows}
                       decorateChildren={(parentId, children) =>
                         children.length

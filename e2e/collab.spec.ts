@@ -33,6 +33,29 @@ async function person(
 }
 
 /** Alice's new project, shared with Bob (editor) and Cléo (viewer), open in the three browsers. */
+/** Creates a project from the dashboard and returns its id. */
+async function createProject(page: Page) {
+  await page.goto('/')
+  await page
+    .getByRole('button', { name: /Nouveau projet|C’est parti/ })
+    .first()
+    .click()
+  await page.getByRole('dialog').getByRole('textbox').fill(`Ensemble ${unique()}`)
+  await page.getByRole('dialog').getByRole('button', { name: 'Créer' }).click()
+  await page.waitForURL(/\/p\/[^/?]+/)
+  await expect(page.getByTestId('save-state')).toHaveAttribute('data-state', 'saved')
+  return new URL(page.url()).pathname.split('/')[2] ?? ''
+}
+
+/** Shares a project from its owner's browser. */
+async function share(owner: Page, projectId: string, username: string, role: string) {
+  const response = await owner.request.put(`/api/projects/${projectId}/members`, {
+    data: { username, role },
+    headers: { origin: new URL(owner.url()).origin },
+  })
+  expect(response.ok()).toBe(true)
+}
+
 async function team(browser: Browser, options: { cleo?: boolean } = {}) {
   const alice = await person(browser, 'Alice')
   const bob = await person(browser, 'Bob')
@@ -57,15 +80,7 @@ async function team(browser: Browser, options: { cleo?: boolean } = {}) {
   await admin.context().close()
 
   for (const p of people) await signIn(p.page, p.username, `${p.username}-password`)
-  await alice.page
-    .getByRole('button', { name: /Nouveau projet|C’est parti/ })
-    .first()
-    .click()
-  await alice.page.getByRole('dialog').getByRole('textbox').fill(`Ensemble ${unique()}`)
-  await alice.page.getByRole('dialog').getByRole('button', { name: 'Créer' }).click()
-  await alice.page.waitForURL(/\/p\/[^/?]+/)
-  const projectId = new URL(alice.page.url()).pathname.split('/')[2] ?? ''
-  await expect(alice.page.getByTestId('save-state')).toHaveAttribute('data-state', 'saved')
+  const projectId = await createProject(alice.page)
   await post(
     alice.page,
     `/api/projects/${projectId}/members`,
@@ -236,4 +251,50 @@ test('blocks follow stack by stack; the last save wins and says so', async ({ br
   await expect(fieldOf(alice.page)).toHaveText(/Coucou/)
   await expect(fieldOf(bob.page)).toHaveText(/Coucou/)
   expect(await view(alice.page)).toEqual(before)
+})
+
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGN4EWCPFTEMLQkAzCRdwQfp4yAAAAAASUVORK5CYII=',
+  'base64',
+)
+
+test('pasting into someone else’s project copies the files of its images', async ({ browser }) => {
+  const { alice, bob } = await team(browser, { cleo: false })
+  // Alice's project: an image with a file of hers.
+  await addComponent(alice.page, 'Image')
+  await alice.page
+    .locator('input[type=file][accept="image/*"]')
+    .first()
+    .setInputFiles({ name: 'pomme.png', mimeType: 'image/png', buffer: PNG })
+  const image = (page: Page) =>
+    page.getByTestId('canvas-screen').locator('[data-rx-type="Image"] img')
+  await expect(image(alice.page)).toBeVisible()
+  await alice.page.getByTestId('layer-Image1').click()
+  await alice.page.getByTestId('canvas-screen').focus()
+  await alice.page.keyboard.press('Control+c')
+
+  // Bob's own project, where Alice may write.
+  const theirs = await createProject(bob.page)
+  await share(bob.page, theirs, alice.username, 'editor')
+  const used = async () => {
+    const response = await bob.page.request.get(`/api/projects/${theirs}/storage`)
+    return ((await response.json()) as { usedBytes: number }).usedBytes
+  }
+  expect(await used()).toBe(0)
+
+  await alice.page.goto(`/p/${theirs}?tab=design`)
+  await expect(alice.page.getByTestId('canvas-screen')).toBeVisible()
+  await alice.page.keyboard.press('Control+k')
+  await alice.page.getByRole('option', { name: 'Coller' }).click()
+  await expect(alice.page.getByTestId('layer-Image1')).toBeVisible()
+  // The file now belongs to Bob's project: it counts in his storage, and he sees the image.
+  await expect.poll(used).toBe(PNG.length)
+  await expect(image(bob.page)).toBeVisible()
+  await expect(image(alice.page)).toBeVisible()
+  // A real picture, drawn: its file is there for both.
+  for (const page of [alice.page, bob.page]) {
+    await expect
+      .poll(() => image(page).evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBe(8)
+  }
 })

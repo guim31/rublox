@@ -51,7 +51,7 @@ import { Segmented } from '../../components/ui/segmented.tsx'
 import { Tooltip } from '../../components/ui/tooltip.tsx'
 import { api, call } from '../../lib/api.ts'
 import { errorMessage } from '../../lib/errors.ts'
-import { useDoc, useSession } from '../context.tsx'
+import { useAssetUrl, useDoc, useSession } from '../context.tsx'
 import { isServerProject, setSharedRows, useSharedRows } from './rows.ts'
 
 type Edits = {
@@ -638,6 +638,7 @@ function CellEditor({
   const [draft, setDraft] = useState(text)
   useEffect(() => setDraft(text), [text])
   const session = useSession()
+  const assetUrl = useAssetUrl()
 
   if (column.type === 'boolean') {
     return (
@@ -659,7 +660,7 @@ function CellEditor({
     if (next === undefined) setDraft(text)
     else onCommit(next)
   }
-  const preview = column.type === 'image' && text ? session.assetUrl(text) : undefined
+  const preview = column.type === 'image' && text ? assetUrl(text) : undefined
   return (
     <div className="flex items-center">
       {preview ? (

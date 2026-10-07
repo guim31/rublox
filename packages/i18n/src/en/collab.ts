@@ -22,4 +22,8 @@ export const collab = {
     someone: 'someone',
     show: 'Show',
   },
+  paste: {
+    missing: 'The file of “{{name}}” cannot be found: add it to this project again.',
+    failed: 'The file of “{{name}}” could not be copied into this project.',
+  },
 }
