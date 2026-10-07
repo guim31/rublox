@@ -86,6 +86,11 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - Modèles de projets : `cd packages/templates && npx vitest run` (chaque modèle construit en FR
   et EN, chargé dans Blockly, code généré). Captures : `e2e/screenshots-j6.spec.ts` →
   `docs/screenshots/j6/`.
+- Édition à plusieurs (J4b) : `cd apps/server && npx vitest run test/collab.test.ts` (présence,
+  droits, hors ligne, annulation, sur un vrai serveur), `cd packages/schema && npx vitest run
+  test/conflicts.test.ts` (conflits de piles), `npx playwright test --project=e2e
+  e2e/collab.spec.ts` (deux et trois navigateurs). Captures :
+  `npx playwright test --project=screenshots e2e/screenshots-j4b.spec.ts` → `docs/screenshots/j4b/`.
 - `pnpm --filter @rublox/server db:generate` : migration Drizzle après un changement de
   `apps/server/src/db/schema.ts`.
 - `docker build -f docker/Dockerfile .` et `docker compose -f docker/compose.yaml up`.
@@ -131,6 +136,10 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   nom) ; le constructeur met les identifiants.
 - Tout ce qui touche l'IA côté studio se montre seulement si `useFeatures().ai` (ou `aiAllowed()`
   hors React) ; un composant qui a besoin de l'IA va dans `AI_TYPES` (`lib/features.ts`).
+- Une information partagée avec les autres éditeurs (présence) : un champ de `PresenceState`
+  (`apps/studio/src/editor/presence.ts`), publié par `session.presence?.set({...})`, lu par
+  `usePeers()`. Jamais d'identité côté client : `user` est réécrit par le serveur
+  (`beforeHandleAwareness`, `collab.ts`).
 - Une route d'API : `apps/server/src/routes/<domaine>.ts`, corps validé par `jsonBody(zod)`,
   droits par `access.ts`, test sur PGlite avec `test/server.ts` (`createTestServer`, un `Client`
   par navigateur). Côté studio : `call(api.<route>.$get(…))`.
@@ -287,3 +296,24 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **hc et types profonds** : renvoyer un `ProjectDoc` entier d'une route fait TS2589 dans le
   studio ; le typer `Record<string, unknown>` côté serveur et le relire en `ProjectDoc`.
 - **Playwright** : un `<input type="search">` a le rôle `searchbox`, pas `textbox`.
+- **Hocuspocus, changement de droits** : `closeConnections` (dans `Collab.reconnect`) ferme le
+  document avec la raison « Reset Connection » mais garde la socket ; sans rien faire, le
+  provider reste non authentifié (« Hors ligne »). `ServerSource` le rouvre par
+  `socket.attach(provider)`. `socket.disconnect()` est asynchrone : dans un test, attendre
+  `socket.status === 'disconnected'` avant d'écrire « hors ligne », sinon `connect()` ne fait rien.
+- **Awareness et serveur** : `beforeHandleAwareness` reçoit les états décodés (`states`), qu'on
+  peut modifier ou retirer avant qu'ils soient appliqués ; c'est là que l'identité est imposée.
+- **Yjs, cartes** : `event.changes.added` ne concerne que les listes ; pour savoir qui a écrit
+  une clé d'une `Y.Map` et ce qu'elle a remplacé, il faut l'élément de la clé (`entryWriter`,
+  `conflicts.ts`) et son `origin` (pas `left`, que la résolution des conflits réécrit). Une
+  écriture concurrente l'emporte sur une suppression. Une `Y.Map` créée paresseusement par deux
+  clients en même temps en perd une (avec son contenu) : la créer à l'avance (`ensureBlockMaps`).
+- **React Compiler et `useMemo`** : le compilateur ne garde que les dépendances réellement lues
+  (`void version` ne compte pas) ; une valeur qui doit changer quand un fichier arrive doit
+  vraiment dépendre de la version (`useAssetUrl`). Lire les ressources par `useAssetUrl()`,
+  jamais `session.assetUrl` dans le rendu.
+- **Captures avec un badge** : le premier bloc d'évènement fait gagner un badge, dont le toast
+  couvre les autres ; le fermer avant la capture (`screenshots-j4b.spec.ts`).
+- **PNG d'exemple** : celui de `e2e/publish.spec.ts` est corrompu (bloc IDAT tronqué) ; pour
+  vérifier qu'une image s'affiche, prendre celui de `e2e/collab.spec.ts` et tester
+  `naturalWidth`.
