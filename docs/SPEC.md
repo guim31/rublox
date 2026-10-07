@@ -17,7 +17,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J6 | Galerie, remix, modèles, assistant IA | fait (PR #10), voir § 0.7 |
 | J7 | Mode jeu : scène, lutins, physique | fait (PR #5), voir § 0.6 |
 | J8 | Finitions : accessibilité, performances, sécurité, mise en production | fait (PR #12), voir § 0.10 ; version 1.0.0 |
-| J9 | Applis à décortiquer (demandé le 07/10/2026) | fait (PR #14), voir § 0.11 |
+| J9 | Applis à décortiquer (demandé le 07/10/2026) | fait (PR #14), voir § 0.11 ; version 1.1.0 |
 
 ### 0.1 Ce que le J0 a fixé (06/10/2026)
 

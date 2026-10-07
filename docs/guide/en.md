@@ -1,6 +1,6 @@
 # Rublox user guide
 
-*Version 1.0.0*
+*Version 1.1.0*
 
 Rublox lets you build real phone apps with blocks. You draw the screens, snap blocks together to
 tell the app what to do, and try it right away. This guide is for everyone: a parent, a teacher, a

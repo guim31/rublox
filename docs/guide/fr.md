@@ -1,6 +1,6 @@
 # Guide d’utilisation de Rublox
 
-*Version 1.0.0*
+*Version 1.1.0*
 
 Rublox sert à fabriquer de vraies applis pour téléphone avec des blocs. Tu dessines les écrans, tu
 assembles des blocs pour dire à l’appli quoi faire, et tu l’essaies tout de suite. Ce guide est pour
