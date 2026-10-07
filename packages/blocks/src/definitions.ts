@@ -4,12 +4,19 @@ import {
   type ComponentDef,
   componentStrings,
   type EventFilter,
+  getComponentDef,
   type PropKind,
 } from '@rublox/catalog'
 import { messages } from '@rublox/i18n'
 import * as Blockly from 'blockly/core'
 import { getBlocksLocale } from './context.ts'
-import { ANY, ComponentField, ComponentFilterField, PropertyField } from './fields.ts'
+import {
+  ANY,
+  ComponentField,
+  ComponentFilterField,
+  EventArgField,
+  PropertyField,
+} from './fields.ts'
 
 /**
  * Block types are saved in projects: never rename one. Component blocks are named
@@ -27,7 +34,7 @@ export const BLOCK_TYPES = {
   toast: 'rx_ui_toast',
   confirm: 'rx_ui_confirm',
   prompt: 'rx_ui_prompt',
-  eventArg: 'rx_event_arg',
+  eventValue: 'rx_event_value',
 } as const
 
 export const eventBlockType = (type: string, event: string) => `rx_${type}_on_${event}`
@@ -240,35 +247,33 @@ function defineComponentBlocks(def: ComponentDef): void {
   }
 }
 
-/** What an event argument block reads: `{ type: 'GameScene', event: 'frame', arg: 'dt' }`. */
-export type EventArgRef = { type: string; event: string; arg: string }
+const EVENT_BLOCK = /^rx_([A-Za-z0-9]+)_on_([A-Za-z0-9]+)$/
 
-type EventArgBlock = Blockly.Block & { argRef?: EventArgRef }
-
-export function eventArgLabel(ref: EventArgRef | undefined): string {
-  if (!ref) return t().game.eventArgEmpty
-  return componentStrings(ref.type, getBlocksLocale())?.eventArgs?.[ref.event]?.[ref.arg] ?? ref.arg
+/** Arguments of the event block a block sits in (none outside of an event). */
+export function eventArgsOf(block: Blockly.Block): string[] {
+  const match = EVENT_BLOCK.exec(block.getRootBlock().type)
+  if (!match) return []
+  return Object.keys(getComponentDef(match[1] ?? '')?.events[match[2] ?? '']?.args ?? {})
 }
 
 /**
- * A value received by an event handler ("elapsed time", "the other sprite"). It only makes
- * sense inside its own event block; elsewhere it is flagged and generates `undefined`.
+ * "value of the event": a value the enclosing event brings (elapsed time, the other sprite).
+ * Outside of its event it is flagged and generates `undefined`.
  */
-function defineEventArgBlock(): void {
-  Blockly.Blocks[BLOCK_TYPES.eventArg] = {
-    init(this: EventArgBlock) {
-      this.appendDummyInput().appendField(new Blockly.FieldLabel(eventArgLabel(undefined)), 'LABEL')
+function defineEventValueBlock(): void {
+  Blockly.Blocks[BLOCK_TYPES.eventValue] = {
+    init(this: Blockly.Block) {
+      appendMessage(this, t().game.eventValue, {
+        1: (_, input) => input.appendField(asField(new EventArgField()), 'ARG'),
+      })
       this.setOutput(true, null)
       this.setStyle('rx_event_blocks')
-      this.setTooltip(() => t().game.eventArg)
+      this.setTooltip(() => t().game.eventValueTooltip)
     },
-    saveExtraState(this: EventArgBlock) {
-      return this.argRef ?? null
-    },
-    loadExtraState(this: EventArgBlock, state: EventArgRef | null) {
-      if (!state || typeof state.arg !== 'string') return
-      this.argRef = { type: String(state.type), event: String(state.event), arg: state.arg }
-      this.setFieldValue(eventArgLabel(this.argRef), 'LABEL')
+    onchange(this: Blockly.BlockSvg, event: Blockly.Events.Abstract) {
+      if (this.isInFlyout || event.isUiEvent || !('setWarningText' in this)) return
+      const inside = eventArgsOf(this).includes(this.getFieldValue('ARG'))
+      this.setWarningText(inside ? null : t().game.eventValueOutside)
     },
   }
 }
@@ -358,7 +363,7 @@ export function defineBlocks(): void {
   if (defined) return
   defined = true
   defineGeneralBlocks()
-  defineEventArgBlock()
+  defineEventValueBlock()
   for (const def of COMPONENTS) defineComponentBlocks(def)
 }
 

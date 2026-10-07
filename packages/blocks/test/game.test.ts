@@ -36,9 +36,9 @@ function generate(stacks: Record<string, BlocklyJson>) {
   return code.slice(code.indexOf('export default'))
 }
 
-const arg = (type: string, event: string, name: string): BlocklyJson => ({
-  type: BLOCK_TYPES.eventArg,
-  extraState: { type, event, arg: name },
+const arg = (_type: string, _event: string, name: string): BlocklyJson => ({
+  type: BLOCK_TYPES.eventValue,
+  fields: { ARG: name },
 })
 
 describe('game blocks', () => {
@@ -89,11 +89,11 @@ describe('game blocks', () => {
         },
       },
     })
-    expect(code).toContain('Pomme.onHit(Panier, async (Pomme, other) => {')
-    expect(code).toContain("Pomme.onEdge('bottom', async (Pomme, edge) => {")
-    expect(code).toContain('Scene1.onFrame(async (dt) => {')
-    expect(code).toContain('Panier.rotation = dt;')
-    expect(code).toContain('rx.log(other);')
+    expect(code).toContain('Pomme.onHit(Panier, async (Pomme, event) => {')
+    expect(code).toContain("Pomme.onEdge('bottom', async (Pomme, event) => {")
+    expect(code).toContain('Scene1.onFrame(async (event) => {')
+    expect(code).toContain('Panier.rotation = event.dt;')
+    expect(code).toContain('rx.log(event.other);')
     expect(code).toMatchSnapshot()
   })
 
@@ -114,7 +114,7 @@ describe('game blocks', () => {
         },
       },
     })
-    expect(code).toContain('Pomme.onHit(null, async (Pomme, other) => {')
+    expect(code).toContain('Pomme.onHit(null, async (Pomme, event) => {')
     expect(code).toContain('rx.log(undefined);')
   })
 
@@ -146,34 +146,9 @@ describe('game blocks', () => {
         },
       },
     })
-    expect(code).toContain('Scene1.onTap(async (x, y) => {')
-    expect(code).toContain('await Panier.glideTo(x, 580, 0.2);')
+    expect(code).toContain('Scene1.onTap(async (event) => {')
+    expect(code).toContain('await Panier.glideTo(event.x, 580, 0.2);')
     expect(code).toContain('Pomme.pointTowards(Panier);')
-  })
-
-  it('renames an event value that a component name already uses', () => {
-    const { doc, screenId } = gameProject()
-    doc.screens[screenId]!.components.score!.name = 'dt'
-    const { code } = generateWorkspaceCode(
-      {
-        frame: {
-          type: 'rx_GameScene_on_frame',
-          fields: { COMPONENT: 'scene' },
-          inputs: {
-            DO: {
-              block: {
-                type: 'rx_SceneText_set',
-                fields: { COMPONENT: 'score', PROP: 'text' },
-                inputs: { VALUE: { block: arg('GameScene', 'frame', 'dt') } },
-              },
-            },
-          },
-        },
-      },
-      contextFromDoc(doc, screenId),
-    )
-    expect(code).toContain('Scene1.onFrame(async (dt_) => {')
-    expect(code).toContain('dt.text = dt_;')
   })
 
   it('labels event values in both languages and offers them in the toolbox', () => {
@@ -184,13 +159,13 @@ describe('game blocks', () => {
         contextFromDoc(doc, screenId, { locale }),
       )
       const label = workspace.getBlockById('a')?.toString()
-      expect(label).toBe(locale === 'fr' ? 'temps écoulé (s)' : 'elapsed time (s)')
+      expect(label).toBe(
+        locale === 'fr' ? 'temps écoulé (s) de l’événement' : 'elapsed time (s) of the event',
+      )
       workspace.dispose()
     }
     const toolbox = JSON.stringify(buildToolbox(contextFromDoc(doc, screenId, { mode: 'studio' })))
-    expect(toolbox).toContain(
-      '"type":"rx_event_arg","extraState":{"type":"GameScene","event":"frame","arg":"dt"}',
-    )
+    expect(toolbox).toContain('"type":"rx_event_value","fields":{"ARG":"dt"}')
     // "when Pomme touches …" comes preset with another sprite.
     expect(toolbox).toContain(
       '"type":"rx_Sprite_on_hit","fields":{"COMPONENT":"apple","FILTER":"basket"}',

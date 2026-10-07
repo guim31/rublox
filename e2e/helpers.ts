@@ -170,3 +170,16 @@ export async function signIn(page: Page, username: string, password: string) {
   await page.getByRole('button', { name: /^(Me connecter|Sign in)$/ }).click()
   await expect(page.getByTestId('user-menu')).toBeVisible()
 }
+
+/** Opens a game demo from the command palette (Ctrl + K). */
+export async function openDemo(page: Page, name: RegExp, query = 'démo de jeu') {
+  await page.goto('/')
+  await expect(
+    page.getByRole('button', { name: /Nouveau projet|New project/ }).first(),
+  ).toBeVisible()
+  await page.keyboard.press('Control+k')
+  await page.getByRole('combobox').fill(query)
+  await page.getByRole('option', { name }).click()
+  await page.waitForURL(/\/p\/[^/]+/)
+  await expect(page.getByTestId('canvas-screen')).toBeVisible()
+}

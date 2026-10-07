@@ -17,8 +17,8 @@ export const Joystick = defineComponent({
     y: prop.number({ default: 550, group: 'layout', junior: true, blocks: 'get-set' }),
     size: prop.number({ default: 120, min: 40, max: 600, group: 'layout', junior: true }),
     color: prop.color({ default: '#5b4bff', group: 'style', junior: true }),
-    dx: prop.number({ default: 0, group: 'advanced', blocks: 'get', live: true }),
-    dy: prop.number({ default: 0, group: 'advanced', blocks: 'get', live: true }),
+    dx: prop.number({ default: 0, group: 'advanced', blocks: 'get', state: true }),
+    dy: prop.number({ default: 0, group: 'advanced', blocks: 'get', state: true }),
   },
   events: {
     move: event({ args: { dx: { kind: 'number' }, dy: { kind: 'number' } } }),
@@ -42,7 +42,7 @@ export const Joystick = defineComponent({
       events: { move: 'quand on bouge %1', release: 'quand on lâche %1' },
       methods: {},
       enums: {},
-      eventArgs: { move: { dx: 'direction x', dy: 'direction y' } },
+      args: { dx: 'direction x', dy: 'direction y' },
     },
     en: {
       label: 'Joystick',
@@ -61,7 +61,7 @@ export const Joystick = defineComponent({
       events: { move: 'when %1 moves', release: 'when %1 is released' },
       methods: {},
       enums: {},
-      eventArgs: { move: { dx: 'x direction', dy: 'y direction' } },
+      args: { dx: 'x direction', dy: 'y direction' },
     },
   },
 })

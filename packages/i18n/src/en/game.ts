@@ -7,15 +7,18 @@ export const game: {
   studio: Messages['studio']['game']
 } = {
   blocks: {
-    eventArg: 'A value received by the "when …" block that holds this one.',
-    eventArgMisplaced: 'This block only works inside its own "when …" block.',
-    eventArgEmpty: 'received value',
+    eventValue: '%1 of the event',
+    eventValueTooltip: 'A value the event brings (elapsed time, the other sprite…).',
+    eventValueOutside: 'This block only works inside its own "when …" block.',
   },
   runtime: {
     tooManyClones: 'There are already {{count}} clones: {{name}} does not create a new one.',
   },
   studio: {
-    demo: 'Open the demo: Catch the fruit',
+    demos: {
+      catchGame: 'Open the game demo: Catch the fruit',
+      bouncing: 'Open the game demo: 50 bouncing sprites',
+    },
     demoCreating: 'Getting the demo ready…',
     demoFailed: 'The demo could not be created. Try again.',
     costumes: {

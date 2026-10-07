@@ -48,7 +48,7 @@ function componentItems(id: string, type: string, all: boolean, context: BlocksC
     items.push(block(eventBlockType(type, event), { fields }))
     // The values the handler receives, right under their event.
     for (const arg of Object.keys(info.args)) {
-      items.push(block(BLOCK_TYPES.eventArg, { extraState: { type, event, arg } }))
+      items.push(block(BLOCK_TYPES.eventValue, { fields: { ARG: arg } }))
     }
   }
   const setters = propertyKeys(def, 'set').filter((entry) => all || entry.junior)

@@ -59,6 +59,7 @@ export type EngineOptions = {
 // biome-ignore lint/suspicious/noExplicitAny: generated code passes any value
 type Value = any
 type Handler = (...args: Value[]) => Promise<void> | void
+type EventArgs = Record<string, unknown>
 
 /** A registered handler, with the filter chosen in its block (`null`: any). */
 type HandlerEntry = { fn: Handler; filter: string | null; busy: boolean }
@@ -261,7 +262,7 @@ export class Engine {
     if (!this.running) return
     this.running = false
     this.generation += 1
-    for (const instance of this.stack) this.kill(instance)
+    for (const instance of this.stack) this.disposeInstance(instance)
     this.clock.release()
     for (const entry of this.timers) {
       clearTimeout(entry.timer)
@@ -364,7 +365,7 @@ export class Engine {
   }
 
   /** An instance leaves for good: its handlers stop, its game scenes too. */
-  private kill(instance: Instance): void {
+  private disposeInstance(instance: Instance): void {
     instance.alive = false
     instance.game?.dispose()
   }
@@ -381,7 +382,7 @@ export class Engine {
   private async restartInstance(index: number): Promise<void> {
     const old = this.stack[index]
     if (!old) return
-    this.kill(old)
+    this.disposeInstance(old)
     const instance = this.newInstance(old.screenId)
     this.stack[index] = instance
     await this.runModule(instance.screenId, instance)
@@ -407,7 +408,7 @@ export class Engine {
   back(): void {
     if (!this.running || this.stack.length < 2) return
     const instance = this.stack.pop()
-    if (instance) this.kill(instance)
+    if (instance) this.disposeInstance(instance)
     this.notify()
     const top = this.stack.at(-1)
     if (top) this.fireOpen(top)
@@ -436,8 +437,9 @@ export class Engine {
     instance: Instance,
     componentId: ComponentId,
     event: string,
-    args: unknown[] = [],
+    args: EventArgs = {},
     filter?: string,
+    self?: Value,
   ): void {
     if (!this.running || !instance.alive) return
     const entries = instance.handlers.get(componentId)?.get(event)
@@ -449,7 +451,7 @@ export class Engine {
       entry.busy = true
       this.lastYield = now()
       Promise.resolve()
-        .then(() => entry.fn(...args))
+        .then(() => (self === undefined ? entry.fn(args) : entry.fn(self, args)))
         .catch((error) => this.report(error))
         .finally(() => {
           entry.busy = false
@@ -469,7 +471,7 @@ export class Engine {
         self: Body | null,
         componentId: ComponentId,
         event: string,
-        args: unknown[],
+        args: EventArgs,
         filter?: string,
       ) => {
         const proxy = (value: unknown) =>
@@ -478,13 +480,14 @@ export class Engine {
             : value
         const node = this.doc.screens[instance.screenId]?.components[componentId]
         const clonable = Boolean(node && getComponentDef(node.type)?.clonable)
-        const values = args.map(proxy)
+        const values = Object.fromEntries(Object.entries(args).map(([k, v]) => [k, proxy(v)]))
         this.fire(
           instance,
           componentId,
           event,
-          clonable && self ? [proxy(self), ...values] : values,
+          values,
           filter,
+          clonable && self ? proxy(self) : undefined,
         )
       },
       listens: (componentId: ComponentId, event: string) =>
@@ -662,7 +665,7 @@ export class Engine {
           const live = node && isWorldType(node.type) ? bodyOf() : undefined
           if (live && node && def) {
             const coerced = def.props[key]?.coerce(value)
-            if (coerced === undefined || def.props[key]?.live) this.invalid(node.name, key, value)
+            if (coerced === undefined || def.props[key]?.state) this.invalid(node.name, key, value)
             else live.world.set(live.body, key, coerced)
             return true
           }

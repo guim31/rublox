@@ -77,7 +77,7 @@ export const Sprite = defineComponent({
       blocks: 'get-set',
     }),
     solid: prop.boolean({ default: false, group: 'advanced', blocks: 'get-set' }),
-    isClone: prop.boolean({ default: false, group: 'advanced', blocks: 'get', live: true }),
+    isClone: prop.boolean({ default: false, group: 'advanced', blocks: 'get', state: true }),
   },
   events: {
     tap: event({ junior: true }),
@@ -177,11 +177,7 @@ export const Sprite = defineComponent({
         },
         collision: { box: 'Boîte', circle: 'Cercle', none: 'Aucune' },
       },
-      eventArgs: {
-        hit: { other: 'l’autre lutin' },
-        edge: { edge: 'bord touché' },
-        drag: { x: 'x du doigt', y: 'y du doigt' },
-      },
+      args: { other: 'l’autre lutin', edge: 'bord touché', x: 'x du doigt', y: 'y du doigt' },
       filters: {
         hit: { any: 'un autre lutin' },
         edge: {
@@ -248,11 +244,7 @@ export const Sprite = defineComponent({
         },
         collision: { box: 'Box', circle: 'Circle', none: 'None' },
       },
-      eventArgs: {
-        hit: { other: 'the other sprite' },
-        edge: { edge: 'edge touched' },
-        drag: { x: 'finger x', y: 'finger y' },
-      },
+      args: { other: 'the other sprite', edge: 'edge touched', x: 'finger x', y: 'finger y' },
       filters: {
         hit: { any: 'another sprite' },
         edge: {

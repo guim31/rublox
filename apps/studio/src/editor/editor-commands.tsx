@@ -10,6 +10,7 @@ import type { EditorTab } from '../routes/p.$projectId.tsx'
 import { addComponentOfType, addNewScreen, deleteComponent, duplicate } from './actions.ts'
 import { ComponentIcon } from './component-icon.tsx'
 import { useSession } from './context.tsx'
+import { freeKey } from './design/free-layout.ts'
 import { useEditorNavigate } from './nav.ts'
 import { useEditor } from './store.ts'
 
@@ -123,6 +124,11 @@ export function EditorCommands({
     if (target.closest('[role="tree"], [role="dialog"], [role="menu"]')) return
     const selected = useEditor.getState().selected
     if (!selected) return
+    // A sprite or a scene text: arrows move it, Alt + arrows resize it, R turns it.
+    if (freeKey(session, screenId, selected, event)) {
+      event.preventDefault()
+      return
+    }
     if (key === 'delete' || key === 'backspace') {
       event.preventDefault()
       deleteComponent(session, screenId, selected)

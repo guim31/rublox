@@ -2,6 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { Command as Cmdk } from 'cmdk'
 import {
   Blocks,
+  Gamepad2,
   Globe,
   LayoutDashboard,
   LogIn,
@@ -17,9 +18,11 @@ import {
 } from 'lucide-react'
 import { Dialog as Radix } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { type Command, useCommands } from '../lib/commands.ts'
 import { usePrefs } from '../lib/prefs.ts'
 import { signOut, useMe } from '../lib/session.ts'
+import { createDemo } from '../storage/demos.ts'
 import { Kbd } from './ui/kbd.tsx'
 
 const GROUP_ORDER: Command['group'][] = ['editor', 'add', 'project', 'interface']
@@ -40,6 +43,21 @@ export function CommandPalette() {
       icon: <Plus size={16} />,
       run: () => void navigate({ to: '/', search: { new: true } }),
     },
+    ...(['catchGame', 'bouncing'] as const).map(
+      (demo): Command => ({
+        id: `demo-${demo}`,
+        group: 'project',
+        label: t(`game.demos.${demo}`),
+        icon: <Gamepad2 size={16} />,
+        keywords: ['jeu', 'game', 'demo', 'démo'],
+        run: () => {
+          const created = createDemo(demo, prefs.locale, Boolean(me.data?.user)).then((projectId) =>
+            navigate({ to: '/p/$projectId', params: { projectId }, search: { tab: 'design' } }),
+          )
+          toast.promise(created, { loading: t('game.demoCreating'), error: t('game.demoFailed') })
+        },
+      }),
+    ),
     {
       id: 'dashboard',
       group: 'project',

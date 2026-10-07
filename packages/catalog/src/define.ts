@@ -41,8 +41,11 @@ type PropOptions<T> = {
   /** Shown in Junior without opening "More options". */
   junior?: boolean
   blocks?: BlockAccess
-  /** See `PropDef.live`. */
-  live?: boolean
+  /**
+   * Set by the component while the app runs (a position, "available"): never in the
+   * inspector nor in the project, readable by blocks (`blocks: 'get'` by default).
+   */
+  state?: boolean
 }
 
 export type PropDef<T = unknown> = {
@@ -60,11 +63,8 @@ export type PropDef<T = unknown> = {
   multiline?: boolean
   /** Asset kind accepted (asset). */
   assetKind?: 'image' | 'sound' | 'video' | 'lottie'
-  /**
-   * A value that only exists while the app runs (the direction of a joystick): blocks can
-   * read it, the inspector does not show it and projects never store it.
-   */
-  live?: boolean
+  /** Set while the app runs, never stored (see `PropOptions.state`). */
+  state: boolean
   /** Turns any value into a valid one, or `undefined` when it cannot. */
   coerce: (value: unknown) => T | undefined
 }
@@ -95,13 +95,14 @@ function clamp(n: number, min?: number, max?: number): number {
 }
 
 function defaults<T>(kind: PropKind, options: PropOptions<T>) {
+  const state = options.state ?? false
   return {
     kind,
     default: options.default,
     group: options.group,
     junior: options.junior ?? false,
-    blocks: options.blocks ?? 'none',
-    ...(options.live ? { live: true } : {}),
+    blocks: options.blocks ?? (state ? 'get' : 'none'),
+    state,
   }
 }
 
@@ -263,6 +264,14 @@ export type ArgDef = {
   default?: unknown
 }
 
+/** An argument of an event or a method: `arg('number')`, `arg('number', { default: 10 })`. */
+export function arg(
+  kind: ArgDef['kind'],
+  options: { componentType?: string; default?: unknown } = {},
+): ArgDef {
+  return { kind, ...options }
+}
+
 /**
  * Narrows which occurrences of an event a handler receives, chosen in a dropdown of the
  * event block (its `%2`): another component of `componentType` ("when Pomme touches
@@ -275,7 +284,11 @@ export type EventFilter =
 
 export type EventDef = {
   junior: boolean
-  /** Values passed to the handler, in order. */
+  /**
+   * Values the event carries (the item clicked, the new value…). The handler receives them
+   * as one object, `event`, and the "value of the event" block reads them. Their labels are
+   * in `strings.args`.
+   */
   args: Record<string, ArgDef>
   filter?: EventFilter
   /**
@@ -372,8 +385,8 @@ export type ComponentStrings = {
   methods: Record<string, string>
   /** Labels of enum values: `{ variant: { filled: 'Plein', … } }`. */
   enums: Record<string, Record<string, string>>
-  /** Labels of event arguments, by event: `{ frame: { dt: 'temps écoulé' } }`. */
-  eventArgs?: Record<string, Record<string, string>>
+  /** Labels of event arguments: `{ item: 'élément' }` (required for each one). */
+  args?: Record<string, string>
   /** Labels of event filter choices, by event, with `any`: `{ edge: { any: 'un bord', … } }`. */
   filters?: Record<string, Record<string, string>>
 }

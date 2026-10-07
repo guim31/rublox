@@ -4,17 +4,17 @@ exports[`game blocks > passes the clone itself and the event values to handlers 
 "export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
   const { Panier, Pomme, Scene1 } = components;
 
-  Pomme.onHit(Panier, async (Pomme, other) => {
+  Pomme.onHit(Panier, async (Pomme, event) => {
     Pomme.delete();
-    rx.log(other);
+    rx.log(event.other);
   });
 
-  Pomme.onEdge('bottom', async (Pomme, edge) => {
+  Pomme.onEdge('bottom', async (Pomme, event) => {
     Pomme.delete();
   });
 
-  Scene1.onFrame(async (dt) => {
-    Panier.rotation = dt;
+  Scene1.onFrame(async (event) => {
+    Panier.rotation = event.dt;
   });
 }
 "

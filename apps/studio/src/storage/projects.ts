@@ -109,6 +109,13 @@ export async function createProject(input: {
   return doc.meta.id
 }
 
+/** Keeps a ready-made project in this browser (a demo): its document and its summary. */
+export async function addProject(doc: ProjectDoc): Promise<string> {
+  await storeDoc(doc)
+  await saveSummary(summarize(doc))
+  return doc.meta.id
+}
+
 /** Applies a change to a closed project's document (rename from the dashboard…). */
 async function withDoc<T>(id: string, change: (ydoc: Y.Doc) => T): Promise<T> {
   const { ydoc, persistence } = await openProjectDoc(id)

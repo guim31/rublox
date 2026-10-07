@@ -30,7 +30,12 @@ export type Body = {
   el?: HTMLElement
   /** The costume drawn now, to swap the element's content only when it changes. */
   drawn?: string
-  edgesTouched: Set<string>
+  /** Style values written to the element, to write only what changed. */
+  styles?: Map<string, string>
+  /** Whether it takes touches (draggable, or a handler listens): known after the first draw. */
+  touchable?: boolean
+  /** Edges touched at the last frame, one bit each (`EDGES` order). */
+  edgesTouched: number
   glide?: Glide
   dragging?: { pointer: number; dx: number; dy: number; moved: boolean }
 }
@@ -53,7 +58,7 @@ export type WorldHost = {
     self: Body | null,
     componentId: ComponentId,
     event: string,
-    args: unknown[],
+    args: Record<string, unknown>,
     filter?: string,
   ): void
   /** Whether a handler exists, to skip work nobody listens to. */
@@ -66,7 +71,6 @@ export type WorldHost = {
 export const MAX_CLONES = 300
 
 const EDGES = ['top', 'bottom', 'left', 'right'] as const
-type Edge = (typeof EDGES)[number]
 
 /** Properties whose change needs the body to be drawn again. */
 const VISUAL = new Set([
@@ -94,8 +98,15 @@ const VISUAL = new Set([
 const SCENE_CHILDREN = new Set<string>(SCENE_CHILD_TYPES)
 
 function same(a: unknown, b: unknown): boolean {
-  return a === b || JSON.stringify(a) === JSON.stringify(b)
+  if (a === b) return true
+  // Numbers and texts change at every frame: only lists (costumes) need a deep look.
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false
+  return JSON.stringify(a) === JSON.stringify(b)
 }
+
+/** One number for a pair of bodies, the smaller key first (keys stay below a million). */
+const PAIR = 1_000_000
+const pairKey = (a: Body, b: Body) => (a.key < b.key ? a.key * PAIR + b.key : b.key * PAIR + a.key)
 
 /**
  * A running game scene (SPEC § 4.4): its bodies, the physics (speed, gravity, edges, bounces,
@@ -107,7 +118,7 @@ export class World {
   /** Drawing order, back to front. */
   bodies: Body[] = []
   private readonly originals = new Map<ComponentId, Body>()
-  private readonly contacts = new Set<string>()
+  private readonly contacts = new Set<number>()
   private nextKey = 1
   private started = false
   private active = false
@@ -145,7 +156,7 @@ export class World {
       written: new Set(),
       deleted: false,
       dirty: true,
-      edgesTouched: new Set(),
+      edgesTouched: 0,
     }
   }
 
@@ -218,6 +229,7 @@ export class World {
   set(body: Body, key: string, value: unknown): void {
     body.written.add(key)
     if (same(body.values[key], value)) return
+    if (key === 'draggable') body.touchable = undefined
     body.values[key] = value
     if (VISUAL.has(key)) {
       body.dirty = true
@@ -249,7 +261,7 @@ export class World {
     this.bodies.splice(at < 0 ? this.bodies.length : at, 0, copy)
     if (this.stage) this.createElement(copy, body.el)
     this.host.redraw()
-    this.host.fire(copy, copy.componentId, 'clone', [])
+    this.host.fire(copy, copy.componentId, 'clone', {})
     return copy
   }
 
@@ -271,8 +283,7 @@ export class World {
     body.el = undefined
     this.bodies = this.bodies.filter((other) => other !== body)
     for (const key of [...this.contacts]) {
-      const [a, b] = key.split(':').map(Number)
-      if (a === body.key || b === body.key) this.contacts.delete(key)
+      if (Math.floor(key / PAIR) === body.key || key % PAIR === body.key) this.contacts.delete(key)
     }
     this.pendingDrags.delete(body.key)
     this.host.redraw()
@@ -371,7 +382,7 @@ export class World {
     this.active = true
     if (!this.started) {
       this.started = true
-      this.host.fire(null, this.sceneId, 'start', [])
+      this.host.fire(null, this.sceneId, 'start', {})
     }
     this.wake()
   }
@@ -411,15 +422,15 @@ export class World {
       this.collide()
       for (const [key, point] of this.pendingDrags) {
         const body = this.bodies.find((b) => b.key === key)
-        if (body) this.host.fire(body, body.componentId, 'drag', [point.x, point.y])
+        if (body) this.host.fire(body, body.componentId, 'drag', { x: point.x, y: point.y })
       }
       this.pendingDrags.clear()
       if (this.pendingMove) {
         const { body, dx, dy } = this.pendingMove
         this.pendingMove = null
-        this.host.fire(body, body.componentId, 'move', [dx, dy])
+        this.host.fire(body, body.componentId, 'move', { dx, dy })
       }
-      this.host.fire(null, this.sceneId, 'frame', [dt])
+      this.host.fire(null, this.sceneId, 'frame', { dt })
     } else {
       this.pendingDrags.clear()
     }
@@ -476,14 +487,12 @@ export class World {
     let x = num(v.x)
     let y = num(v.y)
     const restitution = Math.max(0, Math.min(100, num(v.bounce, 100))) / 100
-    const touched = new Set<Edge>()
-    const limits: [Edge, boolean][] = [
-      ['left', x - hw <= 0],
-      ['right', x + hw >= width],
-      ['top', y - hh <= 0],
-      ['bottom', y + hh >= height],
-    ]
-    for (const [edge, out] of limits) if (out) touched.add(edge)
+    // Bits in `EDGES` order: top, bottom, left, right.
+    const touched =
+      (y - hh <= 0 ? 1 : 0) |
+      (y + hh >= height ? 2 : 0) |
+      (x - hw <= 0 ? 4 : 0) |
+      (x + hw >= width ? 8 : 0)
     if (mode === 'stop' || mode === 'bounce') {
       const bounce = mode === 'bounce'
       const vx = num(v.vx)
@@ -502,15 +511,16 @@ export class World {
       }
       if (x !== num(v.x) || y !== num(v.y)) this.move(body, x, y)
     }
-    if (v.visible !== false) {
-      for (const edge of touched) {
-        if (!body.edgesTouched.has(edge)) {
-          this.host.fire(body, body.componentId, 'edge', [edge], edge)
-          if (body.deleted) return
+    const begun = v.visible === false ? 0 : touched & ~body.edgesTouched
+    body.edgesTouched = v.visible === false ? 0 : touched
+    if (begun) {
+      EDGES.forEach((edge, index) => {
+        if (begun & (1 << index) && !body.deleted) {
+          this.host.fire(body, body.componentId, 'edge', { edge }, edge)
         }
-      }
+      })
+      if (body.deleted) return
     }
-    body.edgesTouched = v.visible === false ? new Set() : touched
     // A clone that left the scene for good disappears, so that falling objects do not pile up.
     if (
       body.clone &&
@@ -534,41 +544,54 @@ export class World {
     return overlap(this.shape(a), this.shape(b)) !== null
   }
 
-  /** Contacts between sprites: events when they start, pushes between solid ones. */
+  /**
+   * Contacts between sprites: events when they start, pushes between solid ones. Sprites are
+   * sorted along x and only those whose spans overlap are compared (sweep and prune).
+   */
   private collide(): void {
-    const sprites = this.bodies.filter((body) => this.collides(body))
-    const listening = new Set(
-      sprites.filter((b) => this.host.listens(b.componentId, 'hit')).map((b) => b.componentId),
-    )
-    const anySolid = sprites.some((b) => b.values.solid === true)
-    if (!listening.size && !anySolid) {
+    const entries: { body: Body; shape: Shape; min: number; max: number; hit: boolean }[] = []
+    let listened = false
+    let solids = 0
+    for (const body of this.bodies) {
+      if (!this.collides(body)) continue
+      const shape = this.shape(body)
+      const { hw } = extent(shape)
+      const hit = this.host.listens(body.componentId, 'hit')
+      const solid = body.values.solid === true
+      listened ||= hit
+      if (solid) solids += 1
+      entries.push({ body, shape, min: shape.x - hw, max: shape.x + hw, hit: hit || solid })
+    }
+    if (!listened && solids < 2) {
       this.contacts.clear()
       return
     }
-    const now = new Set<string>()
+    entries.sort((a, b) => a.min - b.min)
+    const now = new Set<number>()
     const begun: [Body, Body][] = []
-    for (let i = 0; i < sprites.length; i++) {
-      const a = sprites[i] as Body
-      for (let j = i + 1; j < sprites.length; j++) {
-        const b = sprites[j] as Body
-        const wanted =
-          listening.has(a.componentId) ||
-          listening.has(b.componentId) ||
-          (a.values.solid === true && b.values.solid === true)
-        if (!wanted) continue
-        const hit = overlap(this.shape(a), this.shape(b))
-        if (!hit) continue
-        const key = `${a.key}:${b.key}`
+    for (let i = 0; i < entries.length; i++) {
+      const a = entries[i] as (typeof entries)[number]
+      for (let j = i + 1; j < entries.length; j++) {
+        const b = entries[j] as (typeof entries)[number]
+        if (b.min > a.max) break
+        if (!a.hit && !b.hit) continue
+        const contact = overlap(a.shape, b.shape)
+        if (!contact) continue
+        const key = pairKey(a.body, b.body)
         now.add(key)
-        if (!this.contacts.has(key)) begun.push([a, b])
-        if (a.values.solid === true && b.values.solid === true) this.separate(a, b, hit)
+        if (!this.contacts.has(key)) begun.push([a.body, b.body])
+        if (a.body.values.solid === true && b.body.values.solid === true) {
+          this.separate(a.body, b.body, contact)
+        }
       }
     }
     this.contacts.clear()
     for (const key of now) this.contacts.add(key)
     for (const [a, b] of begun) {
-      if (!a.deleted && !b.deleted) this.host.fire(a, a.componentId, 'hit', [b], b.componentId)
-      if (!a.deleted && !b.deleted) this.host.fire(b, b.componentId, 'hit', [a], a.componentId)
+      if (!a.deleted && !b.deleted)
+        this.host.fire(a, a.componentId, 'hit', { other: b }, b.componentId)
+      if (!a.deleted && !b.deleted)
+        this.host.fire(b, b.componentId, 'hit', { other: a }, a.componentId)
     }
   }
 
@@ -634,6 +657,7 @@ export class World {
       body.el?.remove()
       body.el = undefined
       body.drawn = undefined
+      body.styles = undefined
     }
     this.stage = null
   }
@@ -655,6 +679,7 @@ export class World {
     }
     body.el = el
     body.drawn = undefined
+    body.styles = undefined
     body.dirty = true
     if (before?.parentElement === stage) stage.insertBefore(el, before)
     else stage.append(el)
@@ -678,24 +703,41 @@ export class World {
       if (!el || (!body.dirty && !all)) continue
       body.dirty = false
       const v = body.values
-      const style = el.style
-      style.display = v.visible === false ? 'none' : ''
-      style.opacity = num(v.opacity, 100) < 100 ? String(num(v.opacity, 100) / 100) : ''
-      style.pointerEvents = this.interactive(body) ? 'auto' : 'none'
+      // Only what changed reaches the DOM: a moving sprite costs one transform per frame.
+      const write = (key: string, value: string) => {
+        const written = body.styles ?? new Map<string, string>()
+        body.styles = written
+        if (!all && written.get(key) === value) return
+        written.set(key, value)
+        el.style.setProperty(key, value)
+      }
+      write('display', v.visible === false ? 'none' : '')
+      write('opacity', num(v.opacity, 100) < 100 ? String(num(v.opacity, 100) / 100) : '')
+      body.touchable ??= this.interactive(body)
+      write('pointer-events', body.touchable ? 'auto' : 'none')
       if (body.type === 'Sprite') {
         const box = spriteStyle(v)
-        style.width = box.width
-        style.height = box.height
-        style.transform = box.transform
-        style.fontSize = box.fontSize
+        write('width', box.width)
+        write('height', box.height)
+        write('transform', box.transform)
+        write('font-size', box.fontSize)
         const costume = costumeOf(v, this.assetUrl)
         const key = costume
           ? `${costume.kind}:${costume.kind === 'image' ? costume.src : costume.text}`
           : ''
         if (key !== body.drawn) {
+          const previous = body.drawn ?? ''
           body.drawn = key
-          el.replaceChildren()
-          if (costume?.kind === 'image') {
+          const child = el.firstElementChild as HTMLElement | null
+          // Same kind of costume: update it in place (cheaper than a new element).
+          if (costume?.kind === 'glyph' && previous.startsWith('glyph:') && child) {
+            child.textContent = costume.text
+          } else if (costume?.kind === 'image' && previous.startsWith('image:') && child) {
+            ;(child as HTMLImageElement).src = costume.src
+          } else el.replaceChildren()
+          if (el.firstElementChild) {
+            // Updated in place above.
+          } else if (costume?.kind === 'image') {
             const img = el.ownerDocument.createElement('img')
             img.src = costume.src
             img.alt = ''
@@ -708,11 +750,21 @@ export class World {
           }
         }
       } else if (body.type === 'SceneText') {
-        Object.assign(style, sceneTextStyle(v))
+        const style = sceneTextStyle(v)
+        write('transform', style.transform)
+        write('font-size', style.fontSize)
+        write('color', style.color)
+        write('font-weight', style.fontWeight)
+        write('text-align', style.textAlign)
+        write('text-shadow', style.textShadow)
         const text = String(v.text ?? '')
         if (el.textContent !== text) el.textContent = text
       } else if (body.type === 'Joystick') {
-        Object.assign(style, joystickStyle(v))
+        const style = joystickStyle(v)
+        write('width', style.width)
+        write('height', style.height)
+        write('transform', style.transform)
+        write('color', style.color)
         const knob = el.firstElementChild as HTMLElement | null
         if (knob) knob.style.transform = knobTransform(v)
       }
@@ -757,7 +809,7 @@ export class World {
     const point = this.point(event)
     const body = this.bodyAt(event.target)
     if (!body) {
-      this.host.fire(null, this.sceneId, 'tap', [point.x, point.y])
+      this.host.fire(null, this.sceneId, 'tap', { x: point.x, y: point.y })
       return
     }
     event.preventDefault()
@@ -771,7 +823,7 @@ export class World {
       }
       if (body.type === 'Joystick') this.steer(body, point)
     }
-    if (body.type !== 'Joystick') this.host.fire(body, body.componentId, 'tap', [])
+    if (body.type !== 'Joystick') this.host.fire(body, body.componentId, 'tap', {})
   }
 
   private onPointerMove = (event: PointerEvent): void => {
@@ -800,9 +852,9 @@ export class World {
       this.set(body, 'dx', 0)
       this.set(body, 'dy', 0)
       this.pendingMove = null
-      this.host.fire(body, body.componentId, 'release', [])
+      this.host.fire(body, body.componentId, 'release', {})
     } else if (moved) {
-      this.host.fire(body, body.componentId, 'drop', [])
+      this.host.fire(body, body.componentId, 'drop', {})
     }
   }
 

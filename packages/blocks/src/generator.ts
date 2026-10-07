@@ -6,7 +6,7 @@ import { JavascriptGenerator, javascriptGenerator, Order } from 'blockly/javascr
 import { type BlocksContext, contextOf } from './context.ts'
 import {
   BLOCK_TYPES,
-  type EventArgRef,
+  eventArgsOf,
   eventBlockType,
   getterBlockType,
   isFieldArg,
@@ -95,7 +95,7 @@ export class RubloxGenerator extends JavascriptGenerator {
     Object.assign(this.forBlock, javascriptGenerator.forBlock)
     this.INFINITE_LOOP_TRAP = 'await rx.tick();\n'
     this.STATEMENT_PREFIX = `${MARK_START}%1${MARK_END}\n`
-    this.addReservedWords(MODULE_PARAMS.join(','))
+    this.addReservedWords([...MODULE_PARAMS, 'event'].join(','))
     installBlockGenerators(this)
   }
 
@@ -139,15 +139,6 @@ export class RubloxGenerator extends JavascriptGenerator {
 
   screenName(id: string): string | null {
     return this.context.screens.find((screen) => screen.id === id)?.name ?? null
-  }
-
-  /**
-   * The parameter name of an event argument: its own name (`dt`, `other`), with a `_` when a
-   * component of the screen already has that name.
-   */
-  argParam(arg: string): string {
-    const taken = this.context.components.some((c) => c.name === arg)
-    return taken || MODULE_PARAMS.includes(arg) ? `${arg}_` : arg
   }
 
   missing(): string {
@@ -264,12 +255,11 @@ function installBlockGenerators(generator: Gen): void {
   f.procedures_callreturn = call
   f.procedures_callnoreturn = (block, g) => `${call(block, g)[0]};\n`
 
-  f[BLOCK_TYPES.eventArg] = (block, g) => {
-    const ref = (block as Blockly.Block & { argRef?: EventArgRef }).argRef
-    const root = block.getRootBlock()
-    if (!ref || root.type !== eventBlockType(ref.type, ref.event))
-      return ['undefined', Order.ATOMIC]
-    return [g.argParam(ref.arg), Order.ATOMIC]
+  f[BLOCK_TYPES.eventValue] = (block) => {
+    const arg = block.getFieldValue('ARG')
+    return eventArgsOf(block).includes(arg)
+      ? [`event.${arg}`, Order.MEMBER]
+      : ['undefined', Order.ATOMIC]
   }
 
   for (const def of COMPONENTS) {
@@ -280,9 +270,10 @@ function installBlockGenerators(generator: Gen): void {
         const filter = eventFilterCode(def, event, block, g)
         if (filter === null) return `// ${g.missing()}\n`
         const body = g.statementToCode(block, 'DO')
+        // A clone's handlers get the clone itself, under the component's name.
         const params = [
           ...(def.clonable ? [name] : []),
-          ...Object.keys(def.events[event]?.args ?? {}).map((arg) => g.argParam(arg)),
+          ...(Object.keys(def.events[event]?.args ?? {}).length ? ['event'] : []),
         ]
         return `${name}.on${capitalize(event)}(${filter}async (${params.join(', ')}) => {\n${body}});\n`
       }

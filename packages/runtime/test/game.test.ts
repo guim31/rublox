@@ -1,5 +1,12 @@
 import { generateProjectCode } from '@rublox/blocks'
-import { CATCH_GAME_IDS, catchGameDemo, createComponent, createProject } from '@rublox/catalog'
+import {
+  BOUNCING_COUNT,
+  bouncingDemo,
+  CATCH_GAME_IDS,
+  catchGameDemo,
+  createComponent,
+  createProject,
+} from '@rublox/catalog'
 import type { BlocklyJson, ProjectDoc } from '@rublox/schema'
 import { describe, expect, it } from 'vitest'
 import { Engine, FrameClock, type LogEntry, type World } from '../src/index.ts'
@@ -164,10 +171,7 @@ describe('game scene', () => {
         'GameScene',
         'scene',
         'tap',
-        set('Sprite', 'basket', 'x', {
-          type: 'rx_event_arg',
-          extraState: { type: 'GameScene', event: 'tap', arg: 'x' },
-        }),
+        set('Sprite', 'basket', 'x', { type: 'rx_event_value', fields: { ARG: 'x' } }),
       ),
     })
     const { engine, frames } = await run(doc)
@@ -248,10 +252,7 @@ describe('game scene', () => {
         'GameScene',
         'scene',
         'tap',
-        set('Sprite', 'basket', 'x', {
-          type: 'rx_event_arg',
-          extraState: { type: 'GameScene', event: 'tap', arg: 'x' },
-        }),
+        set('Sprite', 'basket', 'x', { type: 'rx_event_value', fields: { ARG: 'x' } }),
       ),
     })
     const { engine, world, frames } = await run(doc)
@@ -300,6 +301,21 @@ describe('the catch game demo', () => {
     expect(logs.filter((entry) => entry.level !== 'log')).toEqual([])
     expect(body(CATCH_GAME_IDS.score).values.text).toMatch(/^Score : [1-9]/)
     expect(body(CATCH_GAME_IDS.lives).values.text).toBe('❤️ 3')
+    engine.dispose()
+  })
+})
+
+describe('the bouncing demo', () => {
+  it('fills the scene with 50 sprites that stay inside', async () => {
+    const doc = bouncingDemo('en')
+    const { engine, world, frames, logs } = await run(doc)
+    await frames(120)
+    expect(world.bodies.filter((b) => b.type === 'Sprite')).toHaveLength(BOUNCING_COUNT)
+    for (const body of world.bodies) {
+      expect(body.values.x as number).toBeGreaterThanOrEqual(0)
+      expect(body.values.y as number).toBeLessThanOrEqual(640)
+    }
+    expect(logs).toEqual([])
     engine.dispose()
   })
 })

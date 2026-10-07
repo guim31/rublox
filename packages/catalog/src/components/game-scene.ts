@@ -89,10 +89,7 @@ export const GameScene = defineComponent({
       enums: {
         edges: { stop: 'Arrêtent', bounce: 'Font rebondir', pass: 'Laissent sortir' },
       },
-      eventArgs: {
-        frame: { dt: 'temps écoulé (s)' },
-        tap: { x: 'x du doigt', y: 'y du doigt' },
-      },
+      args: { dt: 'temps écoulé (s)', x: 'x du doigt', y: 'y du doigt' },
     },
     en: {
       label: 'Game scene',
@@ -120,10 +117,7 @@ export const GameScene = defineComponent({
       enums: {
         edges: { stop: 'Stop', bounce: 'Bounce', pass: 'Let through' },
       },
-      eventArgs: {
-        frame: { dt: 'elapsed time (s)' },
-        tap: { x: 'finger x', y: 'finger y' },
-      },
+      args: { dt: 'elapsed time (s)', x: 'finger x', y: 'finger y' },
     },
   },
 })

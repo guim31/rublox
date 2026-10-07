@@ -1,15 +1,18 @@
 /** Strings of the game mode (J7), merged into the `studio`, `blocks` and `runtime` spaces. */
 export const game = {
   blocks: {
-    eventArg: 'Une valeur reçue par le bloc « quand … » qui contient celui-ci.',
-    eventArgMisplaced: 'Ce bloc ne marche que dans son bloc « quand … ».',
-    eventArgEmpty: 'valeur reçue',
+    eventValue: '%1 de l’événement',
+    eventValueTooltip: 'Une valeur que l’événement apporte (le temps écoulé, l’autre lutin…).',
+    eventValueOutside: 'Ce bloc ne marche que dans son bloc « quand … ».',
   },
   runtime: {
     tooManyClones: 'Il y a déjà {{count}} clones : {{name}} n’en crée pas de nouveau.',
   },
   studio: {
-    demo: 'Ouvrir la démo : Attrape les fruits',
+    demos: {
+      catchGame: 'Ouvrir la démo de jeu : Attrape les fruits',
+      bouncing: 'Ouvrir la démo de jeu : 50 lutins qui rebondissent',
+    },
     demoCreating: 'Préparation de la démo…',
     demoFailed: 'La démo n’a pas pu être créée. Réessaie.',
     costumes: {

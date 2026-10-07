@@ -1,5 +1,19 @@
-import type { BlocklyJson, ComponentNode, Locale, ProjectDoc } from '@rublox/schema'
+import type { ComponentNode, Locale, ProjectDoc } from '@rublox/schema'
 import { createComponent, createProject } from '../project.ts'
+import {
+  call,
+  chain,
+  changeVar,
+  eventValue,
+  join,
+  num,
+  on,
+  random,
+  set,
+  setVar,
+  text,
+  variable,
+} from './blocks-json.ts'
 
 /**
  * « Attrape les fruits » (J7): a catch game made only of blocks. Fruits fall from the sky;
@@ -54,72 +68,6 @@ export const CATCH_GAME_IDS = {
 } as const
 
 const ID = CATCH_GAME_IDS
-
-const num = (value: number): BlocklyJson => ({ type: 'math_number', fields: { NUM: value } })
-const text = (value: string): BlocklyJson => ({ type: 'text', fields: { TEXT: value } })
-const random = (from: number, to: number): BlocklyJson => ({
-  type: 'math_random_int',
-  inputs: { FROM: { block: num(from) }, TO: { block: num(to) } },
-})
-const variable = (id: string): BlocklyJson => ({ type: 'variables_get', fields: { VAR: { id } } })
-const join = (a: BlocklyJson, b: BlocklyJson): BlocklyJson => ({
-  type: 'text_join',
-  extraState: { itemCount: 2 },
-  inputs: { ADD0: { block: a }, ADD1: { block: b } },
-})
-const arg = (type: string, event: string, name: string): BlocklyJson => ({
-  type: 'rx_event_arg',
-  extraState: { type, event, arg: name },
-})
-
-/** Chains statements: each one's `next` is the following one. */
-function chain(...blocks: BlocklyJson[]): BlocklyJson {
-  const [first, ...rest] = blocks
-  if (!first) throw new Error('empty chain')
-  return rest.length ? { ...first, next: { block: chain(...rest) } } : first
-}
-
-const setVar = (id: string, value: BlocklyJson): BlocklyJson => ({
-  type: 'variables_set',
-  fields: { VAR: { id } },
-  inputs: { VALUE: { block: value } },
-})
-const changeVar = (id: string, delta: number): BlocklyJson => ({
-  type: 'math_change',
-  fields: { VAR: { id } },
-  inputs: { DELTA: { block: num(delta) } },
-})
-const set = (type: string, component: string, prop: string, value: BlocklyJson): BlocklyJson => ({
-  type: `rx_${type}_set`,
-  fields: { COMPONENT: component, PROP: prop },
-  inputs: { VALUE: { block: value } },
-})
-const call = (
-  type: string,
-  component: string,
-  method: string,
-  args: BlocklyJson[] = [],
-): BlocklyJson => ({
-  type: `rx_${type}_call_${method}`,
-  fields: { COMPONENT: component },
-  ...(args.length
-    ? { inputs: Object.fromEntries(args.map((value, index) => [`ARG${index}`, { block: value }])) }
-    : {}),
-})
-const on = (
-  type: string,
-  component: string,
-  event: string,
-  body: BlocklyJson,
-  at: { x: number; y: number },
-  filter?: string,
-): BlocklyJson => ({
-  type: `rx_${type}_on_${event}`,
-  id: `${component}-${event}`,
-  ...at,
-  fields: { COMPONENT: component, ...(filter ? { FILTER: filter } : {}) },
-  inputs: { DO: { block: body } },
-})
 
 export function catchGameDemo(locale: Locale, now?: Date): ProjectDoc {
   const t = TEXTS[locale]
@@ -247,7 +195,7 @@ export function catchGameDemo(locale: Locale, now?: Date): ProjectDoc {
         set('Sprite', ID.fruit, 'gravity', random(140, 260)),
         set('Sprite', ID.fruit, 'visible', { type: 'logic_boolean', fields: { BOOL: 'TRUE' } }),
       ),
-      { x: 20, y: 330 },
+      { x: 20, y: 780 },
     ),
     // Caught: one more point.
     on(
@@ -255,7 +203,7 @@ export function catchGameDemo(locale: Locale, now?: Date): ProjectDoc {
       ID.fruit,
       'hit',
       chain(changeVar(score, 1), showScore, call('Sprite', ID.fruit, 'delete')),
-      { x: 420, y: 20 },
+      { x: 880, y: 20 },
       ID.basket,
     ),
     // Missed: one life less; at zero, the game starts over.
@@ -290,7 +238,7 @@ export function catchGameDemo(locale: Locale, now?: Date): ProjectDoc {
           },
         },
       }),
-      { x: 420, y: 260 },
+      { x: 880, y: 440 },
       'bottom',
     ),
     // Tap the garden: the basket glides there.
@@ -298,8 +246,8 @@ export function catchGameDemo(locale: Locale, now?: Date): ProjectDoc {
       'GameScene',
       ID.scene,
       'tap',
-      call('Sprite', ID.basket, 'glideTo', [arg('GameScene', 'tap', 'x'), num(590), num(0.25)]),
-      { x: 20, y: 600 },
+      call('Sprite', ID.basket, 'glideTo', [eventValue('x'), num(590), num(0.25)]),
+      { x: 20, y: 1200 },
     ),
   ]
   doc.blocks[screenId] = Object.fromEntries(stacks.map((stack) => [stack.id as string, stack]))

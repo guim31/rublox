@@ -40,8 +40,7 @@ export function Inspector({ screenId }: { screenId: ScreenId }) {
   const isRoot = id === screen.rootId
   const essential = mode === 'studio' || more
 
-  // Values that only exist while the app runs (a joystick's direction) are not edited here.
-  const entries = Object.entries(def.props).filter(([, prop]) => !prop.live)
+  const entries = Object.entries(def.props).filter(([, prop]) => !prop.state)
   const grouped = PROP_GROUPS.map((group) => ({
     group,
     props: entries.filter(([, prop]) => prop.group === group && (essential || prop.junior)),

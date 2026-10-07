@@ -1,4 +1,4 @@
-import { componentLabel, propLabel } from '@rublox/catalog'
+import { COMPONENTS, componentLabel, getComponentDef, propLabel } from '@rublox/catalog'
 import { messages } from '@rublox/i18n'
 import * as Blockly from 'blockly/core'
 import { contextOf, getBlocksLocale } from './context.ts'
@@ -168,6 +168,56 @@ export class PropertyField extends Blockly.FieldDropdown {
   }
 }
 
+const EVENT_BLOCK = /^rx_([A-Za-z0-9]+)_on_([A-Za-z0-9]+)$/
+
+/** The label of an event argument, from any component that declares it. */
+export function argLabel(arg: string, type?: string): string {
+  const locale = getBlocksLocale()
+  const own = type ? getComponentDef(type)?.strings[locale].args?.[arg] : undefined
+  if (own) return own
+  for (const def of COMPONENTS) {
+    const label = def.strings[locale].args?.[arg]
+    if (label) return label
+  }
+  return arg
+}
+
+/**
+ * The values of the event the block sits in (`item`, `index`…). Outside of an event, it keeps
+ * its value, so that a block dragged out of the toolbox shows what it reads.
+ */
+export class EventArgField extends Blockly.FieldDropdown {
+  constructor(value?: string) {
+    super(function (this: EventArgField) {
+      return this.buildOptions()
+    } as unknown as Blockly.MenuGeneratorFunction)
+    if (value) this.setValue(value)
+  }
+
+  protected buildOptions(): Option[] {
+    const block = this.getSourceBlock()
+    const value = (this as unknown as { value_: string | null }).value_
+    const match = block ? EVENT_BLOCK.exec(block.getRootBlock().type) : null
+    const type = match?.[1]
+    const args = Object.keys((type && getComponentDef(type)?.events[match?.[2] ?? '']?.args) || {})
+    const options: Option[] = args.map((arg) => [argLabel(arg, type), arg])
+    if (value && !args.includes(value)) options.push([argLabel(value, type), value])
+    return options.length ? options : [['…', '']]
+  }
+
+  protected override doClassValidation_(value?: unknown): string | null {
+    return typeof value === 'string' ? value : null
+  }
+
+  protected override doValueUpdate_(value: string): void {
+    super.doValueUpdate_(value)
+    const match = this.getOptions(false).find(
+      (option) => Array.isArray(option) && option[1] === value,
+    )
+    if (match) (this as unknown as { selectedOption: unknown }).selectedOption = match
+  }
+}
+
 let registered = false
 
 export function registerFields(): void {
@@ -193,14 +243,6 @@ export function refreshReferences(workspace: Blockly.Workspace): void {
                 : messages[locale].blocks.missingComponent
           }
         }
-      }
-    }
-    // An event argument outside its own event block (`rx_event_arg`, see definitions.ts).
-    const ref = (block as Blockly.Block & { argRef?: { type: string; event: string } }).argRef
-    if (block.type === 'rx_event_arg' && ref && !block.isInFlyout) {
-      const root = block.getRootBlock()
-      if (root.type !== `rx_${ref.type}_on_${ref.event}`) {
-        warning = messages[locale].blocks.game.eventArgMisplaced
       }
     }
     if ('setWarningText' in block) (block as Blockly.BlockSvg).setWarningText(warning)

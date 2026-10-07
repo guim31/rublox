@@ -40,7 +40,7 @@ describe('catalog completeness', () => {
       for (const [key, eventDef] of Object.entries(def.events)) {
         expect(strings.events[key], `${locale}.events.${key}`).toContain('%1')
         for (const arg of Object.keys(eventDef.args)) {
-          expect(strings.eventArgs?.[key]?.[arg], `${locale}.eventArgs.${key}.${arg}`).toBeTruthy()
+          expect(strings.args?.[arg], `${locale}.args.${arg}`).toBeTruthy()
         }
         const filter = eventDef.filter
         if (filter) {
@@ -68,9 +68,6 @@ describe('catalog completeness', () => {
       // No stray strings for things that do not exist.
       for (const key of Object.keys(strings.props)) expect(def.props[key], key).toBeDefined()
       for (const key of Object.keys(strings.events)) expect(def.events[key], key).toBeDefined()
-      for (const key of Object.keys(strings.eventArgs ?? {})) {
-        expect(def.events[key], key).toBeDefined()
-      }
     }
     // A component reaches its handlers, methods and properties by name: they cannot clash.
     const members = [
