@@ -1,4 +1,4 @@
-import { evaluate, fillNames, getTutorial, type LearnState } from '@rublox/learn'
+import { fillNames, getTutorial, type LearnState, stepProgress } from '@rublox/learn'
 import { useNavigate } from '@tanstack/react-router'
 import { Check, GraduationCap, Lightbulb, Pause, Play, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -91,14 +91,15 @@ function Runner({ tab, workspace }: { tab: 'design' | 'blocks' | 'data'; workspa
   )
 
   const advancing = useRef(false)
-  const advance = async () => {
+  /** `ahead`: the following step already holds, it starts done. */
+  const advance = async (ahead = false) => {
     if (!active || !tutorial || advancing.current) return
     advancing.current = true
     const next = active.step + 1
     const now = new Date().toISOString()
     const finished = next >= tutorial.steps.length
     useLearn.setState({ tutorial: { ...active, step: next, finished }, events: [] })
-    setDone(false)
+    setDone(ahead && !finished)
     setHint(false)
     clearEvents()
     play(finished ? 'finish' : 'step')
@@ -113,11 +114,15 @@ function Runner({ tab, workspace }: { tab: 'design' | 'blocks' | 'data'; workspa
     advancing.current = false
   }
 
-  // A step is validated as soon as its check holds…
+  // A step is validated as soon as its check holds; during its "Nice one!", doing what the
+  // following step asks moves on at once (`stepProgress`).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `advance` reads the latest state
   useEffect(() => {
-    if (!step?.check || step.check.kind === 'manual' || done || active?.paused) return
-    if (evaluate(step.check, state)) setDone(true)
-  }, [state, step, done, active?.paused])
+    if (!active || !tutorial || active.paused) return
+    const progress = stepProgress(tutorial, { step: active.step, done }, state)
+    if (progress.step !== active.step) void advance(true)
+    else if (progress.done !== done) setDone(progress.done)
+  }, [state, active?.step, done, active?.paused])
 
   // …then "Nice one!" stays a moment, whatever else changes meanwhile.
   // biome-ignore lint/correctness/useExhaustiveDependencies: `advance` reads the latest state
@@ -125,7 +130,7 @@ function Runner({ tab, workspace }: { tab: 'design' | 'blocks' | 'data'; workspa
     if (!done) return
     const timer = setTimeout(() => void advance(), STEP_DONE_MS)
     return () => clearTimeout(timer)
-  }, [done])
+  }, [done, active?.step])
 
   if (!active || !tutorial || !texts) return null
 
