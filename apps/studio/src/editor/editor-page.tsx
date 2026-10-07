@@ -1,15 +1,17 @@
 import { APP_WORKSPACE } from '@rublox/schema'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Copy, Eye } from 'lucide-react'
+import { Copy, Eye, Shuffle } from 'lucide-react'
 import QRCode from 'qrcode'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { AiPanel } from '../ai/panel.tsx'
 import { Mascot } from '../components/brand.tsx'
 import { Button } from '../components/ui/button.tsx'
 import { HelpPanel } from '../help/help-panel.tsx'
 import { BadgeWatcher } from '../learn/badges.tsx'
 import { ChallengePanel } from '../learn/challenge-panel.tsx'
+import { awardBadge } from '../learn/store.ts'
 import { TourRunner } from '../learn/tour.tsx'
 import { TutorialRunner } from '../learn/tutorial-runner.tsx'
 import { ApiError } from '../lib/api.ts'
@@ -125,10 +127,11 @@ function Editor({ projectId, tab, screen }: Props) {
             </Suspense>
           )}
         </div>
-        <ConsolePanel open={consoleOpen} projectId={projectId} />
+        <ConsolePanel open={consoleOpen} projectId={projectId} workspace={screenId} />
       </div>
       <EditorCommands projectId={projectId} tab={tab} screenId={screenId} />
       <HelpPanel />
+      <AiPanel projectId={projectId} />
       <BadgeWatcher />
       <ChallengePanel projectId={projectId} tab={tab} workspace={workspace} />
       <TutorialRunner projectId={projectId} tab={tab} workspace={workspace} />
@@ -148,21 +151,32 @@ function ReadOnlyBanner() {
   useSaveState()
   if (!session.readOnly) return null
   const owner = session.source.owner?.displayName ?? ''
+  // A gallery project (J6): "Remix" makes a copy that keeps the credit.
+  const gallery = session.source.access === 'gallery'
   return (
     <div
       role="note"
       className="flex shrink-0 items-center gap-3 border-b border-border bg-yellow-soft px-4 py-2"
     >
       <Eye size={18} className="shrink-0" aria-hidden="true" />
-      <p className="min-w-0 flex-1 text-ui-sm">{t('sync.readOnlyBanner', { name: owner })}</p>
+      <p className="min-w-0 flex-1 text-ui-sm">
+        {gallery
+          ? t('gallery.readOnly.banner', { name: owner })
+          : t('sync.readOnlyBanner', { name: owner })}
+      </p>
       <Button
         size="sm"
-        icon={<Copy size={15} />}
+        variant={gallery ? 'primary' : undefined}
+        icon={gallery ? <Shuffle size={15} /> : <Copy size={15} />}
         onClick={async () => {
           try {
-            const name = t('dashboard.copyName', { name: session.getDoc().meta.name })
+            const current = session.getDoc().meta.name
+            const name = gallery
+              ? t('gallery.remixName', { name: current })
+              : t('dashboard.copyName', { name: current })
             const id = await serverBackend.duplicate(session.id, name)
-            toast.success(t('sync.duplicated'))
+            toast.success(gallery ? t('gallery.remixed') : t('sync.duplicated'))
+            if (gallery) void awardBadge('first-remix')
             await navigate({
               to: '/p/$projectId',
               params: { projectId: id },
@@ -173,7 +187,7 @@ function ReadOnlyBanner() {
           }
         }}
       >
-        {t('sync.duplicate')}
+        {gallery ? t('gallery.readOnly.remix') : t('sync.duplicate')}
       </Button>
     </div>
   )

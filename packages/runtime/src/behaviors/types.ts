@@ -33,7 +33,27 @@ export type BehaviorContext = {
   alive(): boolean
   /** Shows a full-screen panel over the app (QR scanner…) until it answers. */
   overlay<T>(kind: string, data?: unknown): Promise<T>
+  /** The AI assistant, when the player offers it (J6): the AI component asks it. */
+  readonly ai: AiProvider | undefined
 }
+
+/** A request of the AI component (J6): a text, and an image to describe. */
+export type AiRequest = {
+  prompt: string
+  image?: { mediaType: 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp'; data: string }
+}
+
+/** The answer: a text, a refusal of the model, or why there is none. */
+export type AiReply =
+  | { text: string }
+  | { refused: true }
+  | { error: 'unavailable' | 'quota' | 'failed' }
+
+/**
+ * How the player reaches the assistant: through the studio in the preview, through the apps
+ * origin (`/_rx/ai`) for a published app or a live test.
+ */
+export type AiProvider = (request: AiRequest) => Promise<AiReply>
 
 export type Method = (ctx: BehaviorContext, ...args: unknown[]) => unknown
 
@@ -43,7 +63,7 @@ export type Method = (ctx: BehaviorContext, ...args: unknown[]) => unknown
  */
 export type Behavior = {
   /** Whether the browser can do what the component needs: sets its `available` property. */
-  available?: () => boolean
+  available?: (ctx: BehaviorContext) => boolean
   /** Starts the component when its screen opens (a timer, a sensor…). */
   mount?: (ctx: BehaviorContext) => void
   /** The component's methods (`rx_<Type>_call_<method>` blocks). */

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { cn } from '../lib/cn.ts'
 import { useCommands } from '../lib/commands.ts'
+import { useFeatures } from '../lib/features.ts'
 import { signOut, useMe } from '../lib/session.ts'
 import { Avatar } from './avatar.tsx'
 import { Logo } from './brand.tsx'
@@ -18,6 +19,7 @@ export function AppHeader() {
   const { t } = useTranslation()
   const me = useMe()
   const user = me.data?.user ?? null
+  const features = useFeatures()
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-bg/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-5 junior:h-[72px]">
@@ -27,6 +29,7 @@ export function AppHeader() {
         {me.isPending ? null : user ? (
           <nav aria-label={t('nav.main')} className="ml-2 hidden items-center gap-1 sm:flex">
             <NavLink to="/">{t('nav.projects')}</NavLink>
+            {features.gallery ? <NavLink to="/gallery">{t('gallery.nav')}</NavLink> : null}
             <NavLink to="/spaces">{t('nav.spaces')}</NavLink>
             <NavLink to="/learn">{t('learn.open')}</NavLink>
             {user.isAdmin ? <NavLink to="/admin">{t('nav.admin')}</NavLink> : null}
@@ -76,7 +79,7 @@ function NavLink({
   to,
   children,
 }: {
-  to: '/' | '/spaces' | '/admin' | '/learn'
+  to: '/' | '/spaces' | '/admin' | '/learn' | '/gallery'
   children: ReactNode
 }) {
   return (

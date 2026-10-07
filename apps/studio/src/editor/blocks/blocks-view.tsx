@@ -1,10 +1,13 @@
 import { type GeneratedCode, generateProjectCode } from '@rublox/blocks'
-import type { ProjectDoc, ScreenId, WorkspaceKey } from '@rublox/schema'
+import { APP_WORKSPACE, type ProjectDoc, type ScreenId, type WorkspaceKey } from '@rublox/schema'
 import { Code2, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useAiPanel } from '../../ai/store.ts'
+import { Button } from '../../components/ui/button.tsx'
 import { Panel, PanelGroup, ResizeHandle } from '../../components/ui/panels.tsx'
 import { Switch } from '../../components/ui/switch.tsx'
+import { useFeatures } from '../../lib/features.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { useDoc } from '../context.tsx'
 import { Preview } from '../preview/preview.tsx'
@@ -88,9 +91,16 @@ export default function BlocksView({
                 <Code2 size={16} className="text-primary-text" />
                 {t('editor.blocks.showCode')}
               </label>
+              <div className="flex-1" />
+              <ExplainScreenButton workspace={workspace} />
             </div>
           ) : null}
-          <div className="min-h-0 flex-1">
+          <div className="relative min-h-0 flex-1">
+            {mode === 'studio' ? (
+              <div className="absolute top-2 right-3 z-10">
+                <ExplainScreenButton workspace={workspace} />
+              </div>
+            ) : null}
             <BlocksWorkspace key={workspace} workspaceKey={workspace} label={label} />
           </div>
         </Panel>
@@ -119,5 +129,27 @@ export default function BlocksView({
       </PanelGroup>
       <PromptDialog />
     </>
+  )
+}
+
+/** "Explain this screen" (J6), when this account may ask the assistant. */
+function ExplainScreenButton({ workspace }: { workspace: WorkspaceKey }) {
+  const { t } = useTranslation()
+  const features = useFeatures()
+  const previewScreen = useDoc().screenOrder[0]
+  if (!features.ai) return null
+  const screen = workspace === APP_WORKSPACE ? previewScreen : workspace
+  if (!screen) return null
+  return (
+    <Button
+      size="sm"
+      icon={<Sparkles size={15} className="text-primary" />}
+      data-testid="ai-explain-screen"
+      onClick={() =>
+        useAiPanel.getState().open({ kind: 'explain', target: 'screen', workspace: screen })
+      }
+    >
+      {t('ai.explain.screen')}
+    </Button>
   )
 }

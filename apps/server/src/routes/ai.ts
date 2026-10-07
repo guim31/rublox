@@ -60,7 +60,12 @@ export function aiRoutes(services: Services) {
           return c.json(
             result.refused
               ? { refused: true as const }
-              : { refused: false as const, doc: result.value.doc, summary: result.value.summary },
+              : {
+                  refused: false as const,
+                  // Typed loosely: the studio reads it as a `ProjectDoc` (a deep type for `hc`).
+                  doc: result.value.doc as unknown as Record<string, unknown>,
+                  summary: result.value.summary,
+                },
           )
         },
       )

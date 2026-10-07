@@ -1,4 +1,5 @@
 import type { Locale, UiMode } from '@rublox/schema'
+import { AI } from './components/ai.ts'
 import { AudioRecorder } from './components/audio-recorder.ts'
 import { Battery } from './components/battery.ts'
 import { Box } from './components/box.ts'
@@ -107,6 +108,7 @@ export const COMPONENTS: readonly ComponentDef[] = [
   Clipboard,
   Notifier,
   QrScanner,
+  AI,
   GameScene,
   Sprite,
   SceneText,

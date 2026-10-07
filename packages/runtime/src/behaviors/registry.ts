@@ -1,3 +1,4 @@
+import { aiBehavior } from './ai.ts'
 import {
   canvasBehavior,
   dataGridBehavior,
@@ -56,4 +57,5 @@ export const BEHAVIORS: Record<string, Behavior> = {
   Clipboard: clipboardBehavior,
   Notifier: notifierBehavior,
   QrScanner: qrScannerBehavior,
+  AI: aiBehavior,
 }

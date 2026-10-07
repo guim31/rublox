@@ -30,8 +30,16 @@ const KNOWN = new Set([
 
 type Code = typeof KNOWN extends Set<infer C> ? C : never
 
+const GALLERY_CODES = new Set(['gallery_disabled', 'gallery_forbidden', 'gallery_removed'] as const)
+type GalleryCode = typeof GALLERY_CODES extends Set<infer C> ? C : never
+const AI_CODES = new Set(['ai_forbidden', 'ai_quota', 'ai_failed'] as const)
+type AiCode = typeof AI_CODES extends Set<infer C> ? C : never
+
 /** A sentence for the person, for any error of the API (SPEC § 5.4: what happened). */
 export function errorMessage(t: TFunction, error: unknown): string {
   const code = error instanceof ApiError ? error.code : 'unknown'
+  // J6: the gallery and the AI assistant keep their own messages.
+  if ((GALLERY_CODES as Set<string>).has(code)) return t(`gallery.errors.${code as GalleryCode}`)
+  if ((AI_CODES as Set<string>).has(code)) return t(`ai.errors.${code as AiCode}`)
   return (KNOWN as Set<string>).has(code) ? t(`errors.${code as Code}`) : t('errors.unknown')
 }

@@ -2,6 +2,7 @@ import { detectLocale, messages } from '@rublox/i18n'
 import { Engine } from '@rublox/runtime'
 import type { PublishedApp } from '@rublox/schema'
 import { useCallback, useEffect, useState } from 'react'
+import { serverAi } from './ai.ts'
 import { InstallButton, InstallHelp } from './install.tsx'
 import { assetResolver, Message, RunningApp } from './run.tsx'
 
@@ -15,9 +16,12 @@ type Failure = 'offline' | 'error'
  */
 export function PublishedView({
   base,
+  slug,
   install,
   serviceWorker,
 }: {
+  /** The published app's address (`/a/<slug>/`); absent for an exported website. */
+  slug?: string
   /** Path of the app, ending with `/`: `/a/<slug>/`, or the folder of an exported site. */
   base: string
   install: boolean
@@ -39,6 +43,8 @@ export function PublishedView({
         locale: app.doc.meta.locale,
         mode: app.doc.meta.mode,
         appId: `app:${app.appId}`,
+        // The AI component works if the owner allowed it (J6); an exported site has none.
+        ai: slug ? serverAi({ slug }) : undefined,
         host: { log: () => {} },
       })
       document.title = app.settings.name
@@ -47,7 +53,7 @@ export function PublishedView({
     } catch {
       setFailure(navigator.onLine ? 'error' : 'offline')
     }
-  }, [base, install])
+  }, [base, install, slug])
 
   useEffect(() => {
     void load()

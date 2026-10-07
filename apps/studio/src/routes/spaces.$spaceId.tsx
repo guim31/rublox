@@ -30,6 +30,7 @@ import { ProjectThumbnail } from '../dashboard/thumbnail.tsx'
 import { api, call } from '../lib/api.ts'
 import { downloadJson } from '../lib/download.ts'
 import { errorMessage } from '../lib/errors.ts'
+import { useFeatures } from '../lib/features.ts'
 import { isDark, usePrefs } from '../lib/prefs.ts'
 import { ME_KEY, useMe } from '../lib/session.ts'
 import { relativeTime } from '../lib/time.ts'
@@ -414,11 +415,15 @@ function SettingsSection({ data }: { data: Details }) {
       toast.error(errorMessage(t, caught))
     }
   }
-  const rights = [
-    ['membersCanPublish', 'canPublish'],
-    ['membersCanUseAi', 'canUseAi'],
-    ['membersCanShareInGallery', 'canShareInGallery'],
-  ] as const
+  // Without `ANTHROPIC_API_KEY` the assistant has no switch here either (SPEC § 8).
+  const { aiConfigured } = useFeatures()
+  const rights = (
+    [
+      ['membersCanPublish', t('spaces.canPublish')],
+      ['membersCanUseAi', t('ai.space.canUseAi')],
+      ['membersCanShareInGallery', t('spaces.canShareInGallery')],
+    ] as const
+  ).filter(([field]) => aiConfigured || field !== 'membersCanUseAi')
   return (
     <div className="flex flex-col gap-5">
       <Section title={t('spaces.tabs.settings')}>
@@ -454,11 +459,11 @@ function SettingsSection({ data }: { data: Details }) {
           </Button>
         </form>
       </Section>
-      <Section title={t('spaces.rights')} description={t('spaces.rightsLater')}>
+      <Section title={t('spaces.rights')}>
         <ul className="flex flex-col gap-3">
           {rights.map(([field, label]) => (
             <li key={field} className="flex items-center justify-between gap-3">
-              <label htmlFor={`right-${field}`}>{t(`spaces.${label}`)}</label>
+              <label htmlFor={`right-${field}`}>{label}</label>
               <Switch
                 id={`right-${field}`}
                 checked={data.space[field]}

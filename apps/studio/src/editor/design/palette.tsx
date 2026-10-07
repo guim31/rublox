@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '../../components/ui/tooltip.tsx'
 import { cn } from '../../lib/cn.ts'
+import { useOfferedType } from '../../lib/features.ts'
 import { usePrefs } from '../../lib/prefs.ts'
 import { addComponentOfType } from '../actions.ts'
 import { ComponentIcon } from '../component-icon.tsx'
@@ -21,10 +22,12 @@ export function Palette({ screenId }: { screenId: string }) {
   const { mode, locale } = usePrefs()
   const [query, setQuery] = useState('')
   const needle = query.trim().toLocaleLowerCase(locale)
+  const offered = useOfferedType()
   const categories = paletteFor(mode)
     .map((entry) => ({
       ...entry,
       components: entry.components.filter((def) => {
+        if (!offered(def.type)) return false
         if (!needle) return true
         const strings = def.strings[locale]
         return `${strings.label} ${strings.description} ${def.type}`

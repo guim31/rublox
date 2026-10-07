@@ -25,7 +25,7 @@ export type Badge = {
   /** An emoji. */
   icon: string
   accent: Accent
-  /** `false` while the feature that earns it does not exist (publication: J4, remix: J6). */
+  /** `false` while the feature that earns it does not exist. */
   available: boolean
 }
 
@@ -42,7 +42,7 @@ export const BADGES: readonly Badge[] = [
   { id: 'bug-hunter', icon: '🔎', accent: 'coral', available: true },
   { id: 'three-stars', icon: '⭐', accent: 'yellow', available: true },
   { id: 'first-publish', icon: '🌍', accent: 'indigo', available: true },
-  { id: 'first-remix', icon: '🎨', accent: 'coral', available: false },
+  { id: 'first-remix', icon: '🎨', accent: 'coral', available: true },
 ]
 
 const LOOPS = [

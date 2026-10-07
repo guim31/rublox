@@ -10,6 +10,7 @@ import { Dialog } from '../components/ui/dialog.tsx'
 import { Badge, Field } from '../components/ui/field.tsx'
 import { Input, Select } from '../components/ui/input.tsx'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../components/ui/menu.tsx'
+import { GallerySharing } from '../gallery/sharing.tsx'
 import { ApiError, api, call } from '../lib/api.ts'
 import { errorMessage } from '../lib/errors.ts'
 import { useUser } from '../lib/session.ts'
@@ -187,6 +188,7 @@ export function ShareDialog({ open, onClose }: { open: boolean; onClose: () => v
         {members.data && members.data.members.length === 0 ? (
           <p className="mt-2 text-ui-sm text-muted">{t('share.nobody')}</p>
         ) : null}
+        {isOwner ? <GallerySharing projectId={projectId} /> : null}
         {!isOwner && user && members.data?.members.some((m) => m.id === user.id) ? (
           <div className="mt-4 flex justify-end">
             <Button variant="ghost" icon={<UserMinus size={16} />} onClick={() => remove(user.id)}>

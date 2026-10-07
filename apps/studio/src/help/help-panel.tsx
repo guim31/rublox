@@ -18,6 +18,7 @@ import { Segmented } from '../components/ui/segmented.tsx'
 import { ComponentIcon } from '../editor/component-icon.tsx'
 import { startTour } from '../learn/tour.tsx'
 import { cn } from '../lib/cn.ts'
+import { useOfferedType } from '../lib/features.ts'
 import { usePrefs } from '../lib/prefs.ts'
 import { allBlockSheets, blockSheet, categoryColor, componentSheets, type Sheet } from './sheets.ts'
 import { type HelpTab, openHelp, useHelp } from './store.ts'
@@ -71,7 +72,8 @@ export function HelpPanel() {
   }, [open, topic])
 
   const blocks = useMemo(() => allBlockSheets(locale), [locale])
-  const components = useMemo(() => componentSheets(locale), [locale])
+  const offered = useOfferedType()
+  const components = componentSheets(locale).filter((sheet) => offered(sheet.type))
   const glossary = Object.entries(messages[locale].studio.glossary)
 
   if (!open) return null

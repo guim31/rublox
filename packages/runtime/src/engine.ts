@@ -10,7 +10,7 @@ import {
   type WorkspaceKey,
 } from '@rublox/schema'
 import { BEHAVIORS } from './behaviors/registry.ts'
-import type { BehaviorContext } from './behaviors/types.ts'
+import type { AiProvider, BehaviorContext } from './behaviors/types.ts'
 import { friendlyError, listItem, StopSignal } from './errors.ts'
 import { FrameClock } from './game/clock.ts'
 import { GameInstance } from './game/instance.ts'
@@ -81,6 +81,8 @@ export type EngineOptions = {
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null
   /** URL of an asset property value, for behaviors (a sound to play). */
   assetUrl?: (value: string) => string | undefined
+  /** The AI assistant for the AI component (J6); absent, the component answers nothing. */
+  ai?: AiProvider
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: generated code passes any value
@@ -224,6 +226,7 @@ export class Engine {
   private readonly appId: string
   private readonly storage: Pick<Storage, 'getItem' | 'setItem'> | null
   private readonly assetUrl: (value: string) => string | undefined
+  private readonly ai: AiProvider | undefined
   private overlays: Overlay[] = []
   private stack: Instance[] = []
   /** Tabs and drawer: the instance of each top-level screen, kept while another one shows. */
@@ -274,6 +277,7 @@ export class Engine {
     this.appId = options.appId ?? options.doc.meta.id
     this.storage = options.storage === undefined ? defaultStorage() : options.storage
     this.assetUrl = options.assetUrl ?? httpsOnly
+    this.ai = options.ai
     this.snapshot = this.makeSnapshot(0)
   }
 
@@ -553,7 +557,7 @@ export class Engine {
       if (behavior.available && getComponentDef(node.type)?.props.available) {
         let available = false
         try {
-          available = behavior.available()
+          available = behavior.available(ctx)
         } catch {
           available = false
         }
@@ -594,6 +598,7 @@ export class Engine {
       },
       alive: () => instance.alive && this.running,
       overlay: <T>(kind: string, data?: unknown) => this.overlay(kind, data) as Promise<T>,
+      ai: this.ai,
     }
     instance.contexts.set(componentId, ctx)
     return ctx
