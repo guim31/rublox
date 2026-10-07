@@ -1,0 +1,708 @@
+{
+  "id": "converter",
+  "order": 10,
+  "mode": "studio",
+  "icon": "🌡️",
+  "accent": "coral",
+  "recipe": {
+    "name": { "fr": "Convertisseur de températures", "en": "Temperature converter" },
+    "theme": { "primary": "#e8590c" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 20, "gap": 16 },
+        "components": [
+          {
+            "key": "header",
+            "type": "Row",
+            "name": { "fr": "EnTete", "en": "Header" },
+            "props": { "gap": 10 },
+            "children": [
+              {
+                "key": "thermo",
+                "type": "Icon",
+                "name": { "fr": "Thermometre", "en": "Thermometer" },
+                "props": { "icon": "thermometer", "size": 36 }
+              },
+              {
+                "key": "title",
+                "type": "Text",
+                "name": { "fr": "Titre", "en": "Title" },
+                "props": {
+                  "text": { "fr": "Températures", "en": "Temperatures" },
+                  "fontSize": 26,
+                  "bold": true
+                }
+              }
+            ]
+          },
+          {
+            "key": "direction",
+            "type": "Dropdown",
+            "name": { "fr": "Sens", "en": "Direction" },
+            "props": { "options": ["°C → °F", "°F → °C"], "selected": "°C → °F" }
+          },
+          {
+            "key": "entry",
+            "type": "Row",
+            "name": { "fr": "Saisie", "en": "Entry" },
+            "props": { "gap": 8 },
+            "children": [
+              {
+                "key": "value",
+                "type": "TextInput",
+                "name": { "fr": "Valeur", "en": "Value" },
+                "props": { "inputType": "number", "text": "20", "fontSize": 22, "grow": true }
+              },
+              {
+                "key": "swap",
+                "type": "Button",
+                "name": { "fr": "Inverser", "en": "Swap" },
+                "props": { "text": "⇅", "fontSize": 22, "variant": "outline" }
+              }
+            ]
+          },
+          {
+            "key": "resultCard",
+            "type": "Box",
+            "name": { "fr": "CarteResultat", "en": "ResultCard" },
+            "props": { "alignItems": "center", "gap": 6, "padding": 24 },
+            "children": [
+              {
+                "key": "result",
+                "type": "Text",
+                "name": { "fr": "Resultat", "en": "Result" },
+                "props": {
+                  "text": "68 °F",
+                  "fontSize": 48,
+                  "bold": true,
+                  "color": "@primary",
+                  "align": "center"
+                }
+              },
+              {
+                "key": "feel",
+                "type": "Text",
+                "name": { "fr": "Ressenti", "en": "Feel" },
+                "props": {
+                  "text": { "fr": "🙂 Il fait bon", "en": "🙂 Nice and mild" },
+                  "fontSize": 18,
+                  "align": "center"
+                }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "procedures_defnoreturn",
+            "fields": { "NAME": { "fr": "convertir", "en": "convert" } },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "controls_if",
+                  "extraState": { "hasElse": true },
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "text_isEmpty",
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "text_trim",
+                              "fields": { "MODE": "BOTH" },
+                              "inputs": {
+                                "TEXT": {
+                                  "block": {
+                                    "type": "rx_TextInput_get",
+                                    "fields": { "COMPONENT": "value", "PROP": "text" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_Text_set",
+                        "fields": { "COMPONENT": "result", "PROP": "text" },
+                        "inputs": {
+                          "VALUE": { "block": { "type": "text", "fields": { "TEXT": "—" } } }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "rx_Text_set",
+                            "fields": { "COMPONENT": "feel", "PROP": "text" },
+                            "inputs": {
+                              "VALUE": { "block": { "type": "text", "fields": { "TEXT": "" } } }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ELSE": {
+                      "block": {
+                        "type": "variables_set",
+                        "fields": { "VAR": "input" },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "text_replace",
+                              "inputs": {
+                                "FROM": { "block": { "type": "text", "fields": { "TEXT": "," } } },
+                                "TO": { "block": { "type": "text", "fields": { "TEXT": "." } } },
+                                "TEXT": {
+                                  "block": {
+                                    "type": "rx_TextInput_get",
+                                    "fields": { "COMPONENT": "value", "PROP": "text" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "variables_set",
+                            "fields": { "VAR": "input" },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "math_arithmetic",
+                                  "fields": { "OP": "MULTIPLY" },
+                                  "inputs": {
+                                    "A": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": { "VAR": "input" }
+                                      }
+                                    },
+                                    "B": {
+                                      "block": { "type": "math_number", "fields": { "NUM": 1 } }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "controls_if",
+                                "extraState": { "hasElse": true },
+                                "inputs": {
+                                  "IF0": {
+                                    "block": {
+                                      "type": "logic_compare",
+                                      "fields": { "OP": "EQ" },
+                                      "inputs": {
+                                        "A": {
+                                          "block": {
+                                            "type": "rx_Dropdown_get",
+                                            "fields": {
+                                              "COMPONENT": "direction",
+                                              "PROP": "selected"
+                                            }
+                                          }
+                                        },
+                                        "B": {
+                                          "block": {
+                                            "type": "text",
+                                            "fields": { "TEXT": "°C → °F" }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "DO0": {
+                                    "block": {
+                                      "type": "variables_set",
+                                      "fields": { "VAR": "celsius" },
+                                      "inputs": {
+                                        "VALUE": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": { "VAR": "input" }
+                                          }
+                                        }
+                                      },
+                                      "next": {
+                                        "block": {
+                                          "type": "variables_set",
+                                          "fields": { "VAR": "output" },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "math_arithmetic",
+                                                "fields": { "OP": "ADD" },
+                                                "inputs": {
+                                                  "A": {
+                                                    "block": {
+                                                      "type": "math_arithmetic",
+                                                      "fields": { "OP": "MULTIPLY" },
+                                                      "inputs": {
+                                                        "A": {
+                                                          "block": {
+                                                            "type": "variables_get",
+                                                            "fields": { "VAR": "input" }
+                                                          }
+                                                        },
+                                                        "B": {
+                                                          "block": {
+                                                            "type": "math_number",
+                                                            "fields": { "NUM": 1.8 }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  },
+                                                  "B": {
+                                                    "block": {
+                                                      "type": "math_number",
+                                                      "fields": { "NUM": 32 }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "next": {
+                                            "block": {
+                                              "type": "rx_Text_set",
+                                              "fields": { "COMPONENT": "result", "PROP": "text" },
+                                              "inputs": {
+                                                "VALUE": {
+                                                  "block": {
+                                                    "type": "text_join",
+                                                    "extraState": { "itemCount": 2 },
+                                                    "inputs": {
+                                                      "ADD0": {
+                                                        "block": {
+                                                          "type": "math_arithmetic",
+                                                          "fields": { "OP": "DIVIDE" },
+                                                          "inputs": {
+                                                            "A": {
+                                                              "block": {
+                                                                "type": "math_round",
+                                                                "fields": { "OP": "ROUND" },
+                                                                "inputs": {
+                                                                  "NUM": {
+                                                                    "block": {
+                                                                      "type": "math_arithmetic",
+                                                                      "fields": {
+                                                                        "OP": "MULTIPLY"
+                                                                      },
+                                                                      "inputs": {
+                                                                        "A": {
+                                                                          "block": {
+                                                                            "type": "variables_get",
+                                                                            "fields": {
+                                                                              "VAR": "output"
+                                                                            }
+                                                                          }
+                                                                        },
+                                                                        "B": {
+                                                                          "block": {
+                                                                            "type": "math_number",
+                                                                            "fields": { "NUM": 10 }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            },
+                                                            "B": {
+                                                              "block": {
+                                                                "type": "math_number",
+                                                                "fields": { "NUM": 10 }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      },
+                                                      "ADD1": {
+                                                        "block": {
+                                                          "type": "text",
+                                                          "fields": { "TEXT": " °F" }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "ELSE": {
+                                    "block": {
+                                      "type": "variables_set",
+                                      "fields": { "VAR": "output" },
+                                      "inputs": {
+                                        "VALUE": {
+                                          "block": {
+                                            "type": "math_arithmetic",
+                                            "fields": { "OP": "DIVIDE" },
+                                            "inputs": {
+                                              "A": {
+                                                "block": {
+                                                  "type": "math_arithmetic",
+                                                  "fields": { "OP": "MINUS" },
+                                                  "inputs": {
+                                                    "A": {
+                                                      "block": {
+                                                        "type": "variables_get",
+                                                        "fields": { "VAR": "input" }
+                                                      }
+                                                    },
+                                                    "B": {
+                                                      "block": {
+                                                        "type": "math_number",
+                                                        "fields": { "NUM": 32 }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              },
+                                              "B": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": { "NUM": 1.8 }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "next": {
+                                        "block": {
+                                          "type": "variables_set",
+                                          "fields": { "VAR": "celsius" },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": { "VAR": "output" }
+                                              }
+                                            }
+                                          },
+                                          "next": {
+                                            "block": {
+                                              "type": "rx_Text_set",
+                                              "fields": { "COMPONENT": "result", "PROP": "text" },
+                                              "inputs": {
+                                                "VALUE": {
+                                                  "block": {
+                                                    "type": "text_join",
+                                                    "extraState": { "itemCount": 2 },
+                                                    "inputs": {
+                                                      "ADD0": {
+                                                        "block": {
+                                                          "type": "math_arithmetic",
+                                                          "fields": { "OP": "DIVIDE" },
+                                                          "inputs": {
+                                                            "A": {
+                                                              "block": {
+                                                                "type": "math_round",
+                                                                "fields": { "OP": "ROUND" },
+                                                                "inputs": {
+                                                                  "NUM": {
+                                                                    "block": {
+                                                                      "type": "math_arithmetic",
+                                                                      "fields": {
+                                                                        "OP": "MULTIPLY"
+                                                                      },
+                                                                      "inputs": {
+                                                                        "A": {
+                                                                          "block": {
+                                                                            "type": "variables_get",
+                                                                            "fields": {
+                                                                              "VAR": "output"
+                                                                            }
+                                                                          }
+                                                                        },
+                                                                        "B": {
+                                                                          "block": {
+                                                                            "type": "math_number",
+                                                                            "fields": { "NUM": 10 }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            },
+                                                            "B": {
+                                                              "block": {
+                                                                "type": "math_number",
+                                                                "fields": { "NUM": 10 }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      },
+                                                      "ADD1": {
+                                                        "block": {
+                                                          "type": "text",
+                                                          "fields": { "TEXT": " °C" }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "controls_if",
+                                    "extraState": { "elseIfCount": 2, "hasElse": true },
+                                    "inputs": {
+                                      "IF0": {
+                                        "block": {
+                                          "type": "logic_compare",
+                                          "fields": { "OP": "LT" },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": { "VAR": "celsius" }
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 0 }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "DO0": {
+                                        "block": {
+                                          "type": "rx_Text_set",
+                                          "fields": { "COMPONENT": "feel", "PROP": "text" },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "🥶 Ça gèle !",
+                                                    "en": "🥶 Freezing!"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "IF1": {
+                                        "block": {
+                                          "type": "logic_compare",
+                                          "fields": { "OP": "LT" },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": { "VAR": "celsius" }
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 15 }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "DO1": {
+                                        "block": {
+                                          "type": "rx_Text_set",
+                                          "fields": { "COMPONENT": "feel", "PROP": "text" },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "🧥 Il fait frais",
+                                                    "en": "🧥 A bit chilly"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "IF2": {
+                                        "block": {
+                                          "type": "logic_compare",
+                                          "fields": { "OP": "LT" },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": { "VAR": "celsius" }
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 25 }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "DO2": {
+                                        "block": {
+                                          "type": "rx_Text_set",
+                                          "fields": { "COMPONENT": "feel", "PROP": "text" },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "🙂 Il fait bon",
+                                                    "en": "🙂 Nice and mild"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "ELSE": {
+                                        "block": {
+                                          "type": "rx_Text_set",
+                                          "fields": { "COMPONENT": "feel", "PROP": "text" },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "🥵 Il fait chaud !",
+                                                    "en": "🥵 Hot!"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_TextInput_on_change",
+            "fields": { "COMPONENT": "value" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": { "name": { "fr": "convertir", "en": "convert" } }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Dropdown_on_change",
+            "fields": { "COMPONENT": "direction" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": { "name": { "fr": "convertir", "en": "convert" } }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "swap" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "controls_if",
+                  "extraState": { "hasElse": true },
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "fields": { "OP": "EQ" },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "rx_Dropdown_get",
+                              "fields": { "COMPONENT": "direction", "PROP": "selected" }
+                            }
+                          },
+                          "B": { "block": { "type": "text", "fields": { "TEXT": "°C → °F" } } }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_Dropdown_set",
+                        "fields": { "COMPONENT": "direction", "PROP": "selected" },
+                        "inputs": {
+                          "VALUE": { "block": { "type": "text", "fields": { "TEXT": "°F → °C" } } }
+                        }
+                      }
+                    },
+                    "ELSE": {
+                      "block": {
+                        "type": "rx_Dropdown_set",
+                        "fields": { "COMPONENT": "direction", "PROP": "selected" },
+                        "inputs": {
+                          "VALUE": { "block": { "type": "text", "fields": { "TEXT": "°C → °F" } } }
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": { "name": { "fr": "convertir", "en": "convert" } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      { "key": "input", "name": { "fr": "valeur", "en": "input" }, "initial": 0 },
+      { "key": "output", "name": { "fr": "resultat", "en": "output" }, "initial": 0 },
+      { "key": "celsius", "name": { "fr": "celsius", "en": "celsius" }, "initial": 0 }
+    ]
+  }
+}

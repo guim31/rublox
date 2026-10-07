@@ -1,0 +1,255 @@
+{
+  "id": "scoreboard",
+  "order": 3,
+  "mode": "junior",
+  "icon": "🏆",
+  "accent": "yellow",
+  "recipe": {
+    "name": { "fr": "Tableau des scores", "en": "Scoreboard" },
+    "theme": { "primary": "#f59f00", "font": "rounded" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 20, "gap": 20, "justify": "center" },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "🏆 Tableau des scores", "en": "🏆 Scoreboard" },
+              "fontSize": 26,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "teams",
+            "type": "Row",
+            "name": { "fr": "Equipes", "en": "Teams" },
+            "props": { "gap": 12, "alignItems": "stretch" },
+            "children": [
+              {
+                "key": "blueCard",
+                "type": "Box",
+                "name": { "fr": "CarteBleue", "en": "BlueCard" },
+                "props": {
+                  "grow": true,
+                  "alignItems": "center",
+                  "gap": 8,
+                  "background": "#e7ecff",
+                  "padding": 16
+                },
+                "children": [
+                  {
+                    "key": "blueName",
+                    "type": "Text",
+                    "name": { "fr": "NomBleus", "en": "BlueName" },
+                    "props": {
+                      "text": { "fr": "Équipe bleue", "en": "Blue team" },
+                      "bold": true,
+                      "fontSize": 18,
+                      "color": "#3b5bdb",
+                      "align": "center"
+                    }
+                  },
+                  {
+                    "key": "blueScore",
+                    "type": "Text",
+                    "name": { "fr": "ScoreBleus", "en": "BlueScore" },
+                    "props": {
+                      "text": "0",
+                      "fontSize": 72,
+                      "bold": true,
+                      "color": "#3b5bdb",
+                      "align": "center"
+                    }
+                  },
+                  {
+                    "key": "bluePlus",
+                    "type": "Button",
+                    "name": { "fr": "PlusBleus", "en": "BluePlus" },
+                    "props": { "text": "+1", "fontSize": 24, "color": "#3b5bdb", "width": "fill" }
+                  }
+                ]
+              },
+              {
+                "key": "redCard",
+                "type": "Box",
+                "name": { "fr": "CarteRouge", "en": "RedCard" },
+                "props": {
+                  "grow": true,
+                  "alignItems": "center",
+                  "gap": 8,
+                  "background": "#ffe8e8",
+                  "padding": 16
+                },
+                "children": [
+                  {
+                    "key": "redName",
+                    "type": "Text",
+                    "name": { "fr": "NomRouges", "en": "RedName" },
+                    "props": {
+                      "text": { "fr": "Équipe rouge", "en": "Red team" },
+                      "bold": true,
+                      "fontSize": 18,
+                      "color": "#e03131",
+                      "align": "center"
+                    }
+                  },
+                  {
+                    "key": "redScore",
+                    "type": "Text",
+                    "name": { "fr": "ScoreRouges", "en": "RedScore" },
+                    "props": {
+                      "text": "0",
+                      "fontSize": 72,
+                      "bold": true,
+                      "color": "#e03131",
+                      "align": "center"
+                    }
+                  },
+                  {
+                    "key": "redPlus",
+                    "type": "Button",
+                    "name": { "fr": "PlusRouges", "en": "RedPlus" },
+                    "props": { "text": "+1", "fontSize": 24, "color": "#e03131", "width": "fill" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "key": "reset",
+            "type": "Button",
+            "name": { "fr": "Zero", "en": "Reset" },
+            "props": { "text": { "fr": "Remettre à zéro", "en": "Reset" }, "variant": "outline" }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "bluePlus" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": { "VAR": "blue" },
+                  "inputs": {
+                    "DELTA": { "block": { "type": "math_number", "fields": { "NUM": 1 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Text_set",
+                      "fields": { "COMPONENT": "blueScore", "PROP": "text" },
+                      "inputs": {
+                        "VALUE": {
+                          "block": { "type": "variables_get", "fields": { "VAR": "blue" } }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "redPlus" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": { "VAR": "red" },
+                  "inputs": {
+                    "DELTA": { "block": { "type": "math_number", "fields": { "NUM": 1 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Text_set",
+                      "fields": { "COMPONENT": "redScore", "PROP": "text" },
+                      "inputs": {
+                        "VALUE": {
+                          "block": { "type": "variables_get", "fields": { "VAR": "red" } }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "reset" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": { "VAR": "blue" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": { "VAR": "red" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_Text_set",
+                          "fields": { "COMPONENT": "blueScore", "PROP": "text" },
+                          "inputs": {
+                            "VALUE": {
+                              "block": { "type": "variables_get", "fields": { "VAR": "blue" } }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "rx_Text_set",
+                              "fields": { "COMPONENT": "redScore", "PROP": "text" },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": { "type": "variables_get", "fields": { "VAR": "red" } }
+                                }
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "rx_ui_toast",
+                                  "inputs": {
+                                    "MESSAGE": {
+                                      "block": {
+                                        "type": "text",
+                                        "fields": {
+                                          "TEXT": {
+                                            "fr": "C’est reparti !",
+                                            "en": "Here we go again!"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      { "key": "blue", "name": { "fr": "bleus", "en": "blue" }, "initial": 0 },
+      { "key": "red", "name": { "fr": "rouges", "en": "red" }, "initial": 0 }
+    ]
+  }
+}

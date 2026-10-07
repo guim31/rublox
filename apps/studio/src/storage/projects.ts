@@ -15,8 +15,11 @@ import { clearDocument, IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
 import { get, getAll, put, remove, STORES } from './db.ts'
 
-/** What the caller may do with a project (server projects; guest projects are `owner`). */
-export type ProjectAccess = 'owner' | 'editor' | 'viewer' | 'manager'
+/**
+ * What the caller may do with a project (server projects; guest projects are `owner`).
+ * `gallery`: a project shared in the gallery, opened read-only ("See the blocks", J6).
+ */
+export type ProjectAccess = 'owner' | 'editor' | 'viewer' | 'manager' | 'gallery'
 
 export type ProjectOwner = {
   id: string
@@ -42,6 +45,8 @@ export type ProjectSummary = {
   owner?: ProjectOwner
   /** The space through which a manager sees the project. */
   spaceId?: string | null
+  /** "Remix of X by Y": the gallery project it was copied from (J6). */
+  remixOf?: { id: string; name: string; owner: string } | null
 }
 
 export const TRASH_DAYS = 30

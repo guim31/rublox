@@ -8,6 +8,7 @@ import { account, member, organization, spaceSettings, user } from '../db/schema
 import { type ApiEnv, fail, isAdmin, jsonBody, requireUser, type SessionUser } from '../http.ts'
 import { deleteAccount, exportAccount } from '../privacy.ts'
 import type { Services } from '../services.ts'
+import { mayShareInGallery } from './gallery.ts'
 
 export const AVATAR_PATTERN = /^[a-z0-9-]{1,32}$/
 
@@ -74,6 +75,12 @@ export function meRoutes(services: Services) {
             manager: isManagerRole(space.role),
           })),
           instance: { name: settings.instanceName, maxUploadMb: settings.maxUploadMb },
+          features: {
+            gallery: settings.galleryEnabled,
+            galleryShare: settings.galleryEnabled && (await mayShareInGallery(db, session.user.id)),
+            // Absent without `ANTHROPIC_API_KEY`: the studio shows no trace of the assistant.
+            ai: services.ai ? await services.ai.status(session.user.id) : null,
+          },
         })
       })
       // RGPD (SPEC § 4.7): everything about the account, as a JSON file.

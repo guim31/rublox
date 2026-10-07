@@ -1,0 +1,422 @@
+{
+  "id": "tabs",
+  "order": 11,
+  "mode": "studio",
+  "icon": "🗂️",
+  "accent": "indigo",
+  "recipe": {
+    "name": { "fr": "Appli à onglets", "en": "Tabbed app" },
+    "theme": { "primary": "#5b4bff" },
+    "navigation": "tabs",
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "navIcon": "house",
+        "navLabel": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 24, "gap": 16 },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "Bienvenue ! 👋", "en": "Welcome! 👋" },
+              "fontSize": 28,
+              "bold": true
+            }
+          },
+          {
+            "key": "intro",
+            "type": "Text",
+            "name": { "fr": "Intro", "en": "Intro" },
+            "props": {
+              "text": {
+                "fr": "Cette appli a trois onglets, en bas de l’écran. Touche-les pour passer d’un écran à l’autre.",
+                "en": "This app has three tabs at the bottom of the screen. Tap them to move from one screen to another."
+              },
+              "fontSize": 17,
+              "color": "@muted"
+            }
+          },
+          {
+            "key": "likeCard",
+            "type": "Box",
+            "name": { "fr": "CarteJaime", "en": "LikeCard" },
+            "props": { "alignItems": "center", "gap": 10, "padding": 24 },
+            "children": [
+              {
+                "key": "heart",
+                "type": "Icon",
+                "name": { "fr": "Coeur", "en": "Heart" },
+                "props": { "icon": "heart", "size": 56, "color": "@secondary" }
+              },
+              {
+                "key": "likes",
+                "type": "Text",
+                "name": { "fr": "Compteur", "en": "Counter" },
+                "props": {
+                  "text": { "fr": "0 j’aime", "en": "0 likes" },
+                  "fontSize": 22,
+                  "bold": true,
+                  "align": "center"
+                }
+              },
+              {
+                "key": "like",
+                "type": "Button",
+                "name": { "fr": "Jaime", "en": "Like" },
+                "props": { "text": { "fr": "J’aime", "en": "Like" }, "color": "@secondary" }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "like" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": { "VAR": "likeCount" },
+                  "inputs": {
+                    "DELTA": { "block": { "type": "math_number", "fields": { "NUM": 1 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Text_set",
+                      "fields": { "COMPONENT": "likes", "PROP": "text" },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_join",
+                            "extraState": { "itemCount": 2 },
+                            "inputs": {
+                              "ADD0": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": { "VAR": "likeCount" }
+                                }
+                              },
+                              "ADD1": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": { "TEXT": { "fr": " j’aime", "en": " likes" } }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_Icon_set",
+                          "fields": { "COMPONENT": "heart", "PROP": "size" },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_arithmetic",
+                                "fields": { "OP": "ADD" },
+                                "inputs": {
+                                  "A": {
+                                    "block": { "type": "math_number", "fields": { "NUM": 56 } }
+                                  },
+                                  "B": {
+                                    "block": {
+                                      "type": "math_arithmetic",
+                                      "fields": { "OP": "MULTIPLY" },
+                                      "inputs": {
+                                        "A": {
+                                          "block": {
+                                            "type": "math_constrain",
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": { "VAR": "likeCount" }
+                                                }
+                                              },
+                                              "LOW": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": { "NUM": 0 }
+                                                }
+                                              },
+                                              "HIGH": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": { "NUM": 10 }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "B": {
+                                          "block": { "type": "math_number", "fields": { "NUM": 4 } }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "key": "notes",
+        "name": { "fr": "Notes", "en": "Notes" },
+        "navIcon": "pencil",
+        "navLabel": { "fr": "Notes", "en": "Notes" },
+        "props": { "padding": 24, "gap": 14 },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "Mes notes", "en": "My notes" },
+              "fontSize": 28,
+              "bold": true
+            }
+          },
+          {
+            "key": "note",
+            "type": "TextInput",
+            "name": { "fr": "Note", "en": "Note" },
+            "props": {
+              "inputType": "multiline",
+              "placeholder": {
+                "fr": "Écris ce que tu veux retenir…",
+                "en": "Write what you want to remember…"
+              },
+              "height": 220
+            }
+          },
+          {
+            "key": "save",
+            "type": "Button",
+            "name": { "fr": "Enregistrer", "en": "Save" },
+            "props": { "text": { "fr": "Enregistrer", "en": "Save" } }
+          },
+          {
+            "key": "saved",
+            "type": "Text",
+            "name": { "fr": "Etat", "en": "Status" },
+            "props": {
+              "text": {
+                "fr": "Ta note reste sur ton téléphone.",
+                "en": "Your note stays on your phone."
+              },
+              "fontSize": 14,
+              "color": "@muted"
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": { "COMPONENT": "notes" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_TextInput_set",
+                  "fields": { "COMPONENT": "note", "PROP": "text" },
+                  "inputs": {
+                    "VALUE": {
+                      "block": { "type": "variables_get", "fields": { "VAR": "savedNote" } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "save" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": { "VAR": "savedNote" },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "rx_TextInput_get",
+                        "fields": { "COMPONENT": "note", "PROP": "text" }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_ui_toast",
+                      "inputs": {
+                        "MESSAGE": {
+                          "block": {
+                            "type": "text",
+                            "fields": {
+                              "TEXT": { "fr": "Note enregistrée ✔", "en": "Note saved ✔" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "key": "feedback",
+        "name": { "fr": "Avis", "en": "Feedback" },
+        "navIcon": "star",
+        "navLabel": { "fr": "Avis", "en": "Feedback" },
+        "props": { "padding": 24, "gap": 16, "alignItems": "center" },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "Ton avis", "en": "Your feedback" },
+              "fontSize": 28,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "question",
+            "type": "Text",
+            "name": { "fr": "Question", "en": "Question" },
+            "props": {
+              "text": {
+                "fr": "Combien d’étoiles donnes-tu à cette appli ?",
+                "en": "How many stars do you give this app?"
+              },
+              "fontSize": 17,
+              "color": "@muted",
+              "align": "center"
+            }
+          },
+          {
+            "key": "stars",
+            "type": "Rating",
+            "name": { "fr": "Etoiles", "en": "Stars" },
+            "props": { "size": 44 }
+          },
+          {
+            "key": "thanks",
+            "type": "Text",
+            "name": { "fr": "Merci", "en": "Thanks" },
+            "props": { "text": "", "fontSize": 20, "bold": true, "align": "center" }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Rating_on_change",
+            "fields": { "COMPONENT": "stars" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "controls_if",
+                  "extraState": { "hasElse": true },
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "fields": { "OP": "GTE" },
+                        "inputs": {
+                          "A": {
+                            "block": { "type": "rx_event_value", "fields": { "ARG": "value" } }
+                          },
+                          "B": { "block": { "type": "math_number", "fields": { "NUM": 4 } } }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_Text_set",
+                        "fields": { "COMPONENT": "thanks", "PROP": "text" },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "text_join",
+                              "extraState": { "itemCount": 3 },
+                              "inputs": {
+                                "ADD0": {
+                                  "block": {
+                                    "type": "text",
+                                    "fields": {
+                                      "TEXT": { "fr": "Merci pour tes ", "en": "Thanks for your " }
+                                    }
+                                  }
+                                },
+                                "ADD1": {
+                                  "block": {
+                                    "type": "rx_event_value",
+                                    "fields": { "ARG": "value" }
+                                  }
+                                },
+                                "ADD2": {
+                                  "block": {
+                                    "type": "text",
+                                    "fields": {
+                                      "TEXT": { "fr": " étoiles ! 🤩", "en": " stars! 🤩" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ELSE": {
+                      "block": {
+                        "type": "rx_Text_set",
+                        "fields": { "COMPONENT": "thanks", "PROP": "text" },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Merci ! Dis-nous ce qu’on peut améliorer. 🙏",
+                                  "en": "Thanks! Tell us what we can do better. 🙏"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      { "key": "likeCount", "name": { "fr": "jaime", "en": "likeCount" }, "initial": 0 },
+      {
+        "key": "savedNote",
+        "name": { "fr": "note", "en": "note" },
+        "kind": "stored",
+        "initial": ""
+      }
+    ]
+  }
+}

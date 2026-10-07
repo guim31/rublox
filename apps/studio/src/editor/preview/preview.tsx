@@ -1,5 +1,5 @@
 import type { GeneratedCode } from '@rublox/blocks'
-import { isPlayerMessage, type StudioToPlayer } from '@rublox/runtime'
+import { type AiReply, type AiRequest, isPlayerMessage, type StudioToPlayer } from '@rublox/runtime'
 import type { ProjectDoc, ScreenId, WorkspaceKey } from '@rublox/schema'
 import { Moon, RotateCw, Square, Sun } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -7,12 +7,36 @@ import { useTranslation } from 'react-i18next'
 import { PhoneFrame } from '../../components/phone.tsx'
 import { IconButton } from '../../components/ui/button.tsx'
 import { recordEvent, useLearn } from '../../learn/store.ts'
+import { ApiError, api, call } from '../../lib/api.ts'
 import { cn } from '../../lib/cn.ts'
 import { appsOrigin, config } from '../../lib/config.ts'
+import { aiAllowed } from '../../lib/features.ts'
 import { usePrefs } from '../../lib/prefs.ts'
+import { queryClient } from '../../lib/query.ts'
+import { ME_KEY } from '../../lib/session.ts'
 import { useAssetsVersion, useSession } from '../context.tsx'
+import type { ProjectSession } from '../session.ts'
 import { DEVICES, useEditor } from '../store.ts'
 import { onStep, SlowMotionBar, SlowMotionToggle } from './slow-motion.tsx'
+
+/** The AI component of the previewed app asks the assistant (J6). */
+async function askForApp(session: ProjectSession, request: AiRequest): Promise<AiReply> {
+  if (session.source.kind !== 'server' || !aiAllowed()) return { error: 'unavailable' }
+  try {
+    const answer = await call(
+      api.ai.app.$post({
+        json: { projectId: session.id, prompt: request.prompt, image: request.image },
+      }),
+    )
+    return answer.refused ? { refused: true } : { text: answer.text }
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'ai_quota') return { error: 'quota' }
+    if (error instanceof ApiError && error.status === 403) return { error: 'unavailable' }
+    return { error: 'failed' }
+  } finally {
+    void queryClient.invalidateQueries({ queryKey: ME_KEY })
+  }
+}
 
 /**
  * The live preview: the player on the apps origin in an iframe (SPEC § 6.6), fed with the
@@ -61,10 +85,19 @@ export function Preview({
           useLearn.setState({ previewScreen: message.screenId })
       } else if (message.type === 'rx:event') recordEvent(message.event)
       else if (message.type === 'rx:step') onStep(message.step)
+      else if (message.type === 'rx:ai') {
+        // The AI component (J6): asked on behalf of the person testing the app.
+        void askForApp(session, message.request).then((reply) =>
+          frame.current?.contentWindow?.postMessage(
+            { type: 'rx:ai-reply', id: message.id, reply } satisfies StudioToPlayer,
+            appsOrigin,
+          ),
+        )
+      }
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [])
+  }, [session])
 
   // Send the project whenever it (or its code) changes.
   // biome-ignore lint/correctness/useExhaustiveDependencies: `post` only reads a ref

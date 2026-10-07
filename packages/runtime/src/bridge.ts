@@ -6,6 +6,7 @@ import type {
   UiMode,
   WorkspaceKey,
 } from '@rublox/schema'
+import type { AiReply, AiRequest } from './behaviors/types.ts'
 import type { AppEvent, LogEntry, ModuleCode, SlowMotion, StepInfo } from './engine.ts'
 import type { Scheme } from './theme.ts'
 
@@ -34,6 +35,8 @@ export type StudioToPlayer =
   | { type: 'rx:slow'; slow: SlowMotion }
   /** Leaves a pause: runs on (`step: false`) or stops again at the next block. */
   | { type: 'rx:resume'; step: boolean }
+  /** The answer of the assistant to an `rx:ai` request (J6). */
+  | { type: 'rx:ai-reply'; id: number; reply: AiReply }
 
 export type PlayerToStudio =
   | { type: 'rx:ready' }
@@ -44,6 +47,8 @@ export type PlayerToStudio =
   | { type: 'rx:event'; event: AppEvent }
   /** Slow motion: the block running now (`null` once the code is done), paused or not. */
   | { type: 'rx:step'; step: StepInfo }
+  /** The AI component asks the assistant (J6): the studio asks the server, billed to the editor. */
+  | { type: 'rx:ai'; id: number; request: AiRequest }
 
 const STUDIO_TYPES = new Set([
   'rx:load',
@@ -53,8 +58,17 @@ const STUDIO_TYPES = new Set([
   'rx:inspect',
   'rx:slow',
   'rx:resume',
+  'rx:ai-reply',
 ])
-const PLAYER_TYPES = new Set(['rx:ready', 'rx:log', 'rx:state', 'rx:select', 'rx:event', 'rx:step'])
+const PLAYER_TYPES = new Set([
+  'rx:ready',
+  'rx:log',
+  'rx:state',
+  'rx:select',
+  'rx:event',
+  'rx:step',
+  'rx:ai',
+])
 
 function hasType(data: unknown, types: Set<string>): boolean {
   return (

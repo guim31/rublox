@@ -7,21 +7,24 @@ export function Switch({
   label,
   id,
   className,
+  disabled,
 }: {
   checked: boolean
   onChange: (checked: boolean) => void
   label?: string
   id?: string
   className?: string
+  disabled?: boolean
 }) {
   return (
     <Radix.Root
       id={id}
       checked={checked}
+      disabled={disabled}
       onCheckedChange={onChange}
       aria-label={label}
       className={cn(
-        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full bg-surface-3 transition-colors data-[state=checked]:bg-primary junior:h-7 junior:w-12',
+        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center disabled:cursor-not-allowed disabled:opacity-50 rounded-full bg-surface-3 transition-colors data-[state=checked]:bg-primary junior:h-7 junior:w-12',
         className,
       )}
     >

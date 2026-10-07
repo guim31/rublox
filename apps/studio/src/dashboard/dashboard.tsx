@@ -1,4 +1,5 @@
 import { createDemoProject } from '@rublox/catalog'
+import { type Template, templateProject } from '@rublox/templates'
 import { useNavigate } from '@tanstack/react-router'
 import {
   Copy,
@@ -8,13 +9,16 @@ import {
   Plus,
   RotateCcw,
   Search,
+  Shuffle,
   Sparkles,
   Star,
   Trash2,
+  WandSparkles,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { CreateWithAiDialog } from '../ai/create-dialog.tsx'
 import { AppHeader } from '../components/app-header.tsx'
 import { Avatar } from '../components/avatar.tsx'
 import { Mascot } from '../components/brand.tsx'
@@ -26,6 +30,7 @@ import { Segmented } from '../components/ui/segmented.tsx'
 import { cn } from '../lib/cn.ts'
 import { useCommands } from '../lib/commands.ts'
 import { errorMessage } from '../lib/errors.ts'
+import { useFeatures } from '../lib/features.ts'
 import { isDark, usePrefs } from '../lib/prefs.ts'
 import { useMe } from '../lib/session.ts'
 import { relativeTime } from '../lib/time.ts'
@@ -33,6 +38,7 @@ import { guestBackend, serverBackend } from '../storage/backend.ts'
 import type { ProjectSummary } from '../storage/projects.ts'
 import { GuestImport } from './guest-import.tsx'
 import { ImportButton } from './import-button.tsx'
+import { NewProjectDialog } from './new-project-dialog.tsx'
 import { useProjectMutation, useProjects } from './queries.ts'
 import { ProjectThumbnail } from './thumbnail.tsx'
 
@@ -68,6 +74,8 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
   const [filter, setFilter] = useState<Filter>('all')
   const [sort, setSort] = useState<Sort>('recent')
   const [creating, setCreating] = useState(openNew)
+  const [creatingWithAi, setCreatingWithAi] = useState(false)
+  const features = useFeatures()
   const [renaming, setRenaming] = useState<ProjectSummary | null>(null)
   const [deleting, setDeleting] = useState<ProjectSummary | null>(null)
   const dark = isDark(theme)
@@ -91,7 +99,7 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
               name: '',
               locale,
               mode,
-              doc: createDemoProject({ locale, mode }),
+              doc: createDemoProject({ locale, mode, ai: features.ai !== null }),
             })
             .then((id) =>
               navigate({
@@ -104,9 +112,17 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
       },
     ])
     return () => useCommands.getState().setPage([])
-  }, [store, locale, mode, navigate, tc])
+  }, [store, locale, mode, navigate, tc, features.ai])
 
-  const create = useProjectMutation((name: string) => store.create({ name, locale, mode }))
+  const create = useProjectMutation(
+    ({ name, template }: { name: string; template: Template | null }) =>
+      store.create({
+        name,
+        locale,
+        mode,
+        doc: template ? templateProject(template, { locale, mode, name }) : undefined,
+      }),
+  )
   const rename = useProjectMutation(({ id, name }: { id: string; name: string }) =>
     store.rename(id, name),
   )
@@ -163,6 +179,17 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
           </div>
           <div className="flex flex-wrap gap-2">
             {backend ? <ImportButton target={backend.kind} /> : null}
+            {features.ai ? (
+              <Button
+                variant="soft"
+                size="lg"
+                icon={<WandSparkles size={18} />}
+                onClick={() => setCreatingWithAi(true)}
+                data-testid="ai-create-open"
+              >
+                {t('ai.create.open')}
+              </Button>
+            ) : null}
             <Button
               variant="primary"
               size="lg"
@@ -284,25 +311,35 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
         )}
       </main>
 
-      <NameDialog
+      <NewProjectDialog
         open={creating}
-        title={t('dashboard.createTitle')}
-        initial={creating ? defaultName() : ''}
-        action={t('common.create')}
+        locale={locale}
+        dark={dark}
+        defaultName={creating ? defaultName() : ''}
         onClose={() => {
           setCreating(false)
           if (openNew) void navigate({ to: '/', search: {} })
         }}
-        onSubmit={async (name) => {
+        onCreate={async (input) => {
           try {
-            const id = await create.mutateAsync(name)
+            const id = await create.mutateAsync(input)
             setCreating(false)
             await open(id as string)
           } catch (error) {
-            toast.error(errorMessage(t, error))
+            toast.error(input.template ? t('templates.failed') : errorMessage(t, error))
           }
         }}
       />
+      {features.ai ? (
+        <CreateWithAiDialog
+          open={creatingWithAi}
+          onClose={() => setCreatingWithAi(false)}
+          onCreated={(id) => {
+            setCreatingWithAi(false)
+            void open(id)
+          }}
+        />
+      ) : null}
       <NameDialog
         open={renaming !== null}
         title={t('dashboard.renameTitle')}
@@ -416,6 +453,14 @@ function ProjectCard(props: CardProps) {
               <span className="truncate">
                 {t('library.by', { name: project.owner.displayName })}
                 {writable ? '' : ` · ${t('library.readOnly')}`}
+              </span>
+            </p>
+          ) : null}
+          {project.remixOf ? (
+            <p className="flex min-w-0 items-center gap-1 text-ui-sm text-muted">
+              <Shuffle size={13} className="shrink-0" aria-hidden="true" />
+              <span className="truncate">
+                {t('gallery.remixOf', { name: project.remixOf.name, owner: project.remixOf.owner })}
               </span>
             </p>
           ) : null}

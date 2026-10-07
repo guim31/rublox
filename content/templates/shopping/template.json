@@ -1,0 +1,318 @@
+{
+  "id": "shopping",
+  "order": 8,
+  "mode": "studio",
+  "icon": "🛒",
+  "accent": "mint",
+  "recipe": {
+    "name": { "fr": "Liste de courses", "en": "Shopping list" },
+    "theme": { "primary": "#12b886" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 20, "gap": 14, "scroll": false },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "🛒 Liste de courses", "en": "🛒 Shopping list" },
+              "fontSize": 26,
+              "bold": true
+            }
+          },
+          {
+            "key": "entry",
+            "type": "Row",
+            "name": { "fr": "Saisie", "en": "Entry" },
+            "props": { "gap": 8 },
+            "children": [
+              {
+                "key": "item",
+                "type": "TextInput",
+                "name": { "fr": "Article", "en": "Item" },
+                "props": {
+                  "placeholder": { "fr": "Ajoute un article…", "en": "Add an item…" },
+                  "grow": true
+                }
+              },
+              {
+                "key": "add",
+                "type": "Button",
+                "name": { "fr": "Ajouter", "en": "Add" },
+                "props": { "text": { "fr": "Ajouter", "en": "Add" } }
+              }
+            ]
+          },
+          {
+            "key": "list",
+            "type": "ListView",
+            "name": { "fr": "Liste", "en": "List" },
+            "props": { "items": [], "grow": true, "fontSize": 18 }
+          },
+          {
+            "key": "hint",
+            "type": "Text",
+            "name": { "fr": "Astuce", "en": "Hint" },
+            "props": {
+              "text": {
+                "fr": "Touche un article pour le retirer.",
+                "en": "Tap an item to remove it."
+              },
+              "fontSize": 14,
+              "color": "@muted",
+              "align": "center"
+            }
+          },
+          {
+            "key": "clear",
+            "type": "Button",
+            "name": { "fr": "Vider", "en": "Clear" },
+            "props": {
+              "text": { "fr": "Vider la liste", "en": "Clear the list" },
+              "variant": "ghost"
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "procedures_defnoreturn",
+            "fields": { "NAME": { "fr": "ajouterArticle", "en": "addItem" } },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "controls_if",
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_negate",
+                        "inputs": {
+                          "BOOL": {
+                            "block": {
+                              "type": "text_isEmpty",
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "text_trim",
+                                    "fields": { "MODE": "BOTH" },
+                                    "inputs": {
+                                      "TEXT": {
+                                        "block": {
+                                          "type": "rx_TextInput_get",
+                                          "fields": { "COMPONENT": "item", "PROP": "text" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_ListView_call_addItem",
+                        "fields": { "COMPONENT": "list" },
+                        "inputs": {
+                          "ARG0": {
+                            "block": {
+                              "type": "text_trim",
+                              "fields": { "MODE": "BOTH" },
+                              "inputs": {
+                                "TEXT": {
+                                  "block": {
+                                    "type": "rx_TextInput_get",
+                                    "fields": { "COMPONENT": "item", "PROP": "text" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "variables_set",
+                            "fields": { "VAR": "items" },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "rx_ListView_get",
+                                  "fields": { "COMPONENT": "list", "PROP": "items" }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "rx_TextInput_call_clear",
+                                "fields": { "COMPONENT": "item" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Screen_on_open",
+            "fields": { "COMPONENT": "home" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_ListView_set",
+                  "fields": { "COMPONENT": "list", "PROP": "items" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "variables_get", "fields": { "VAR": "items" } } }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "add" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": { "name": { "fr": "ajouterArticle", "en": "addItem" } }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_TextInput_on_submit",
+            "fields": { "COMPONENT": "item" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": { "name": { "fr": "ajouterArticle", "en": "addItem" } }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_ListView_on_itemClick",
+            "fields": { "COMPONENT": "list" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_ListView_call_removeItem",
+                  "fields": { "COMPONENT": "list" },
+                  "inputs": {
+                    "ARG0": { "block": { "type": "rx_event_value", "fields": { "ARG": "index" } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": { "VAR": "items" },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "rx_ListView_get",
+                            "fields": { "COMPONENT": "list", "PROP": "items" }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_ui_toast",
+                          "inputs": {
+                            "MESSAGE": {
+                              "block": {
+                                "type": "text_join",
+                                "extraState": { "itemCount": 2 },
+                                "inputs": {
+                                  "ADD0": {
+                                    "block": { "type": "text", "fields": { "TEXT": "✔ " } }
+                                  },
+                                  "ADD1": {
+                                    "block": {
+                                      "type": "rx_event_value",
+                                      "fields": { "ARG": "item" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "clear" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "controls_if",
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "rx_ui_confirm",
+                        "inputs": {
+                          "MESSAGE": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Vider toute la liste ?",
+                                  "en": "Clear the whole list?"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_ListView_call_clear",
+                        "fields": { "COMPONENT": "list" },
+                        "next": {
+                          "block": {
+                            "type": "variables_set",
+                            "fields": { "VAR": "items" },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "rx_ListView_get",
+                                  "fields": { "COMPONENT": "list", "PROP": "items" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      {
+        "key": "items",
+        "name": { "fr": "articles", "en": "items" },
+        "kind": "stored",
+        "initial": []
+      }
+    ]
+  }
+}

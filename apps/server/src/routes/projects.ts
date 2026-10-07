@@ -5,7 +5,7 @@ import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type * as Y from 'yjs'
 import { z } from 'zod'
-import { MANAGER_ROLES, type ProjectAccess, requireProject } from '../access.ts'
+import { inGallery, MANAGER_ROLES, type ProjectAccess, requireProject } from '../access.ts'
 import type { Database } from '../db/index.ts'
 import {
   assets,
@@ -58,12 +58,15 @@ const nameSchema = z.string().trim().min(1).max(80)
 
 type ProjectRow = typeof projects.$inferSelect
 
-/** Creates a project from a document state (new project, import, duplicate). */
-async function insertProject(
+/** "Remix of X by Y" (J6), kept on the copy. */
+export type RemixOf = { id: string; name: string; owner: string }
+
+/** Creates a project from a document state (new project, import, duplicate, remix). */
+export async function insertProject(
   db: Database,
   owner: SessionUser,
   ydoc: Y.Doc,
-  options: { keepDates: boolean; name?: string },
+  options: { keepDates: boolean; name?: string; remixOf?: RemixOf },
 ) {
   const doc = readProject(ydoc)
   if (!doc) fail(400, 'invalid_project')
@@ -85,6 +88,8 @@ async function insertProject(
       name: final.meta.name,
       description: final.meta.description ?? null,
       preview: previewOf(final),
+      uiMode: final.meta.mode,
+      ...(options.remixOf ? { remixOfId: options.remixOf.id, remixOf: options.remixOf } : {}),
       createdAt: Number.isNaN(createdAt.getTime()) ? new Date() : createdAt,
       updatedAt: new Date(),
     })
@@ -209,7 +214,7 @@ export function projectsRoutes(services: Services) {
           db,
           me.id,
           c.req.param('projectId'),
-          'read',
+          'view',
         )
         const [owner] = await db
           .select({
@@ -226,6 +231,8 @@ export function projectsRoutes(services: Services) {
           access,
           deletedAt: iso(project.deletedAt),
           owner: owner ?? null,
+          remixOf: (project.remixOf ?? null) as RemixOf | null,
+          inGallery: inGallery(project),
         })
       })
       .patch(
@@ -273,11 +280,20 @@ export function projectsRoutes(services: Services) {
       )
       .post('/:projectId/duplicate', jsonBody(z.object({ name: nameSchema })), async (c) => {
         const me = requireUser(c)
-        const { project } = await requireProject(db, me.id, c.req.param('projectId'), 'read')
+        const { project, access } = await requireProject(
+          db,
+          me.id,
+          c.req.param('projectId'),
+          'view',
+        )
         const source = await currentDoc(project.id)
         const now = new Date().toISOString()
         const ydoc = copyDoc(source, { id: 'pending', name: c.req.valid('json').name, now })
-        const id = await insertProject(db, me, ydoc, { keepDates: true })
+        // A copy of someone else's gallery project is a remix: it keeps the credit.
+        const id = await insertProject(db, me, ydoc, {
+          keepDates: true,
+          remixOf: access === 'gallery' ? await remixCredit(db, project) : undefined,
+        })
         await copyAssetRows(db, project.id, id, me.id)
         return c.json({ id }, 201)
       })
@@ -550,6 +566,18 @@ export function projectsRoutes(services: Services) {
   )
 }
 
+/** The credit a remix keeps: the original's name and its owner's display name. */
+export async function remixCredit(
+  db: Database,
+  project: { id: string; name: string; ownerId: string },
+): Promise<RemixOf> {
+  const [owner] = await db
+    .select({ name: user.name })
+    .from(user)
+    .where(eq(user.id, project.ownerId))
+  return { id: project.id, name: project.name, owner: owner?.name ?? '' }
+}
+
 /** Bytes an account uses: each distinct file counted once. */
 export async function storageUsed(db: Database, ownerId: string): Promise<number> {
   const result = await db.execute<{ total: string | number | null }>(
@@ -561,7 +589,7 @@ export async function storageUsed(db: Database, ownerId: string): Promise<number
   return Number(rows[0]?.total ?? 0)
 }
 
-async function copyAssetRows(db: Database, fromId: string, toId: string, ownerId: string) {
+export async function copyAssetRows(db: Database, fromId: string, toId: string, ownerId: string) {
   const rows = await db.select().from(assets).where(eq(assets.projectId, fromId))
   for (const row of rows) {
     await db
@@ -591,6 +619,8 @@ export function summaryOf(
     access,
     owner: { ...owner, username: owner.username ?? '' },
     spaceId: project.spaceId,
+    /** "Remix of X by Y" (J6). */
+    remixOf: (project.remixOf ?? null) as RemixOf | null,
   }
 }
 

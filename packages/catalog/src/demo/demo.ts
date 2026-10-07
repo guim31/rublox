@@ -110,6 +110,8 @@ const TEXTS = {
     share: 'Partager',
     shareText: 'Regarde mon appli Rublox !',
     copy: 'Copier',
+    ai: 'Demander à l’IA',
+    aiPrompt: 'Invente une devinette courte pour un enfant.',
     notify: 'Notifier',
     notifyTitle: 'Rublox',
     notifyText: 'Une notification de la démo',
@@ -173,6 +175,8 @@ const TEXTS = {
     share: 'Share',
     shareText: 'Look at my Rublox app!',
     copy: 'Copy',
+    ai: 'Ask the AI',
+    aiPrompt: 'Make up a short riddle for a child.',
     notify: 'Notify',
     notifyTitle: 'Rublox',
     notifyText: 'A notification from the demo',
@@ -203,6 +207,8 @@ export function createDemoProject(input: {
   mode: UiMode
   id?: string
   now?: Date
+  /** Adds the AI component (J6): only when the instance has the assistant. */
+  ai?: boolean
 }): ProjectDoc {
   const L = TEXTS[input.locale]
   const doc = createProject({ name: L.name, ...input })
@@ -293,6 +299,7 @@ export function createDemoProject(input: {
     ['scan', L.scan],
     ['record', L.record],
     ['play', L.play],
+    ...(input.ai ? ([['ai', L.ai]] as [string, string][]) : []),
     ['goSensors', L.goSensors],
   ]
   const device = buildScreen(
@@ -324,6 +331,7 @@ export function createDemoProject(input: {
       c('clipboard', 'Clipboard'),
       c('notifier', 'Notifier'),
       c('scanner', 'QrScanner'),
+      ...(input.ai ? [c('ai', 'AI')] : []),
     ],
   )
 
@@ -528,6 +536,14 @@ export function createDemoProject(input: {
     error('Clipboard', 'clipboard'),
     error('Notifier', 'notifier'),
     error('QrScanner', 'scanner'),
+    ...(input.ai
+      ? [
+          on('Button', 'click', 'b-ai', [
+            deviceResult(call('AI', 'ai', 'generate', [text(L.aiPrompt)])),
+          ]),
+          error('AI', 'ai'),
+        ]
+      : []),
   )
 
   const position = (value: ReturnType<typeof text>) => set('Text', 'position', 'text', value)

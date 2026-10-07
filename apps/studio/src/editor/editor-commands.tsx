@@ -18,6 +18,7 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { type Command, useCommands } from '../lib/commands.ts'
+import { AI_TYPES, useFeatures } from '../lib/features.ts'
 import { isMod, isTyping, useKeydown } from '../lib/hotkeys.ts'
 import { usePrefs } from '../lib/prefs.ts'
 import type { EditorTab } from '../routes/p.$projectId.tsx'
@@ -50,6 +51,7 @@ export function EditorCommands({
   const session = useSession()
   const go = useEditorNavigate(projectId)
   const { mode, locale } = usePrefs()
+  const aiOn = useFeatures().ai !== null
 
   useEffect(() => {
     const commands: Command[] = [
@@ -157,24 +159,26 @@ export function EditorCommands({
         },
       },
       ...paletteFor(mode).flatMap(({ components }) =>
-        components.map(
-          (def): Command => ({
-            id: `add-${def.type}`,
-            group: 'add',
-            label: t('commands.add', { name: componentLabel(def.type, locale) }),
-            icon: <ComponentIcon type={def.type} />,
-            keywords: [def.type],
-            run: () => {
-              if (tab !== 'design') void go({ tab: 'design' })
-              addComponentOfType(session, screenId, def.type, locale)
-            },
-          }),
-        ),
+        components
+          .filter((def) => aiOn || !AI_TYPES.includes(def.type))
+          .map(
+            (def): Command => ({
+              id: `add-${def.type}`,
+              group: 'add',
+              label: t('commands.add', { name: componentLabel(def.type, locale) }),
+              icon: <ComponentIcon type={def.type} />,
+              keywords: [def.type],
+              run: () => {
+                if (tab !== 'design') void go({ tab: 'design' })
+                addComponentOfType(session, screenId, def.type, locale)
+              },
+            }),
+          ),
       ),
     ]
     useCommands.getState().setPage(commands)
     return () => useCommands.getState().setPage([])
-  }, [t, tc, go, session, mode, locale, tab, screenId])
+  }, [t, tc, go, session, mode, locale, tab, screenId, aiOn])
 
   useKeydown((event) => {
     if (useCommands.getState().open) return

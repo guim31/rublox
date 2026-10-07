@@ -9,6 +9,9 @@ import { defineConfig, devices } from '@playwright/test'
  */
 const port = Number(process.env.E2E_PORT ?? 4310)
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`
+/** The server with the AI assistant (J6) and its fake Claude API. */
+const AI_PORT = 4320
+const FAKE_ANTHROPIC_PORT = 4329
 
 /**
  * By default a test starts as a returning guest: the welcome page and the guided tours (J3)
@@ -77,23 +80,47 @@ export default defineConfig({
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined
-    : {
-        command: 'node apps/server/dist/index.js',
-        url: `${baseURL}/healthz`,
-        reuseExistingServer: !process.env.CI,
-        timeout: 60_000,
-        env: {
-          NODE_ENV: 'production',
-          PORT: String(port),
-          STUDIO_URL: `http://localhost:${port}`,
-          APPS_URL: `http://127.0.0.1:${port}`,
-          DATABASE_URL: 'memory://',
-          DATA_DIR: 'test-results/data',
-          LOG_LEVEL: 'warn',
-          // Test-only values (SPEC § 6.10): the first administrator of the empty database.
-          RUBLOX_SECRET: 'e2e-secret-e2e-secret-e2e-secret-e2e-secret',
-          RUBLOX_ADMIN_USERNAME: 'admin',
-          RUBLOX_ADMIN_PASSWORD: 'admin-password',
+    : [
+        {
+          command: 'node apps/server/dist/index.js',
+          url: `${baseURL}/healthz`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 60_000,
+          env: serverEnv(port, 'test-results/data'),
         },
-      },
+        // J6: a second server with the AI assistant, answered by a fake Claude API. No real
+        // key ever: the SDK sends its requests to `ANTHROPIC_BASE_URL`.
+        {
+          command: `node e2e/fake-anthropic.mjs ${FAKE_ANTHROPIC_PORT}`,
+          port: FAKE_ANTHROPIC_PORT,
+          reuseExistingServer: !process.env.CI,
+        },
+        {
+          command: 'node apps/server/dist/index.js',
+          url: `http://localhost:${AI_PORT}/healthz`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 60_000,
+          env: {
+            ...serverEnv(AI_PORT, 'test-results/data-ai'),
+            ANTHROPIC_API_KEY: 'test-key-not-real',
+            ANTHROPIC_BASE_URL: `http://127.0.0.1:${FAKE_ANTHROPIC_PORT}`,
+          },
+        },
+      ],
 })
+
+function serverEnv(serverPort: number, dataDir: string): Record<string, string> {
+  return {
+    NODE_ENV: 'production',
+    PORT: String(serverPort),
+    STUDIO_URL: `http://localhost:${serverPort}`,
+    APPS_URL: `http://127.0.0.1:${serverPort}`,
+    DATABASE_URL: 'memory://',
+    DATA_DIR: dataDir,
+    LOG_LEVEL: 'warn',
+    // Test-only values (SPEC § 6.10): the first administrator of the empty database.
+    RUBLOX_SECRET: 'e2e-secret-e2e-secret-e2e-secret-e2e-secret',
+    RUBLOX_ADMIN_USERNAME: 'admin',
+    RUBLOX_ADMIN_PASSWORD: 'admin-password',
+  }
+}

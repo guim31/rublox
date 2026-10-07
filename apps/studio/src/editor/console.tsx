@@ -5,14 +5,17 @@ import {
   Info,
   MessageSquareText,
   Smartphone,
+  Sparkles,
   Terminal,
   Trash2,
   TriangleAlert,
 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { IconButton } from '../components/ui/button.tsx'
+import { useAiPanel } from '../ai/store.ts'
+import { Button, IconButton } from '../components/ui/button.tsx'
 import { cn } from '../lib/cn.ts'
+import { useFeatures } from '../lib/features.ts'
 import { usePrefs } from '../lib/prefs.ts'
 import { useEditorNavigate } from './nav.ts'
 import { useEditor } from './store.ts'
@@ -20,8 +23,18 @@ import { useEditor } from './store.ts'
 const ICONS = { log: Info, warn: TriangleAlert, error: CircleAlert }
 
 /** Messages, warnings and errors of the running app (SPEC § 4.3). */
-export function ConsolePanel({ open, projectId }: { open: boolean; projectId: string }) {
+export function ConsolePanel({
+  open,
+  projectId,
+  workspace,
+}: {
+  open: boolean
+  projectId: string
+  /** The screen being edited, for "Why doesn't it work?" (J6). */
+  workspace: string
+}) {
   const { t, i18n } = useTranslation()
+  const features = useFeatures()
   const { logs, clearLogs } = useEditor()
   const toggle = usePrefs((s) => s.toggleConsole)
   const go = useEditorNavigate(projectId)
@@ -65,6 +78,17 @@ export function ConsolePanel({ open, projectId }: { open: boolean; projectId: st
           />
         </button>
         <div className="flex-1" />
+        {features.ai ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Sparkles size={14} className="text-primary" />}
+            data-testid="ai-debug-open"
+            onClick={() => useAiPanel.getState().open({ kind: 'debug', workspace })}
+          >
+            {t('ai.debug.open')}
+          </Button>
+        ) : null}
         {open && logs.length ? (
           <IconButton size="sm" label={t('editor.console.clear')} onClick={clearLogs}>
             <Trash2 size={14} />

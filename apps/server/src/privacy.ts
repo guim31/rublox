@@ -4,7 +4,9 @@ import { realEmail } from './auth.ts'
 import type { Database } from './db/index.ts'
 import {
   account,
+  aiUsage,
   assets,
+  likes,
   member,
   organization,
   passkey,
@@ -77,6 +79,23 @@ export async function exportAccount(services: Services, userId: string) {
     .from(projectFavorites)
     .where(eq(projectFavorites.userId, userId))
 
+  // J6: likes in the gallery, and the account's use of the AI assistant (no content is kept).
+  const liked = await db
+    .select({ projectId: likes.projectId, createdAt: likes.createdAt })
+    .from(likes)
+    .where(eq(likes.userId, userId))
+  const aiUses = await db
+    .select({
+      kind: aiUsage.kind,
+      model: aiUsage.model,
+      inputTokens: aiUsage.inputTokens,
+      outputTokens: aiUsage.outputTokens,
+      outcome: aiUsage.outcome,
+      createdAt: aiUsage.createdAt,
+    })
+    .from(aiUsage)
+    .where(eq(aiUsage.userId, userId))
+
   const projectsOut = []
   for (const project of owned) {
     const ydoc = await collab.read(project.id)
@@ -86,6 +105,8 @@ export async function exportAccount(services: Services, userId: string) {
       createdAt: iso(project.createdAt),
       updatedAt: iso(project.updatedAt),
       deletedAt: iso(project.deletedAt),
+      inGallery: project.visibility === 'gallery',
+      remixOf: project.remixOf ?? null,
       document: ydoc ? readProject(ydoc) : null,
       versions: versions
         .filter((version) => version.projectId === project.id)
@@ -135,6 +156,8 @@ export async function exportAccount(services: Services, userId: string) {
     })),
     sharedWithMe,
     favorites: favorites.map((entry) => entry.projectId),
+    likes: liked.map((entry) => ({ projectId: entry.projectId, createdAt: iso(entry.createdAt) })),
+    aiUsage: aiUses.map((entry) => ({ ...entry, createdAt: iso(entry.createdAt) })),
   }
 }
 

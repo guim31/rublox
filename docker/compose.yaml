@@ -28,6 +28,10 @@ services:
       RUBLOX_ADMIN_PASSWORD: change-me-too
       # Set to true only behind a reverse proxy that sets X-Real-IP.
       TRUST_PROXY: "false"
+      # Optional: the AI assistant (it costs per use). Without a key, the studio shows no AI.
+      # ANTHROPIC_API_KEY: your-key
+      # RUBLOX_AI_MODEL: claude-opus-5-5
+      # RUBLOX_AI_FAST_MODEL: claude-haiku-4-5
     volumes:
       - rublox-data:/data
     depends_on:

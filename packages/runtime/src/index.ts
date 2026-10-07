@@ -1,3 +1,4 @@
+export type { AiProvider, AiReply, AiRequest } from './behaviors/types.ts'
 export * from './bridge.ts'
 export * from './components/registry.ts'
 export type { Renderer, RendererProps } from './components/types.ts'

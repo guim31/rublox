@@ -83,6 +83,7 @@ export const RENDERERS: Record<string, Renderer> = {
   Share: NonVisualRenderer,
   Clipboard: NonVisualRenderer,
   Notifier: NonVisualRenderer,
+  AI: NonVisualRenderer,
   QrScanner: NonVisualRenderer,
   GameScene: GameSceneRenderer,
   Sprite: SpriteRenderer,

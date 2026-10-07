@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { type Context, Hono } from 'hono'
 import type { Logger } from 'pino'
+import { APP_AI_PATH, AppAiRelay } from './ai/app-relay.ts'
 import { createApi } from './api.ts'
 import { AUTH_ROUTES, CLIENT_IP_HEADER, SIGN_IN_ROUTES } from './auth.ts'
 import { getClientIp } from './client-ip.ts'
@@ -69,11 +70,16 @@ export function createApp({ config, services, ping, logger }: AppDeps) {
     .all('*', () => notFound())
 
   const published = new PublishedApps(services, config.playerDist, runtimeConfig)
+  const appAi = new AppAiRelay(services)
 
   // Apps origin: player, then published apps, assets and the API relay. Never any studio cookie.
   const apps = new Hono()
     .use(appsSecurityHeaders(config.studioUrl))
     .get('/assets/:hash', (c) => serveAsset(services, c.req.param('hash')))
+    // The AI component of published apps and live tests (J6).
+    .post(APP_AI_PATH, (c) =>
+      appAi.handle(c.req.raw, getClientIp(c, services.config.trustProxy) ?? 'unknown'),
+    )
     .get('*', async (c) => {
       const path = rawPath(c.req.url)
       // Published apps (SPEC § 4.6) and live test links (§ 4.3).

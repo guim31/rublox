@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InviteCodeRouteImport } from './routes/invite.$code'
@@ -32,6 +33,11 @@ const AccountRoute = AccountRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearnRoute = LearnRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/gallery': typeof GalleryRoute
   '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/invite/$code': typeof InviteCodeRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/gallery': typeof GalleryRoute
   '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/invite/$code': typeof InviteCodeRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/gallery': typeof GalleryRoute
   '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/invite/$code': typeof InviteCodeRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/gallery'
     | '/learn'
     | '/login'
     | '/invite/$code'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/gallery'
     | '/learn'
     | '/login'
     | '/invite/$code'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/gallery'
     | '/learn'
     | '/login'
     | '/invite/$code'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
+  GalleryRoute: typeof GalleryRoute
   LearnRoute: typeof LearnRoute
   LoginRoute: typeof LoginRoute
   InviteCodeRoute: typeof InviteCodeRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learn': {
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
+  GalleryRoute: GalleryRoute,
   LearnRoute: LearnRoute,
   LoginRoute: LoginRoute,
   InviteCodeRoute: InviteCodeRoute,

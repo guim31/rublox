@@ -1,0 +1,453 @@
+{
+  "id": "toothbrush",
+  "order": 5,
+  "mode": "junior",
+  "icon": "🪥",
+  "accent": "indigo",
+  "recipe": {
+    "name": { "fr": "Le minuteur des dents", "en": "Toothbrush timer" },
+    "theme": { "primary": "#4c6ef5", "font": "rounded" },
+    "screens": [
+      {
+        "key": "home",
+        "name": { "fr": "Accueil", "en": "Home" },
+        "props": { "padding": 24, "gap": 20, "justify": "center" },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": { "fr": "Titre", "en": "Title" },
+            "props": {
+              "text": { "fr": "Le minuteur des dents", "en": "Toothbrush timer" },
+              "fontSize": 26,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "face",
+            "type": "Text",
+            "name": { "fr": "Visage", "en": "Face" },
+            "props": { "text": "🪥", "fontSize": 96, "align": "center" }
+          },
+          {
+            "key": "time",
+            "type": "Text",
+            "name": { "fr": "Temps", "en": "Time" },
+            "props": {
+              "text": { "fr": "120 secondes", "en": "120 seconds" },
+              "fontSize": 36,
+              "bold": true,
+              "color": "@primary",
+              "align": "center"
+            }
+          },
+          {
+            "key": "bar",
+            "type": "ProgressBar",
+            "name": { "fr": "Barre", "en": "Bar" },
+            "props": { "value": 0, "thickness": 16 }
+          },
+          {
+            "key": "message",
+            "type": "Text",
+            "name": { "fr": "Message", "en": "Message" },
+            "props": {
+              "text": { "fr": "Prêt ? Appuie sur le bouton !", "en": "Ready? Press the button!" },
+              "fontSize": 20,
+              "align": "center"
+            }
+          },
+          {
+            "key": "start",
+            "type": "Button",
+            "name": { "fr": "Demarrer", "en": "Start" },
+            "props": { "text": { "fr": "C’est parti !", "en": "Let’s go!" }, "fontSize": 20 }
+          },
+          {
+            "key": "clock",
+            "type": "Timer",
+            "name": { "fr": "Chrono", "en": "Clock" },
+            "props": { "interval": 1, "repeat": true, "autostart": false }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": { "COMPONENT": "start" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": { "VAR": "seconds" },
+                  "inputs": {
+                    "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_ProgressBar_set",
+                      "fields": { "COMPONENT": "bar", "PROP": "value" },
+                      "inputs": {
+                        "VALUE": { "block": { "type": "math_number", "fields": { "NUM": 0 } } }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_Text_set",
+                          "fields": { "COMPONENT": "time", "PROP": "text" },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "text",
+                                "fields": { "TEXT": { "fr": "120 secondes", "en": "120 seconds" } }
+                              }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "rx_Text_set",
+                              "fields": { "COMPONENT": "face", "PROP": "text" },
+                              "inputs": {
+                                "VALUE": { "block": { "type": "text", "fields": { "TEXT": "🪥" } } }
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "rx_Text_set",
+                                  "fields": { "COMPONENT": "message", "PROP": "text" },
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "text",
+                                        "fields": {
+                                          "TEXT": {
+                                            "fr": "Brosse en haut à gauche ↖️",
+                                            "en": "Brush the top left ↖️"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "next": {
+                                    "block": {
+                                      "type": "rx_Timer_call_start",
+                                      "fields": { "COMPONENT": "clock" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "rx_Timer_on_tick",
+            "fields": { "COMPONENT": "clock" },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": { "VAR": "seconds" },
+                  "inputs": {
+                    "DELTA": { "block": { "type": "math_number", "fields": { "NUM": 1 } } }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_ProgressBar_set",
+                      "fields": { "COMPONENT": "bar", "PROP": "value" },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_arithmetic",
+                            "fields": { "OP": "DIVIDE" },
+                            "inputs": {
+                              "A": {
+                                "block": {
+                                  "type": "math_arithmetic",
+                                  "fields": { "OP": "MULTIPLY" },
+                                  "inputs": {
+                                    "A": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": { "VAR": "seconds" }
+                                      }
+                                    },
+                                    "B": {
+                                      "block": { "type": "math_number", "fields": { "NUM": 100 } }
+                                    }
+                                  }
+                                }
+                              },
+                              "B": { "block": { "type": "math_number", "fields": { "NUM": 120 } } }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_Text_set",
+                          "fields": { "COMPONENT": "time", "PROP": "text" },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "text_join",
+                                "extraState": { "itemCount": 2 },
+                                "inputs": {
+                                  "ADD0": {
+                                    "block": {
+                                      "type": "math_arithmetic",
+                                      "fields": { "OP": "MINUS" },
+                                      "inputs": {
+                                        "A": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "fields": { "NUM": 120 }
+                                          }
+                                        },
+                                        "B": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": { "VAR": "seconds" }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "ADD1": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": { "TEXT": { "fr": " secondes", "en": " seconds" } }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "controls_if",
+                              "extraState": { "elseIfCount": 3 },
+                              "inputs": {
+                                "IF0": {
+                                  "block": {
+                                    "type": "logic_compare",
+                                    "fields": { "OP": "EQ" },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": { "VAR": "seconds" }
+                                        }
+                                      },
+                                      "B": {
+                                        "block": { "type": "math_number", "fields": { "NUM": 30 } }
+                                      }
+                                    }
+                                  }
+                                },
+                                "DO0": {
+                                  "block": {
+                                    "type": "rx_Text_set",
+                                    "fields": { "COMPONENT": "message", "PROP": "text" },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "text",
+                                          "fields": {
+                                            "TEXT": {
+                                              "fr": "Brosse en haut à droite ↗️",
+                                              "en": "Brush the top right ↗️"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "IF1": {
+                                  "block": {
+                                    "type": "logic_compare",
+                                    "fields": { "OP": "EQ" },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": { "VAR": "seconds" }
+                                        }
+                                      },
+                                      "B": {
+                                        "block": { "type": "math_number", "fields": { "NUM": 60 } }
+                                      }
+                                    }
+                                  }
+                                },
+                                "DO1": {
+                                  "block": {
+                                    "type": "rx_Text_set",
+                                    "fields": { "COMPONENT": "message", "PROP": "text" },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "text",
+                                          "fields": {
+                                            "TEXT": {
+                                              "fr": "Brosse en bas à gauche ↙️",
+                                              "en": "Brush the bottom left ↙️"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "IF2": {
+                                  "block": {
+                                    "type": "logic_compare",
+                                    "fields": { "OP": "EQ" },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": { "VAR": "seconds" }
+                                        }
+                                      },
+                                      "B": {
+                                        "block": { "type": "math_number", "fields": { "NUM": 90 } }
+                                      }
+                                    }
+                                  }
+                                },
+                                "DO2": {
+                                  "block": {
+                                    "type": "rx_Text_set",
+                                    "fields": { "COMPONENT": "message", "PROP": "text" },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "text",
+                                          "fields": {
+                                            "TEXT": {
+                                              "fr": "Brosse en bas à droite ↘️",
+                                              "en": "Brush the bottom right ↘️"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "IF3": {
+                                  "block": {
+                                    "type": "logic_compare",
+                                    "fields": { "OP": "GTE" },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": { "VAR": "seconds" }
+                                        }
+                                      },
+                                      "B": {
+                                        "block": { "type": "math_number", "fields": { "NUM": 120 } }
+                                      }
+                                    }
+                                  }
+                                },
+                                "DO3": {
+                                  "block": {
+                                    "type": "rx_Timer_call_stop",
+                                    "fields": { "COMPONENT": "clock" },
+                                    "next": {
+                                      "block": {
+                                        "type": "rx_Text_set",
+                                        "fields": { "COMPONENT": "face", "PROP": "text" },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": { "type": "text", "fields": { "TEXT": "😁" } }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "rx_Text_set",
+                                            "fields": { "COMPONENT": "time", "PROP": "text" },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "text",
+                                                  "fields": {
+                                                    "TEXT": { "fr": "Terminé !", "en": "Done!" }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "rx_Text_set",
+                                                "fields": {
+                                                  "COMPONENT": "message",
+                                                  "PROP": "text"
+                                                },
+                                                "inputs": {
+                                                  "VALUE": {
+                                                    "block": {
+                                                      "type": "text",
+                                                      "fields": {
+                                                        "TEXT": {
+                                                          "fr": "Bravo, tes dents sont toutes propres ! ✨",
+                                                          "en": "Well done, your teeth are sparkling clean! ✨"
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "next": {
+                                                  "block": {
+                                                    "type": "rx_Button_set",
+                                                    "fields": {
+                                                      "COMPONENT": "start",
+                                                      "PROP": "text"
+                                                    },
+                                                    "inputs": {
+                                                      "VALUE": {
+                                                        "block": {
+                                                          "type": "text",
+                                                          "fields": {
+                                                            "TEXT": {
+                                                              "fr": "Recommencer",
+                                                              "en": "Start again"
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [{ "key": "seconds", "name": { "fr": "secondes", "en": "seconds" }, "initial": 0 }]
+  }
+}

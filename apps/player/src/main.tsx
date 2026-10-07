@@ -17,6 +17,7 @@ if (root) {
     ) : page.kind === 'app' ? (
       <PublishedView
         base={`/a/${page.slug}/`}
+        slug={page.slug}
         install={page.install}
         serviceWorker={import.meta.env.PROD}
       />

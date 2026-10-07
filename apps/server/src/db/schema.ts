@@ -242,8 +242,20 @@ export const projects = pgTable(
     spaceId: text('space_id').references(() => organization.id, { onDelete: 'set null' }),
     name: text('name').notNull(),
     description: text('description'),
+    /** `private`, or `gallery` once shared in the gallery of the instance (J6). */
     visibility: text('visibility').notNull().default('private'),
+    /** The gallery project this one was remixed from (null once that one is deleted). */
     remixOfId: text('remix_of_id'),
+    /** "Remix of X by Y", kept even when the original is deleted: `{ id, name, owner }`. */
+    remixOf: jsonb('remix_of'),
+    /** Mode of the project (`junior` or `studio`), for the filters of the gallery. */
+    uiMode: text('ui_mode'),
+    /** When it was shared in the gallery. */
+    sharedAt: timestamp('shared_at', { withTimezone: true }),
+    /** Taken out of the gallery by an administrator: the owner cannot share it again. */
+    galleryRemovedAt: timestamp('gallery_removed_at', { withTimezone: true }),
+    /** The owner lets the AI component work in the published app (billed to them, J6). */
+    appAiAllowed: boolean('app_ai_allowed').notNull().default(false),
     /** Start screen, theme and language: the dashboard thumbnail (`ProjectSummary.preview`). */
     preview: jsonb('preview'),
     createdAt: createdAt(),
@@ -254,6 +266,8 @@ export const projects = pgTable(
     index('projects_owner_idx').on(t.ownerId),
     index('projects_space_idx').on(t.spaceId),
     index('projects_deleted_idx').on(t.deletedAt),
+    index('projects_remix_idx').on(t.remixOfId),
+    index('projects_visibility_idx').on(t.visibility),
   ],
 )
 
@@ -399,4 +413,51 @@ export const liveLinks = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('live_links_project_idx').on(t.projectId)],
+)
+
+// ---- Gallery and AI assistant (J6, SPEC § 4.11, § 4.12) -----------------------------------
+
+/** "I like" on a gallery project: one per account and project. */
+export const likes = pgTable(
+  'likes',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.projectId] }),
+    index('likes_project_idx').on(t.projectId),
+  ],
+)
+
+/**
+ * Usage journal of the AI assistant: one row per request, counted against the daily quota of
+ * the account (`userId`). The question and the answer are not kept.
+ */
+export const aiUsage = pgTable(
+  'ai_usage',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    projectId: text('project_id').references(() => projects.id, { onDelete: 'set null' }),
+    /** `create`, `explain`, `debug`, `app-text`, `app-image`. */
+    kind: text('kind').notNull(),
+    model: text('model').notNull(),
+    inputTokens: integer('input_tokens').notNull().default(0),
+    outputTokens: integer('output_tokens').notNull().default(0),
+    /** `ok`, `refused` (declined by the model), `error`. */
+    outcome: text('outcome').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index('ai_usage_user_idx').on(t.userId, t.createdAt),
+    index('ai_usage_created_idx').on(t.createdAt),
+  ],
 )

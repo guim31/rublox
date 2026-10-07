@@ -3,7 +3,7 @@ import { accounts } from './accounts.ts'
 import { learning } from './learn.ts'
 import { publish } from './publish.ts'
 
-export const studio: Omit<Messages['studio'], 'game'> = {
+export const studio: Omit<Messages['studio'], 'game' | 'gallery' | 'templates' | 'ai'> = {
   ...accounts,
   ...learning,
   ...publish,

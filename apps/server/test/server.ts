@@ -11,6 +11,7 @@ import { hc } from 'hono/client'
 import { WebSocket } from 'ws'
 import * as Y from 'yjs'
 import { bootstrapAdmin } from '../src/accounts.ts'
+import type { AiClient } from '../src/ai/client.ts'
 import type { Api } from '../src/api.ts'
 import { createApp } from '../src/app.ts'
 import { COLLAB_PATH } from '../src/collab.ts'
@@ -27,7 +28,10 @@ const STUDIO_HOST = new URL(STUDIO).host
  * A server on an in-memory PGlite database, with the first administrator created. Each
  * `Client` keeps its own session cookie, as a browser would.
  */
-export async function createTestServer(env: Record<string, string> = {}) {
+export async function createTestServer(
+  env: Record<string, string> = {},
+  options: { aiClient?: AiClient } = {},
+) {
   const dataDir = mkdtempSync(join(tmpdir(), 'rublox-data-'))
   const config = loadConfig({
     NODE_ENV: 'test',
@@ -42,7 +46,7 @@ export async function createTestServer(env: Record<string, string> = {}) {
   })
   const database = openDatabase({ databaseUrl: 'memory://', dataDir })
   await database.migrate(config.migrationsFolder)
-  const services = createServices(database.db, config)
+  const services = createServices(database.db, config, undefined, options)
   await bootstrapAdmin(services, config.admin)
   const app = createApp({ config, services, ping: database.ping })
 

@@ -12,6 +12,7 @@ import {
 } from '@rublox/runtime'
 import type { Locale } from '@rublox/schema'
 import { useEffect, useRef, useState } from 'react'
+import { studioAi } from './ai.ts'
 import { Stopped } from './run.tsx'
 
 const config = readConfig()
@@ -20,6 +21,9 @@ const studioOrigin = originOf(config.studioUrl)
 function send(message: PlayerToStudio): void {
   if (window.parent !== window) window.parent.postMessage(message, studioOrigin)
 }
+
+/** The AI component asks through the studio, which answers with `rx:ai-reply` (J6). */
+const ai = studioAi(send)
 
 type State = {
   engine: Engine
@@ -49,6 +53,9 @@ export function Preview() {
     const handle = async (message: StudioToPlayer) => {
       const engine = engineRef.current
       switch (message.type) {
+        case 'rx:ai-reply':
+          ai.answer(message.id, message.reply)
+          return
         case 'rx:load': {
           if (message.assets) {
             for (const url of assets.current.values()) URL.revokeObjectURL(url)
@@ -72,6 +79,7 @@ export function Preview() {
             initialScreen: message.screenId,
             slow: slow.current,
             assetUrl: (value) => assets.current.get(value),
+            ai: ai.provider,
             host: {
               log: (entry) => send({ type: 'rx:log', entry }),
               state: (s) => send({ type: 'rx:state', running: s.running, screenId: s.screenId }),

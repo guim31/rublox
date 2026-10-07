@@ -73,6 +73,14 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   image, processeur ralenti ×4 ; les chiffres s'affichent dans la sortie). Le projet `perf`
   attend la fin des autres tests (`dependencies`) : mesurer sous charge ne veut rien dire. Captures :
   `npx playwright test --project=screenshots e2e/screenshots-j7.spec.ts` → `docs/screenshots/j7/`.
+- IA (J6) : `pnpm test:e2e` lance aussi un second serveur avec l'IA (`localhost:4320`, base en
+  mémoire) branché sur un faux Claude (`e2e/fake-anthropic.mjs`, port 4329, réponses dans
+  `e2e/fixtures/`) : `npx playwright test --project=e2e e2e/ai.spec.ts`. En développement :
+  `ANTHROPIC_API_KEY=… pnpm dev` (vraie clé, jamais commitée), puis activer l'IA dans
+  Administration › Réglages. Modèles : `RUBLOX_AI_MODEL`, `RUBLOX_AI_FAST_MODEL`.
+- Modèles de projets : `cd packages/templates && npx vitest run` (chaque modèle construit en FR
+  et EN, chargé dans Blockly, code généré). Captures : `e2e/screenshots-j6.spec.ts` →
+  `docs/screenshots/j6/`.
 - `pnpm --filter @rublox/server db:generate` : migration Drizzle après un changement de
   `apps/server/src/db/schema.ts`.
 - `docker build -f docker/Dockerfile .` et `docker compose -f docker/compose.yaml up`.
@@ -105,6 +113,12 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `accepts` de la scène) ; son dessin à l'exécution va dans `World` (`runtime/src/game/`), pas
   dans React. Une démo : `packages/catalog/src/demos/` (blocs écrits en JSON avec
   `blocks-json.ts`), puis une entrée dans `apps/studio/src/storage/demos.ts`.
+- Un modèle de projet : un dossier `content/templates/<id>/` (`template.json` : la recette
+  `AppSpec`, `fr.json`, `en.json`), puis une ligne dans `packages/templates/src/content.ts`. Dans
+  les blocs d'une recette, composants, écrans et variables se nomment par leur `key` (ou leur
+  nom) ; le constructeur met les identifiants.
+- Tout ce qui touche l'IA côté studio se montre seulement si `useFeatures().ai` (ou `aiAllowed()`
+  hors React) ; un composant qui a besoin de l'IA va dans `AI_TYPES` (`lib/features.ts`).
 - Une route d'API : `apps/server/src/routes/<domaine>.ts`, corps validé par `jsonBody(zod)`,
   droits par `access.ts`, test sur PGlite avec `test/server.ts` (`createTestServer`, un `Client`
   par navigateur). Côté studio : `call(api.<route>.$get(…))`.
@@ -229,3 +243,15 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   va dans `e2e/helpers.ts`. Le canevas de l'aperçu n'existe que dans la vue Blocs.
 - **Shell** : `pkill -f <motif>` ou `pgrep -f vite | xargs kill` tue aussi le shell qui le lance ;
   arrêter les serveurs par PID ou par port.
+- **Claude (J6)** : SDK `@anthropic-ai/sdk` 0.131, côté serveur seulement (`apps/server/src/ai/`).
+  Structured outputs par `client.beta.messages.parse` + `betaZodOutputFormat` ; pas de schéma
+  récursif (d'où la réponse « à plat » de `prompts.ts`). Opus 5.5 : ni `thinking` désactivé ni
+  `tool_choice` forcé (400) ; `fallbacks: "default"` demande l'en-tête
+  `server-side-fallback-2026-07-01`. Haiku 4.5 ne prend pas `effort`. Le SDK lit
+  `ANTHROPIC_BASE_URL` (tests de bout en bout). Toujours vérifier `stop_reason` (`refusal`,
+  `max_tokens`) avant de lire la réponse.
+- **Galerie** : `requireProject(…, 'read')` refuse l'accès `gallery` ; une route qu'un visiteur
+  de la galerie doit atteindre (ouvrir, remixer) prend `'view'`.
+- **hc et types profonds** : renvoyer un `ProjectDoc` entier d'une route fait TS2589 dans le
+  studio ; le typer `Record<string, unknown>` côté serveur et le relire en `ProjectDoc`.
+- **Playwright** : un `<input type="search">` a le rôle `searchbox`, pas `textbox`.

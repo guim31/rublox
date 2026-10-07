@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { AiJournal } from '../ai/journal.tsx'
 import { Page } from '../components/app-header.tsx'
 import { Avatar } from '../components/avatar.tsx'
 import { ConfirmDialog, NewAccountDialog, PasswordDialog } from '../components/dialogs.tsx'
@@ -26,6 +27,7 @@ import { Segmented } from '../components/ui/segmented.tsx'
 import { Switch } from '../components/ui/switch.tsx'
 import { api, call } from '../lib/api.ts'
 import { errorMessage } from '../lib/errors.ts'
+import { useFeatures } from '../lib/features.ts'
 import { useMe } from '../lib/session.ts'
 import { relativeTime } from '../lib/time.ts'
 
@@ -373,6 +375,8 @@ function SpacesTab() {
 
 function SettingsTab() {
   const { t, i18n } = useTranslation()
+  // Without `ANTHROPIC_API_KEY`, nothing about the assistant (SPEC § 8).
+  const { aiConfigured } = useFeatures()
   const client = useQueryClient()
   const settings = useQuery({
     queryKey: ['admin', 'settings'],
@@ -420,27 +424,28 @@ function SettingsTab() {
               onChange={(v) => set('galleryEnabled', v)}
             />
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <label htmlFor="setting-ai">{t('admin.ai')}</label>
-              <p className="text-ui-sm text-muted">{t('admin.aiHint')}</p>
-            </div>
-            <Switch
-              id="setting-ai"
-              checked={form.aiEnabled}
-              onChange={(v) => set('aiEnabled', v)}
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field id="setting-ai-quota" label={t('admin.aiQuota')}>
-              <Input
-                id="setting-ai-quota"
-                type="number"
-                min={0}
-                value={form.aiDailyQuota}
-                onChange={(event) => set('aiDailyQuota', Number(event.target.value))}
+          {aiConfigured ? (
+            <div className="flex items-center justify-between gap-3">
+              <label htmlFor="setting-ai">{t('ai.admin.enabled')}</label>
+              <Switch
+                id="setting-ai"
+                checked={form.aiEnabled}
+                onChange={(v) => set('aiEnabled', v)}
               />
-            </Field>
+            </div>
+          ) : null}
+          <div className="grid gap-4 sm:grid-cols-3">
+            {aiConfigured ? (
+              <Field id="setting-ai-quota" label={t('ai.admin.quota')}>
+                <Input
+                  id="setting-ai-quota"
+                  type="number"
+                  min={0}
+                  value={form.aiDailyQuota}
+                  onChange={(event) => set('aiDailyQuota', Number(event.target.value))}
+                />
+              </Field>
+            ) : null}
             <Field id="setting-upload" label={t('admin.maxUpload')}>
               <Input
                 id="setting-upload"
@@ -467,6 +472,7 @@ function SettingsTab() {
           </div>
         </form>
       </Section>
+      {aiConfigured ? <AiJournal /> : null}
       {stats.data ? (
         <Section title={t('admin.disk')}>
           <p className="text-ui-lg font-strong">

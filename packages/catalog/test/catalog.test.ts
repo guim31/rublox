@@ -235,7 +235,7 @@ describe('coercion', () => {
 
 describe('demo app', () => {
   it.each(['fr', 'en'] as const)('is a valid project that uses every component (%s)', (locale) => {
-    const doc = createDemoProject({ locale, mode: 'studio' })
+    const doc = createDemoProject({ locale, mode: 'studio', ai: true })
     expect(projectDocSchema.safeParse(doc).error).toBeUndefined()
     expect(
       typesMissingFromDemo(

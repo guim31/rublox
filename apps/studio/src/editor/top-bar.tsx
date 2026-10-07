@@ -73,6 +73,8 @@ type Props = { projectId: string; tab: EditorTab; screenId: WorkspaceKey }
 export function TopBar({ projectId, tab, screenId }: Props) {
   const { t } = useTranslation()
   const session = useSession()
+  // A gallery project (J6) is only looked at: no history, test, share nor publish.
+  const visitor = session.source.access === 'gallery'
   const { canUndo, canRedo } = useUndoState()
   const go = useEditorNavigate(projectId)
   const mode = usePrefs((s) => s.mode)
@@ -150,27 +152,35 @@ export function TopBar({ projectId, tab, screenId }: Props) {
       >
         <Search size={18} />
       </IconButton>
-      {session.source.kind === 'server' ? <HistoryButton /> : null}
-      <TransferMenu />
-      {session.source.kind === 'server' ? (
-        <LiveButton />
-      ) : (
-        <Soon label={t('live.guest')} icon={<Smartphone size={16} />} text={t('editor.test')} />
-      )}
-      {session.source.kind === 'server' ? (
-        <ShareButton />
-      ) : (
-        <Soon label={t('editor.guestOnly')} icon={<Share2 size={16} />} text={t('editor.share')} />
-      )}
-      {session.source.kind === 'server' ? (
-        <PublishButton />
-      ) : (
-        <Soon
-          label={t('publish.guest')}
-          icon={<Rocket size={16} />}
-          text={t('editor.publish')}
-          primary
-        />
+      {visitor ? null : (
+        <>
+          {session.source.kind === 'server' ? <HistoryButton /> : null}
+          <TransferMenu />
+          {session.source.kind === 'server' ? (
+            <LiveButton />
+          ) : (
+            <Soon label={t('live.guest')} icon={<Smartphone size={16} />} text={t('editor.test')} />
+          )}
+          {session.source.kind === 'server' ? (
+            <ShareButton />
+          ) : (
+            <Soon
+              label={t('editor.guestOnly')}
+              icon={<Share2 size={16} />}
+              text={t('editor.share')}
+            />
+          )}
+          {session.source.kind === 'server' ? (
+            <PublishButton />
+          ) : (
+            <Soon
+              label={t('publish.guest')}
+              icon={<Rocket size={16} />}
+              text={t('editor.publish')}
+              primary
+            />
+          )}
+        </>
       )}
       <div className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
       <HelpButton />

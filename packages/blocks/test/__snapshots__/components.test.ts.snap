@@ -1,5 +1,25 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`generated code of each component > AI 1`] = `
+"export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
+  const { Accueil, IA1 } = components;
+
+  Accueil.onOpen(async () => {
+    IA1.instructions = 'abc';
+    rx.log(await IA1.generate('abc'));
+    rx.log(await IA1.describe('https://example.com/a.png', 'abc'));
+    rx.log(IA1.instructions);
+    rx.log(IA1.busy);
+    rx.log(IA1.available);
+  });
+
+  IA1.onError(async (event) => {
+    rx.log(event.message);
+  });
+}
+"
+`;
+
 exports[`generated code of each component > AudioRecorder 1`] = `
 "export default async function ({ components, app, stored, shared, screens, ui, device, rx }) {
   const { Accueil, Enregistreur1 } = components;
