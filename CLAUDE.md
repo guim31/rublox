@@ -91,6 +91,14 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   test/conflicts.test.ts` (conflits de piles), `npx playwright test --project=e2e
   e2e/collab.spec.ts` (deux et trois navigateurs). Captures :
   `npx playwright test --project=screenshots e2e/screenshots-j4b.spec.ts` → `docs/screenshots/j4b/`.
+- Finitions (J8) : `npx playwright test --project=e2e e2e/a11y-j8.spec.ts` (axe sur toutes les
+  pages et dialogues qui manquaient, l'origine des applis, et l'appli de chacun des 12 modèles),
+  `e2e/keyboard.spec.ts` (blocs au clavier seul, mouvement réduit) ; budgets du § 7 :
+  `npx playwright test --project=perf --no-deps e2e/budget-perf.spec.ts` (poids du studio avant
+  l'éditeur, temps de l'aperçu, d'une propriété ; chiffres dans la sortie). Audit de sécurité :
+  `cd apps/server && npx vitest run test/audit.test.ts`. Captures :
+  `npx playwright test --project=screenshots e2e/screenshots-j8.spec.ts` → `docs/screenshots/j8/`.
+  Guide d'utilisation : `docs/guide/fr.md` et `en.md`, à tenir à jour avec l'interface.
 - `pnpm --filter @rublox/server db:generate` : migration Drizzle après un changement de
   `apps/server/src/db/schema.ts`.
 - `docker build -f docker/Dockerfile .` et `docker compose -f docker/compose.yaml up`.
@@ -320,3 +328,29 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **PNG d'exemple** : celui de `e2e/publish.spec.ts` est corrompu (bloc IDAT tronqué) ; pour
   vérifier qu'une image s'affiche, prendre celui de `e2e/collab.spec.ts` et tester
   `naturalWidth`.
+- **turbo et `content/`** : les tutoriels, défis et modèles sont hors des paquets ; sans
+  `globalDependencies: ["content/**"]` (`turbo.json`), les modifier laissait la construction et
+  les tests en cache (vieux modèle servi).
+- **`/ws/collab` et les sessions** : Hocuspocus ne vérifie la session qu'à l'ouverture d'un
+  document ; toute fin de session (désactivation, mot de passe, suppression, déconnexion,
+  révocation) appelle `collab.disconnectUser(id)`, et l'onglet rouvre ses documents (refusés
+  s'il n'a plus de session). Un onglet révoqué va donc tout seul à `/login`.
+- **Écritures et corbeille** : `requireProject(…, 'write')` répond 409 `in_trash` ; une route
+  qui doit agir sur un projet à la corbeille (dépublier) prend `'read'` puis vérifie `canWrite`.
+- **Menus Radix** : `Menu` (`components/ui/menu.tsx`) n'est pas modal (sinon `aria-hidden` sur
+  le reste de la page, axe `aria-hidden-focus`) ; l'analyse d'axe le ferme parfois (focus) :
+  dans un test, Échap, attendre qu'il soit fermé, puis le rouvrir.
+- **Lien en forme de bouton** : `LinkButton`, jamais un `Button` dans un `Link` (deux contrôles
+  imbriqués).
+- **Couleurs des applis** : le texte sur une couleur pleine passe par `textOn()` et la couleur
+  principale en texte par `--rx-primary-text` (`runtime/src/theme.ts`) ; un nouveau rendu qui
+  écrit sur `--rx-primary` doit en faire autant.
+- **Mesures de temps entre le studio et l'aperçu** : `performance.timeOrigin +
+  performance.now()` est comparable d'une page à l'autre (même machine) ; `Date.now()` est trop
+  grossier pour 50 ms (`e2e/budget-perf.spec.ts`).
+- **Lancer un serveur e2e à la main** : `lsof -t -iTCP:4310 -sTCP:LISTEN` pour retrouver son PID
+  (`ss` n'existe pas en session cloud) ; reconstruire (`pnpm build`) pendant une suite Playwright
+  remplace `dist/` sous ses pieds.
+- **axe et animations** : sous charge, un dialogue encore en fondu (même de 1 ms avec le
+  mouvement réduit) donne de faux contrastes ; `await settled(page)` (`e2e/helpers.ts`) avant
+  chaque `AxeBuilder`.

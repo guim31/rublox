@@ -1,5 +1,5 @@
 import { APP_WORKSPACE } from '@rublox/schema'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Copy, Eye, Shuffle } from 'lucide-react'
 import QRCode from 'qrcode'
 import { lazy, Suspense, useEffect, useState } from 'react'
@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { AiPanel } from '../ai/panel.tsx'
 import { Mascot } from '../components/brand.tsx'
 import { Button } from '../components/ui/button.tsx'
+import { LinkButton } from '../components/ui/link-button.tsx'
 import { HelpPanel } from '../help/help-panel.tsx'
 import { BadgeWatcher } from '../learn/badges.tsx'
 import { ChallengePanel } from '../learn/challenge-panel.tsx'
@@ -82,9 +83,9 @@ export function EditorPage(props: Props) {
                 ? t('sync.loadError')
                 : t('editor.loadError')}
           </h1>
-          <Link to="/">
-            <Button variant="primary">{t('editor.loadErrorAction')}</Button>
-          </Link>
+          <LinkButton to="/" variant="primary">
+            {t('editor.loadErrorAction')}
+          </LinkButton>
         </div>
       </main>
     )
@@ -239,9 +240,7 @@ function SmallScreenGuard({ children }: { children: React.ReactNode }) {
         // biome-ignore lint/security/noDangerouslySetInnerHtml: SVG generated locally by `qrcode`
         dangerouslySetInnerHTML={{ __html: qr }}
       />
-      <Link to="/">
-        <Button>{t('editor.loadErrorAction')}</Button>
-      </Link>
+      <LinkButton to="/">{t('editor.loadErrorAction')}</LinkButton>
     </main>
   )
 }

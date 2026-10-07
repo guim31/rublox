@@ -225,3 +225,19 @@ export async function createAccount(page: Page, displayName: string) {
   expect(response.status()).toBe(201)
   return { username, password }
 }
+
+/**
+ * Waits until no finite animation is running (a dialog fading in): axe measures the contrast
+ * of what is drawn, and a busy machine can leave even a 1 ms animation on its first frame.
+ */
+export async function settled(page: Page) {
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          animation.playState !== 'running' ||
+          animation.effect?.getComputedTiming().iterations === Number.POSITIVE_INFINITY,
+      ),
+  )
+}

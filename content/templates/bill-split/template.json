@@ -93,7 +93,7 @@
             "key": "resultCard",
             "type": "Box",
             "name": { "fr": "CarteResultat", "en": "ResultCard" },
-            "props": { "alignItems": "center", "gap": 6, "background": "#fff4e6" },
+            "props": { "alignItems": "center", "gap": 6, "background": "@surface" },
             "children": [
               {
                 "key": "eachLabel",

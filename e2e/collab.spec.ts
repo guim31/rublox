@@ -5,6 +5,7 @@ import {
   addComponent,
   buildHelloBlocks,
   openBlocks,
+  settled,
   signIn,
   unique,
   usePrefs,
@@ -314,6 +315,7 @@ for (const theme of ['light', 'dark'] as const) {
     // An open menu hides the rest of the page from assistive technologies (Radix): then only
     // the menu is checked.
     const check = async (where: string, only?: string) => {
+      await settled(alice.page)
       const builder = new AxeBuilder({ page: alice.page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
         .exclude('[data-testid=preview-frame]')

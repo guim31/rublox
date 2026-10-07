@@ -62,7 +62,7 @@ export function dataRoutes(services: Services) {
         const user = requireUser(c)
         const { project } = await requireProject(db, user.id, c.req.param('id'), 'read')
         if (project.deletedAt) fail(410, 'in_trash')
-        return c.json(services.tickets.issue(project.id))
+        return c.json(services.tickets.issue(project.id, user.id))
       })
 
       .get('/:id/secrets', async (c) => {

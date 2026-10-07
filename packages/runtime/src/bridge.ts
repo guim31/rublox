@@ -89,8 +89,54 @@ export function isStudioMessage(data: unknown): data is StudioToPlayer {
   return hasType(data, STUDIO_TYPES)
 }
 
+type Fields = Record<string, unknown>
+const isObject = (value: unknown): value is Fields => typeof value === 'object' && value !== null
+const isString = (value: unknown): value is string => typeof value === 'string'
+const isOptional = (value: unknown, check: (value: unknown) => boolean) =>
+  value === undefined || check(value)
+const isStringOrNull = (value: unknown) => value === null || isString(value)
+const LOG_LEVELS = new Set(['log', 'warn', 'error'])
+
+/** The shape of each message from the preview: the studio trusts nothing else (SPEC § 0.10). */
+const PLAYER_SHAPES: Record<PlayerToStudio['type'], (message: Fields) => boolean> = {
+  'rx:ready': () => true,
+  'rx:log': ({ entry }) =>
+    isObject(entry) &&
+    LOG_LEVELS.has(entry.level as string) &&
+    isString(entry.message) &&
+    typeof entry.time === 'number' &&
+    isOptional(entry.blockId, isString) &&
+    isOptional(entry.workspace, isString),
+  'rx:state': ({ running, screenId }) => typeof running === 'boolean' && isStringOrNull(screenId),
+  'rx:select': ({ screenId, componentId }) => isString(screenId) && isString(componentId),
+  'rx:event': ({ event }) =>
+    isObject(event) &&
+    ['screenId', 'componentId', 'componentType', 'componentName', 'event'].every((key) =>
+      isString(event[key]),
+    ),
+  'rx:step': ({ step }) =>
+    isObject(step) &&
+    isStringOrNull(step.blockId) &&
+    isStringOrNull(step.workspace) &&
+    typeof step.paused === 'boolean',
+  'rx:ai': ({ id, request }) =>
+    Number.isSafeInteger(id) &&
+    isObject(request) &&
+    isString(request.prompt) &&
+    isOptional(
+      request.image,
+      (image) => isObject(image) && isString(image.mediaType) && isString(image.data),
+    ),
+}
+
+/**
+ * A message of the preview, checked field by field: the preview runs the app's code, so the
+ * studio never takes its word for the shape (a wrong log level would break the console).
+ */
 export function isPlayerMessage(data: unknown): data is PlayerToStudio {
-  return hasType(data, PLAYER_TYPES)
+  if (!hasType(data, PLAYER_TYPES)) return false
+  const message = data as Fields & { type: PlayerToStudio['type'] }
+  return PLAYER_SHAPES[message.type](message)
 }
 
 /** `http://localhost:5173/x` → `http://localhost:5173`; invalid → `''`. */

@@ -1,6 +1,6 @@
 {
   "name": "@rublox/server",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -22,7 +22,7 @@
     "@rublox/config": "workspace:*",
     "@rublox/schema": "workspace:*",
     "@rublox/templates": "workspace:*",
-    "@types/ws": "^8.18.2",
+    "@types/ws": "8.18.2",
     "drizzle-kit": "0.31.11",
     "esbuild": "0.28.2",
     "tsx": "4.23.15"
@@ -39,7 +39,7 @@
     "nanoid": "6.0.2",
     "pino": "10.4.0",
     "postgres": "3.4.9",
-    "ws": "^8.22.0",
+    "ws": "8.22.0",
     "yjs": "13.6.33",
     "zod": "4.6.5"
   }

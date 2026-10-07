@@ -1,8 +1,9 @@
 import { RELAY_LIMITS, RELAY_PATH, relayRequestSchema } from '@rublox/schema'
 import { eq } from 'drizzle-orm'
 import { type Context, Hono } from 'hono'
+import { bodyLimit } from 'hono/body-limit'
 import type { Logger } from 'pino'
-import { APP_AI_PATH, AppAiRelay } from './ai/app-relay.ts'
+import { APP_AI_MAX_BYTES, APP_AI_PATH, AppAiRelay } from './ai/app-relay.ts'
 import { createApi } from './api.ts'
 import { AUTH_ROUTES, CLIENT_IP_HEADER, SIGN_IN_ROUTES } from './auth.ts'
 import { getClientIp } from './client-ip.ts'
@@ -78,9 +79,14 @@ export function createApp({ config, services, ping, logger }: AppDeps) {
   const apps = new Hono()
     .use(appsSecurityHeaders(config.studioUrl))
     .get('/assets/:hash', (c) => serveAsset(services, c.req.param('hash')))
-    .post(RELAY_PATH, (c) => relay(services, c.req.raw, config.appsUrl))
+    // Bodies are counted as they arrive (a chunked body has no length to check first).
+    .post(
+      RELAY_PATH,
+      bodyLimit({ maxSize: RELAY_LIMITS.maxRequestBytes + 4096, onError: tooLarge }),
+      (c) => relay(services, c.req.raw, config.appsUrl),
+    )
     // The AI component of published apps and live tests (J6).
-    .post(APP_AI_PATH, (c) =>
+    .post(APP_AI_PATH, bodyLimit({ maxSize: APP_AI_MAX_BYTES, onError: tooLarge }), (c) =>
       appAi.handle(c.req.raw, getClientIp(c, services.config.trustProxy) ?? 'unknown'),
     )
     .get('*', async (c) => {
@@ -105,7 +111,11 @@ export function createApp({ config, services, ping, logger }: AppDeps) {
 
   const app = new Hono()
   app.onError((error, c) => {
-    logger?.error({ err: error, path: c.req.path }, 'unhandled error')
+    // A test link carries its token in the path: never in the logs (SPEC § 0.10).
+    logger?.error(
+      { err: error, path: c.req.path.replace(/^\/live\/[^/]+/, '/live/…') },
+      'unhandled error',
+    )
     return c.json({ error: 'internal_error' }, 500)
   })
 
@@ -137,6 +147,17 @@ export type App = ReturnType<typeof createApp>
  * the brute-force limit, and Better Auth reads the client address Rublox resolved, never
  * `X-Forwarded-For`. A route that needs a session answers 403 without one, not 401.
  */
+/**
+ * Better Auth routes that end sessions: `/ws/collab` checks a session only when a document is
+ * opened, so the account's connections are closed and must authenticate again (SPEC § 0.10).
+ */
+const SESSION_ENDING_ROUTES = new Set([
+  'POST /sign-out',
+  'POST /revoke-session',
+  'POST /revoke-other-sessions',
+  'POST /change-password',
+])
+
 async function handleAuth(services: Services, raw: Request, c: Context): Promise<Response> {
   const path = new URL(raw.url).pathname.replace(/^\/api\/auth/, '')
   const key = `${raw.method} ${path}`
@@ -156,8 +177,13 @@ async function handleAuth(services: Services, raw: Request, c: Context): Promise
   headers.delete('x-forwarded-for')
   headers.delete('x-real-ip')
   headers.set(CLIENT_IP_HEADER, ip)
+  // Sessions about to end: the account's open documents authenticate again afterwards.
+  const ending = SESSION_ENDING_ROUTES.has(key)
+    ? await services.auth.api.getSession({ headers })
+    : null
   const response = await services.auth.handler(new Request(raw, { headers }))
   if (signIn && response.status >= 400 && response.status < 500) services.guard.fail(ip)
+  if (ending && response.ok) services.collab.disconnectUser(ending.user.id)
   // Only a failed sign-in may answer 401 (SPEC § 6.9): a missing session is a 403, as on /api.
   if (response.status === 401 && !signIn) {
     return Response.json({ error: 'signed_out' }, { status: 403 })
@@ -197,6 +223,8 @@ async function serveAsset(services: Services, hash: string): Promise<Response> {
  * origin, and only with a credential that names a project open in the editor, a live link or
  * a published app.
  */
+const tooLarge = () => Response.json({ error: 'too_large' }, { status: 413 })
+
 async function relay(services: Services, raw: Request, appsUrl: string): Promise<Response> {
   const refuse = (error: string, status: number) => Response.json({ error }, { status })
   if (raw.headers.get('origin') !== appsUrl) return refuse('forbidden', 403)

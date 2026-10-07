@@ -10,6 +10,7 @@ import {
   passwordSchema,
   usernameSchema,
 } from '../accounts.ts'
+import { CLIENT_IP_HEADER } from '../auth.ts'
 import { invites, inviteUses, member, organization, spaceSettings, user } from '../db/schema.ts'
 import { type ApiEnv, fail, isAdmin, iso, jsonBody, requireUser } from '../http.ts'
 import { randomToken, uuidv7 } from '../ids.ts'
@@ -224,10 +225,13 @@ export function invitesRoutes(services: Services) {
             })
           }
         })
-        // Sign in with the new credentials: Better Auth sets the session cookie.
+        // Sign in with the new credentials: Better Auth sets the session cookie. It reads the
+        // address Rublox resolved, never one the client sent (SPEC § 0.10).
+        const headers = new Headers(c.req.raw.headers)
+        headers.set(CLIENT_IP_HEADER, c.get('clientIp'))
         const response = await services.auth.api.signInUsername({
           body: { username: input.username, password: input.password },
-          headers: c.req.raw.headers,
+          headers,
           asResponse: true,
         })
         for (const cookie of response.headers.getSetCookie()) {

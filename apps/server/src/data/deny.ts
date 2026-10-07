@@ -1,5 +1,20 @@
 import { BlockList, isIP } from 'node:net'
-import { embeddedIpv4, type Resolve } from './address.ts'
+import { networkInterfaces } from 'node:os'
+import { embeddedIpv4, isPublicAddress, type Resolve } from './address.ts'
+
+type Address = { address: string; family: number }
+
+/**
+ * The public addresses of this machine's own network interfaces. A call to one of them never
+ * leaves the machine (it goes through the loopback), past any outside firewall.
+ */
+export function interfaceAddresses(): Address[] {
+  return Object.values(networkInterfaces())
+    .flat()
+    .filter((entry) => entry !== undefined)
+    .map((entry) => ({ address: entry.address, family: entry.family === 'IPv6' ? 6 : 4 }))
+    .filter((entry) => isPublicAddress(entry.address))
+}
 
 /**
  * What the administrator forbids the relay on top of the private ranges (`RUBLOX_RELAY_DENY`,
@@ -18,10 +33,10 @@ export class DenyList {
       if (!entry) continue
       this.empty = false
       if (entry.includes('/')) {
-        const [network = '', prefix = ''] = entry.split('/')
+        const [network = '', prefix = '', ...extra] = entry.split('/')
         const family = isIP(network)
         const bits = Number(prefix)
-        if (!family || !/^\d+$/.test(prefix) || bits > (family === 4 ? 32 : 128)) {
+        if (!family || extra.length || !/^\d+$/.test(prefix) || bits > (family === 4 ? 32 : 128)) {
           throw new Error(`invalid range: ${raw}`)
         }
         this.addresses.addSubnet(network, bits, family === 4 ? 'ipv4' : 'ipv6')
@@ -68,9 +83,11 @@ export const SELF_REFRESH_MS = 5 * 60_000
 
 /**
  * The addresses of the instance itself: what the names of `STUDIO_URL` and `APPS_URL` resolve
- * to. Behind a home router, the public name resolves to the router's public address, and a
- * call to it comes back through the router (NAT hairpin) with a local source address: the
- * relay must never call it. Resolved at start, then every 5 minutes to follow a new address.
+ * to, and the public addresses of the machine's interfaces (when those names point to a CDN or
+ * a tunnel, SPEC § 0.10). Behind a home router, the public name resolves to the router's
+ * public address, and a call to it comes back through the router (NAT hairpin) with a local
+ * source address: the relay must never call it. Resolved at start, then every 5 minutes to
+ * follow a new address.
  */
 export class SelfAddresses {
   private readonly known = new Map<string, { address: string; family: number }[]>()
@@ -84,6 +101,7 @@ export class SelfAddresses {
     private readonly resolve: Resolve,
     private readonly onError: (host: string, error: unknown) => void = () => {},
     refreshMs = SELF_REFRESH_MS,
+    private readonly interfaces: () => Address[] = interfaceAddresses,
   ) {
     this.ready = this.refresh()
     if (refreshMs > 0) {
@@ -110,7 +128,13 @@ export class SelfAddresses {
       }),
     )
     const next = new BlockList()
-    for (const addresses of this.known.values()) {
+    let own: Address[] = []
+    try {
+      own = this.interfaces()
+    } catch (error) {
+      this.onError('network interfaces', error)
+    }
+    for (const addresses of [...this.known.values(), own]) {
       for (const { address, family } of addresses) {
         next.addAddress(address, family === 6 ? 'ipv6' : 'ipv4')
         const v4 = family === 6 ? embeddedIpv4(address) : null

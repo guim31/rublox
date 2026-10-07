@@ -6,7 +6,7 @@
   "accent": "yellow",
   "recipe": {
     "name": { "fr": "Tableau des scores", "en": "Scoreboard" },
-    "theme": { "primary": "#f59f00", "font": "rounded" },
+    "theme": { "primary": "#c2410c", "font": "rounded" },
     "screens": [
       {
         "key": "home",
@@ -94,7 +94,7 @@
                       "text": { "fr": "Équipe rouge", "en": "Red team" },
                       "bold": true,
                       "fontSize": 18,
-                      "color": "#e03131",
+                      "color": "#c92a2a",
                       "align": "center"
                     }
                   },
@@ -106,7 +106,7 @@
                       "text": "0",
                       "fontSize": 72,
                       "bold": true,
-                      "color": "#e03131",
+                      "color": "#c92a2a",
                       "align": "center"
                     }
                   },
@@ -114,7 +114,7 @@
                     "key": "redPlus",
                     "type": "Button",
                     "name": { "fr": "PlusRouges", "en": "RedPlus" },
-                    "props": { "text": "+1", "fontSize": 24, "color": "#e03131", "width": "fill" }
+                    "props": { "text": "+1", "fontSize": 24, "color": "#c92a2a", "width": "fill" }
                   }
                 ]
               }

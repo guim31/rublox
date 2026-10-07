@@ -33,6 +33,10 @@
   --c-mint: #13a27f;
   --c-mint-soft: #d9f6ee;
   --c-mint-text: #0a6b52;
+  /* Code view: syntax colors readable on the panel (WCAG 1.4.3). */
+  --c-code-string: #0a6b52;
+  --c-code-number: #b93a2b;
+  --c-code-function: #7d5200;
   --c-danger: #c8321f;
   --c-on-danger: #ffffff;
   --c-overlay: rgb(20 16 48 / 0.45);
@@ -64,6 +68,9 @@
   --c-mint: #4fd6b2;
   --c-mint-soft: #13332b;
   --c-mint-text: #6ee3c3;
+  --c-code-string: #4fd6b2;
+  --c-code-number: #ff7e6f;
+  --c-code-function: #ffcc4d;
   --c-danger: #ff7a68;
   /* White on this coral is 2.5:1: dark text instead (7:1). */
   --c-on-danger: #2b0a05;
@@ -256,8 +263,13 @@ body {
   *::after {
     /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win */
     animation-duration: 1ms !important;
+    /* An endless animation (spinner, pulse) would otherwise run every millisecond: once. */
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win */
+    animation-iteration-count: 1 !important;
     /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win */
     transition-duration: 1ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win */
+    scroll-behavior: auto !important;
   }
 }
 

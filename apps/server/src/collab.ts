@@ -158,6 +158,20 @@ export class Collab {
     this.hocuspocus.closeConnections(projectId)
   }
 
+  /**
+   * Closes every open connection of an account, so each one authenticates again (SPEC
+   * § 0.10): Hocuspocus checks a session once, when a document is opened. Called when the
+   * account's sessions end (disabled, password reset, deleted, signed out, sessions revoked);
+   * a tab whose session is still valid opens its documents again at once.
+   */
+  disconnectUser(userId: string) {
+    for (const document of this.hocuspocus.documents.values()) {
+      for (const connection of [...document.connections.keys()]) {
+        if (connection.context?.userId === userId) connection.close(RESET_CONNECTION)
+      }
+    }
+  }
+
   /** Stores what is pending (shutdown, tests). */
   async flush() {
     const { debouncer, documents } = this.hocuspocus
@@ -207,6 +221,9 @@ export class Collab {
     ws.on('error', (error) => this.deps.logger?.warn({ err: error }, 'collaboration socket error'))
   }
 }
+
+/** The close event of `closeConnections` (`ResetConnection` in Hocuspocus, not exported). */
+const RESET_CONNECTION = { code: 4205, reason: 'Reset Connection' }
 
 function refusal(reason: CollabRefusal) {
   return { reason }

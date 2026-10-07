@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type HelpTab = 'blocks' | 'components' | 'glossary'
+export type HelpTab = 'blocks' | 'components' | 'glossary' | 'keys'
 
 /** A sheet of the help: a block type, a component type or a glossary entry. */
 export type HelpTopic = { kind: 'block' | 'component' | 'term'; id: string }

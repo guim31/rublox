@@ -498,7 +498,7 @@
   white-space: nowrap;
 }
 .rx-tab[aria-current="page"] {
-  color: var(--rx-primary);
+  color: var(--rx-primary-text, var(--rx-primary));
 }
 .rx-tab:focus-visible,
 .rx-drawer-item:focus-visible {
@@ -549,7 +549,7 @@
 }
 .rx-drawer-item[aria-current="page"] {
   background: color-mix(in srgb, var(--rx-primary) 14%, transparent);
-  color: var(--rx-primary);
+  color: var(--rx-primary-text, var(--rx-primary));
 }
 @keyframes rx-fade-in {
   from {
@@ -640,7 +640,7 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--rx-primary);
+  color: var(--rx-primary-text, var(--rx-primary));
   cursor: pointer;
 }
 .rx-bar-back:hover {

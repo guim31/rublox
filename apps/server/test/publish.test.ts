@@ -129,6 +129,9 @@ describe('publishing an app', () => {
     expect(sw).toContain('/_app/player-def456.js')
     expect(sw).toContain('"/a/le-de/app.json"')
     expect(sw).toContain("addEventListener('notificationclick'")
+    // Its own cache only: another app of the origin cannot answer in its place.
+    expect(sw).not.toContain('caches.match(')
+    expect(() => new Function(sw)).not.toThrow()
 
     expect((await apps(admin, '/a/le-de')).status).toBe(301)
     expect((await apps(admin, '/a/le-de/install')).status).toBe(200)
@@ -258,6 +261,15 @@ describe('who may publish', () => {
     const refused = await publish(pupil, project.id, body)
     expect(refused.status).toBe(403)
     expect(await json(refused)).toEqual({ error: 'publish_forbidden' })
+    // Nor through someone who may publish their own apps (SPEC § 0.10).
+    const shared = await pupil.request('PUT', `/api/projects/${project.id}/members`, {
+      username: 'publish-editor',
+      role: 'editor',
+    })
+    expect(shared.status).toBe(200)
+    const through = await publish(editor, project.id, { ...body, slug: 'appli-eleve-2' })
+    expect(through.status).toBe(403)
+    expect(await json(through)).toEqual({ error: 'publish_forbidden' })
 
     await admin.request('PATCH', `/api/spaces/${spaceId}`, { membersCanPublish: true })
     expect((await publish(pupil, project.id, body)).status).toBe(201)

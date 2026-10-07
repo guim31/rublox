@@ -16,12 +16,12 @@ const highlight = HighlightStyle.define([
     color: 'var(--c-primary-text)',
     fontWeight: '600',
   },
-  { tag: [tags.string, tags.special(tags.string)], color: 'var(--c-mint)' },
-  { tag: [tags.number, tags.bool, tags.null], color: 'var(--c-coral)' },
+  { tag: [tags.string, tags.special(tags.string)], color: 'var(--c-code-string)' },
+  { tag: [tags.number, tags.bool, tags.null], color: 'var(--c-code-number)' },
   { tag: [tags.propertyName], color: 'var(--c-text)' },
   {
     tag: [tags.function(tags.variableName), tags.function(tags.propertyName)],
-    color: 'var(--c-yellow)',
+    color: 'var(--c-code-function)',
   },
 ])
 

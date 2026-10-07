@@ -225,7 +225,13 @@ describe('gallery', () => {
     expect((await share(bob, remix)).status).toBe(403)
     const me = await json<{ features: { gallery: boolean } }>(await bob.request('GET', '/api/me'))
     expect(me.features.gallery).toBe(false)
+    // What the gallery opened closes with it, even for one who knows the address (SPEC § 0.10).
+    expect((await bob.request('GET', `/api/projects/${rocket}`)).status).toBe(404)
+    expect(
+      (await bob.request('POST', `/api/projects/${rocket}/duplicate`, { name: 'Copie' })).status,
+    ).toBe(404)
     await admin.request('PATCH', '/api/admin/settings', { galleryEnabled: true })
+    expect((await bob.request('GET', `/api/projects/${rocket}`)).status).toBe(200)
   })
 
   it('refuses the guest (no session)', async () => {

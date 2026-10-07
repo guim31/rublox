@@ -48,6 +48,10 @@ async function project(page: Page, name: string) {
   await page.getByRole('textbox', { name: 'texte', exact: true }).fill('Lance le dé !')
   await addComponent(page, 'Button')
   await page.getByRole('textbox', { name: 'texte', exact: true }).fill('Lancer')
+  // The app follows the phone's theme: the « dark » phone pictures show it dark.
+  await page.getByTestId('layer-Accueil').click()
+  await page.getByRole('radio', { name: 'Appli' }).click()
+  await page.getByRole('radio', { name: 'Auto' }).click()
   await expect(page.getByTestId('save-state')).toHaveAttribute('data-state', 'saved')
 }
 

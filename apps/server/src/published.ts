@@ -145,14 +145,15 @@ async function networkFirst(request, fallback) {
     }
     return response
   } catch (error) {
-    const cached = await caches.match(fallback || request)
+    const cached = await (await caches.open(CACHE)).match(fallback || request)
     if (cached) return cached
     throw error
   }
 }
 
+// Only this app's cache: \`caches.match\` would read the caches of every app of the origin.
 async function cacheFirst(request) {
-  const cached = await caches.match(request)
+  const cached = await (await caches.open(CACHE)).match(request)
   if (cached) return cached
   const response = await fetch(request)
   const url = new URL(request.url)

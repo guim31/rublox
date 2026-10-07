@@ -54,6 +54,12 @@ function patchBlockly(): void {
     if (Blockly.ShortcutRegistry.registry.getRegistry()[name])
       Blockly.ShortcutRegistry.registry.unregister(name)
   }
+  // Keyboard navigation (SPEC § 4.2, § 5.1): Blockly 13 carries the official plugin in its
+  // core (`@blockly/keyboard-navigation` stops at Blockly 12). Its jumps (Home, End, Page up
+  // and down) and workspace scrolling are not registered by default.
+  if (!Blockly.ShortcutRegistry.registry.getRegistry()[Blockly.ShortcutItems.names.SCROLL_UP]) {
+    Blockly.ShortcutItems.registerNavigationShortcuts()
+  }
   for (const id of ['undoWorkspace', 'redoWorkspace']) {
     if (Blockly.ContextMenuRegistry.registry.getItem(id))
       Blockly.ContextMenuRegistry.registry.unregister(id)

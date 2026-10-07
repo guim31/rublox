@@ -1,6 +1,15 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
-import { ADMIN, addComponent, newProject, openBlocks, signIn, unique, usePrefs } from './helpers.ts'
+import {
+  ADMIN,
+  addComponent,
+  newProject,
+  openBlocks,
+  settled,
+  signIn,
+  unique,
+  usePrefs,
+} from './helpers.ts'
 
 /**
  * A new administrator of its own. Signed in as the shared `admin`, the four variants (run in
@@ -39,6 +48,7 @@ for (const mode of ['junior', 'studio'] as const) {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await usePrefs(page, { mode, theme, locale: 'fr' })
       const check = async () => {
+        await settled(page)
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
           .exclude('.injectionDiv')
@@ -72,6 +82,7 @@ for (const mode of ['junior', 'studio'] as const) {
         // The page shows this variant's theme and mode, not those of another profile.
         await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
         await expect(page.locator('html')).toHaveAttribute('data-mode', mode)
+        await settled(page)
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
           .exclude('[data-testid=preview-frame]')
@@ -117,6 +128,7 @@ for (const mode of ['junior', 'studio'] as const) {
       await usePrefs(guest, { mode, theme, locale: 'fr' })
       await guest.goto(link)
       await expect(guest.getByRole('heading', { name: 'Bienvenue sur Rublox' })).toBeVisible()
+      await settled(guest)
       const results = await new AxeBuilder({ page: guest })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
         .analyze()
@@ -132,6 +144,7 @@ for (const mode of ['junior', 'studio'] as const) {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await usePrefs(page, { mode, theme, locale: 'fr', welcomed: false })
       const check = async () => {
+        await settled(page)
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
           .exclude('.injectionDiv')

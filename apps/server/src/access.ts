@@ -3,6 +3,7 @@ import { alias } from 'drizzle-orm/pg-core'
 import type { Database } from './db/index.ts'
 import { member, projectMembers, projects, user } from './db/schema.ts'
 import { fail, type SessionUser } from './http.ts'
+import { settingsOf } from './settings.ts'
 
 /** Better Auth organization roles that make a space manager. */
 export const MANAGER_ROLES = ['owner', 'admin'] as const
@@ -92,14 +93,17 @@ export async function projectAccess(db: Database, userId: string, projectId: str
     .where(and(eq(member.userId, project.ownerId), eq(member.role, 'member')))
     .limit(1)
   if (managed) return { project, access: 'manager' as ProjectAccess }
-  if (inGallery(project)) return { project, access: 'gallery' as ProjectAccess }
+  // The gallery switched off by the administrator closes what it opened (SPEC § 0.10).
+  if (inGallery(project) && ((await settingsOf(db)?.get())?.galleryEnabled ?? true)) {
+    return { project, access: 'gallery' as ProjectAccess }
+  }
   return null
 }
 
 /**
  * The project and the caller's access, or 404 (also when the access is too low to know).
  * `view` lets anyone see a gallery project (open it read-only, remix it); `read` is for the
- * people it is shared with (versions, members…).
+ * people it is shared with (versions, members…); `write` refuses a project in the trash.
  */
 export async function requireProject(
   db: Database,
@@ -111,6 +115,9 @@ export async function requireProject(
   if (!found) fail(404, 'not_found')
   if (need === 'read' && found.access === 'gallery') fail(404, 'not_found')
   if (need === 'write' && !canWrite(found.access)) fail(403, 'forbidden')
+  // A project in the trash is read-only, as on `/ws/collab` (SPEC § 0.10): restoring it or
+  // deleting it for good asks for `owner`.
+  if (need === 'write' && found.project.deletedAt) fail(409, 'in_trash')
   if (need === 'owner' && found.access !== 'owner') fail(403, 'forbidden')
   return found
 }

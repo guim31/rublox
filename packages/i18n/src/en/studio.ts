@@ -197,7 +197,7 @@ export const studio: Omit<
       reset: 'Back to the default value',
       help: 'Help',
       size: { auto: 'Auto', fill: 'Fill', px: 'px', percent: '%' },
-      color: { none: 'None', theme: 'Theme colors', custom: 'Custom' },
+      color: { none: 'None', theme: 'Theme colors', custom: 'Custom', hex: 'Color code (hex)' },
       tokens: {
         primary: 'Primary',
         secondary: 'Secondary',

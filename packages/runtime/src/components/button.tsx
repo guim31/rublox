@@ -1,16 +1,31 @@
 import { useRef } from 'react'
-import { cssColor } from '../theme.ts'
+import { cssColor, textOn } from '../theme.ts'
 import { type Renderer, rootAttributes } from './types.ts'
 
 const LONG_PRESS_MS = 500
 
+/** The text on a fill of a theme color, worked out with the theme (`themeVariables`). */
+const ON_THEME: Record<string, string> = {
+  'var(--rx-primary)': 'var(--rx-on-primary)',
+  'var(--rx-secondary)': 'var(--rx-on-secondary)',
+}
+
 export const ButtonRenderer: Renderer = (p) => {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const longPressed = useRef(false)
-  const color = cssColor(p.props.color) ?? 'var(--rx-primary)'
+  const own = cssColor(p.props.color)
+  const color = own ?? 'var(--rx-primary)'
   const variant = p.props.variant
   const filled = variant === 'filled'
-  const text = cssColor(p.props.textColor) ?? (filled ? 'var(--rx-on-primary)' : color)
+  // Readable by default (WCAG 1.4.3): white or near black on the fill; as text, the primary
+  // made readable on the background. A text color chosen in the inspector wins.
+  const text =
+    cssColor(p.props.textColor) ??
+    (filled
+      ? (ON_THEME[color] ?? textOn(color))
+      : color === 'var(--rx-primary)'
+        ? 'var(--rx-primary-text)'
+        : color)
   const disabled = p.props.disabled === true
   return (
     <button

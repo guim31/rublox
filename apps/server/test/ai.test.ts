@@ -213,6 +213,27 @@ describe('with a (fake) model', () => {
     expect(body.entries.map((e) => e.outcome)).toContain('refused')
   })
 
+  it('does not let parallel questions go past the quota (SPEC § 0.10)', async () => {
+    const me = await json<{ features: { ai: { used: number } } }>(
+      await alice.request('GET', '/api/me'),
+    )
+    await admin.request('PATCH', '/api/admin/settings', { aiDailyQuota: me.features.ai.used + 2 })
+    const ask = () =>
+      alice.request('POST', '/api/ai/explain', {
+        projectId: null,
+        target: 'block',
+        locale: 'fr',
+        mode: 'junior',
+        context: '{}',
+      })
+    fake.delay = 200
+    const statuses = (await Promise.all(Array.from({ length: 6 }, ask))).map((r) => r.status)
+    fake.delay = 0
+    expect(statuses.filter((status) => status === 200)).toHaveLength(2)
+    expect(statuses.filter((status) => status === 429)).toHaveLength(4)
+    await admin.request('PATCH', '/api/admin/settings', { aiDailyQuota: 50 })
+  })
+
   it('needs the managers of a space to switch it on for their members', async () => {
     const space = await json<{ id: string }>(
       await alice.request('POST', '/api/spaces', { name: 'Classe', kind: 'class' }),
@@ -268,12 +289,14 @@ describe('with a (fake) model', () => {
       },
     })
     expect(published.status).toBe(201)
-    const ask = () =>
+    const ask = (origin = APPS) =>
       server.client('198.51.100.7').fetch(`${APPS}/_rx/ai`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json', origin },
         body: JSON.stringify({ slug: 'appli-ia', prompt: 'Dis bonjour' }),
       })
+    // Only the apps themselves: another site cannot spend the owner's quota (SPEC § 0.10).
+    expect((await ask('https://elsewhere.example.com')).status).toBe(403)
     const refused = await ask()
     expect(refused.status).toBe(403)
     expect(await json(refused)).toEqual({ error: 'ai_forbidden' })

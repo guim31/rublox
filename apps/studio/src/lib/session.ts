@@ -1,7 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { clearCache } from '../storage/server-cache.ts'
 import { api, call, type Me } from './api.ts'
-import { authClient } from './auth-client.ts'
 import { queryClient } from './query.ts'
 
 export const ME_KEY = ['me'] as const
@@ -75,7 +73,7 @@ export async function refreshMe() {
 export async function forgetAccount() {
   signingOut = true
   try {
-    await clearCache()
+    await (await import('../storage/server-cache.ts')).clearCache()
     queryClient.clear()
     queryClient.setQueryData(ME_KEY, SIGNED_OUT)
   } finally {
@@ -86,9 +84,11 @@ export async function forgetAccount() {
 export async function signOut() {
   signingOut = true
   try {
+    // Better Auth's client is only needed to sign in and out: loaded then (SPEC § 7).
+    const { authClient } = await import('./auth-client.ts')
     await authClient.signOut()
     // The browser may be shared: the offline copies of the projects leave with the account.
-    await clearCache()
+    await (await import('../storage/server-cache.ts')).clearCache()
     queryClient.clear()
     queryClient.setQueryData(ME_KEY, SIGNED_OUT)
   } finally {

@@ -1,5 +1,4 @@
-import { createDemoProject } from '@rublox/catalog'
-import { type Template, templateProject } from '@rublox/templates'
+import type { Template } from '@rublox/templates'
 import { useNavigate } from '@tanstack/react-router'
 import {
   Copy,
@@ -15,10 +14,9 @@ import {
   Trash2,
   WandSparkles,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { CreateWithAiDialog } from '../ai/create-dialog.tsx'
 import { AppHeader } from '../components/app-header.tsx'
 import { Avatar } from '../components/avatar.tsx'
 import { Mascot } from '../components/brand.tsx'
@@ -38,9 +36,19 @@ import { guestBackend, serverBackend } from '../storage/backend.ts'
 import type { ProjectSummary } from '../storage/projects.ts'
 import { GuestImport } from './guest-import.tsx'
 import { ImportButton } from './import-button.tsx'
-import { NewProjectDialog } from './new-project-dialog.tsx'
 import { useProjectMutation, useProjects } from './queries.ts'
-import { ProjectThumbnail } from './thumbnail.tsx'
+
+// Loaded when needed (SPEC § 7: the studio's first download stays under 300 KB): the dialogs
+// bring the templates and the AI; the thumbnails, the component renderers.
+const NewProjectDialog = lazy(() =>
+  import('./new-project-dialog.tsx').then((m) => ({ default: m.NewProjectDialog })),
+)
+const CreateWithAiDialog = lazy(() =>
+  import('../ai/create-dialog.tsx').then((m) => ({ default: m.CreateWithAiDialog })),
+)
+const ProjectThumbnail = lazy(() =>
+  import('./thumbnail.tsx').then((m) => ({ default: m.ProjectThumbnail })),
+)
 
 type Filter = 'all' | 'mine' | 'shared' | 'space' | 'favorites' | 'trash'
 type Sort = 'recent' | 'name'
@@ -94,13 +102,15 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
         icon: <Sparkles size={16} />,
         keywords: ['demo', 'démo', 'catalog', 'catalogue'],
         run: () =>
-          void store
-            .create({
-              name: '',
-              locale,
-              mode,
-              doc: createDemoProject({ locale, mode, ai: features.ai !== null }),
-            })
+          void import('@rublox/catalog')
+            .then(({ createDemoProject }) =>
+              store.create({
+                name: '',
+                locale,
+                mode,
+                doc: createDemoProject({ locale, mode, ai: features.ai !== null }),
+              }),
+            )
             .then((id) =>
               navigate({
                 to: '/p/$projectId',
@@ -115,12 +125,14 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
   }, [store, locale, mode, navigate, tc, features.ai])
 
   const create = useProjectMutation(
-    ({ name, template }: { name: string; template: Template | null }) =>
+    async ({ name, template }: { name: string; template: Template | null }) =>
       store.create({
         name,
         locale,
         mode,
-        doc: template ? templateProject(template, { locale, mode, name }) : undefined,
+        doc: template
+          ? (await import('@rublox/templates')).templateProject(template, { locale, mode, name })
+          : undefined,
       }),
   )
   const rename = useProjectMutation(({ id, name }: { id: string; name: string }) =>
@@ -311,34 +323,40 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
         )}
       </main>
 
-      <NewProjectDialog
-        open={creating}
-        locale={locale}
-        dark={dark}
-        defaultName={creating ? defaultName() : ''}
-        onClose={() => {
-          setCreating(false)
-          if (openNew) void navigate({ to: '/', search: {} })
-        }}
-        onCreate={async (input) => {
-          try {
-            const id = await create.mutateAsync(input)
-            setCreating(false)
-            await open(id as string)
-          } catch (error) {
-            toast.error(input.template ? t('templates.failed') : errorMessage(t, error))
-          }
-        }}
-      />
-      {features.ai ? (
-        <CreateWithAiDialog
-          open={creatingWithAi}
-          onClose={() => setCreatingWithAi(false)}
-          onCreated={(id) => {
-            setCreatingWithAi(false)
-            void open(id)
-          }}
-        />
+      {creating ? (
+        <Suspense fallback={null}>
+          <NewProjectDialog
+            open={creating}
+            locale={locale}
+            dark={dark}
+            defaultName={creating ? defaultName() : ''}
+            onClose={() => {
+              setCreating(false)
+              if (openNew) void navigate({ to: '/', search: {} })
+            }}
+            onCreate={async (input) => {
+              try {
+                const id = await create.mutateAsync(input)
+                setCreating(false)
+                await open(id as string)
+              } catch (error) {
+                toast.error(input.template ? t('templates.failed') : errorMessage(t, error))
+              }
+            }}
+          />
+        </Suspense>
+      ) : null}
+      {features.ai && creatingWithAi ? (
+        <Suspense fallback={null}>
+          <CreateWithAiDialog
+            open={creatingWithAi}
+            onClose={() => setCreatingWithAi(false)}
+            onCreated={(id) => {
+              setCreatingWithAi(false)
+              void open(id)
+            }}
+          />
+        </Suspense>
       ) : null}
       <NameDialog
         open={renaming !== null}
@@ -428,7 +446,9 @@ function ProjectCard(props: CardProps) {
         style={{ opacity: trashed ? 0.6 : 1 }}
       >
         <div className="absolute inset-x-6 top-4 bottom-0 overflow-hidden rounded-t-[18px] border-[5px] border-b-0 border-text/85 bg-surface shadow-2">
-          <ProjectThumbnail preview={project.preview} dark={props.dark} />
+          <Suspense fallback={<div className="size-full bg-surface-2" />}>
+            <ProjectThumbnail preview={project.preview} dark={props.dark} />
+          </Suspense>
         </div>
       </div>
       <div className="flex items-center gap-2 p-3 junior:p-4">

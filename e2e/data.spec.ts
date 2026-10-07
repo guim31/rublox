@@ -66,6 +66,8 @@ async function fill(page: Page, label: string | RegExp, value: string) {
 }
 
 test('SPEC § 8, J5: the weather tutorial works from start to finish', async ({ page, context }) => {
+  // A whole tutorial, end to end: about 45 s on two busy cores, too close to the 60 s budget.
+  test.slow()
   await usePrefs(page, { mode: 'studio', locale: 'fr' })
   await signIn(page, ADMIN.username, ADMIN.password)
   await fakeOpenMeteo(context)
@@ -152,6 +154,8 @@ test('SPEC § 8, J5: the weather tutorial works from start to finish', async ({ 
 })
 
 test('SPEC § 8, J5: the family chat syncs two browsers', async ({ page, browser }) => {
+  // A whole tutorial, end to end: about 45 s on two busy cores, too close to the 60 s budget.
+  test.slow()
   await usePrefs(page, { mode: 'studio', locale: 'fr' })
   await signIn(page, ADMIN.username, ADMIN.password)
   await startTutorial(page, 'family-chat')

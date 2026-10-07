@@ -6,7 +6,7 @@
   "accent": "indigo",
   "recipe": {
     "name": { "fr": "Le minuteur des dents", "en": "Toothbrush timer" },
-    "theme": { "primary": "#4c6ef5", "font": "rounded" },
+    "theme": { "primary": "#3b5bdb", "font": "rounded" },
     "screens": [
       {
         "key": "home",

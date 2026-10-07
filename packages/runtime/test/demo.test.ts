@@ -1,8 +1,8 @@
 import { generateProjectCode } from '@rublox/blocks'
 import { createDemoProject } from '@rublox/catalog'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { Engine, type LogEntry } from '../src/index.ts'
-import { dataLoader, sleep } from './helpers.ts'
+import { dataLoader } from './helpers.ts'
 
 describe('demo app', () => {
   it.each(['fr', 'en'] as const)('runs every screen without an error (%s)', async (locale) => {
@@ -25,14 +25,14 @@ describe('demo app', () => {
     await engine.start()
     for (const screenId of doc.screenOrder) {
       engine.openScreen(doc.screens[screenId]?.name ?? '')
-      await sleep(20)
-      expect(engine.getSnapshot().screen?.screenId).toBe(screenId)
+      await vi.waitFor(() => expect(engine.getSnapshot().screen?.screenId).toBe(screenId))
     }
     // The stored variable counted this visit.
     engine.switchTo(doc.screenOrder[0] ?? '')
-    await sleep(20)
+    await vi.waitFor(() =>
+      expect(String(engine.getSnapshot().screen?.overrides.get('visits')?.text)).toMatch(/1$/),
+    )
     const home = doc.screens[doc.screenOrder[0] ?? '']
-    expect(String(engine.getSnapshot().screen?.overrides.get('visits')?.text)).toMatch(/1$/)
     expect(home).toBeDefined()
     expect(logs.filter((entry) => entry.level !== 'log')).toEqual([])
     engine.dispose()

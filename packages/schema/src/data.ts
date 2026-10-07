@@ -114,6 +114,8 @@ export function buildApiUrl(
   if (extra) {
     if (/^[a-z][a-z0-9+.-]*:|^\/\//i.test(extra)) throw new TypeError('path leaves the base')
     const [pathPart = '', queryPart] = extra.split('?', 2)
+    // An encoded slash or backslash would leave the base once the API decodes it.
+    if (/%(2f|5c)/i.test(pathPart)) throw new TypeError('path leaves the base')
     const joined = `${base.pathname.replace(/\/+$/, '')}/${pathPart.replace(/^\/+/, '')}`
     url = new URL(base)
     url.pathname = joined

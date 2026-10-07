@@ -135,7 +135,10 @@ export function adminRoutes(services: Services) {
       }
       const [row] = await db.update(user).set(values).where(eq(user.id, targetId)).returning()
       if (!row) fail(404, 'not_found')
-      if (patch.disabled) await db.delete(session).where(eq(session.userId, targetId))
+      if (patch.disabled) {
+        await db.delete(session).where(eq(session.userId, targetId))
+        services.collab.disconnectUser(targetId)
+      }
       return c.json({ ok: true })
     })
     .post(

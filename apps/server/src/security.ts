@@ -1,6 +1,11 @@
 import type { MiddlewareHandler } from 'hono'
 
-/** Features the preview iframe may use (SPEC § 6.6), delegated with its `allow` attribute. */
+/**
+ * Features the preview iframe may use (SPEC § 6.6), delegated with its `allow` attribute.
+ * `web-share` stays in the attribute but not in the header: Chrome does not know it as a
+ * policy feature (it logs « Unrecognized feature »), and its default allowlist (`self`) plus
+ * the attribute already delegate it.
+ */
 const APP_FEATURES = [
   'camera',
   'microphone',
@@ -8,7 +13,6 @@ const APP_FEATURES = [
   'accelerometer',
   'gyroscope',
   'clipboard-write',
-  'web-share',
   'fullscreen',
   'autoplay',
 ] as const
@@ -69,6 +73,10 @@ export function studioSecurityHeaders(appsUrl: string): MiddlewareHandler {
     await next()
     commonHeaders(c.res.headers)
     c.res.headers.set('Content-Security-Policy', csp)
+    // A page of the apps origin that opens the studio (`window.open`) must not get a handle
+    // on it: through it, it would reach the preview iframe, which is on its own origin, and
+    // read the open project and its data ticket (SPEC § 0.10).
+    c.res.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
   }
 }
 
