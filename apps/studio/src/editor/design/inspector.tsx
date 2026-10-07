@@ -20,6 +20,7 @@ import { useDoc, useSession } from '../context.tsx'
 import { useEditor } from '../store.ts'
 import { AppSettings } from './app-settings.tsx'
 import { EDITORS } from './editors.tsx'
+import { MultiInspector } from './multi-inspector.tsx'
 
 /**
  * Properties of the selected component, generated from the catalog and grouped in sections
@@ -35,7 +36,10 @@ export function Inspector({ screenId }: { screenId: ScreenId }) {
   const tab = useEditor((s) => s.inspectorTab)
   const [more, setMore] = useState(false)
   const screen = doc.screens[screenId]
+  const selection = useEditor((s) => s.selection)
   if (!screen) return null
+  if (selection.filter((sid) => sid !== screen.rootId && screen.components[sid]).length > 1)
+    return <MultiInspector screenId={screenId} ids={selection} />
   const id = selected && screen.components[selected] ? selected : screen.rootId
   const node = screen.components[id]
   const def = node ? getComponentDef(node.type) : undefined

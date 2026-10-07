@@ -44,7 +44,8 @@ export function Layers({ screenId }: { screenId: ScreenId }) {
   const session = useSession()
   const doc = useDoc()
   const locale = usePrefs((s) => s.locale)
-  const { selected, select, hover, announce } = useEditor()
+  const { selected, select, hover, announce, selection, toggle } = useEditor()
+  const mode = usePrefs((s) => s.mode)
   const screen = doc.screens[screenId]
   const [renaming, setRenaming] = useState<ComponentId | null>(null)
   const [zone, setZone] = useState<Zone | null>(null)
@@ -216,7 +217,7 @@ export function Layers({ screenId }: { screenId: ScreenId }) {
           const node = screen.components[id]
           if (!node) return null
           const isRoot = id === screen.rootId
-          const active = id === current
+          const active = id === current || selection.includes(id)
           const container = isContainer(screen, id)
           return (
             <div
@@ -269,7 +270,11 @@ export function Layers({ screenId }: { screenId: ScreenId }) {
                   select(payload.id)
                 }
               }}
-              onClick={() => select(id)}
+              onClick={(event) => {
+                if (mode === 'studio' && (event.shiftKey || event.metaKey || event.ctrlKey))
+                  toggle(id)
+                else select(id)
+              }}
               onDoubleClick={() => setRenaming(id)}
               onMouseEnter={() => hover(id)}
               onMouseLeave={() => hover(null)}

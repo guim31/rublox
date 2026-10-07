@@ -40,13 +40,14 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
   useAssetsVersion()
   const screen = doc.screens[screenId]
   const { device, landscape, zoom, appScheme, selected, hovered, set, select, hover } = useEditor()
-  const locale = usePrefs((s) => s.locale)
+  const { locale, mode } = usePrefs()
+  const selection = useEditor((s) => s.selection)
   const areaRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const screenRef = useRef<HTMLDivElement>(null)
   const [fit, setFit] = useState(1)
   const [drop, setDrop] = useState<(DropTarget & { line: Box }) | null>(null)
-  const [boxes, setBoxes] = useState<{ selected?: Box; hovered?: Box; parent?: Box }>({})
+  const [boxes, setBoxes] = useState<{ selected?: Box; hovered?: Box; others?: Box[] }>({})
 
   const size = DEVICES[device]
   const width = landscape ? size.height : size.width
@@ -96,6 +97,10 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
       const next = {
         selected: boxOf(elementOf(selected)),
         hovered: hovered !== selected ? boxOf(elementOf(hovered)) : undefined,
+        others: selection
+          .filter((id) => id !== selected)
+          .map((id) => boxOf(elementOf(id)))
+          .filter((box): box is Box => Boolean(box)),
       }
       const key = JSON.stringify(next)
       if (key !== last) {
@@ -106,7 +111,7 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
     }
     frame = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(frame)
-  }, [selected, hovered, boxOf, elementOf])
+  }, [selected, hovered, selection, boxOf, elementOf])
 
   if (!screen) return null
 
@@ -228,7 +233,13 @@ export function Canvas({ screenId }: { screenId: ScreenId }) {
                     ref={screenRef}
                     className="min-h-0 flex-1"
                     data-testid="canvas-screen"
-                    onClick={(event) => select(componentAt(event.target) ?? screen.rootId)}
+                    onClick={(event) => {
+                      const id = componentAt(event.target) ?? screen.rootId
+                      // Studio: Shift or Ctrl/Cmd + click builds a multiple selection.
+                      if (mode === 'studio' && (event.shiftKey || event.metaKey || event.ctrlKey))
+                        useEditor.getState().toggle(id)
+                      else select(id)
+                    }}
                     onMouseMove={(event) => {
                       const id = componentAt(event.target)
                       if (id !== useEditor.getState().hovered) hover(id)
@@ -384,7 +395,7 @@ function EmptyHint({ root }: { root: boolean }) {
 }
 
 function Overlay(props: {
-  boxes: { selected?: Box; hovered?: Box }
+  boxes: { selected?: Box; hovered?: Box; others?: Box[] }
   drop?: Box
   selectedLabel: string
   hoveredLabel: string
@@ -425,6 +436,14 @@ function Overlay(props: {
   }
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
+      {props.boxes.others?.map((box) => (
+        <div
+          key={`${box.left},${box.top}`}
+          className="absolute rounded-[3px] outline-2 outline-primary/70 outline-dashed"
+          style={box}
+          data-testid="selection-extra"
+        />
+      ))}
       {hovered ? (
         <div
           className="absolute rounded-[3px] outline-[1.5px] outline-dashed outline-primary/70"

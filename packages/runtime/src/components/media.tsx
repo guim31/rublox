@@ -65,8 +65,12 @@ export const LottieRenderer: Renderer = (p) => {
   const loop = p.props.loop !== false
   const autoplay = p.props.autoplay !== false
   const speed = Number(p.props.speed) || 1
-  const { emit, design } = p
+  // `emit` is a new function at each render: read it through a ref, not as a dependency.
+  const emitRef = useRef(p.emit)
+  emitRef.current = p.emit
+  const { design } = p
   useEffect(() => {
+    const emit: typeof emitRef.current = (...args) => emitRef.current(...args)
     const container = box.current
     if (!src || !container) return
     let cancelled = false
@@ -98,7 +102,7 @@ export const LottieRenderer: Renderer = (p) => {
       animation.current = null
       destroy()
     }
-  }, [src, loop, autoplay, speed, emit, design])
+  }, [src, loop, autoplay, speed, design])
   return (
     <div {...rootAttributes(p, 'Lottie')} className="rx-lottie" style={p.style}>
       <div ref={box} className="rx-lottie-box" aria-hidden="true" />

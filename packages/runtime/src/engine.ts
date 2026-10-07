@@ -780,6 +780,8 @@ export class Engine {
       return
     }
     const current = instance.overrides.get(componentId) ?? {}
+    // Writing the same value again changes nothing (and redraws nothing).
+    if (prop in current && Object.is(current[prop], coerced)) return
     instance.overrides.set(componentId, { ...current, [prop]: coerced })
     if (instance.alive) this.notify()
   }

@@ -1,5 +1,5 @@
 import { Star } from 'lucide-react'
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { cssColor } from '../theme.ts'
 import { type Renderer, type RendererProps, rootAttributes } from './types.ts'
 
@@ -91,10 +91,13 @@ export const DropdownRenderer: Renderer = (p) => {
   const options = Array.isArray(p.props.options) ? p.props.options.map(String) : []
   const selected = String(p.props.selected ?? '')
   const index = options.indexOf(selected) + 1
-  const { design, setValue } = p
+  // Keep "selected position" in step with "selected", whoever changed it (a block, a tap).
+  const setValue = useRef(p.setValue)
+  setValue.current = p.setValue
+  const { design } = p
   useEffect(() => {
-    if (!design) setValue('selectedIndex', index)
-  }, [design, setValue, index])
+    if (!design) setValue.current('selectedIndex', index)
+  }, [design, index])
   return (
     <div
       {...rootAttributes(p, 'Dropdown')}

@@ -5,6 +5,27 @@
  */
 export const catalog = {
   studio: {
+    demo: {
+      open: 'Ouvrir l’appli de démonstration (tous les composants)',
+      failed: 'L’appli de démonstration n’a pas pu être créée. Réessaie.',
+    },
+    clipboard: {
+      copy: 'Copier la sélection',
+      cutAction: 'Couper la sélection',
+      paste: 'Coller',
+      copied: 'Copié : colle-le dans un autre écran ou un autre projet.',
+      cut: 'Coupé : colle-le où tu veux.',
+      pasted_one: '{{count}} composant collé',
+      pasted_other: '{{count}} composants collés',
+      empty: 'Rien à coller : copie d’abord un composant.',
+    },
+    selection: {
+      count_one: '{{count}} composant sélectionné',
+      count_other: '{{count}} composants sélectionnés',
+      hint: 'Les réglages ci-dessous changent tous les composants sélectionnés. Maj + clic ajoute ou retire un composant.',
+      mixed: 'Valeurs différentes',
+      none: 'Ces composants n’ont pas de réglage en commun.',
+    },
     app: {
       tab: 'Appli',
       screenTab: 'Écran',

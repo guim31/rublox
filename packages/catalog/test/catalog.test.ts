@@ -12,6 +12,7 @@ import {
   CATEGORY_LABELS,
   COMPONENTS,
   createComponent,
+  createDemoProject,
   createProject,
   createScreen,
   getComponentDef,
@@ -19,6 +20,7 @@ import {
   prop,
   resolveProps,
   stripDefaults,
+  typesMissingFromDemo,
 } from '../src/index.ts'
 
 describe('catalog completeness', () => {
@@ -185,5 +187,18 @@ describe('coercion', () => {
     const time = prop.time({ default: '', group: 'content' })
     expect(time.coerce('9:05')).toBe('09:05')
     expect(time.coerce('24:00')).toBeUndefined()
+  })
+})
+
+describe('demo app', () => {
+  it.each(['fr', 'en'] as const)('is a valid project that uses every component (%s)', (locale) => {
+    const doc = createDemoProject({ locale, mode: 'studio' })
+    expect(projectDocSchema.safeParse(doc).error).toBeUndefined()
+    expect(
+      typesMissingFromDemo(
+        doc,
+        COMPONENTS.map((def) => def.type),
+      ),
+    ).toEqual([])
   })
 })

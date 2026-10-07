@@ -237,3 +237,23 @@ describe('J2 components while running', () => {
     engine.dispose()
   })
 })
+
+describe('rendering stays quiet', () => {
+  it('draws a dropdown without redrawing forever', async () => {
+    const { doc } = withComponent('Dropdown', { selected: 'Vert' })
+    const { engine } = engineFor(doc)
+    await engine.start()
+    const view = await mount(engine)
+    await act(async () => {
+      await sleep(30)
+    })
+    const version = engine.getSnapshot().version
+    await act(async () => {
+      await sleep(30)
+    })
+    expect(engine.getSnapshot().version).toBe(version)
+    expect(value(engine, 'c', 'selectedIndex')).toBe(2)
+    await view.unmount()
+    engine.dispose()
+  })
+})

@@ -2,6 +2,27 @@ import type { Messages } from '../types.ts'
 
 export const catalog: Messages['catalog'] = {
   studio: {
+    demo: {
+      open: 'Open the demo app (every component)',
+      failed: 'The demo app could not be created. Try again.',
+    },
+    clipboard: {
+      copy: 'Copy the selection',
+      cutAction: 'Cut the selection',
+      paste: 'Paste',
+      copied: 'Copied: paste it in another screen or another project.',
+      cut: 'Cut: paste it wherever you like.',
+      pasted_one: '{{count}} component pasted',
+      pasted_other: '{{count}} components pasted',
+      empty: 'Nothing to paste: copy a component first.',
+    },
+    selection: {
+      count_one: '{{count}} component selected',
+      count_other: '{{count}} components selected',
+      hint: 'The settings below change every selected component. Shift + click adds or removes one.',
+      mixed: 'Different values',
+      none: 'These components have no setting in common.',
+    },
     app: {
       tab: 'App',
       screenTab: 'Screen',

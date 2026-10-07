@@ -245,7 +245,7 @@ function ColorRow({
         {label}
       </label>
       <Input
-        aria-label={label}
+        aria-label={`${label} (hex)`}
         value={value}
         className="w-24 font-mono text-ui-sm"
         onChange={(event) => {
