@@ -22,7 +22,6 @@ import { toast } from 'sonner'
 import { type Command, useCommands } from '../lib/commands.ts'
 import { usePrefs } from '../lib/prefs.ts'
 import { signOut, useMe } from '../lib/session.ts'
-import { createDemo } from '../storage/demos.ts'
 import { Kbd } from './ui/kbd.tsx'
 
 const GROUP_ORDER: Command['group'][] = ['editor', 'add', 'project', 'interface']
@@ -51,9 +50,12 @@ export function CommandPalette() {
         icon: <Gamepad2 size={16} />,
         keywords: ['jeu', 'game', 'demo', 'démo'],
         run: () => {
-          const created = createDemo(demo, prefs.locale, Boolean(me.data?.user)).then((projectId) =>
-            navigate({ to: '/p/$projectId', params: { projectId }, search: { tab: 'design' } }),
-          )
+          // Loaded on demand: a demo brings the catalog and the project format along.
+          const created = import('../storage/demos.ts')
+            .then(({ createDemo }) => createDemo(demo, prefs.locale, Boolean(me.data?.user)))
+            .then((projectId) =>
+              navigate({ to: '/p/$projectId', params: { projectId }, search: { tab: 'design' } }),
+            )
           toast.promise(created, { loading: t('game.demoCreating'), error: t('game.demoFailed') })
         },
       }),

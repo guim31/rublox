@@ -194,7 +194,12 @@ export const studio = {
       reset: 'Revenir à la valeur par défaut',
       help: 'Aide',
       size: { auto: 'Auto', fill: 'Remplir', px: 'px', percent: '%' },
-      color: { none: 'Aucune', theme: 'Couleurs du thème', custom: 'Personnalisée' },
+      color: {
+        none: 'Aucune',
+        theme: 'Couleurs du thème',
+        custom: 'Personnalisée',
+        hex: 'Code de la couleur (hexadécimal)',
+      },
       tokens: {
         primary: 'Principale',
         secondary: 'Secondaire',

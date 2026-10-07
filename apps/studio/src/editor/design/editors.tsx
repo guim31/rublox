@@ -218,7 +218,7 @@ export function ColorEditor({ id, value, onChange }: EditorProps<string>) {
               className="h-control w-12 cursor-pointer rounded-ui border border-border bg-surface p-1"
             />
             <Input
-              aria-label="hex"
+              aria-label={t('editor.inspector.color.hex')}
               value={current.startsWith('#') ? current : ''}
               placeholder="#5b4bff"
               onChange={(event) => {

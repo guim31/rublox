@@ -298,7 +298,10 @@ function TabLink({
         active && 'bg-surface text-text shadow-1',
       )}
     >
-      {icon}
+      {/* Junior's wider controls leave no room for them under 1536 px: the words stay. */}
+      <span aria-hidden="true" className="contents junior:max-2xl:hidden">
+        {icon}
+      </span>
       {children}
     </button>
   )
@@ -330,7 +333,7 @@ function ProjectName() {
           event.currentTarget.blur()
         }
       }}
-      className="h-control w-44 min-w-0 truncate rounded-ui border border-transparent bg-transparent px-2 font-strong outline-none hover:border-border focus:border-primary focus:bg-surface junior:w-52"
+      className="h-control w-44 min-w-36 truncate rounded-ui border border-transparent bg-transparent px-2 font-strong outline-none hover:border-border focus:border-primary focus:bg-surface junior:w-52"
     />
   )
 }
