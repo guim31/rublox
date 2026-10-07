@@ -49,9 +49,8 @@ test('a session revoked elsewhere is noticed without a single 401', async ({ bro
   })
   expect(revoked.status()).toBe(200)
 
-  // Back on the first tab: going on working, then back to the dashboard.
-  await addComponent(page, 'Text')
-  await page.getByRole('link', { name: 'Tableau de bord' }).click()
+  // The first tab notices at once: its open document is closed by the server and refused
+  // when it opens it again (SPEC § 0.10), never through a 401.
   await expect(page).toHaveURL(/\/login/)
   await expect(page.getByText('Tu as été déconnecté·e. Reconnecte-toi.')).toBeVisible()
 
