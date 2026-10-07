@@ -45,6 +45,8 @@ export type ProjectSummary = {
   owner?: ProjectOwner
   /** The space through which a manager sees the project. */
   spaceId?: string | null
+  /** "Remix of X by Y": the gallery project it was copied from (J6). */
+  remixOf?: { id: string; name: string; owner: string } | null
 }
 
 export const TRASH_DAYS = 30

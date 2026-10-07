@@ -14,7 +14,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J3 | Expérience Junior et Studio, apprentissage, accueil | fait (PR #7), voir § 0.3 |
 | J4 | Collaboration, test sur téléphone, publication PWA, export | fait sauf l’édition à plusieurs (PR #6), voir § 0.5 |
 | J5 | Données et services : tables, variables, API web, cartes, graphiques | à faire |
-| J6 | Galerie, remix, modèles, assistant IA | à faire |
+| J6 | Galerie, remix, modèles, assistant IA | fait (PR #10), voir § 0.7 |
 | J7 | Mode jeu : scène, lutins, physique | fait (PR #5), voir § 0.6 |
 | J8 | Finitions : accessibilité, performances, sécurité, mise en production | à faire |
 
@@ -474,6 +474,85 @@ composant (palette de commandes du tableau de bord) ; `docs/compatibilite.md`.
   « nombre aléatoire entre » est le `math_random_int` de Blockly, déjà présent.
 - Démos : `catchGameDemo(locale)` et `bouncingDemo(locale)` dans `@rublox/catalog` ; le J3 peut
   en tirer le tutoriel « Mon premier jeu » (identifiants fixes : `CATCH_GAME_IDS`).
+
+### 0.7 Ce que le J6 a fixé (07/10/2026)
+
+**Fait** : galerie interne (cartes, « Essayer », « Voir les blocs », « Remixer », j'aime, compteur
+et arbre des remix, filtres récents / populaires et Junior / Studio, recherche), droit des
+membres d'un espace à y partager, retrait par l'administrateur ; 12 modèles FR et EN proposés à
+la création d'un projet ; assistant IA (« Créer avec l'IA », « Explique-moi » un bloc, une pile
+ou un écran, « Pourquoi ça ne marche pas ? »), composant **IA** (générer un texte, décrire une
+image), activation par l'administrateur et par espace, quotas quotidiens par compte, journal
+d'usage, consignes adaptées aux enfants ; badge « premier remix ».
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Une seule recette pour les modèles et l'IA** : un modèle est une recette d'appli (`AppSpec`,
+  `content/templates/<id>/template.json`, textes dans `fr.json` et `en.json`) que
+  `@rublox/templates` construit en projet ; l'IA écrit la même recette. Le constructeur refuse
+  tout ce que le catalogue et les blocs ne connaissent pas (type, propriété, valeur, bloc, nom de
+  composant, d'écran), et un test charge chaque modèle dans Blockly (chaque pile, chaque menu
+  déroulant) puis génère son code.
+- **« Créer avec l'IA » crée un nouveau projet** (tableau de bord) : la proposition (écrans en
+  miniature, résumé, nombre de composants et de blocs) se garde ou se refuse ; gardée, elle
+  s'annule par le bouton « Annuler » du message (le projet est supprimé). Ajouter des écrans à un
+  projet ouvert avec l'IA reste à faire.
+- **Réponse de l'IA « à plat »** : les sorties structurées n'acceptent pas bien un schéma
+  récursif ; le modèle donne les composants en liste (avec leur `parent`) et les blocs en JSON
+  texte, que le serveur remet en recette. Une recette qui ne se construit pas est renvoyée une
+  fois au modèle avec la liste des problèmes ; le studio revérifie avec Blockly avant de montrer
+  la proposition.
+- **Modèles par défaut** : `RUBLOX_AI_MODEL` = `claude-opus-5-5` (construire une appli ; effort
+  `medium`, repli `fallbacks: "default"` en cas de refus), `RUBLOX_AI_FAST_MODEL` =
+  `claude-haiku-4-5` (expliquer, déboguer, composant IA : réponses courtes et nombreuses). Les
+  consignes et la référence du catalogue forment un préfixe fixe, mis en cache.
+- **Qui paie le composant IA** : l'appli publiée, son propriétaire, seulement s'il l'a autorisé
+  (`projects.app_ai_allowed`, interrupteur du dialogue de publication) ; l'aperçu de l'éditeur et
+  le test sur téléphone, **la personne qui teste** (sinon un visiteur de la galerie dépenserait le
+  quota du propriétaire). Un site exporté n'a pas d'IA. Relais : `/_rx/ai` sur l'origine des
+  applis (20 requêtes par minute et par adresse), et le studio pour l'aperçu.
+- **Quotas** : par compte et par jour UTC ; chaque requête compte (la seconde chance de « Créer
+  avec l'IA » aussi). Le journal garde qui, quoi, quel modèle, combien de jetons et le résultat,
+  **jamais le contenu** des questions ni des réponses.
+- **Espaces** : un membre (rôle `member`) n'a l'IA et le partage en galerie que si **tous** ses
+  espaces les autorisent (la règle la plus stricte, comme publier) ; les deux sont décochés par
+  défaut (J1). Un compte qui n'est membre d'aucun espace les a si l'instance les active.
+- **« Essayer »** montre l'appli publiée dans un téléphone (`/a/<slug>/`) ; un projet partagé mais
+  pas publié montre sa miniature et s'essaie par « Voir les blocs » (l'éditeur en lecture seule,
+  avec son aperçu). Galerie réservée aux comptes connectés.
+- **Visibilité** : `private` ou `gallery` (la valeur `space` du § 6.8 ne sert pas : les
+  responsables voient déjà les projets de leurs membres). Un projet retiré par l'administrateur
+  ne peut plus être partagé jusqu'à `POST /api/gallery/:id/allow` (pas encore d'écran).
+- **Sans clé, aucune trace** : ni bouton, ni réglage, ni droit d'espace, ni composant IA dans la
+  palette, l'aide, les commandes ou l'appli de démonstration ; toutes les routes `/api/ai/*` et
+  `/_rx/ai` répondent 404.
+- Le tutoriel « Traduire avec l'IA » (§ 4.10) n'est pas écrit.
+
+**Contrats pour les jalons suivants**
+
+- `@rublox/templates` : `appSpecSchema` (`AppSpec`), `buildProject(spec, { locale, mode, name })`
+  (`{ doc }` ou `{ issues }`), `localize`, `knownBlockTypes()` / `isKnownBlockType`,
+  `catalogReference()` (le catalogue pour l'IA), `TEMPLATES`, `templateProject`. Un nouveau
+  composant entre tout seul dans la référence de l'IA ; un nouveau bloc général s'ajoute à
+  `GENERAL_BLOCK_TYPES` (le test vérifie que Blockly le connaît).
+- Base (migration `0003`) : `likes`, `ai_usage`, et dans `projects` : `remix_of` (crédit « remix
+  de X par Y », gardé même si l'original disparaît), `ui_mode`, `shared_at`,
+  `gallery_removed_at`, `app_ai_allowed`.
+- Accès : `ProjectAccess` gagne `gallery` (lecture seule, tout compte connecté) ;
+  `requireProject(…, 'view')` l'accepte (ouvrir, remixer, dupliquer = remixer), `'read'` le
+  refuse (versions, membres, publication).
+- API : `/api/gallery` (liste, `/:id` avec ancêtres et arbre, `like`, `remix`, `sharing`,
+  retrait), `/api/ai/{create,explain,debug,app,usage,projects/:id}`, `/_rx/ai` ; `/api/me`
+  renvoie `features: { gallery, galleryShare, ai: { allowed, reason, quota, used } | null }`.
+  Erreurs `gallery_*` et `ai_*` traduites par `gallery.errors` et `ai.errors`.
+- Serveur : `services.ai` (`AiService`, `null` sans clé) ; un `AiClient` se remplace dans les
+  tests (`createTestServer({}, { aiClient: new FakeAiClient() })`).
+- Moteur et lecteur : `EngineOptions.ai` (`AiProvider`), `BehaviorContext.ai`,
+  `Behavior.available(ctx)` ; messages `rx:ai` (lecteur → studio) et `rx:ai-reply`.
+- Studio : `useFeatures()`, `aiAllowed()`, `AI_TYPES` et `useOfferedType()` (`lib/features.ts`)
+  pour tout ce qui touche l'IA ; `createDemoProject({ ai })`. Chaînes du J6 :
+  `packages/i18n/src/{fr,en}/gallery.ts` (`gallery`, `templates`, `ai` dans `studio`, `ai` dans
+  `runtime`).
 
 ## 1. En bref
 

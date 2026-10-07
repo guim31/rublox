@@ -9,6 +9,7 @@ import {
   Plus,
   RotateCcw,
   Search,
+  Shuffle,
   Sparkles,
   Star,
   Trash2,
@@ -452,6 +453,14 @@ function ProjectCard(props: CardProps) {
               <span className="truncate">
                 {t('library.by', { name: project.owner.displayName })}
                 {writable ? '' : ` · ${t('library.readOnly')}`}
+              </span>
+            </p>
+          ) : null}
+          {project.remixOf ? (
+            <p className="flex min-w-0 items-center gap-1 text-ui-sm text-muted">
+              <Shuffle size={13} className="shrink-0" aria-hidden="true" />
+              <span className="truncate">
+                {t('gallery.remixOf', { name: project.remixOf.name, owner: project.remixOf.owner })}
               </span>
             </p>
           ) : null}

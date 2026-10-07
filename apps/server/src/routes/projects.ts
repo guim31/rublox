@@ -619,6 +619,8 @@ export function summaryOf(
     access,
     owner: { ...owner, username: owner.username ?? '' },
     spaceId: project.spaceId,
+    /** "Remix of X by Y" (J6). */
+    remixOf: (project.remixOf ?? null) as RemixOf | null,
   }
 }
 

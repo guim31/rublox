@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { AppAiPermission } from '../../ai/app-permission.tsx'
 import { QrCode } from '../../components/qr-code.tsx'
 import { Button } from '../../components/ui/button.tsx'
 import { Dialog } from '../../components/ui/dialog.tsx'
@@ -184,7 +185,11 @@ export function PublishDialog({ open, onClose }: { open: boolean; onClose: () =>
                 slugState={slugState}
                 disabled={!data.canPublish || busy}
               />
-            ) : tab === 'share' ? (
+            ) : null}
+            {tab === 'settings' && session.source.access === 'owner' ? (
+              <AppAiPermission projectId={projectId} doc={doc} />
+            ) : null}
+            {tab === 'settings' ? null : tab === 'share' ? (
               <SharePanel
                 url={data.published ? url : null}
                 name={form.name}
