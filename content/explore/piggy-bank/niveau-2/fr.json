@@ -1,0 +1,43 @@
+{
+  "title": "Dépenses et solde",
+  "summary": "Chaque mouvement est noté dans une liste ; une boucle calcule le solde.",
+  "done": "Tu as vu une liste et une boucle « pour chaque ».",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 2, on peut aussi dépenser. Clique sur **Nouveau** pour voir ce qui a changé."
+    },
+    "push": {
+      "text": "On n’ajoute plus au solde : on note chaque **mouvement** au bout d’une liste."
+    },
+    "spend": {
+      "text": "Une dépense est notée en négatif : 0 − montant."
+    },
+    "loop": {
+      "text": "La boucle [pour chaque] passe sur chaque mouvement et l’ajoute au solde, qui repart de 0."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Ajoute deux fois de l’argent : la boucle s’allume une fois par mouvement.",
+      "hint": "Tape un nombre dans l’aperçu, puis touche « + Ajouter »."
+    },
+    "fast": {
+      "text": "Arrête le ralenti."
+    }
+  },
+  "challenges": {
+    "toast": {
+      "text": "Affiche un message bref quand tu dépenses.",
+      "hint": "Pose-le dans « quand Dépenser est cliqué »."
+    },
+    "red": {
+      "text": "Change la couleur du solde dans « afficher le solde ».",
+      "hint": "Avec un [si], tu peux même le mettre en rouge quand il est sous 0."
+    },
+    "reset": {
+      "text": "Ajoute un bouton « Tout effacer » qui vide la liste.",
+      "hint": "[mettre mouvements à] [créer une liste vide], puis appelle « afficher le solde »."
+    }
+  }
+}

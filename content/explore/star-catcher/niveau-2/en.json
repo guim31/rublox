@@ -1,0 +1,49 @@
+{
+  "title": "A rain of stars",
+  "summary": "Clones, a timer and chance make stars rain. A score counts the points.",
+  "done": "You saw clones, the timer and the score.",
+  "steps": {
+    "hello": {
+      "text": "In level 2, it rains stars! Click **New** above the blocks to see what changed."
+    },
+    "drop": {
+      "text": "Now the function creates a **clone**: a copy of the hidden star. Each clone falls on its own."
+    },
+    "appear": {
+      "text": "This block runs for each new clone. These are the blocks of level 1: they just moved."
+    },
+    "tick": {
+      "text": "The **timer** Rain rings every second, and each time one more star falls."
+    },
+    "catch": {
+      "text": "Caught: the **score** variable grows by 1, we show it, and the clone is deleted."
+    },
+    "show": {
+      "text": "[join] sticks a text and a number together: “Score:” then the value of the score."
+    },
+    "slow": {
+      "text": "Start **slow motion**: blocks will light up one by one while the game runs."
+    },
+    "watch": {
+      "text": "Look: [create a clone of Star] lights up each time the timer rings.",
+      "hint": "Wait a little, or click “Restart” in the preview."
+    },
+    "fast": {
+      "text": "Well spotted! Stop slow motion to play at normal speed again."
+    }
+  },
+  "challenges": {
+    "more": {
+      "text": "More rain: one star every 0.5 second.",
+      "hint": "Change the interval of Rain at the start."
+    },
+    "double": {
+      "text": "Win 2 points per star.",
+      "hint": "Look at [change score by 1]."
+    },
+    "wide": {
+      "text": "Make stars fall from edge to edge: from 20 to 340.",
+      "hint": "It is the random number for x."
+    }
+  }
+}

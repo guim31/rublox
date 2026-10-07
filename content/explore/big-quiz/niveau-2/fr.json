@@ -1,0 +1,46 @@
+{
+  "title": "Une liste de questions",
+  "summary": "Les questions sont rangées dans des listes, et une variable « index » dit où on en est.",
+  "done": "Tu as vu des listes et un index.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 2, cinq questions ! Clique sur **Nouveau** pour voir ce qui a changé."
+    },
+    "lists": {
+      "text": "Une **liste** range plusieurs valeurs dans une seule variable : les questions, les réponses possibles, les bonnes réponses."
+    },
+    "index": {
+      "text": "[élément n° … de la liste] lit une case. La variable **index** dit laquelle : 1, puis 2, puis 3…"
+    },
+    "split": {
+      "text": "« 6|8|10 » est coupé à chaque | : on obtient une liste de 3 réponses, une par bouton."
+    },
+    "next": {
+      "text": "Le bouton ajoute 1 à l’index. Après la dernière question, l’index revient à 1."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Touche « Question suivante » : la question est relue dans la liste.",
+      "hint": "Touche une réponse dans l’aperçu, ou clique sur « Redémarrer »."
+    },
+    "fast": {
+      "text": "Arrête le ralenti."
+    }
+  },
+  "challenges": {
+    "sixth": {
+      "text": "Ajoute une 6ᵉ question, ses réponses et sa bonne réponse.",
+      "hint": "Clique sur la roue des blocs [créer une liste avec] pour ajouter une case aux trois listes."
+    },
+    "of": {
+      "text": "Écris « Question 1 sur 5 » au lieu de « 1 / 5 ».",
+      "hint": "Change le texte « / » dans « afficher la question »."
+    },
+    "color": {
+      "text": "Choisis une autre couleur pour « Raté ».",
+      "hint": "Clique sur la pastille de couleur rouge."
+    }
+  }
+}

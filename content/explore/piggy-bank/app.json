@@ -1,0 +1,8 @@
+{
+  "id": "piggy-bank",
+  "order": 4,
+  "kind": "tool",
+  "icon": "🐷",
+  "accent": "mint",
+  "levels": 4
+}

@@ -1,0 +1,43 @@
+{
+  "title": "Chart and history",
+  "summary": "A chart of the balance, and a history kept on the phone.",
+  "done": "You saw a chart and variables kept on the phone.",
+  "steps": {
+    "hello": {
+      "text": "In level 4, a chart, and the piggy bank remembers everything, even after closing it."
+    },
+    "stored": {
+      "text": "The **moves** and **goal** variables are now *stored*: the phone keeps them. When it opens, we show everything again."
+    },
+    "chart": {
+      "text": "In the loop, each movement adds a point to the **chart**: the total at that moment."
+    },
+    "label": {
+      "text": "The round [if … then … else …] block gives a value: “+” for money in, nothing for spending (which already has its “-”)."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Add money: a point is added for each movement.",
+      "hint": "Type a number in the preview, then tap “+ Add”."
+    },
+    "fast": {
+      "text": "Stop slow motion."
+    }
+  },
+  "challenges": {
+    "bars": {
+      "text": "Make a bar chart instead of a line.",
+      "hint": "Select the chart in Design: its type."
+    },
+    "label": {
+      "text": "Write “#1”, “#2”… under the points.",
+      "hint": "Replace the label with [join “#” step]."
+    },
+    "count": {
+      "text": "Also show the number of movements.",
+      "hint": "[length of moves] gives that number."
+    }
+  }
+}

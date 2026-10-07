@@ -1,0 +1,46 @@
+{
+  "title": "A star falls",
+  "summary": "The basket follows your finger, a star falls. A function makes it fall.",
+  "done": "You know how the star falls and how the basket catches it.",
+  "steps": {
+    "hello": {
+      "text": "Here is **Star Catcher**! Try it in the preview: drag the basket to catch the star. Then we look at its blocks."
+    },
+    "start": {
+      "text": "Everything starts here: [when Sky starts] calls the function “make a star fall”."
+    },
+    "drop": {
+      "text": "A **function** keeps blocks under a name. This one puts the star at the top, at random, shows it, then gives it a speed downwards."
+    },
+    "catch": {
+      "text": "When the star touches the basket, we call the same function: the star starts again from the top. A function can be used many times!"
+    },
+    "follow": {
+      "text": "The basket can be dragged (set in Design). This block puts it back on the ground at each move: it only goes left and right."
+    },
+    "slow": {
+      "text": "Start **slow motion**: blocks will light up one by one while the game runs."
+    },
+    "watch": {
+      "text": "Look: the block [put Star at x … y …] lights up each time a star starts again from the top.",
+      "hint": "Wait a little, or click “Restart” in the preview."
+    },
+    "fast": {
+      "text": "Well spotted! Stop slow motion to play at normal speed again."
+    }
+  },
+  "challenges": {
+    "faster": {
+      "text": "Make the star fall faster: 250 or more.",
+      "hint": "Change the 150 in “make a star fall”."
+    },
+    "higher": {
+      "text": "Lift the basket: put 500 instead of 590.",
+      "hint": "It is in the “when Basket is dragged” block."
+    },
+    "spin": {
+      "text": "When you catch the star, make it turn.",
+      "hint": "Take [turn … by … degrees] from Star, and drop it in “when Star touches Basket”."
+    }
+  }
+}

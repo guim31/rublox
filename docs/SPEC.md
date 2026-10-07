@@ -17,6 +17,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J6 | Galerie, remix, modèles, assistant IA | fait (PR #10), voir § 0.7 |
 | J7 | Mode jeu : scène, lutins, physique | fait (PR #5), voir § 0.6 |
 | J8 | Finitions : accessibilité, performances, sécurité, mise en production | fait (PR #12), voir § 0.10 ; version 1.0.0 |
+| J9 | Applis à décortiquer (demandé le 07/10/2026) | fait (PR #14), voir § 0.11 ; version 1.1.0 |
 
 ### 0.1 Ce que le J0 a fixé (06/10/2026)
 
@@ -805,6 +806,84 @@ README, `CHANGELOG.md`, version 1.0.0 de tous les paquets.
 - Tests : `e2e/a11y-j8.spec.ts` (toute nouvelle page ou dialogue y entre), `e2e/keyboard.spec.ts`,
   `e2e/budget-perf.spec.ts` (le budget casse la CI s'il est dépassé).
 
+### 0.11 Ce que le J9 a fixé (07/10/2026)
+
+**Fait** : quatre applis à décortiquer, chacune en 4 niveaux complets et jouables, en FR et EN
+(`content/explore/`) : **Attrape-étoiles** (le panier et une étoile ; pluie de clones, minuteur,
+hasard, score ; vies, « si », écran de fin ; vitesse calculée, record stocké, sons),
+**Casse-briques** (raquette et rebonds ; mur construit par deux boucles imbriquées ; score, vies,
+« si … sinon », gagné et perdu ; menu de vitesse sur un autre écran, cœur bonus), **Le grand
+quiz** (une question et sa vérification ; listes parcourues par un index ; chrono, barre de temps,
+score, écran de résultats ; thèmes, mélange de Fisher-Yates expliqué, records par thème
+stockés) et **Ma tirelire** (ajouter ; dépenses et solde recalculé par une boucle « pour chaque » ;
+objectif et barre de progression ; graphique du J5 et historique stockés). Section « Applis à
+décortiquer » de `/learn` (carte par appli, choix du niveau, « Ouvrir une copie », « Reprendre ma
+copie »), visite guidée de 5 à 9 étapes par niveau dont le ralenti, 3 défis de modification
+vérifiés en direct, « Montre-moi ce qui est nouveau », progression et 4 badges.
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Le contenu s’écrit en TypeScript, se range en JSON.** Les niveaux sont des recettes `AppSpec`
+  du J6 (`level.json`, avec les textes `{ fr, en }` dedans) et leurs textes de visite et de défis
+  (`fr.json`, `en.json`), comme les tutoriels et les modèles. Mais des pages de Blockly JSON
+  imbriqué à la main cacheraient ce que chaque niveau ajoute : ils sont écrits avec un petit
+  langage (`packages/explore/authoring/`, une fonction `level(n)` par appli) et
+  `pnpm --filter @rublox/explore content` écrit les fichiers (puis `pnpm format`). Un test échoue
+  si le JSON n’est plus à jour.
+- **Les identifiants viennent de la recette** (`buildProject(…, { stableIds: true })`) : écrans
+  `s-<clé>`, composants `c-<écran>-<clé>`, variables `v-<clé>`, et chaque bloc garde l’`id` écrit
+  dans la recette. Un bloc d’instruction reçoit son identifiant à la main ; un bloc de valeur le
+  tient de son parent (`<parent>/<entrée>`, par exemple `drop-speed/value`), sauf s’il en reçoit
+  un (`named`, une valeur qui change d’entrée d’un niveau à l’autre). Un niveau ne retire aucun
+  bloc du précédent (test) : un bloc qui change de rôle garde son identifiant et apparaît
+  « modifié » (exemple : au niveau 2 d’Attrape-étoiles, « attrapée, une autre tombe » devient
+  « supprimer le clone »).
+- **« Ce qui est nouveau » compare les deux niveaux de référence**, pas le projet de l’élève au
+  niveau d’avant : ce qu’il a changé lui-même n’est pas mélangé à ce que le niveau apporte. Un bloc
+  est « modifié » si son type, ses champs ou son état changent (ni sa position, ni son commentaire,
+  ni ses voisins). Les blocs encore présents dans la copie s’allument ; un bloc effacé par l’élève
+  est signalé « plus dans ton projet ». Les composants ajoutés sont listés aussi.
+- **Commentaires** : celui du bloc de tête d’une pile est ouvert dans une marge à gauche (les piles
+  sont en colonne à x = 300) ; ceux des blocs intérieurs sont repliés derrière le « ? » du bloc, sans
+  quoi ils couvriraient les blocs.
+- **Défis** : trois par niveau (le cahier des charges disait 2 ou 3), vérifiés par les conditions de
+  `@rublox/learn` sur les identifiants des blocs ; un défi réussi le reste (la progression garde
+  l’union de ce qui a été réussi). Un niveau est **terminé** quand sa visite est faite et ses trois
+  défis réussis ; le badge d’une appli demande ses 4 niveaux terminés.
+- **Badges de projet** (boucle, fonction…) : une copie d’un niveau n’en fait gagner aucun
+  (`BadgeWatcher`), l’élève n’ayant pas écrit ces blocs.
+- Le **mode** de l’interface n’est pas changé à l’ouverture d’une copie (contrairement aux
+  tutoriels) : les applis servent justement au passage de Junior à Studio ; les niveaux 1 et 2
+  sont marqués `junior` dans le projet, 3 et 4 `studio`.
+- La bulle des tutoriels et des visites passe au-dessus de la boîte à outils de Blockly (z-index
+  75 contre 70) : elle passait dessous quand elle tombait dans le coin gauche.
+- Sons des niveaux 4 : de petits balayages synthétisés pour Rublox (`authoring/sounds.ts`), en
+  `data:` WAV dans la propriété `src` du composant Son.
+- Le texte des commentaires de Blockly était blanc sur jaune pâle en thème sombre (il héritait de
+  la page) : corrigé dans `app.css`.
+
+**Contrats pour les jalons suivants**
+
+- Format : `ProjectDoc.meta.origin` (`{ kind: 'explore', app, level }`, facultatif ; `formatVersion`
+  reste 1). Il suit le projet (dupliquer, remixer, exporter).
+- `@rublox/templates` : `BuildOptions.stableIds`.
+- `@rublox/learn` : conditions `blockField` (`id`, `field`, `equals`, `not`, `min`, `max`),
+  `block.within` (dans le bloc d’identifiant donné ou sous lui dans sa pile), `stepped` (le
+  ralenti a allumé ce bloc) ; `LearnState.stepped` ; cible `block:<id>` ; `findBlock`,
+  `FoundBlock.ancestorIds`, `levelChanges` (`diff.ts`) ; `ExploreProgress` dans
+  `LearningProgress.explore` (`<appli>/<niveau>`), `ProgressStore.saveExplore` ; badges
+  `explore-<appli>`, `EXPLORE_BADGES`, `EXPLORE_LEVELS`.
+- `@rublox/explore` : `EXPLORE_APPS`, `getExploreApp`, `getLevel`, `levelProject`, `levelOf`,
+  `localLevel` (visite et défis dans une langue), `newInLevel`, `levelKey`. Chargé à la demande par
+  le studio (`loadExplore`, ~270 Ko) : jamais dans le premier téléchargement.
+- Studio : `useEditor().marks` (blocs allumés : `added` ou `changed`) et `reveal` (amener un bloc
+  à l’écran sans le choisir), `useLearn().explore` (`ActiveExplore`), `openLevelCopy`,
+  `ExploreRunner`, `WhatsNew`. Chaînes du J9 : `packages/i18n/src/{fr,en}/explore.ts` (espace
+  `studio`, préfixe `explore.` ; textes des badges fondus dans `learn.badges`).
+- Tests : `packages/explore/test/` (chaque niveau construit en FR et EN, chargé dans Blockly, code
+  généré, exécuté 20 s dans le moteur sur chaque écran sans erreur ; identifiants gardés d’un
+  niveau au suivant ; visite et défis cohérents), `e2e/explore.spec.ts`, `e2e/a11y-j9.spec.ts`.
+
 ## 1. En bref
 
 Rublox est un clone libre de [Thunkable](https://thunkable.com) : on construit de vraies applis
@@ -1528,6 +1607,22 @@ par seconde sur un téléphone moyen.
 
 Audit d'accessibilité, de performances et de sécurité, nettoyage, documentation utilisateur,
 version `v1.0.0`.
+
+### J9 — Applis à décortiquer
+
+Demandé par Guilhem le 07/10/2026, pour un enfant de 10 à 12 ans qui passe du mode Junior au mode
+Studio : des applis plus riches que les modèles et les tutoriels, à décortiquer petit à petit.
+Quatre applis (Attrape-étoiles, Casse-briques, Le grand quiz, Ma tirelire), chacune en quatre
+niveaux complets et jouables qui reprennent le précédent (les blocs gardent leurs identifiants),
+rangés en fonctions aux noms parlants et commentés ; une visite guidée du code par niveau (5 à 10
+étapes, bulle accrochée aux blocs, ralenti, défis de modification vérifiés) ; une section de
+l’apprentissage avec « Ouvrir une copie » ; « Montre-moi ce qui est nouveau » ; progression et
+badges.
+
+Acceptation : les 16 niveaux s’ouvrent, tournent sans erreur dans l’aperçu et existent en FR et
+EN ; un test de bout en bout parcourt la visite guidée d’un niveau et réussit un de ses défis ; un
+test vérifie, pour chaque appli, que les identifiants des blocs d’un niveau se retrouvent au
+niveau suivant ; des captures du parcours en Junior et en Studio.
 
 ## 9. Hors périmètre
 

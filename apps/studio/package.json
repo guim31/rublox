@@ -1,6 +1,6 @@
 {
   "name": "@rublox/studio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -38,6 +38,7 @@
     "@lezer/highlight": "1.2.5",
     "@rublox/blocks": "workspace:*",
     "@rublox/catalog": "workspace:*",
+    "@rublox/explore": "workspace:*",
     "@rublox/i18n": "workspace:*",
     "@rublox/learn": "workspace:*",
     "@rublox/runtime": "workspace:*",

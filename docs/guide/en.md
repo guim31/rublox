@@ -1,6 +1,6 @@
 # Rublox user guide
 
-*Version 1.0.0*
+*Version 1.1.0*
 
 Rublox lets you build real phone apps with blocks. You draw the screens, snap blocks together to
 tell the app what to do, and try it right away. This guide is for everyone: a parent, a teacher, a
@@ -468,6 +468,7 @@ twice.
 | Three stars | You got all three stars of a challenge. |
 | First publication | Your app is online. |
 | First remix | You remixed someone’s app. |
+| Star Catcher, Brick Breaker, Big Quiz, Piggy Bank taken apart | You finished the app’s 4 levels (4.5). |
 
 A new badge is announced: “New badge: …”. In Studio, “Hide badges” hides them.
 
@@ -479,6 +480,32 @@ you to another device yet.
 Every block and every component has a sheet with an example, and the glossary explains programming
 words: app, screen, component, property, event, block, variable, loop, condition, function,
 parameter, list, preview, console, slow motion, breakpoint, bug, code. See 3.3.7.
+
+### 4.5 Apps to take apart
+
+Richer than the tutorials, four real apps can be taken apart bit by bit, each in **4 levels**:
+**Star Catcher** and **Brick Breaker** (games), **The Big Quiz** and **My Piggy Bank** (a tool).
+Each level is a complete app that works, and takes the previous one up with a few more blocks.
+([screenshot](../screenshots/j9/studio-light-learn.png))
+
+- On the Learn page, pick the app and its level, then “**Open a copy**”: you always work on a
+  copy, kept with your projects (in this browser in guest mode); the original never changes.
+  “Back to my copy” opens the last one again.
+- Blocks are kept in **functions with telling names** (“make a star fall”, “check if the game is
+  lost”) and carry **comments**: those of stacks are open in the margin, those of inner blocks
+  open with the block’s “?”.
+- A **guided tour** (5 to 10 steps) shows the stacks one by one: the bubble hangs on the blocks,
+  says what they do and why, then offers to start **slow motion** to watch them light up.
+  ([screenshot](../screenshots/j9/studio-light-tour.png))
+- It ends with **3 modification challenges** (“Make the star fall faster”, “Give 5 lives instead
+  of 3”…), ticked on their own when done, with “Show the block” and “A hint?”.
+- From level 2, “**Show me what’s new**” (“New” in Junior), above the blocks, lights what the level
+  adds (green) or changes (yellow) compared with the level before, and lists it in a small panel.
+  ([screenshot](../screenshots/j9/studio-dark-whats-new.png))
+
+A level is **finished** when its tour is done and its challenges succeeded; the 4 levels of an app
+earn its badge. Blocks already in a copy do not earn the project badges (loop, function…): the ones
+you add do.
 
 ---
 

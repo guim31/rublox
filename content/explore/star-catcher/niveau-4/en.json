@@ -1,0 +1,43 @@
+{
+  "title": "Faster and faster",
+  "summary": "Speed grows with the score, the record is kept on the phone, and there are sounds.",
+  "done": "You saw a speed formula, a variable kept on the phone, and sounds.",
+  "steps": {
+    "hello": {
+      "text": "In level 4, it gets faster and faster, your record is kept, and there are sounds."
+    },
+    "speed": {
+      "text": "The speed is a calculation: 150 + score × 10. With 5 points, the star falls at 200."
+    },
+    "best": {
+      "text": "The **best** variable is *stored*: the phone keeps it, even when the app is closed. We change it only if the score is bigger."
+    },
+    "sound": {
+      "text": "A **Sound** component plays a little noise for each star caught."
+    },
+    "slow": {
+      "text": "Start **slow motion**: blocks will light up one by one while the game runs."
+    },
+    "watch": {
+      "text": "Watch the speed block light up for each new star.",
+      "hint": "Wait a little, or click “Restart” in the preview."
+    },
+    "fast": {
+      "text": "Well spotted! Stop slow motion to play at normal speed again."
+    }
+  },
+  "challenges": {
+    "gentle": {
+      "text": "Speed up more gently: 5 per point instead of 10.",
+      "hint": "It is the 10 in the speed calculation."
+    },
+    "quick": {
+      "text": "Make stars start at 200 instead of 150.",
+      "hint": "It is the 150 in the speed calculation."
+    },
+    "sad": {
+      "text": "Play a sound when the game is lost.",
+      "hint": "Put [play MissSound] in the [if] of “check if the game is lost”."
+    }
+  }
+}

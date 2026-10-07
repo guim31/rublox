@@ -13,15 +13,18 @@ export function BadgeWatcher() {
   const doc = useDoc()
   const progress = useLearn((s) => s.progress)
   const loaded = useLearn((s) => s.loaded)
+  // A copy of a level to take apart (J9) already holds loops, functions…: the learner did
+  // not write them, so they earn nothing.
+  const copied = doc.meta.origin?.kind === 'explore'
   useEffect(() => {
-    if (!loaded) return
+    if (!loaded || copied) return
     const timer = setTimeout(() => {
       for (const id of badgesFromProject(doc)) {
         if (!progress.badges[id]) void awardBadge(id)
       }
     }, 600)
     return () => clearTimeout(timer)
-  }, [doc, progress, loaded])
+  }, [doc, progress, loaded, copied])
   return null
 }
 

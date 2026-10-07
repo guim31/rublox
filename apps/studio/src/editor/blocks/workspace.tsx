@@ -468,6 +468,48 @@ export function BlocksWorkspace({
     useEditor.getState().set({ focusBlock: null })
   }, [focusBlock])
 
+  // What a level adds or changes (J9), lit until the panel closes.
+  const marks = useEditor((s) => s.marks)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `doc` changes when stacks are reloaded (their elements are new)
+  useEffect(() => {
+    const workspace = workspaceRef.current
+    if (!workspace) return
+    const lit: SVGElement[] = []
+    for (const [id, kind] of Object.entries(marks)) {
+      const block = workspace.getBlockById(id)
+      if (!(block instanceof Blockly.BlockSvg)) continue
+      const root = block.getSvgRoot()
+      root.classList.add(kind === 'added' ? 'rx-new-added' : 'rx-new-changed')
+      lit.push(root)
+    }
+    return () => {
+      for (const root of lit) root.classList.remove('rx-new-added', 'rx-new-changed')
+    }
+  }, [marks, doc])
+
+  // The tour or "what's new" asked to show a block: its stack is scrolled into view.
+  const reveal = useEditor((s) => s.reveal)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `doc` changes when the block may have arrived
+  useEffect(() => {
+    const workspace = workspaceRef.current
+    if (!workspace || !reveal) return
+    const block = workspace.getBlockById(reveal)
+    if (!(block instanceof Blockly.BlockSvg)) return
+    const root = block.getRootBlock() as Blockly.BlockSvg
+    const stack = root.getBoundingRectangle()
+    // The top of the stack with its comment in the margin at its left (J9), and the block
+    // itself when the stack is taller than the view.
+    const left = root.getIcon(Blockly.icons.IconType.COMMENT)?.bubbleIsVisible()
+      ? Math.min(stack.left, 0)
+      : stack.left
+    workspace.scrollBoundsIntoView(
+      new Blockly.utils.Rect(stack.top, stack.bottom, left, stack.right),
+      24,
+    )
+    if (root !== block) workspace.scrollBoundsIntoView(block.getBoundingRectangle(), 24)
+    useEditor.getState().set({ reveal: null })
+  }, [reveal, doc])
+
   // The others' selected blocks on this workspace, in their colour (SPEC § 4.9).
   const peers = usePeers()
   const peersHere = useMemo(

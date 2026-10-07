@@ -4,6 +4,38 @@ All notable changes to Rublox. The format follows [Keep a Changelog](https://kee
 and versions follow [Semantic Versioning](https://semver.org/). The specification, in French,
 is [`docs/SPEC.md`](docs/SPEC.md); its § 0 says what each milestone settled and why.
 
+## [1.1.0] — 2026-10-07
+
+Apps to take apart: for children who have done the first tutorials and want to understand how a
+real app works, before building their own.
+
+### Learn
+
+- **Apps to take apart**, a new section of the Learn page: four real apps, each in **four
+  levels** that build on one another. Two games, **Star Catcher** (catch falling stars, then
+  a score, lives and a record) and **Brick Breaker** (a bouncing ball, a wall of bricks, lives,
+  difficulty levels and a bonus), **The Big Quiz** (questions, a timer, a score, themes and
+  shuffled questions) and **My Piggy Bank** (money in and out, a savings goal, a chart and a
+  history the phone remembers). Every level works on its own, in French and English, and its
+  blocks are grouped into functions with telling names and short comments.
+- **Your own copy**: “Open a copy” puts the level among your projects (in the browser without
+  an account): children can change anything, the original stays as it is.
+- **A guided tour of the code** in each level: a bubble points at the blocks one stack at a
+  time, says what they do and why, then starts slow motion so that the child watches the blocks
+  light up while the app runs.
+- **Challenges**: each level ends with three small changes to make (“make the stars fall
+  faster”, “give 5 lives instead of 3”…), ticked on their own when done, with a hint and a
+  button that shows the block to change.
+- **“Show me what’s new”**: from level 2, one button lights the blocks the level added (green)
+  or changed (yellow) since the level before, and lists them.
+- Progress (tours done, challenges succeeded) joins the rest of the learning progress, and each
+  app finished earns its badge.
+
+### Fixed
+
+- The bubble of tutorials no longer hides under the blocks’ toolbox.
+- Block comments are readable in dark mode.
+
 ## [1.0.0] — 2026-10-07
 
 The first release: everything the specification asks for, from the guest mode to the game
@@ -98,4 +130,5 @@ mode, audited for security, accessibility and performance.
   property edit reaches the canvas in less than 50 ms; all three are measured by
   `e2e/budget-perf.spec.ts`.
 
+[1.1.0]: https://github.com/guim31/rublox/releases/tag/v1.1.0
 [1.0.0]: https://github.com/guim31/rublox/releases/tag/v1.0.0

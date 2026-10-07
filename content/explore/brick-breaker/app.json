@@ -1,0 +1,8 @@
+{
+  "id": "brick-breaker",
+  "order": 2,
+  "kind": "game",
+  "icon": "🧱",
+  "accent": "coral",
+  "levels": 4
+}

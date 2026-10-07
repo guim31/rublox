@@ -1,0 +1,1125 @@
+{
+  "level": 3,
+  "recipe": {
+    "name": {
+      "fr": "Attrape-étoiles 3",
+      "en": "Star Catcher 3"
+    },
+    "mode": "studio",
+    "theme": {
+      "primary": "#7048e8",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [
+      {
+        "key": "score",
+        "name": {
+          "fr": "score",
+          "en": "score"
+        },
+        "kind": "app",
+        "initial": 0
+      },
+      {
+        "key": "lives",
+        "name": {
+          "fr": "vies",
+          "en": "lives"
+        },
+        "kind": "app",
+        "initial": 3
+      }
+    ],
+    "screens": [
+      {
+        "key": "game",
+        "name": {
+          "fr": "Jeu",
+          "en": "Game"
+        },
+        "props": {
+          "padding": 0
+        },
+        "components": [
+          {
+            "key": "sky",
+            "type": "GameScene",
+            "name": {
+              "fr": "Ciel",
+              "en": "Sky"
+            },
+            "props": {
+              "background": "#1b1f4b",
+              "edges": "pass"
+            },
+            "children": [
+              {
+                "key": "moon",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Lune",
+                  "en": "Moon"
+                },
+                "props": {
+                  "costumes": ["🌙"],
+                  "x": 300,
+                  "y": 130,
+                  "width": 72,
+                  "height": 72,
+                  "collision": "none"
+                }
+              },
+              {
+                "key": "star",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Étoile",
+                  "en": "Star"
+                },
+                "props": {
+                  "costumes": ["⭐"],
+                  "x": 180,
+                  "y": -40,
+                  "width": 56,
+                  "height": 56,
+                  "collision": "circle",
+                  "visible": false
+                }
+              },
+              {
+                "key": "basket",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Panier",
+                  "en": "Basket"
+                },
+                "props": {
+                  "costumes": ["🧺"],
+                  "x": 180,
+                  "y": 590,
+                  "width": 96,
+                  "height": 72,
+                  "draggable": true,
+                  "edges": "stop"
+                }
+              },
+              {
+                "key": "scoreText",
+                "type": "SceneText",
+                "name": {
+                  "fr": "TexteScore",
+                  "en": "ScoreText"
+                },
+                "props": {
+                  "text": {
+                    "fr": "Score : 0",
+                    "en": "Score: 0"
+                  },
+                  "x": 20,
+                  "y": 40,
+                  "align": "left",
+                  "color": "#ffffff"
+                }
+              },
+              {
+                "key": "livesText",
+                "type": "SceneText",
+                "name": {
+                  "fr": "TexteVies",
+                  "en": "LivesText"
+                },
+                "props": {
+                  "text": "❤️ 3",
+                  "x": 340,
+                  "y": 40,
+                  "align": "right",
+                  "color": "#ffffff"
+                }
+              }
+            ]
+          },
+          {
+            "key": "rain",
+            "type": "Timer",
+            "name": {
+              "fr": "Pluie",
+              "en": "Rain"
+            },
+            "props": {
+              "interval": 1,
+              "repeat": true,
+              "autostart": false
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_GameScene_on_start",
+            "fields": {
+              "COMPONENT": "sky"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "score"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 0
+                        },
+                        "id": "start-score/value"
+                      }
+                    }
+                  },
+                  "id": "start-score",
+                  "next": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": {
+                        "VAR": "lives"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 3
+                            },
+                            "id": "start-lives/value"
+                          }
+                        }
+                      },
+                      "id": "start-lives",
+                      "next": {
+                        "block": {
+                          "type": "procedures_callnoreturn",
+                          "extraState": {
+                            "name": {
+                              "fr": "afficher le score",
+                              "en": "show the score"
+                            }
+                          },
+                          "id": "start-show",
+                          "next": {
+                            "block": {
+                              "type": "rx_Timer_set",
+                              "fields": {
+                                "COMPONENT": "rain",
+                                "PROP": "interval"
+                              },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "math_number",
+                                    "fields": {
+                                      "NUM": 1
+                                    },
+                                    "id": "start-pace/value"
+                                  }
+                                }
+                              },
+                              "id": "start-pace",
+                              "next": {
+                                "block": {
+                                  "type": "rx_Timer_call_start",
+                                  "fields": {
+                                    "COMPONENT": "rain"
+                                  },
+                                  "id": "start-rain",
+                                  "next": {
+                                    "block": {
+                                      "type": "procedures_callnoreturn",
+                                      "extraState": {
+                                        "name": {
+                                          "fr": "faire tomber une étoile",
+                                          "en": "make a star fall"
+                                        }
+                                      },
+                                      "id": "start-drop"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "start",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Au départ : tout à zéro, la pluie commence.",
+                  "en": "At the start: all to zero, the rain begins."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "faire tomber une étoile",
+                "en": "make a star fall"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_Sprite_call_clone",
+                  "fields": {
+                    "COMPONENT": "star"
+                  },
+                  "id": "drop-clone"
+                }
+              }
+            },
+            "id": "drop",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Chaque étoile est un clone de l’étoile cachée.",
+                  "en": "Each star is a clone of the hidden star."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 500
+              }
+            },
+            "x": 300,
+            "y": 500
+          },
+          {
+            "type": "rx_Sprite_on_clone",
+            "fields": {
+              "COMPONENT": "star"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_call_goTo",
+                  "fields": {
+                    "COMPONENT": "star"
+                  },
+                  "inputs": {
+                    "ARG0": {
+                      "block": {
+                        "type": "math_random_int",
+                        "inputs": {
+                          "FROM": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 40
+                              },
+                              "id": "drop-place/arg0/from"
+                            }
+                          },
+                          "TO": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 320
+                              },
+                              "id": "drop-place/arg0/to"
+                            }
+                          }
+                        },
+                        "id": "drop-place/arg0"
+                      }
+                    },
+                    "ARG1": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": -30
+                        },
+                        "id": "drop-place/arg1"
+                      }
+                    }
+                  },
+                  "id": "drop-place",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "En haut, à un endroit au hasard.",
+                        "en": "At the top, somewhere at random."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Sprite_set",
+                      "fields": {
+                        "COMPONENT": "star",
+                        "PROP": "visible"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "logic_boolean",
+                            "fields": {
+                              "BOOL": "TRUE"
+                            },
+                            "id": "drop-show/value"
+                          }
+                        }
+                      },
+                      "id": "drop-show",
+                      "next": {
+                        "block": {
+                          "type": "rx_Sprite_set",
+                          "fields": {
+                            "COMPONENT": "star",
+                            "PROP": "vy"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 150
+                                },
+                                "id": "drop-speed/value"
+                              }
+                            }
+                          },
+                          "id": "drop-speed",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "Vitesse vers le bas (y augmente).",
+                                "en": "Speed downwards (y grows)."
+                              },
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "appear",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Ici, « Étoile » veut dire le nouveau clone.",
+                  "en": "Here, “Star” means the new clone."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 700
+              }
+            },
+            "x": 300,
+            "y": 700
+          },
+          {
+            "type": "rx_Timer_on_tick",
+            "fields": {
+              "COMPONENT": "rain"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "faire tomber une étoile",
+                      "en": "make a star fall"
+                    }
+                  },
+                  "id": "tick-drop"
+                }
+              }
+            },
+            "id": "tick",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Chaque fois que le minuteur sonne : une étoile de plus.",
+                  "en": "Each time the timer rings: one more star."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1004
+              }
+            },
+            "x": 300,
+            "y": 1004
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "afficher le score",
+                "en": "show the score"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_SceneText_set",
+                  "fields": {
+                    "COMPONENT": "scoreText",
+                    "PROP": "text"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": {
+                          "itemCount": 2
+                        },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Score : ",
+                                  "en": "Score: "
+                                }
+                              },
+                              "id": "show-score/value/add0"
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "score"
+                              },
+                              "id": "show-score/value/add1"
+                            }
+                          }
+                        },
+                        "id": "show-score/value"
+                      }
+                    }
+                  },
+                  "id": "show-score",
+                  "next": {
+                    "block": {
+                      "type": "rx_SceneText_set",
+                      "fields": {
+                        "COMPONENT": "livesText",
+                        "PROP": "text"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_join",
+                            "extraState": {
+                              "itemCount": 2
+                            },
+                            "inputs": {
+                              "ADD0": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": "❤️ "
+                                  },
+                                  "id": "show-lives/value/add0"
+                                }
+                              },
+                              "ADD1": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "lives"
+                                  },
+                                  "id": "show-lives/value/add1"
+                                }
+                              }
+                            },
+                            "id": "show-lives/value"
+                          }
+                        }
+                      },
+                      "id": "show-lives"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "show",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Écrit les nombres en haut de la scène.",
+                  "en": "Writes the numbers at the top of the scene."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1204
+              }
+            },
+            "x": 300,
+            "y": 1204
+          },
+          {
+            "type": "rx_Sprite_on_hit",
+            "fields": {
+              "COMPONENT": "star",
+              "FILTER": "basket"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": {
+                    "VAR": "score"
+                  },
+                  "inputs": {
+                    "DELTA": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 1
+                        },
+                        "id": "catch-score/delta"
+                      }
+                    }
+                  },
+                  "id": "catch-score",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "afficher le score",
+                          "en": "show the score"
+                        }
+                      },
+                      "id": "catch-show",
+                      "next": {
+                        "block": {
+                          "type": "rx_Sprite_call_delete",
+                          "fields": {
+                            "COMPONENT": "star"
+                          },
+                          "id": "catch-end"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "catch",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Attrapée : un point, et l’étoile disparaît.",
+                  "en": "Caught: one point, and the star goes."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1560
+              }
+            },
+            "x": 300,
+            "y": 1560
+          },
+          {
+            "type": "rx_Sprite_on_edge",
+            "fields": {
+              "COMPONENT": "star",
+              "FILTER": "bottom"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": {
+                    "VAR": "lives"
+                  },
+                  "inputs": {
+                    "DELTA": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": -1
+                        },
+                        "id": "miss-lives/delta"
+                      }
+                    }
+                  },
+                  "id": "miss-lives",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "afficher le score",
+                          "en": "show the score"
+                        }
+                      },
+                      "id": "miss-show",
+                      "next": {
+                        "block": {
+                          "type": "procedures_callnoreturn",
+                          "extraState": {
+                            "name": {
+                              "fr": "vérifier si c’est perdu",
+                              "en": "check if the game is lost"
+                            }
+                          },
+                          "id": "miss-check",
+                          "next": {
+                            "block": {
+                              "type": "rx_Sprite_call_delete",
+                              "fields": {
+                                "COMPONENT": "star"
+                              },
+                              "id": "miss-end"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "miss",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Tombée par terre : une vie en moins.",
+                  "en": "It hit the ground: one life less."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1864
+              }
+            },
+            "x": 300,
+            "y": 1864
+          },
+          {
+            "type": "rx_Sprite_on_drag",
+            "fields": {
+              "COMPONENT": "basket"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_set",
+                  "fields": {
+                    "COMPONENT": "basket",
+                    "PROP": "y"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 590
+                        },
+                        "id": "follow-ground/value"
+                      }
+                    }
+                  },
+                  "id": "follow-ground"
+                }
+              }
+            },
+            "id": "follow",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Le panier suit ton doigt, mais reste au sol.",
+                  "en": "The basket follows your finger, but stays on the ground."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2220
+              }
+            },
+            "x": 300,
+            "y": 2220
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "vérifier si c’est perdu",
+                "en": "check if the game is lost"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "controls_if",
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "fields": {
+                          "OP": "LTE"
+                        },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "lives"
+                              },
+                              "id": "check-lost/if0/a"
+                            }
+                          },
+                          "B": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 0
+                              },
+                              "id": "check-lost/if0/b"
+                            }
+                          }
+                        },
+                        "id": "check-lost/if0"
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_Timer_call_stop",
+                        "fields": {
+                          "COMPONENT": "rain"
+                        },
+                        "id": "check-stop",
+                        "next": {
+                          "block": {
+                            "type": "rx_GameScene_call_deleteClones",
+                            "fields": {
+                              "COMPONENT": "sky"
+                            },
+                            "id": "check-clear",
+                            "next": {
+                              "block": {
+                                "type": "rx_screen_open",
+                                "fields": {
+                                  "SCREEN": "end"
+                                },
+                                "id": "check-end"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "id": "check-lost"
+                }
+              }
+            },
+            "id": "check",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Plus de vies : la partie s’arrête.",
+                  "en": "No lives left: the game stops."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2420
+              }
+            },
+            "x": 300,
+            "y": 2420
+          }
+        ]
+      },
+      {
+        "key": "end",
+        "name": {
+          "fr": "Fin",
+          "en": "End"
+        },
+        "props": {
+          "padding": 24,
+          "gap": 16,
+          "alignItems": "center",
+          "justify": "center",
+          "background": "#1b1f4b"
+        },
+        "components": [
+          {
+            "key": "lost",
+            "type": "Text",
+            "name": {
+              "fr": "Perdu",
+              "en": "Lost"
+            },
+            "props": {
+              "text": {
+                "fr": "Partie terminée !",
+                "en": "Game over!"
+              },
+              "fontSize": 32,
+              "bold": true,
+              "color": "#ffe066",
+              "align": "center"
+            }
+          },
+          {
+            "key": "finalText",
+            "type": "Text",
+            "name": {
+              "fr": "TexteFinal",
+              "en": "FinalText"
+            },
+            "props": {
+              "text": {
+                "fr": "Ton score : 0",
+                "en": "Your score: 0"
+              },
+              "fontSize": 22,
+              "color": "#ffffff",
+              "align": "center"
+            }
+          },
+          {
+            "key": "again",
+            "type": "Button",
+            "name": {
+              "fr": "Rejouer",
+              "en": "PlayAgain"
+            },
+            "props": {
+              "text": {
+                "fr": "Rejouer",
+                "en": "Play again"
+              }
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": {
+              "COMPONENT": "end"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Text_set",
+                  "fields": {
+                    "COMPONENT": "finalText",
+                    "PROP": "text"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": {
+                          "itemCount": 2
+                        },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Ton score : ",
+                                  "en": "Your score: "
+                                }
+                              },
+                              "id": "end-score/value/add0"
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "score"
+                              },
+                              "id": "end-score/value/add1"
+                            }
+                          }
+                        },
+                        "id": "end-score/value"
+                      }
+                    }
+                  },
+                  "id": "end-score"
+                }
+              }
+            },
+            "id": "end-open",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "L’écran de fin montre le score.",
+                  "en": "The end screen shows the score."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "again"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_screen_open",
+                  "fields": {
+                    "SCREEN": "game"
+                  },
+                  "id": "again-open"
+                }
+              }
+            },
+            "id": "again",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Rouvre le jeu : tout repart à zéro.",
+                  "en": "Opens the game again: all starts from zero."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 292
+              }
+            },
+            "x": 300,
+            "y": 292
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "start",
+      "target": "block:start"
+    },
+    {
+      "id": "miss",
+      "target": "block:miss"
+    },
+    {
+      "id": "check",
+      "target": "block:check"
+    },
+    {
+      "id": "end",
+      "target": "screen-picker"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:miss-lives",
+      "check": {
+        "kind": "stepped",
+        "id": "miss-lives"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "five",
+      "block": "start-lives",
+      "check": {
+        "kind": "blockField",
+        "id": "start-lives/value",
+        "field": "NUM",
+        "equals": 5
+      }
+    },
+    {
+      "id": "hard",
+      "block": "miss-lives",
+      "check": {
+        "kind": "blockField",
+        "id": "miss-lives/delta",
+        "field": "NUM",
+        "equals": -2
+      }
+    },
+    {
+      "id": "message",
+      "block": "check-lost",
+      "check": {
+        "kind": "block",
+        "type": "rx_ui_toast",
+        "within": "check-lost"
+      }
+    }
+  ]
+}

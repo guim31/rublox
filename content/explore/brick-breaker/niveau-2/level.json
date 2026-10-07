@@ -1,0 +1,943 @@
+{
+  "level": 2,
+  "recipe": {
+    "name": {
+      "fr": "Casse-briques 2",
+      "en": "Brick Breaker 2"
+    },
+    "mode": "junior",
+    "theme": {
+      "primary": "#e8590c",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [
+      {
+        "key": "row",
+        "name": {
+          "fr": "rangée",
+          "en": "row"
+        },
+        "kind": "app",
+        "initial": 1
+      },
+      {
+        "key": "col",
+        "name": {
+          "fr": "colonne",
+          "en": "column"
+        },
+        "kind": "app",
+        "initial": 1
+      }
+    ],
+    "screens": [
+      {
+        "key": "game",
+        "name": {
+          "fr": "Jeu",
+          "en": "Game"
+        },
+        "props": {
+          "padding": 0
+        },
+        "components": [
+          {
+            "key": "field",
+            "type": "GameScene",
+            "name": {
+              "fr": "Terrain",
+              "en": "Field"
+            },
+            "props": {
+              "background": "#14213d",
+              "edges": "bounce"
+            },
+            "children": [
+              {
+                "key": "ball",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Balle",
+                  "en": "Ball"
+                },
+                "props": {
+                  "costumes": ["⚽"],
+                  "x": 180,
+                  "y": 360,
+                  "width": 32,
+                  "height": 32,
+                  "collision": "circle"
+                }
+              },
+              {
+                "key": "paddle",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Raquette",
+                  "en": "Paddle"
+                },
+                "props": {
+                  "costumes": ["🛹"],
+                  "x": 180,
+                  "y": 580,
+                  "width": 90,
+                  "height": 44,
+                  "draggable": true,
+                  "edges": "stop"
+                }
+              },
+              {
+                "key": "brick",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Brique",
+                  "en": "Brick"
+                },
+                "props": {
+                  "costumes": ["🧱"],
+                  "x": 45,
+                  "y": 100,
+                  "width": 40,
+                  "height": 36,
+                  "visible": false
+                }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_GameScene_on_start",
+            "fields": {
+              "COMPONENT": "field"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "construire le mur",
+                      "en": "build the wall"
+                    }
+                  },
+                  "id": "start-wall",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "lancer la balle",
+                          "en": "serve the ball"
+                        }
+                      },
+                      "id": "start-serve"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "start",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Au départ : le mur, puis la balle.",
+                  "en": "At the start: the wall, then the ball."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "lancer la balle",
+                "en": "serve the ball"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_Sprite_call_goTo",
+                  "fields": {
+                    "COMPONENT": "ball"
+                  },
+                  "inputs": {
+                    "ARG0": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 180
+                        },
+                        "id": "serve-place/arg0"
+                      }
+                    },
+                    "ARG1": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 360
+                        },
+                        "id": "serve-place/arg1"
+                      }
+                    }
+                  },
+                  "id": "serve-place",
+                  "next": {
+                    "block": {
+                      "type": "rx_Sprite_set",
+                      "fields": {
+                        "COMPONENT": "ball",
+                        "PROP": "vx"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_random_int",
+                            "inputs": {
+                              "FROM": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": -150
+                                  },
+                                  "id": "serve-vx/value/from"
+                                }
+                              },
+                              "TO": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": 150
+                                  },
+                                  "id": "serve-vx/value/to"
+                                }
+                              }
+                            },
+                            "id": "serve-vx/value"
+                          }
+                        }
+                      },
+                      "id": "serve-vx",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "Un peu à gauche ou à droite, au hasard.",
+                            "en": "A little left or right, at random."
+                          },
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_Sprite_set",
+                          "fields": {
+                            "COMPONENT": "ball",
+                            "PROP": "vy"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 260
+                                },
+                                "id": "serve-vy/value"
+                              }
+                            }
+                          },
+                          "id": "serve-vy",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "Vers le bas : y grandit.",
+                                "en": "Downwards: y grows."
+                              },
+                              "pinned": false,
+                              "width": 230,
+                              "height": 48
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "serve",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Remet la balle au milieu et la lance.",
+                  "en": "Puts the ball in the middle and serves it."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 292
+              }
+            },
+            "x": 300,
+            "y": 292
+          },
+          {
+            "type": "rx_Sprite_on_hit",
+            "fields": {
+              "COMPONENT": "ball",
+              "FILTER": "paddle"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_set",
+                  "fields": {
+                    "COMPONENT": "ball",
+                    "PROP": "vy"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": -300
+                        },
+                        "id": "bounce-vy/value"
+                      }
+                    }
+                  },
+                  "id": "bounce-vy",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "Repart vers le haut.",
+                        "en": "Goes back up."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Sprite_set",
+                      "fields": {
+                        "COMPONENT": "ball",
+                        "PROP": "vx"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_arithmetic",
+                            "fields": {
+                              "OP": "MULTIPLY"
+                            },
+                            "inputs": {
+                              "A": {
+                                "block": {
+                                  "type": "math_arithmetic",
+                                  "fields": {
+                                    "OP": "MINUS"
+                                  },
+                                  "inputs": {
+                                    "A": {
+                                      "block": {
+                                        "type": "rx_Sprite_get",
+                                        "fields": {
+                                          "COMPONENT": "ball",
+                                          "PROP": "x"
+                                        },
+                                        "id": "bounce-vx/value/a/a"
+                                      }
+                                    },
+                                    "B": {
+                                      "block": {
+                                        "type": "rx_Sprite_get",
+                                        "fields": {
+                                          "COMPONENT": "paddle",
+                                          "PROP": "x"
+                                        },
+                                        "id": "bounce-vx/value/a/b"
+                                      }
+                                    }
+                                  },
+                                  "id": "bounce-vx/value/a"
+                                }
+                              },
+                              "B": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": 5
+                                  },
+                                  "id": "bounce-vx/value/b"
+                                }
+                              }
+                            },
+                            "id": "bounce-vx/value"
+                          }
+                        }
+                      },
+                      "id": "bounce-vx",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "Touchée sur le côté : elle part de côté.",
+                            "en": "Hit on the side: it goes sideways."
+                          },
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "bounce",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "La balle rebondit sur la raquette.",
+                  "en": "The ball bounces off the paddle."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 596
+              }
+            },
+            "x": 300,
+            "y": 596
+          },
+          {
+            "type": "rx_Sprite_on_edge",
+            "fields": {
+              "COMPONENT": "ball",
+              "FILTER": "bottom"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "lancer la balle",
+                      "en": "serve the ball"
+                    }
+                  },
+                  "id": "lost-serve"
+                }
+              }
+            },
+            "id": "lost",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Ratée : on relance.",
+                  "en": "Missed: serve again."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 848
+              }
+            },
+            "x": 300,
+            "y": 848
+          },
+          {
+            "type": "rx_Sprite_on_drag",
+            "fields": {
+              "COMPONENT": "paddle"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_set",
+                  "fields": {
+                    "COMPONENT": "paddle",
+                    "PROP": "y"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 580
+                        },
+                        "id": "follow-ground/value"
+                      }
+                    }
+                  },
+                  "id": "follow-ground"
+                }
+              }
+            },
+            "id": "follow",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "La raquette suit ton doigt, en restant en bas.",
+                  "en": "The paddle follows your finger, staying at the bottom."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1048
+              }
+            },
+            "x": 300,
+            "y": 1048
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "construire le mur",
+                "en": "build the wall"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "controls_for",
+                  "fields": {
+                    "VAR": "row"
+                  },
+                  "inputs": {
+                    "FROM": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 1
+                        },
+                        "id": "wall-rows/from"
+                      }
+                    },
+                    "TO": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 4
+                        },
+                        "id": "wall-rows/to"
+                      }
+                    },
+                    "BY": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 1
+                        },
+                        "id": "wall-rows/by"
+                      }
+                    },
+                    "DO": {
+                      "block": {
+                        "type": "controls_for",
+                        "fields": {
+                          "VAR": "col"
+                        },
+                        "inputs": {
+                          "FROM": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 1
+                              },
+                              "id": "wall-cols/from"
+                            }
+                          },
+                          "TO": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 7
+                              },
+                              "id": "wall-cols/to"
+                            }
+                          },
+                          "BY": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 1
+                              },
+                              "id": "wall-cols/by"
+                            }
+                          },
+                          "DO": {
+                            "block": {
+                              "type": "rx_Sprite_call_goTo",
+                              "fields": {
+                                "COMPONENT": "brick"
+                              },
+                              "inputs": {
+                                "ARG0": {
+                                  "block": {
+                                    "type": "math_arithmetic",
+                                    "fields": {
+                                      "OP": "MULTIPLY"
+                                    },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": {
+                                            "VAR": "col"
+                                          },
+                                          "id": "wall-place/arg0/a"
+                                        }
+                                      },
+                                      "B": {
+                                        "block": {
+                                          "type": "math_number",
+                                          "fields": {
+                                            "NUM": 45
+                                          },
+                                          "id": "wall-place/arg0/b"
+                                        }
+                                      }
+                                    },
+                                    "id": "wall-place/arg0"
+                                  }
+                                },
+                                "ARG1": {
+                                  "block": {
+                                    "type": "math_arithmetic",
+                                    "fields": {
+                                      "OP": "ADD"
+                                    },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "math_number",
+                                          "fields": {
+                                            "NUM": 60
+                                          },
+                                          "id": "wall-place/arg1/a"
+                                        }
+                                      },
+                                      "B": {
+                                        "block": {
+                                          "type": "math_arithmetic",
+                                          "fields": {
+                                            "OP": "MULTIPLY"
+                                          },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": "row"
+                                                },
+                                                "id": "wall-place/arg1/b/a"
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "math_number",
+                                                "fields": {
+                                                  "NUM": 40
+                                                },
+                                                "id": "wall-place/arg1/b/b"
+                                              }
+                                            }
+                                          },
+                                          "id": "wall-place/arg1/b"
+                                        }
+                                      }
+                                    },
+                                    "id": "wall-place/arg1"
+                                  }
+                                }
+                              },
+                              "id": "wall-place",
+                              "next": {
+                                "block": {
+                                  "type": "rx_Sprite_call_clone",
+                                  "fields": {
+                                    "COMPONENT": "brick"
+                                  },
+                                  "id": "wall-clone"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "id": "wall-cols",
+                        "icons": {
+                          "comment": {
+                            "text": {
+                              "fr": "Pour chaque rangée, 7 colonnes : 4 × 7 = 28 briques.",
+                              "en": "For each row, 7 columns: 4 × 7 = 28 bricks."
+                            },
+                            "pinned": false,
+                            "width": 260,
+                            "height": 68
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "id": "wall-rows",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "Une boucle dans une boucle !",
+                        "en": "A loop inside a loop!"
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
+                    }
+                  }
+                }
+              }
+            },
+            "id": "wall",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Place la brique cachée, puis la copie.",
+                  "en": "Moves the hidden brick, then copies it."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1248
+              }
+            },
+            "x": 300,
+            "y": 1248
+          },
+          {
+            "type": "rx_Sprite_on_clone",
+            "fields": {
+              "COMPONENT": "brick"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_set",
+                  "fields": {
+                    "COMPONENT": "brick",
+                    "PROP": "visible"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "logic_boolean",
+                        "fields": {
+                          "BOOL": "TRUE"
+                        },
+                        "id": "appear-show/value"
+                      }
+                    }
+                  },
+                  "id": "appear-show"
+                }
+              }
+            },
+            "id": "appear",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Chaque copie se montre.",
+                  "en": "Each copy shows itself."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 1656
+              }
+            },
+            "x": 300,
+            "y": 1656
+          },
+          {
+            "type": "rx_Sprite_on_hit",
+            "fields": {
+              "COMPONENT": "brick",
+              "FILTER": "ball"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_call_delete",
+                  "fields": {
+                    "COMPONENT": "brick"
+                  },
+                  "id": "break-delete",
+                  "next": {
+                    "block": {
+                      "type": "rx_Sprite_set",
+                      "fields": {
+                        "COMPONENT": "ball",
+                        "PROP": "vy"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_arithmetic",
+                            "fields": {
+                              "OP": "MINUS"
+                            },
+                            "inputs": {
+                              "A": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": 0
+                                  },
+                                  "id": "break-bounce/value/a"
+                                }
+                              },
+                              "B": {
+                                "block": {
+                                  "type": "rx_Sprite_get",
+                                  "fields": {
+                                    "COMPONENT": "ball",
+                                    "PROP": "vy"
+                                  },
+                                  "id": "break-bounce/value/b"
+                                }
+                              }
+                            },
+                            "id": "break-bounce/value"
+                          }
+                        }
+                      },
+                      "id": "break-bounce",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "0 − vitesse : elle repart dans l’autre sens.",
+                            "en": "0 − speed: it goes the other way."
+                          },
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "break",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Ici, « Brique » est la brique touchée.",
+                  "en": "Here, “Brick” is the brick that was hit."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1856
+              }
+            },
+            "x": 300,
+            "y": 1856
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "wall",
+      "target": "block:wall"
+    },
+    {
+      "id": "place",
+      "target": "block:wall-place"
+    },
+    {
+      "id": "break",
+      "target": "block:break"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:wall-clone",
+      "check": {
+        "kind": "stepped",
+        "id": "wall-clone"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "rows",
+      "block": "wall-rows",
+      "check": {
+        "kind": "blockField",
+        "id": "wall-rows/to",
+        "field": "NUM",
+        "equals": 5
+      }
+    },
+    {
+      "id": "cols",
+      "block": "wall-cols",
+      "check": {
+        "kind": "blockField",
+        "id": "wall-cols/to",
+        "field": "NUM",
+        "equals": 6
+      }
+    },
+    {
+      "id": "spin",
+      "block": "break",
+      "check": {
+        "kind": "block",
+        "type": "rx_Sprite_call_turn",
+        "within": "break"
+      }
+    }
+  ]
+}

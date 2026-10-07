@@ -1,0 +1,46 @@
+{
+  "title": "Score et vies",
+  "summary": "Des points par brique, trois vies, « gagné » et « perdu ».",
+  "done": "Tu as vu des variables, un « si … sinon » et une fonction de fin.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 3 : des points, des vies, et des messages « Gagné » ou « Perdu »."
+    },
+    "new": {
+      "text": "Les blocs du départ sont rangés dans la fonction « nouvelle partie » : elle sert au départ et pour rejouer."
+    },
+    "count": {
+      "text": "La variable **briques** compte les briques construites…"
+    },
+    "win": {
+      "text": "… et on en enlève une à chaque brique cassée. À 0, c’est gagné !"
+    },
+    "lost": {
+      "text": "[si … sinon] : s’il ne reste plus de vies, c’est perdu ; sinon, on relance la balle."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Laisse tomber la balle : [modifier vies de -1] s’allume.",
+      "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
+    },
+    "fast": {
+      "text": "Arrête le ralenti pour jouer à vitesse normale."
+    }
+  },
+  "challenges": {
+    "five": {
+      "text": "Commence avec 5 vies.",
+      "hint": "C’est dans « nouvelle partie »."
+    },
+    "points": {
+      "text": "Donne 20 points par brique.",
+      "hint": "Regarde [modifier score de 10]."
+    },
+    "toast": {
+      "text": "Affiche un message bref quand c’est gagné.",
+      "hint": "Le bloc est dans la catégorie Interface."
+    }
+  }
+}

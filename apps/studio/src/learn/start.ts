@@ -10,7 +10,7 @@ import { importProjectDoc } from '../storage/projects.ts'
 import { saveChallenge, saveTutorial, useLearn } from './store.ts'
 
 /** Saves a new project where the learner's projects live: the account, or this browser. */
-async function storeProject(doc: ProjectDoc): Promise<string> {
+export async function storeProject(doc: ProjectDoc): Promise<string> {
   const me = await queryClient.fetchQuery({ queryKey: ME_KEY, queryFn: fetchMe }).catch(() => null)
   if (me?.user) {
     const state = toBase64(Y.encodeStateAsUpdate(projectToYDoc(doc)))

@@ -1,0 +1,1339 @@
+{
+  "level": 4,
+  "recipe": {
+    "name": {
+      "fr": "Attrape-étoiles 4",
+      "en": "Star Catcher 4"
+    },
+    "mode": "studio",
+    "theme": {
+      "primary": "#7048e8",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [
+      {
+        "key": "score",
+        "name": {
+          "fr": "score",
+          "en": "score"
+        },
+        "kind": "app",
+        "initial": 0
+      },
+      {
+        "key": "lives",
+        "name": {
+          "fr": "vies",
+          "en": "lives"
+        },
+        "kind": "app",
+        "initial": 3
+      },
+      {
+        "key": "best",
+        "name": {
+          "fr": "record",
+          "en": "best"
+        },
+        "kind": "stored",
+        "initial": 0
+      }
+    ],
+    "screens": [
+      {
+        "key": "game",
+        "name": {
+          "fr": "Jeu",
+          "en": "Game"
+        },
+        "props": {
+          "padding": 0
+        },
+        "components": [
+          {
+            "key": "sky",
+            "type": "GameScene",
+            "name": {
+              "fr": "Ciel",
+              "en": "Sky"
+            },
+            "props": {
+              "background": "#1b1f4b",
+              "edges": "pass"
+            },
+            "children": [
+              {
+                "key": "moon",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Lune",
+                  "en": "Moon"
+                },
+                "props": {
+                  "costumes": ["🌙"],
+                  "x": 300,
+                  "y": 130,
+                  "width": 72,
+                  "height": 72,
+                  "collision": "none"
+                }
+              },
+              {
+                "key": "star",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Étoile",
+                  "en": "Star"
+                },
+                "props": {
+                  "costumes": ["⭐"],
+                  "x": 180,
+                  "y": -40,
+                  "width": 56,
+                  "height": 56,
+                  "collision": "circle",
+                  "visible": false
+                }
+              },
+              {
+                "key": "basket",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Panier",
+                  "en": "Basket"
+                },
+                "props": {
+                  "costumes": ["🧺"],
+                  "x": 180,
+                  "y": 590,
+                  "width": 96,
+                  "height": 72,
+                  "draggable": true,
+                  "edges": "stop"
+                }
+              },
+              {
+                "key": "scoreText",
+                "type": "SceneText",
+                "name": {
+                  "fr": "TexteScore",
+                  "en": "ScoreText"
+                },
+                "props": {
+                  "text": {
+                    "fr": "Score : 0",
+                    "en": "Score: 0"
+                  },
+                  "x": 20,
+                  "y": 40,
+                  "align": "left",
+                  "color": "#ffffff"
+                }
+              },
+              {
+                "key": "livesText",
+                "type": "SceneText",
+                "name": {
+                  "fr": "TexteVies",
+                  "en": "LivesText"
+                },
+                "props": {
+                  "text": "❤️ 3",
+                  "x": 340,
+                  "y": 40,
+                  "align": "right",
+                  "color": "#ffffff"
+                }
+              }
+            ]
+          },
+          {
+            "key": "rain",
+            "type": "Timer",
+            "name": {
+              "fr": "Pluie",
+              "en": "Rain"
+            },
+            "props": {
+              "interval": 1,
+              "repeat": true,
+              "autostart": false
+            }
+          },
+          {
+            "key": "pop",
+            "type": "Sound",
+            "name": {
+              "fr": "SonAttrape",
+              "en": "CatchSound"
+            },
+            "props": {
+              "src": "data:audio/wav;base64,UklGRoQEAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YWAEAACAgYOFhoWDfnl0cG9xdn2HkZicnJaMfm9jWlhdaHmMn62zsaaTfGRQREJLXnmVsMLKxLGVdFM6LS5AXoGlwdLUxquJZUYxLDZNb5O0y9TNuJh0UjktMURihqnE0dC+oX5bPzAwQF2Ao8DP0MCkgV5BMTFAXH+jv87OvqJ/XEAyM0RhhafCzsu5mndVPDE3TGuPsMbOxq6Oaks3Mz9Ze567y8u7nntZPzQ5TWyQsMbMwqmHZEc3NkZjhqjAy8Wvj2xNOjZEXoGjvcnFsZJuTzs3RF6AorzIxK+QbU47OUdihKa+yMGqimdKOztMaoyswce7oX9eRTpAVnaYtcTDsZRxUj88SWSGp73Fu6OCYEc8Qlh4mrXDwK2ObE8/P1Btj63AwbKWdFZCPkxniai9wbWbelpFP0pkhaW7wbace1xGQEtkhaW6wLSaeVpGQU5oiae7vrCVdVdFQ1Juj6y8vKqNbVFDRlp4mLK9t6GCY0tDTWWEo7e8r5R0WEdGV3OUrru2ooRlTUVOZoajtrmrkHBVR0pdepmxubGZel1LSFdykau4s5+BY05IVG2Mp7a0o4ZoUUlSaoiktbSkiGpSSlJph6O0tKOHaVNLVGuJpLOyoYVnUkxWb42ms7CcgGNQTVt1kqqzrJZ5Xk9QYX2ZrbKmjXBYTlVqh6Gwr52CZlNQXXaSqbGoknVdUFVohJ6urp2DaFVRXneTqK+lj3NcUlhtiKGtqpd9Y1RVZX+ZqqyehWpXVGB4k6esootwW1Rdc46jrKSPdF5VXHCKoKulkXdhVltuiJ+qpZJ4YldbboeeqaSSeGJXXW+InqijkHdhWF5yi5+ooIx0YFlhdo6hp52IcF5aZXuTo6WYgmtcXGqBmKSikntmW2BxiZyknotzYVxmepGgo5eBbF5fbYSYo56Od2VdZXiOnqKXg21gYG6Dl6GdjHdlX2d6j56glIBsYGNyh5mgmYdyZGFsgJSenI15aGFoeo6cnZJ+bGJmdYmZnZWDcGRlcoWWnZeGc2ZlcIKUnJiIdWdlb4CSm5iKd2llbn+QmpiKeGpmbn+QmZeKeGpnb3+QmZaJeGpncICQmJWHd2pocoKRmJOFdWpqdISSl5GCc2psd4eTlo5/cWpue4qUlIp7b2txf42VkoZ4bWx1g5CUj4F0bG96iJKTinxxbXN/jJOQhXdvb3iFj5KLf3Nucn6KkY+GeXBweISOkYt/dG9zfomQjoV5cXF5hI2PiX50cXWAio+Mgnhyc3yGjY2GfHRzeYOLjYh/dnN3gImNioJ5dHV9hoyLhHt1dXuEiouGfXZ1eoKJi4d/eHZ5gIeKh4B5dnl/hoqHgXp3eX+FiYeCe3h5foSIh4J8eHl+hIeHgnx5en6Dh4aCfXp6foOGhYJ9ent/g4aFgX17fH+DhYSBfXt8f4OEg4B9fH2Ag4SDgH19foCDg4KAfn1/gYKCgX9+fn+BgoKBf35/gIGBgYB/f3+AgYGAgICAgICA"
+            }
+          },
+          {
+            "key": "oops",
+            "type": "Sound",
+            "name": {
+              "fr": "SonRate",
+              "en": "MissSound"
+            },
+            "props": {
+              "src": "data:audio/wav;base64,UklGRuQIAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YcAIAACAgIGCg4SFhYWEgoB+e3h2dHJycnR3en+DiI2RlZeYl5SQioR9dW5oY2BfYGNpcHmCjJWdpKiqqaagl42BdWlfVlBNTVBXYW16iJekr7e8vbqzqZyNfGxcT0Q9OjtBTFlqfI+hssDJz8/KwbOhjnlkUEA0LSsuNkNUaH2SprjG0NTUzsO1o455ZVJCNi4sLzZDU2Z7j6O1w87T087Ft6aSfmlWRjkwLS41QE9hdYmdr7/K0dPQyLusmYVxXkw+NC8uMjtJWWyAlKe3xM3R0cvCtKOQfGhWRjoyLzA2QU9gc4earLvHztHPyL2unYp3ZFJEOTIwMjlEU2R3i52uvMfO0M3Gu6ybiHVjUkQ5MzEzOkZUZXeKna27xs3PzMa7rZyKd2VURjs0MjQ6RFJidIeZqrjDys7Mx72woI98allLPzczNDhBTVxugJKjsr7HzMzJwbanl4VzYlJFPDY0Nj1HVGR1h5mptsHIy8rFvLChkX9uXU9DOzY1OUBLWWh5i5yruMLIysnDuq6fjn1sXE5DOzc2OkFMWml6i5uqt8HHycjDuq6gkH9uXlFFPTg3OkFLWGd3h5ins77FyMfDvLGjlIRzZFVJQDs4Oj9IU2FwgJGgrbnBxsfFv7aqnIx8bF1QRj46Oj1DTVlndoaWpLG7wsbGwruypZeIeGlbT0U+Ozs/Rk9canmIl6Wxu8HFxMG6sKSWh3hpW09GPzw8P0ZPW2l4h5ajr7nAw8PBurGmmYp7bV9TSUI+PT9FTVhlc4KQnqq1vMHDwby1qp6QgnNmWU5GQT4/Q0lTXmt5iJajrre9wcG/ubCmmYx+cGJXTUVBP0FFTFZhbnyKmKSvt73AwL23r6SYi31vY1dORkJAQkZNVmFue4mWoq21u7+/vbewppqNgHNmWlFJREJCRUtUXmp3hJGdqLG4vL69ubKqn5OGeWxhVk5HRENESVBZY298iZWhq7O5vL27tq+mm5CDdmpfVU1IRERGS1JbZXF9ipahqrK4u7u5ta6lm5CDd2tgV09JRkVHS1FaZG97h5OeqLC2ubq5ta+nnpOHe3BlW1JMSEZHSk9XYGp2gY2Yoquytrm5t7Kro5mOg3dsYllRTElISUxSWmNteISPmqOrsba4t7WwqqGYjYJ3bGJZUk1KSUpNU1pjbXiDjZihqbC0tra0sKqjmY+Fem9lXVVQTEpLTVJYYGlzfomTnKWssbS1tLKtpp6Vi4B2bGNbVE9MS0xQVVtjbHaBi5Wepayws7SzsKuknJOKf3VsY1tVUE1NTlFVXGNsdoCJk5yjqq+ys7Kvq6WelYyCeG9mXlhTUE5OUFRaYWlye4WOl5+mq6+xsbCtqKGakYh/dW1kXVdTUE9QUldcY2t0fYaPmJ+lq66wsK6rpqCZkYh/dm1mX1lUUlFRU1dcY2pze4SNlZyjqKyur66rp6Kbk4uDenFqYlxYVFJSU1ZaYGdudn+Hj5eepKisra2sqaWfmZGJgXlwaWJdWFVTU1VYXGFob3d/h4+WnaKnqqysq6ikn5mSioN7c2xlX1tXVVVVWFtgZmx0e4OLkpmfpKeqq6qppqGclo+HgHhxamRfW1hWVldaXWJobnV8hIuSmJ6jpqipqaekoJuVj4iBeXJsZmFdWlhXWFpdYmdtc3qBiI+Vm6Cjpqiop6WhnZiSi4V+d3BqZWBdWllZWlxgZGlvdXyCiZCVm5+ipaampaOgnJeRi4V+eHFsZmJfXFtaW11gZGhudHqAh42TmJygo6SlpKOgnZmUjoiCfHZwamZiX11cXF1fYmZqcHV7gYeNk5ecn6Gjo6Oin5yYk46Ignx3cWxoZGFfXl1eYGJmam90eX+FipCUmZyfoaKioZ+dmZWQi4aAe3VwbGhkYmBfX2BiZGdrcHV6gIWKj5SYm52foKCgnpyYlZCMh4F8d3JuamZkYmFgYWJkZ2tvc3h9goeMkJSYm52en5+enJqXk4+KhYF8d3Jua2hlY2JiYmRmaGtvc3h8gYaKjpKWmZucnZ2dm5mXk5CMh4N+enVxbmpoZmRkZGRmaGptcXV5fYKGio6SlZeZm5ycm5qYlZKPi4eDf3t3c29samhmZWVmZ2hqbXB0eHyAhIiLj5KVl5mampqZmJaUkY2KhoJ+e3dzcG1raWhnZ2doamxucXR4e3+DhoqNkJOVlpiYmJiXlZORjouIhIF9enZzcG5samlpaGlqa21wcnV4fH+ChomMj5GTlZaXl5aWlJOQjouIhYJ/e3h1c3BubWtqamprbG1vcXR3en2Ag4aJjI6QkpOUlZWVlJORj42LiIWCf3x6d3RycG9tbGxsbG1ucHJ0dnl7foGEhomLjY+RkpOTk5OSkZCOjIqHhYKAfXp4dnRycG9ubm5ubm9xcnR2eHp9f4KEh4mLjY6PkJGRkZGQj46Mi4mHhIKAfXt5d3V0cnFwcHBwcHFyc3R2eHp8foGDhYeJioyNjo+PkI+Pjo6Mi4mIhoSCgH58enh3dXRzcnJxcXJyc3R1d3h6fH5/gYOFh4iKi4yNjY6Ojo2NjIuKiIeFg4KAfn17eXh3dnV0dHNzc3R0dXZ3eHp7fX6AgoOFhoeIiYqLi4yMjIuLiomIh4aFg4KAf358e3p5eHd2dnV1dXV2dnd4eXp7fH5/gIKDhIWGh4iJiYmKioqJiYmIh4aFhIOCgYB/fXx7enp5eHh3d3d3d3h4eXl6e3x9fn+AgYKDhIWFhoeHh4iIiIiHh4eGhYWEg4KBgIB/fn18fHt7enp5eXl5eXp6ent7fH19fn+AgIGCgoOEhIWFhYaGhoaGhYWFhISDg4KCgYGAf39+fn19fHx8fHt7e3t8fHx8fX19fn5/f4CAgYGCgoKDg4ODg4SEhIODg4ODg4KCgoGBgYCAgH9/f35+fn5+fn5+fn5+fn5+fn5/f39/gICAgICBgYGBgYGBgYGBgYGBgYGBgYGBgYGAgICAgICAgICAgICAgICAgICAgICAgA=="
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_GameScene_on_start",
+            "fields": {
+              "COMPONENT": "sky"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "score"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 0
+                        },
+                        "id": "start-score/value"
+                      }
+                    }
+                  },
+                  "id": "start-score",
+                  "next": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": {
+                        "VAR": "lives"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 3
+                            },
+                            "id": "start-lives/value"
+                          }
+                        }
+                      },
+                      "id": "start-lives",
+                      "next": {
+                        "block": {
+                          "type": "procedures_callnoreturn",
+                          "extraState": {
+                            "name": {
+                              "fr": "afficher le score",
+                              "en": "show the score"
+                            }
+                          },
+                          "id": "start-show",
+                          "next": {
+                            "block": {
+                              "type": "rx_Timer_set",
+                              "fields": {
+                                "COMPONENT": "rain",
+                                "PROP": "interval"
+                              },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "math_number",
+                                    "fields": {
+                                      "NUM": 1
+                                    },
+                                    "id": "start-pace/value"
+                                  }
+                                }
+                              },
+                              "id": "start-pace",
+                              "next": {
+                                "block": {
+                                  "type": "rx_Timer_call_start",
+                                  "fields": {
+                                    "COMPONENT": "rain"
+                                  },
+                                  "id": "start-rain",
+                                  "next": {
+                                    "block": {
+                                      "type": "procedures_callnoreturn",
+                                      "extraState": {
+                                        "name": {
+                                          "fr": "faire tomber une étoile",
+                                          "en": "make a star fall"
+                                        }
+                                      },
+                                      "id": "start-drop"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "start",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Au départ : tout à zéro, la pluie commence.",
+                  "en": "At the start: all to zero, the rain begins."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "faire tomber une étoile",
+                "en": "make a star fall"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_Sprite_call_clone",
+                  "fields": {
+                    "COMPONENT": "star"
+                  },
+                  "id": "drop-clone"
+                }
+              }
+            },
+            "id": "drop",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Chaque étoile est un clone de l’étoile cachée.",
+                  "en": "Each star is a clone of the hidden star."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 500
+              }
+            },
+            "x": 300,
+            "y": 500
+          },
+          {
+            "type": "rx_Sprite_on_clone",
+            "fields": {
+              "COMPONENT": "star"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_call_goTo",
+                  "fields": {
+                    "COMPONENT": "star"
+                  },
+                  "inputs": {
+                    "ARG0": {
+                      "block": {
+                        "type": "math_random_int",
+                        "inputs": {
+                          "FROM": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 40
+                              },
+                              "id": "drop-place/arg0/from"
+                            }
+                          },
+                          "TO": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 320
+                              },
+                              "id": "drop-place/arg0/to"
+                            }
+                          }
+                        },
+                        "id": "drop-place/arg0"
+                      }
+                    },
+                    "ARG1": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": -30
+                        },
+                        "id": "drop-place/arg1"
+                      }
+                    }
+                  },
+                  "id": "drop-place",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "En haut, à un endroit au hasard.",
+                        "en": "At the top, somewhere at random."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Sprite_set",
+                      "fields": {
+                        "COMPONENT": "star",
+                        "PROP": "visible"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "logic_boolean",
+                            "fields": {
+                              "BOOL": "TRUE"
+                            },
+                            "id": "drop-show/value"
+                          }
+                        }
+                      },
+                      "id": "drop-show",
+                      "next": {
+                        "block": {
+                          "type": "rx_Sprite_set",
+                          "fields": {
+                            "COMPONENT": "star",
+                            "PROP": "vy"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_arithmetic",
+                                "fields": {
+                                  "OP": "ADD"
+                                },
+                                "inputs": {
+                                  "A": {
+                                    "block": {
+                                      "type": "math_number",
+                                      "fields": {
+                                        "NUM": 150
+                                      },
+                                      "id": "drop-speed/value/a"
+                                    }
+                                  },
+                                  "B": {
+                                    "block": {
+                                      "type": "math_arithmetic",
+                                      "fields": {
+                                        "OP": "MULTIPLY"
+                                      },
+                                      "inputs": {
+                                        "A": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": "score"
+                                            },
+                                            "id": "drop-speed/value/b/a"
+                                          }
+                                        },
+                                        "B": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "fields": {
+                                              "NUM": 10
+                                            },
+                                            "id": "drop-speed/value/b/b"
+                                          }
+                                        }
+                                      },
+                                      "id": "drop-speed/value/b"
+                                    }
+                                  }
+                                },
+                                "id": "drop-speed/value"
+                              }
+                            }
+                          },
+                          "id": "drop-speed",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "Plus le score monte, plus ça tombe vite !",
+                                "en": "The higher the score, the faster!"
+                              },
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "appear",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Ici, « Étoile » veut dire le nouveau clone.",
+                  "en": "Here, “Star” means the new clone."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 700
+              }
+            },
+            "x": 300,
+            "y": 700
+          },
+          {
+            "type": "rx_Timer_on_tick",
+            "fields": {
+              "COMPONENT": "rain"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "faire tomber une étoile",
+                      "en": "make a star fall"
+                    }
+                  },
+                  "id": "tick-drop"
+                }
+              }
+            },
+            "id": "tick",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Chaque fois que le minuteur sonne : une étoile de plus.",
+                  "en": "Each time the timer rings: one more star."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1004
+              }
+            },
+            "x": 300,
+            "y": 1004
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "afficher le score",
+                "en": "show the score"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_SceneText_set",
+                  "fields": {
+                    "COMPONENT": "scoreText",
+                    "PROP": "text"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": {
+                          "itemCount": 2
+                        },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Score : ",
+                                  "en": "Score: "
+                                }
+                              },
+                              "id": "show-score/value/add0"
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "score"
+                              },
+                              "id": "show-score/value/add1"
+                            }
+                          }
+                        },
+                        "id": "show-score/value"
+                      }
+                    }
+                  },
+                  "id": "show-score",
+                  "next": {
+                    "block": {
+                      "type": "rx_SceneText_set",
+                      "fields": {
+                        "COMPONENT": "livesText",
+                        "PROP": "text"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_join",
+                            "extraState": {
+                              "itemCount": 2
+                            },
+                            "inputs": {
+                              "ADD0": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": "❤️ "
+                                  },
+                                  "id": "show-lives/value/add0"
+                                }
+                              },
+                              "ADD1": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "lives"
+                                  },
+                                  "id": "show-lives/value/add1"
+                                }
+                              }
+                            },
+                            "id": "show-lives/value"
+                          }
+                        }
+                      },
+                      "id": "show-lives"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "show",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Écrit les nombres en haut de la scène.",
+                  "en": "Writes the numbers at the top of the scene."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1204
+              }
+            },
+            "x": 300,
+            "y": 1204
+          },
+          {
+            "type": "rx_Sprite_on_hit",
+            "fields": {
+              "COMPONENT": "star",
+              "FILTER": "basket"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": {
+                    "VAR": "score"
+                  },
+                  "inputs": {
+                    "DELTA": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 1
+                        },
+                        "id": "catch-score/delta"
+                      }
+                    }
+                  },
+                  "id": "catch-score",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "afficher le score",
+                          "en": "show the score"
+                        }
+                      },
+                      "id": "catch-show",
+                      "next": {
+                        "block": {
+                          "type": "rx_Sound_call_play",
+                          "fields": {
+                            "COMPONENT": "pop"
+                          },
+                          "id": "catch-sound",
+                          "next": {
+                            "block": {
+                              "type": "rx_Sprite_call_delete",
+                              "fields": {
+                                "COMPONENT": "star"
+                              },
+                              "id": "catch-end"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "catch",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Attrapée : un point, et l’étoile disparaît.",
+                  "en": "Caught: one point, and the star goes."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1560
+              }
+            },
+            "x": 300,
+            "y": 1560
+          },
+          {
+            "type": "rx_Sprite_on_edge",
+            "fields": {
+              "COMPONENT": "star",
+              "FILTER": "bottom"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": {
+                    "VAR": "lives"
+                  },
+                  "inputs": {
+                    "DELTA": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": -1
+                        },
+                        "id": "miss-lives/delta"
+                      }
+                    }
+                  },
+                  "id": "miss-lives",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "afficher le score",
+                          "en": "show the score"
+                        }
+                      },
+                      "id": "miss-show",
+                      "next": {
+                        "block": {
+                          "type": "procedures_callnoreturn",
+                          "extraState": {
+                            "name": {
+                              "fr": "vérifier si c’est perdu",
+                              "en": "check if the game is lost"
+                            }
+                          },
+                          "id": "miss-check",
+                          "next": {
+                            "block": {
+                              "type": "rx_Sound_call_play",
+                              "fields": {
+                                "COMPONENT": "oops"
+                              },
+                              "id": "miss-sound",
+                              "next": {
+                                "block": {
+                                  "type": "rx_Sprite_call_delete",
+                                  "fields": {
+                                    "COMPONENT": "star"
+                                  },
+                                  "id": "miss-end"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "miss",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Tombée par terre : une vie en moins.",
+                  "en": "It hit the ground: one life less."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1916
+              }
+            },
+            "x": 300,
+            "y": 1916
+          },
+          {
+            "type": "rx_Sprite_on_drag",
+            "fields": {
+              "COMPONENT": "basket"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_set",
+                  "fields": {
+                    "COMPONENT": "basket",
+                    "PROP": "y"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 590
+                        },
+                        "id": "follow-ground/value"
+                      }
+                    }
+                  },
+                  "id": "follow-ground"
+                }
+              }
+            },
+            "id": "follow",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Le panier suit ton doigt, mais reste au sol.",
+                  "en": "The basket follows your finger, but stays on the ground."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2324
+              }
+            },
+            "x": 300,
+            "y": 2324
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "vérifier si c’est perdu",
+                "en": "check if the game is lost"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "controls_if",
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "fields": {
+                          "OP": "LTE"
+                        },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "lives"
+                              },
+                              "id": "check-lost/if0/a"
+                            }
+                          },
+                          "B": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 0
+                              },
+                              "id": "check-lost/if0/b"
+                            }
+                          }
+                        },
+                        "id": "check-lost/if0"
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_Timer_call_stop",
+                        "fields": {
+                          "COMPONENT": "rain"
+                        },
+                        "id": "check-stop",
+                        "next": {
+                          "block": {
+                            "type": "rx_GameScene_call_deleteClones",
+                            "fields": {
+                              "COMPONENT": "sky"
+                            },
+                            "id": "check-clear",
+                            "next": {
+                              "block": {
+                                "type": "controls_if",
+                                "inputs": {
+                                  "IF0": {
+                                    "block": {
+                                      "type": "logic_compare",
+                                      "fields": {
+                                        "OP": "GT"
+                                      },
+                                      "inputs": {
+                                        "A": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": "score"
+                                            },
+                                            "id": "check-best/if0/a"
+                                          }
+                                        },
+                                        "B": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": "best"
+                                            },
+                                            "id": "check-best/if0/b"
+                                          }
+                                        }
+                                      },
+                                      "id": "check-best/if0"
+                                    }
+                                  },
+                                  "DO0": {
+                                    "block": {
+                                      "type": "variables_set",
+                                      "fields": {
+                                        "VAR": "best"
+                                      },
+                                      "inputs": {
+                                        "VALUE": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": "score"
+                                            },
+                                            "id": "check-record/value"
+                                          }
+                                        }
+                                      },
+                                      "id": "check-record"
+                                    }
+                                  }
+                                },
+                                "id": "check-best",
+                                "icons": {
+                                  "comment": {
+                                    "text": {
+                                      "fr": "Un record ? On le garde.",
+                                      "en": "A record? Keep it."
+                                    },
+                                    "pinned": false,
+                                    "width": 230,
+                                    "height": 48
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "rx_screen_open",
+                                    "fields": {
+                                      "SCREEN": "end"
+                                    },
+                                    "id": "check-end"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "id": "check-lost"
+                }
+              }
+            },
+            "id": "check",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Plus de vies : la partie s’arrête.",
+                  "en": "No lives left: the game stops."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2524
+              }
+            },
+            "x": 300,
+            "y": 2524
+          }
+        ]
+      },
+      {
+        "key": "end",
+        "name": {
+          "fr": "Fin",
+          "en": "End"
+        },
+        "props": {
+          "padding": 24,
+          "gap": 16,
+          "alignItems": "center",
+          "justify": "center",
+          "background": "#1b1f4b"
+        },
+        "components": [
+          {
+            "key": "lost",
+            "type": "Text",
+            "name": {
+              "fr": "Perdu",
+              "en": "Lost"
+            },
+            "props": {
+              "text": {
+                "fr": "Partie terminée !",
+                "en": "Game over!"
+              },
+              "fontSize": 32,
+              "bold": true,
+              "color": "#ffe066",
+              "align": "center"
+            }
+          },
+          {
+            "key": "finalText",
+            "type": "Text",
+            "name": {
+              "fr": "TexteFinal",
+              "en": "FinalText"
+            },
+            "props": {
+              "text": {
+                "fr": "Ton score : 0",
+                "en": "Your score: 0"
+              },
+              "fontSize": 22,
+              "color": "#ffffff",
+              "align": "center"
+            }
+          },
+          {
+            "key": "bestText",
+            "type": "Text",
+            "name": {
+              "fr": "TexteRecord",
+              "en": "BestText"
+            },
+            "props": {
+              "text": {
+                "fr": "Meilleur score : 0",
+                "en": "Best score: 0"
+              },
+              "fontSize": 18,
+              "color": "#ffe066",
+              "align": "center"
+            }
+          },
+          {
+            "key": "again",
+            "type": "Button",
+            "name": {
+              "fr": "Rejouer",
+              "en": "PlayAgain"
+            },
+            "props": {
+              "text": {
+                "fr": "Rejouer",
+                "en": "Play again"
+              }
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": {
+              "COMPONENT": "end"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Text_set",
+                  "fields": {
+                    "COMPONENT": "finalText",
+                    "PROP": "text"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": {
+                          "itemCount": 2
+                        },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Ton score : ",
+                                  "en": "Your score: "
+                                }
+                              },
+                              "id": "end-score/value/add0"
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "score"
+                              },
+                              "id": "end-score/value/add1"
+                            }
+                          }
+                        },
+                        "id": "end-score/value"
+                      }
+                    }
+                  },
+                  "id": "end-score",
+                  "next": {
+                    "block": {
+                      "type": "rx_Text_set",
+                      "fields": {
+                        "COMPONENT": "bestText",
+                        "PROP": "text"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_join",
+                            "extraState": {
+                              "itemCount": 2
+                            },
+                            "inputs": {
+                              "ADD0": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": {
+                                      "fr": "Meilleur score : ",
+                                      "en": "Best score: "
+                                    }
+                                  },
+                                  "id": "end-best/value/add0"
+                                }
+                              },
+                              "ADD1": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "best"
+                                  },
+                                  "id": "end-best/value/add1"
+                                }
+                              }
+                            },
+                            "id": "end-best/value"
+                          }
+                        }
+                      },
+                      "id": "end-best"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "end-open",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "L’écran de fin montre le score.",
+                  "en": "The end screen shows the score."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "again"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_screen_open",
+                  "fields": {
+                    "SCREEN": "game"
+                  },
+                  "id": "again-open"
+                }
+              }
+            },
+            "id": "again",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Rouvre le jeu : tout repart à zéro.",
+                  "en": "Opens the game again: all starts from zero."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 396
+              }
+            },
+            "x": 300,
+            "y": 396
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "speed",
+      "target": "block:drop-speed"
+    },
+    {
+      "id": "best",
+      "target": "block:check-best"
+    },
+    {
+      "id": "sound",
+      "target": "block:catch-sound"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:drop-speed",
+      "check": {
+        "kind": "stepped",
+        "id": "drop-speed"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "gentle",
+      "block": "drop-speed",
+      "check": {
+        "kind": "blockField",
+        "id": "drop-speed/value/b/b",
+        "field": "NUM",
+        "equals": 5
+      }
+    },
+    {
+      "id": "quick",
+      "block": "drop-speed",
+      "check": {
+        "kind": "blockField",
+        "id": "drop-speed/value/a",
+        "field": "NUM",
+        "min": 200
+      }
+    },
+    {
+      "id": "sad",
+      "block": "check-lost",
+      "check": {
+        "kind": "block",
+        "type": "rx_Sound_call_play",
+        "within": "check-lost"
+      }
+    }
+  ]
+}

@@ -12,6 +12,7 @@ import { LinkButton } from '../components/ui/link-button.tsx'
 import { HelpPanel } from '../help/help-panel.tsx'
 import { BadgeWatcher } from '../learn/badges.tsx'
 import { ChallengePanel } from '../learn/challenge-panel.tsx'
+import { ExploreRunner } from '../learn/explore-runner.tsx'
 import { awardBadge } from '../learn/store.ts'
 import { TourRunner } from '../learn/tour.tsx'
 import { TutorialRunner } from '../learn/tutorial-runner.tsx'
@@ -145,6 +146,7 @@ function Editor({ projectId, tab, screen }: Props) {
       <BadgeWatcher />
       <ChallengePanel projectId={projectId} tab={tab} workspace={workspace} />
       <TutorialRunner projectId={projectId} tab={tab} workspace={workspace} />
+      <ExploreRunner projectId={projectId} tab={tab} workspace={workspace} />
       <TourRunner tab={tab} />
       <div aria-live="polite" className="sr-only">
         {announcement}

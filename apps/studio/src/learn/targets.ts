@@ -57,6 +57,13 @@ export function findTarget(
       return visible(document.querySelector('[data-testid="preview-frame"]'))
     case 'workspace':
       return visible(document.querySelector('[data-testid="blockly-workspace"]'))
+    case 'block':
+      // J9: a stack of blocks by the id of its top block (its group holds the whole stack).
+      return visible(
+        document.querySelector(
+          `[data-testid="blockly-workspace"] .blocklyBlockCanvas [data-id="${CSS.escape(value)}"]`,
+        ),
+      )
     case 'screen-picker':
       return visible(document.querySelector('[data-testid="screen-picker"]'))
     default:

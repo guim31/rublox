@@ -1,0 +1,49 @@
+{
+  "title": "Themes and shuffle",
+  "summary": "Three themes, questions shuffled each game, and a record per theme.",
+  "done": "You saw a real algorithm: the Fisher-Yates shuffle.",
+  "steps": {
+    "hello": {
+      "text": "In level 4, you pick a theme, the questions are shuffled, and each theme has its record."
+    },
+    "load": {
+      "text": "The theme is a number. Theme 1 is loaded first; [if] the theme is 2 or 3, its lists replace it."
+    },
+    "fill": {
+      "text": "To shuffle, we don’t move the questions: we make an **order** list: 1, 2, 3, 4, 5…"
+    },
+    "mix": {
+      "text": "… then, from the last place to the 2nd, we swap each place with a random place before it. It is the **Fisher-Yates** algorithm: every order has the same chance."
+    },
+    "pick": {
+      "text": "Question number index is the one in the shuffled order."
+    },
+    "record": {
+      "text": "The **records** list is *stored*: the phone keeps a record per theme."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Watch the swaps light up: 4 swaps for 5 questions.",
+      "hint": "Tap an answer in the preview, or click “Restart”."
+    },
+    "fast": {
+      "text": "Stop slow motion."
+    }
+  },
+  "challenges": {
+    "space": {
+      "text": "Add a question to the space theme.",
+      "hint": "They are in “pick the questions”."
+    },
+    "three": {
+      "text": "Games of 3 questions: stop after the 3rd.",
+      "hint": "In “go to the next question”, compare the index with 3 instead of the length of the list."
+    },
+    "cheer": {
+      "text": "Show “New record!” when there is one.",
+      "hint": "A short message in the record [if]."
+    }
+  }
+}

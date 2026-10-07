@@ -1,0 +1,43 @@
+{
+  "title": "One question",
+  "summary": "Three buttons, a “choice” variable, and an “if … else” that checks the answer.",
+  "done": "You know how the quiz checks an answer.",
+  "steps": {
+    "hello": {
+      "text": "Here is **The Big Quiz**! Answer the question in the preview, then let’s see how it knows if you are right."
+    },
+    "click": {
+      "text": "When a button is tapped, we put its text in the **choice** variable. A variable is a box with a name."
+    },
+    "check": {
+      "text": "The three buttons call the same function: the check is written only once."
+    },
+    "test": {
+      "text": "[if … else]: if the choice is “8”, we write “Well done” in green; else, the right answer in red."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Tap an answer in the preview: watch the [if] light up, then only one of the two branches.",
+      "hint": "Tap an answer in the preview, or click “Restart”."
+    },
+    "fast": {
+      "text": "Stop slow motion."
+    }
+  },
+  "challenges": {
+    "question": {
+      "text": "Change the question (in Design) and its right answer (in the [if]).",
+      "hint": "For example: “How many wheels does a bike have?”, answers 1, 2, 3, and “2” in the [if]."
+    },
+    "cheer": {
+      "text": "Write your own winning message.",
+      "hint": "Change the text “Well done! 🎉”."
+    },
+    "toast": {
+      "text": "Also show a short message when it’s right.",
+      "hint": "The block is in the Interface category."
+    }
+  }
+}

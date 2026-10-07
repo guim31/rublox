@@ -1,0 +1,3930 @@
+{
+  "level": 4,
+  "recipe": {
+    "name": {
+      "fr": "Le grand quiz 4",
+      "en": "The Big Quiz 4"
+    },
+    "mode": "studio",
+    "theme": {
+      "primary": "#1971c2",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [
+      {
+        "key": "choice",
+        "name": {
+          "fr": "choix",
+          "en": "choice"
+        },
+        "kind": "app",
+        "initial": ""
+      },
+      {
+        "key": "questions",
+        "name": {
+          "fr": "questions",
+          "en": "questions"
+        },
+        "kind": "app",
+        "initial": []
+      },
+      {
+        "key": "choices",
+        "name": {
+          "fr": "réponses",
+          "en": "choices"
+        },
+        "kind": "app",
+        "initial": []
+      },
+      {
+        "key": "answers",
+        "name": {
+          "fr": "bonnes",
+          "en": "answers"
+        },
+        "kind": "app",
+        "initial": []
+      },
+      {
+        "key": "options",
+        "name": {
+          "fr": "options",
+          "en": "options"
+        },
+        "kind": "app",
+        "initial": []
+      },
+      {
+        "key": "index",
+        "name": {
+          "fr": "index",
+          "en": "index"
+        },
+        "kind": "app",
+        "initial": 1
+      },
+      {
+        "key": "score",
+        "name": {
+          "fr": "score",
+          "en": "score"
+        },
+        "kind": "app",
+        "initial": 0
+      },
+      {
+        "key": "timeLeft",
+        "name": {
+          "fr": "temps",
+          "en": "timeLeft"
+        },
+        "kind": "app",
+        "initial": 10
+      },
+      {
+        "key": "answered",
+        "name": {
+          "fr": "répondu",
+          "en": "answered"
+        },
+        "kind": "app",
+        "initial": false
+      },
+      {
+        "key": "theme",
+        "name": {
+          "fr": "thème",
+          "en": "theme"
+        },
+        "kind": "app",
+        "initial": 1
+      },
+      {
+        "key": "order",
+        "name": {
+          "fr": "ordre",
+          "en": "order"
+        },
+        "kind": "app",
+        "initial": []
+      },
+      {
+        "key": "number",
+        "name": {
+          "fr": "numéro",
+          "en": "number"
+        },
+        "kind": "app",
+        "initial": 1
+      },
+      {
+        "key": "i",
+        "name": {
+          "fr": "i",
+          "en": "i"
+        },
+        "kind": "app",
+        "initial": 0
+      },
+      {
+        "key": "j",
+        "name": {
+          "fr": "j",
+          "en": "j"
+        },
+        "kind": "app",
+        "initial": 0
+      },
+      {
+        "key": "swap",
+        "name": {
+          "fr": "garde",
+          "en": "keep"
+        },
+        "kind": "app",
+        "initial": 0
+      },
+      {
+        "key": "records",
+        "name": {
+          "fr": "records",
+          "en": "records"
+        },
+        "kind": "stored",
+        "initial": [0, 0, 0]
+      }
+    ],
+    "screens": [
+      {
+        "key": "themes",
+        "name": {
+          "fr": "Thèmes",
+          "en": "Themes"
+        },
+        "props": {
+          "padding": 24,
+          "gap": 16,
+          "alignItems": "stretch",
+          "justify": "center"
+        },
+        "components": [
+          {
+            "key": "pick",
+            "type": "Text",
+            "name": {
+              "fr": "Choisis",
+              "en": "Pick"
+            },
+            "props": {
+              "text": {
+                "fr": "Choisis un thème",
+                "en": "Pick a theme"
+              },
+              "fontSize": 26,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "theme-general",
+            "type": "Button",
+            "name": {
+              "fr": "Theme1",
+              "en": "Theme1"
+            },
+            "props": {
+              "text": {
+                "fr": "🧠 Culture générale",
+                "en": "🧠 General knowledge"
+              }
+            }
+          },
+          {
+            "key": "theme-space",
+            "type": "Button",
+            "name": {
+              "fr": "Theme2",
+              "en": "Theme2"
+            },
+            "props": {
+              "text": {
+                "fr": "🚀 L’espace",
+                "en": "🚀 Space"
+              }
+            }
+          },
+          {
+            "key": "theme-animals",
+            "type": "Button",
+            "name": {
+              "fr": "Theme3",
+              "en": "Theme3"
+            },
+            "props": {
+              "text": {
+                "fr": "🐾 Les animaux",
+                "en": "🐾 Animals"
+              }
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "theme-general"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "theme"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 1
+                        },
+                        "id": "theme-general-set/value"
+                      }
+                    }
+                  },
+                  "id": "theme-general-set",
+                  "next": {
+                    "block": {
+                      "type": "rx_screen_open",
+                      "fields": {
+                        "SCREEN": "quiz"
+                      },
+                      "id": "theme-general-open"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "theme-general",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Le thème est un numéro : 1, 2 ou 3.",
+                  "en": "The theme is a number: 1, 2 or 3."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "theme-space"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "theme"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 2
+                        },
+                        "id": "theme-space-set/value"
+                      }
+                    }
+                  },
+                  "id": "theme-space-set",
+                  "next": {
+                    "block": {
+                      "type": "rx_screen_open",
+                      "fields": {
+                        "SCREEN": "quiz"
+                      },
+                      "id": "theme-space-open"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "theme-space",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Thème 2.",
+                  "en": "Theme 2."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 292
+              }
+            },
+            "x": 300,
+            "y": 292
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "theme-animals"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "theme"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 3
+                        },
+                        "id": "theme-animals-set/value"
+                      }
+                    }
+                  },
+                  "id": "theme-animals-set",
+                  "next": {
+                    "block": {
+                      "type": "rx_screen_open",
+                      "fields": {
+                        "SCREEN": "quiz"
+                      },
+                      "id": "theme-animals-open"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "theme-animals",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Thème 3.",
+                  "en": "Theme 3."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 544
+              }
+            },
+            "x": 300,
+            "y": 544
+          }
+        ]
+      },
+      {
+        "key": "quiz",
+        "name": {
+          "fr": "Quiz",
+          "en": "Quiz"
+        },
+        "props": {
+          "padding": 20,
+          "gap": 12
+        },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": {
+              "fr": "Titre",
+              "en": "Title"
+            },
+            "props": {
+              "text": {
+                "fr": "❓ Le grand quiz",
+                "en": "❓ The Big Quiz"
+              },
+              "fontSize": 26,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "status",
+            "type": "Row",
+            "name": {
+              "fr": "État",
+              "en": "Status"
+            },
+            "props": {
+              "justify": "between"
+            },
+            "children": [
+              {
+                "key": "timeText",
+                "type": "Text",
+                "name": {
+                  "fr": "TexteTemps",
+                  "en": "TimeText"
+                },
+                "props": {
+                  "text": "⏱ 10",
+                  "bold": true
+                }
+              },
+              {
+                "key": "scoreText",
+                "type": "Text",
+                "name": {
+                  "fr": "TexteScore",
+                  "en": "ScoreText"
+                },
+                "props": {
+                  "text": {
+                    "fr": "Score : 0",
+                    "en": "Score: 0"
+                  },
+                  "bold": true
+                }
+              }
+            ]
+          },
+          {
+            "key": "timeBar",
+            "type": "ProgressBar",
+            "name": {
+              "fr": "BarreTemps",
+              "en": "TimeBar"
+            },
+            "props": {
+              "value": 100
+            }
+          },
+          {
+            "key": "counter",
+            "type": "Text",
+            "name": {
+              "fr": "Compteur",
+              "en": "Counter"
+            },
+            "props": {
+              "text": "Question 1 / 5",
+              "color": "@muted",
+              "align": "center"
+            }
+          },
+          {
+            "key": "question",
+            "type": "Text",
+            "name": {
+              "fr": "Question",
+              "en": "Question"
+            },
+            "props": {
+              "text": {
+                "fr": "Combien de pattes a une araignée ?",
+                "en": "How many legs does a spider have?"
+              },
+              "fontSize": 22,
+              "align": "center"
+            }
+          },
+          {
+            "key": "a",
+            "type": "Button",
+            "name": {
+              "fr": "RéponseA",
+              "en": "AnswerA"
+            },
+            "props": {
+              "text": "6",
+              "variant": "outline"
+            }
+          },
+          {
+            "key": "b",
+            "type": "Button",
+            "name": {
+              "fr": "RéponseB",
+              "en": "AnswerB"
+            },
+            "props": {
+              "text": "8",
+              "variant": "outline"
+            }
+          },
+          {
+            "key": "c",
+            "type": "Button",
+            "name": {
+              "fr": "RéponseC",
+              "en": "AnswerC"
+            },
+            "props": {
+              "text": "10",
+              "variant": "outline"
+            }
+          },
+          {
+            "key": "feedback",
+            "type": "Text",
+            "name": {
+              "fr": "Résultat",
+              "en": "Feedback"
+            },
+            "props": {
+              "text": "",
+              "fontSize": 20,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "next",
+            "type": "Button",
+            "name": {
+              "fr": "Suivante",
+              "en": "Next"
+            },
+            "props": {
+              "text": {
+                "fr": "Question suivante →",
+                "en": "Next question →"
+              }
+            }
+          },
+          {
+            "key": "chrono",
+            "type": "Timer",
+            "name": {
+              "fr": "Chrono",
+              "en": "Clock"
+            },
+            "props": {
+              "interval": 1,
+              "repeat": true,
+              "autostart": false
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": {
+              "COMPONENT": "quiz"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "choisir les questions",
+                      "en": "pick the questions"
+                    }
+                  },
+                  "id": "open-load",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "mélanger les questions",
+                          "en": "shuffle the questions"
+                        }
+                      },
+                      "id": "open-mix",
+                      "next": {
+                        "block": {
+                          "type": "variables_set",
+                          "fields": {
+                            "VAR": "index"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 1
+                                },
+                                "id": "open-index/value"
+                              }
+                            }
+                          },
+                          "id": "open-index",
+                          "next": {
+                            "block": {
+                              "type": "variables_set",
+                              "fields": {
+                                "VAR": "score"
+                              },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "math_number",
+                                    "fields": {
+                                      "NUM": 0
+                                    },
+                                    "id": "open-score/value"
+                                  }
+                                }
+                              },
+                              "id": "open-score",
+                              "next": {
+                                "block": {
+                                  "type": "procedures_callnoreturn",
+                                  "extraState": {
+                                    "name": {
+                                      "fr": "afficher la question",
+                                      "en": "show the question"
+                                    }
+                                  },
+                                  "id": "open-show"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "open",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "À l’ouverture : les questions, puis la première.",
+                  "en": "When it opens: the questions, then the first one."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "afficher la question",
+                "en": "show the question"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "number"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "lists_getIndex",
+                        "fields": {
+                          "MODE": "GET",
+                          "WHERE": "FROM_START"
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "order"
+                              },
+                              "id": "show-pick/value/value"
+                            }
+                          },
+                          "AT": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "index"
+                              },
+                              "id": "show-pick/value/at"
+                            }
+                          }
+                        },
+                        "id": "show-pick/value"
+                      }
+                    }
+                  },
+                  "id": "show-pick",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "Quelle question ? Celle de l’ordre mélangé.",
+                        "en": "Which question? The one in the shuffled order."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Text_set",
+                      "fields": {
+                        "COMPONENT": "question",
+                        "PROP": "text"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "lists_getIndex",
+                            "fields": {
+                              "MODE": "GET",
+                              "WHERE": "FROM_START"
+                            },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "questions"
+                                  },
+                                  "id": "show-question/value/value"
+                                }
+                              },
+                              "AT": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "number"
+                                  },
+                                  "id": "show-question/value/at"
+                                }
+                              }
+                            },
+                            "id": "show-question/value"
+                          }
+                        }
+                      },
+                      "id": "show-question",
+                      "next": {
+                        "block": {
+                          "type": "variables_set",
+                          "fields": {
+                            "VAR": "options"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "lists_split",
+                                "fields": {
+                                  "MODE": "SPLIT"
+                                },
+                                "extraState": {
+                                  "mode": "SPLIT"
+                                },
+                                "inputs": {
+                                  "INPUT": {
+                                    "block": {
+                                      "type": "lists_getIndex",
+                                      "fields": {
+                                        "MODE": "GET",
+                                        "WHERE": "FROM_START"
+                                      },
+                                      "inputs": {
+                                        "VALUE": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": "choices"
+                                            },
+                                            "id": "show-options/value/input/value"
+                                          }
+                                        },
+                                        "AT": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": "number"
+                                            },
+                                            "id": "show-options/value/input/at"
+                                          }
+                                        }
+                                      },
+                                      "id": "show-options/value/input"
+                                    }
+                                  },
+                                  "DELIM": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": "|"
+                                      },
+                                      "id": "show-options/value/delim"
+                                    }
+                                  }
+                                },
+                                "id": "show-options/value"
+                              }
+                            }
+                          },
+                          "id": "show-options",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "« 6|8|10 » devient une liste de 3 textes.",
+                                "en": "“6|8|10” becomes a list of 3 texts."
+                              },
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "rx_Button_set",
+                              "fields": {
+                                "COMPONENT": "a",
+                                "PROP": "text"
+                              },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "lists_getIndex",
+                                    "fields": {
+                                      "MODE": "GET",
+                                      "WHERE": "FROM_START"
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": {
+                                            "VAR": "options"
+                                          },
+                                          "id": "show-a/value/value"
+                                        }
+                                      },
+                                      "AT": {
+                                        "block": {
+                                          "type": "math_number",
+                                          "fields": {
+                                            "NUM": 1
+                                          },
+                                          "id": "show-a/value/at"
+                                        }
+                                      }
+                                    },
+                                    "id": "show-a/value"
+                                  }
+                                }
+                              },
+                              "id": "show-a",
+                              "next": {
+                                "block": {
+                                  "type": "rx_Button_set",
+                                  "fields": {
+                                    "COMPONENT": "b",
+                                    "PROP": "text"
+                                  },
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "lists_getIndex",
+                                        "fields": {
+                                          "MODE": "GET",
+                                          "WHERE": "FROM_START"
+                                        },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": {
+                                              "type": "variables_get",
+                                              "fields": {
+                                                "VAR": "options"
+                                              },
+                                              "id": "show-b/value/value"
+                                            }
+                                          },
+                                          "AT": {
+                                            "block": {
+                                              "type": "math_number",
+                                              "fields": {
+                                                "NUM": 2
+                                              },
+                                              "id": "show-b/value/at"
+                                            }
+                                          }
+                                        },
+                                        "id": "show-b/value"
+                                      }
+                                    }
+                                  },
+                                  "id": "show-b",
+                                  "next": {
+                                    "block": {
+                                      "type": "rx_Button_set",
+                                      "fields": {
+                                        "COMPONENT": "c",
+                                        "PROP": "text"
+                                      },
+                                      "inputs": {
+                                        "VALUE": {
+                                          "block": {
+                                            "type": "lists_getIndex",
+                                            "fields": {
+                                              "MODE": "GET",
+                                              "WHERE": "FROM_START"
+                                            },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": "options"
+                                                  },
+                                                  "id": "show-c/value/value"
+                                                }
+                                              },
+                                              "AT": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": {
+                                                    "NUM": 3
+                                                  },
+                                                  "id": "show-c/value/at"
+                                                }
+                                              }
+                                            },
+                                            "id": "show-c/value"
+                                          }
+                                        }
+                                      },
+                                      "id": "show-c",
+                                      "next": {
+                                        "block": {
+                                          "type": "rx_Text_set",
+                                          "fields": {
+                                            "COMPONENT": "feedback",
+                                            "PROP": "text"
+                                          },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": ""
+                                                },
+                                                "id": "show-feedback/value"
+                                              }
+                                            }
+                                          },
+                                          "id": "show-feedback",
+                                          "next": {
+                                            "block": {
+                                              "type": "rx_Text_set",
+                                              "fields": {
+                                                "COMPONENT": "counter",
+                                                "PROP": "text"
+                                              },
+                                              "inputs": {
+                                                "VALUE": {
+                                                  "block": {
+                                                    "type": "text_join",
+                                                    "extraState": {
+                                                      "itemCount": 4
+                                                    },
+                                                    "inputs": {
+                                                      "ADD0": {
+                                                        "block": {
+                                                          "type": "text",
+                                                          "fields": {
+                                                            "TEXT": "Question "
+                                                          },
+                                                          "id": "show-counter/value/add0"
+                                                        }
+                                                      },
+                                                      "ADD1": {
+                                                        "block": {
+                                                          "type": "variables_get",
+                                                          "fields": {
+                                                            "VAR": "index"
+                                                          },
+                                                          "id": "show-counter/value/add1"
+                                                        }
+                                                      },
+                                                      "ADD2": {
+                                                        "block": {
+                                                          "type": "text",
+                                                          "fields": {
+                                                            "TEXT": " / "
+                                                          },
+                                                          "id": "show-counter/value/add2"
+                                                        }
+                                                      },
+                                                      "ADD3": {
+                                                        "block": {
+                                                          "type": "lists_length",
+                                                          "inputs": {
+                                                            "VALUE": {
+                                                              "block": {
+                                                                "type": "variables_get",
+                                                                "fields": {
+                                                                  "VAR": "questions"
+                                                                },
+                                                                "id": "show-counter/value/add3/value"
+                                                              }
+                                                            }
+                                                          },
+                                                          "id": "show-counter/value/add3"
+                                                        }
+                                                      }
+                                                    },
+                                                    "id": "show-counter/value"
+                                                  }
+                                                }
+                                              },
+                                              "id": "show-counter",
+                                              "next": {
+                                                "block": {
+                                                  "type": "variables_set",
+                                                  "fields": {
+                                                    "VAR": "answered"
+                                                  },
+                                                  "inputs": {
+                                                    "VALUE": {
+                                                      "block": {
+                                                        "type": "logic_boolean",
+                                                        "fields": {
+                                                          "BOOL": "FALSE"
+                                                        },
+                                                        "id": "show-answered/value"
+                                                      }
+                                                    }
+                                                  },
+                                                  "id": "show-answered",
+                                                  "next": {
+                                                    "block": {
+                                                      "type": "variables_set",
+                                                      "fields": {
+                                                        "VAR": "timeLeft"
+                                                      },
+                                                      "inputs": {
+                                                        "VALUE": {
+                                                          "block": {
+                                                            "type": "math_number",
+                                                            "fields": {
+                                                              "NUM": 10
+                                                            },
+                                                            "id": "show-time/value"
+                                                          }
+                                                        }
+                                                      },
+                                                      "id": "show-time",
+                                                      "next": {
+                                                        "block": {
+                                                          "type": "rx_Text_set",
+                                                          "fields": {
+                                                            "COMPONENT": "timeText",
+                                                            "PROP": "text"
+                                                          },
+                                                          "inputs": {
+                                                            "VALUE": {
+                                                              "block": {
+                                                                "type": "text_join",
+                                                                "extraState": {
+                                                                  "itemCount": 2
+                                                                },
+                                                                "inputs": {
+                                                                  "ADD0": {
+                                                                    "block": {
+                                                                      "type": "text",
+                                                                      "fields": {
+                                                                        "TEXT": "⏱ "
+                                                                      },
+                                                                      "id": "show-time-text/value/add0"
+                                                                    }
+                                                                  },
+                                                                  "ADD1": {
+                                                                    "block": {
+                                                                      "type": "variables_get",
+                                                                      "fields": {
+                                                                        "VAR": "timeLeft"
+                                                                      },
+                                                                      "id": "show-time-text/value/add1"
+                                                                    }
+                                                                  }
+                                                                },
+                                                                "id": "show-time-text/value"
+                                                              }
+                                                            }
+                                                          },
+                                                          "id": "show-time-text",
+                                                          "next": {
+                                                            "block": {
+                                                              "type": "rx_ProgressBar_set",
+                                                              "fields": {
+                                                                "COMPONENT": "timeBar",
+                                                                "PROP": "value"
+                                                              },
+                                                              "inputs": {
+                                                                "VALUE": {
+                                                                  "block": {
+                                                                    "type": "math_number",
+                                                                    "fields": {
+                                                                      "NUM": 100
+                                                                    },
+                                                                    "id": "show-bar/value"
+                                                                  }
+                                                                }
+                                                              },
+                                                              "id": "show-bar",
+                                                              "next": {
+                                                                "block": {
+                                                                  "type": "rx_Timer_call_start",
+                                                                  "fields": {
+                                                                    "COMPONENT": "chrono"
+                                                                  },
+                                                                  "id": "show-chrono"
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "show",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Écrit la question n° « index » et ses 3 réponses.",
+                  "en": "Writes question number “index” and its 3 answers."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 448
+              }
+            },
+            "x": 300,
+            "y": 448
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "a"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "choice"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "rx_Button_get",
+                        "fields": {
+                          "COMPONENT": "a",
+                          "PROP": "text"
+                        },
+                        "id": "click-a-set/value"
+                      }
+                    }
+                  },
+                  "id": "click-a-set",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "vérifier la réponse",
+                          "en": "check the answer"
+                        }
+                      },
+                      "id": "click-a-check"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "click-a",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "On retient le texte du bouton touché.",
+                  "en": "We remember the text of the button tapped."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 1480
+              }
+            },
+            "x": 300,
+            "y": 1480
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "b"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "choice"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "rx_Button_get",
+                        "fields": {
+                          "COMPONENT": "b",
+                          "PROP": "text"
+                        },
+                        "id": "click-b-set/value"
+                      }
+                    }
+                  },
+                  "id": "click-b-set",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "vérifier la réponse",
+                          "en": "check the answer"
+                        }
+                      },
+                      "id": "click-b-check"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "click-b",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Pareil pour le bouton B…",
+                  "en": "Same for button B…"
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 1732
+              }
+            },
+            "x": 300,
+            "y": 1732
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "c"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "choice"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "rx_Button_get",
+                        "fields": {
+                          "COMPONENT": "c",
+                          "PROP": "text"
+                        },
+                        "id": "click-c-set/value"
+                      }
+                    }
+                  },
+                  "id": "click-c-set",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "vérifier la réponse",
+                          "en": "check the answer"
+                        }
+                      },
+                      "id": "click-c-check"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "click-c",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "… et pour le bouton C.",
+                  "en": "… and for button C."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 1984
+              }
+            },
+            "x": 300,
+            "y": 1984
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "vérifier la réponse",
+                "en": "check the answer"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "controls_if",
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_negate",
+                        "inputs": {
+                          "BOOL": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "answered"
+                              },
+                              "id": "check-once/if0/bool"
+                            }
+                          }
+                        },
+                        "id": "check-once/if0"
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "variables_set",
+                        "fields": {
+                          "VAR": "answered"
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "logic_boolean",
+                              "fields": {
+                                "BOOL": "TRUE"
+                              },
+                              "id": "check-mark/value"
+                            }
+                          }
+                        },
+                        "id": "check-mark",
+                        "next": {
+                          "block": {
+                            "type": "rx_Timer_call_stop",
+                            "fields": {
+                              "COMPONENT": "chrono"
+                            },
+                            "id": "check-stop",
+                            "next": {
+                              "block": {
+                                "type": "controls_if",
+                                "extraState": {
+                                  "hasElse": true
+                                },
+                                "inputs": {
+                                  "IF0": {
+                                    "block": {
+                                      "type": "logic_compare",
+                                      "fields": {
+                                        "OP": "EQ"
+                                      },
+                                      "inputs": {
+                                        "A": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": "choice"
+                                            },
+                                            "id": "check-test/if0/a"
+                                          }
+                                        },
+                                        "B": {
+                                          "block": {
+                                            "type": "lists_getIndex",
+                                            "fields": {
+                                              "MODE": "GET",
+                                              "WHERE": "FROM_START"
+                                            },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": "answers"
+                                                  },
+                                                  "id": "check-test/if0/b/value"
+                                                }
+                                              },
+                                              "AT": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": "number"
+                                                  },
+                                                  "id": "check-test/if0/b/at"
+                                                }
+                                              }
+                                            },
+                                            "id": "check-test/if0/b"
+                                          }
+                                        }
+                                      },
+                                      "id": "check-test/if0"
+                                    }
+                                  },
+                                  "DO0": {
+                                    "block": {
+                                      "type": "rx_Text_set",
+                                      "fields": {
+                                        "COMPONENT": "feedback",
+                                        "PROP": "text"
+                                      },
+                                      "inputs": {
+                                        "VALUE": {
+                                          "block": {
+                                            "type": "text",
+                                            "fields": {
+                                              "TEXT": {
+                                                "fr": "Bravo ! 🎉",
+                                                "en": "Well done! 🎉"
+                                              }
+                                            },
+                                            "id": "check-yes/value"
+                                          }
+                                        }
+                                      },
+                                      "id": "check-yes",
+                                      "next": {
+                                        "block": {
+                                          "type": "rx_Text_set",
+                                          "fields": {
+                                            "COMPONENT": "feedback",
+                                            "PROP": "color"
+                                          },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "colour_picker",
+                                                "fields": {
+                                                  "COLOUR": "#009900"
+                                                },
+                                                "id": "check-yes-color/value"
+                                              }
+                                            }
+                                          },
+                                          "id": "check-yes-color",
+                                          "next": {
+                                            "block": {
+                                              "type": "math_change",
+                                              "fields": {
+                                                "VAR": "score"
+                                              },
+                                              "inputs": {
+                                                "DELTA": {
+                                                  "block": {
+                                                    "type": "math_number",
+                                                    "fields": {
+                                                      "NUM": 1
+                                                    },
+                                                    "id": "check-point/delta"
+                                                  }
+                                                }
+                                              },
+                                              "id": "check-point",
+                                              "next": {
+                                                "block": {
+                                                  "type": "rx_Text_set",
+                                                  "fields": {
+                                                    "COMPONENT": "scoreText",
+                                                    "PROP": "text"
+                                                  },
+                                                  "inputs": {
+                                                    "VALUE": {
+                                                      "block": {
+                                                        "type": "text_join",
+                                                        "extraState": {
+                                                          "itemCount": 2
+                                                        },
+                                                        "inputs": {
+                                                          "ADD0": {
+                                                            "block": {
+                                                              "type": "text",
+                                                              "fields": {
+                                                                "TEXT": {
+                                                                  "fr": "Score : ",
+                                                                  "en": "Score: "
+                                                                }
+                                                              },
+                                                              "id": "check-score/value/add0"
+                                                            }
+                                                          },
+                                                          "ADD1": {
+                                                            "block": {
+                                                              "type": "variables_get",
+                                                              "fields": {
+                                                                "VAR": "score"
+                                                              },
+                                                              "id": "check-score/value/add1"
+                                                            }
+                                                          }
+                                                        },
+                                                        "id": "check-score/value"
+                                                      }
+                                                    }
+                                                  },
+                                                  "id": "check-score"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "ELSE": {
+                                    "block": {
+                                      "type": "rx_Text_set",
+                                      "fields": {
+                                        "COMPONENT": "feedback",
+                                        "PROP": "text"
+                                      },
+                                      "inputs": {
+                                        "VALUE": {
+                                          "block": {
+                                            "type": "text_join",
+                                            "extraState": {
+                                              "itemCount": 2
+                                            },
+                                            "inputs": {
+                                              "ADD0": {
+                                                "block": {
+                                                  "type": "text",
+                                                  "fields": {
+                                                    "TEXT": {
+                                                      "fr": "Raté ! C’était : ",
+                                                      "en": "Wrong! It was: "
+                                                    }
+                                                  },
+                                                  "id": "check-no/value/add0"
+                                                }
+                                              },
+                                              "ADD1": {
+                                                "block": {
+                                                  "type": "lists_getIndex",
+                                                  "fields": {
+                                                    "MODE": "GET",
+                                                    "WHERE": "FROM_START"
+                                                  },
+                                                  "inputs": {
+                                                    "VALUE": {
+                                                      "block": {
+                                                        "type": "variables_get",
+                                                        "fields": {
+                                                          "VAR": "answers"
+                                                        },
+                                                        "id": "check-no/value/add1/value"
+                                                      }
+                                                    },
+                                                    "AT": {
+                                                      "block": {
+                                                        "type": "variables_get",
+                                                        "fields": {
+                                                          "VAR": "number"
+                                                        },
+                                                        "id": "check-no/value/add1/at"
+                                                      }
+                                                    }
+                                                  },
+                                                  "id": "check-no/value/add1"
+                                                }
+                                              }
+                                            },
+                                            "id": "check-no/value"
+                                          }
+                                        }
+                                      },
+                                      "id": "check-no",
+                                      "next": {
+                                        "block": {
+                                          "type": "rx_Text_set",
+                                          "fields": {
+                                            "COMPONENT": "feedback",
+                                            "PROP": "color"
+                                          },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "colour_picker",
+                                                "fields": {
+                                                  "COLOUR": "#cc0000"
+                                                },
+                                                "id": "check-no-color/value"
+                                              }
+                                            }
+                                          },
+                                          "id": "check-no-color"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "id": "check-test",
+                                "icons": {
+                                  "comment": {
+                                    "text": {
+                                      "fr": "Le choix est-il la bonne réponse ?",
+                                      "en": "Is the choice the right answer?"
+                                    },
+                                    "pinned": false,
+                                    "width": 230,
+                                    "height": 68
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "id": "check-once",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "Une seule réponse par question.",
+                        "en": "Only one answer per question."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
+                    }
+                  }
+                }
+              }
+            },
+            "id": "check",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Compare le choix avec la bonne réponse.",
+                  "en": "Compares the choice with the right answer."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 2236
+              }
+            },
+            "x": 300,
+            "y": 2236
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "next"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "passer à la question suivante",
+                      "en": "go to the next question"
+                    }
+                  },
+                  "id": "next-call"
+                }
+              }
+            },
+            "id": "next",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Le bouton passe à la suivante.",
+                  "en": "The button goes to the next one."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 3086
+              }
+            },
+            "x": 300,
+            "y": 3086
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "passer à la question suivante",
+                "en": "go to the next question"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "math_change",
+                  "fields": {
+                    "VAR": "index"
+                  },
+                  "inputs": {
+                    "DELTA": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 1
+                        },
+                        "id": "next-index/delta"
+                      }
+                    }
+                  },
+                  "id": "next-index",
+                  "next": {
+                    "block": {
+                      "type": "controls_if",
+                      "extraState": {
+                        "hasElse": true
+                      },
+                      "inputs": {
+                        "IF0": {
+                          "block": {
+                            "type": "logic_compare",
+                            "fields": {
+                              "OP": "GT"
+                            },
+                            "inputs": {
+                              "A": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "index"
+                                  },
+                                  "id": "next-end/if0/a"
+                                }
+                              },
+                              "B": {
+                                "block": {
+                                  "type": "lists_length",
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": {
+                                          "VAR": "questions"
+                                        },
+                                        "id": "next-end/if0/b/value"
+                                      }
+                                    }
+                                  },
+                                  "id": "next-end/if0/b"
+                                }
+                              }
+                            },
+                            "id": "next-end/if0"
+                          }
+                        },
+                        "DO0": {
+                          "block": {
+                            "type": "variables_set",
+                            "fields": {
+                              "VAR": "index"
+                            },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": 1
+                                  },
+                                  "id": "next-loop/value"
+                                }
+                              }
+                            },
+                            "id": "next-loop",
+                            "next": {
+                              "block": {
+                                "type": "rx_Timer_call_stop",
+                                "fields": {
+                                  "COMPONENT": "chrono"
+                                },
+                                "id": "next-stop",
+                                "next": {
+                                  "block": {
+                                    "type": "controls_if",
+                                    "inputs": {
+                                      "IF0": {
+                                        "block": {
+                                          "type": "logic_compare",
+                                          "fields": {
+                                            "OP": "GT"
+                                          },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": "score"
+                                                },
+                                                "id": "next-record/if0/a"
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "lists_getIndex",
+                                                "fields": {
+                                                  "MODE": "GET",
+                                                  "WHERE": "FROM_START"
+                                                },
+                                                "inputs": {
+                                                  "VALUE": {
+                                                    "block": {
+                                                      "type": "variables_get",
+                                                      "fields": {
+                                                        "VAR": "records"
+                                                      },
+                                                      "id": "next-record/if0/b/value"
+                                                    }
+                                                  },
+                                                  "AT": {
+                                                    "block": {
+                                                      "type": "variables_get",
+                                                      "fields": {
+                                                        "VAR": "theme"
+                                                      },
+                                                      "id": "next-record/if0/b/at"
+                                                    }
+                                                  }
+                                                },
+                                                "id": "next-record/if0/b"
+                                              }
+                                            }
+                                          },
+                                          "id": "next-record/if0"
+                                        }
+                                      },
+                                      "DO0": {
+                                        "block": {
+                                          "type": "lists_setIndex",
+                                          "fields": {
+                                            "MODE": "SET",
+                                            "WHERE": "FROM_START"
+                                          },
+                                          "inputs": {
+                                            "LIST": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": "records"
+                                                },
+                                                "id": "next-best/list"
+                                              }
+                                            },
+                                            "AT": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": "theme"
+                                                },
+                                                "id": "next-best/at"
+                                              }
+                                            },
+                                            "TO": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": "score"
+                                                },
+                                                "id": "next-best/to"
+                                              }
+                                            }
+                                          },
+                                          "id": "next-best"
+                                        }
+                                      }
+                                    },
+                                    "id": "next-record",
+                                    "icons": {
+                                      "comment": {
+                                        "text": {
+                                          "fr": "Nouveau record pour ce thème ?",
+                                          "en": "A new record for this theme?"
+                                        },
+                                        "pinned": false,
+                                        "width": 230,
+                                        "height": 48
+                                      }
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "rx_screen_open",
+                                        "fields": {
+                                          "SCREEN": "results"
+                                        },
+                                        "id": "next-results"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "ELSE": {
+                          "block": {
+                            "type": "procedures_callnoreturn",
+                            "extraState": {
+                              "name": {
+                                "fr": "afficher la question",
+                                "en": "show the question"
+                              }
+                            },
+                            "id": "next-show"
+                          }
+                        }
+                      },
+                      "id": "next-end",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "Après la dernière : les résultats.",
+                            "en": "After the last one: the results."
+                          },
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "next-fn",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "index + 1 : la question d’après.",
+                  "en": "index + 1: the following question."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 3286
+              }
+            },
+            "x": 300,
+            "y": 3286
+          },
+          {
+            "type": "rx_Timer_on_tick",
+            "fields": {
+              "COMPONENT": "chrono"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "math_change",
+                  "fields": {
+                    "VAR": "timeLeft"
+                  },
+                  "inputs": {
+                    "DELTA": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": -1
+                        },
+                        "id": "tick-down/delta"
+                      }
+                    }
+                  },
+                  "id": "tick-down",
+                  "next": {
+                    "block": {
+                      "type": "rx_Text_set",
+                      "fields": {
+                        "COMPONENT": "timeText",
+                        "PROP": "text"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_join",
+                            "extraState": {
+                              "itemCount": 2
+                            },
+                            "inputs": {
+                              "ADD0": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": "⏱ "
+                                  },
+                                  "id": "tick-text/value/add0"
+                                }
+                              },
+                              "ADD1": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "timeLeft"
+                                  },
+                                  "id": "tick-text/value/add1"
+                                }
+                              }
+                            },
+                            "id": "tick-text/value"
+                          }
+                        }
+                      },
+                      "id": "tick-text",
+                      "next": {
+                        "block": {
+                          "type": "rx_ProgressBar_set",
+                          "fields": {
+                            "COMPONENT": "timeBar",
+                            "PROP": "value"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_arithmetic",
+                                "fields": {
+                                  "OP": "MULTIPLY"
+                                },
+                                "inputs": {
+                                  "A": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": {
+                                        "VAR": "timeLeft"
+                                      },
+                                      "id": "tick-bar/value/a"
+                                    }
+                                  },
+                                  "B": {
+                                    "block": {
+                                      "type": "math_number",
+                                      "fields": {
+                                        "NUM": 10
+                                      },
+                                      "id": "tick-bar/value/b"
+                                    }
+                                  }
+                                },
+                                "id": "tick-bar/value"
+                              }
+                            }
+                          },
+                          "id": "tick-bar",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "10 secondes = barre pleine (100).",
+                                "en": "10 seconds = full bar (100)."
+                              },
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "controls_if",
+                              "inputs": {
+                                "IF0": {
+                                  "block": {
+                                    "type": "logic_compare",
+                                    "fields": {
+                                      "OP": "LTE"
+                                    },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": {
+                                            "VAR": "timeLeft"
+                                          },
+                                          "id": "tick-zero/if0/a"
+                                        }
+                                      },
+                                      "B": {
+                                        "block": {
+                                          "type": "math_number",
+                                          "fields": {
+                                            "NUM": 0
+                                          },
+                                          "id": "tick-zero/if0/b"
+                                        }
+                                      }
+                                    },
+                                    "id": "tick-zero/if0"
+                                  }
+                                },
+                                "DO0": {
+                                  "block": {
+                                    "type": "rx_Timer_call_stop",
+                                    "fields": {
+                                      "COMPONENT": "chrono"
+                                    },
+                                    "id": "tick-stop",
+                                    "next": {
+                                      "block": {
+                                        "type": "variables_set",
+                                        "fields": {
+                                          "VAR": "answered"
+                                        },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": {
+                                              "type": "logic_boolean",
+                                              "fields": {
+                                                "BOOL": "TRUE"
+                                              },
+                                              "id": "tick-answered/value"
+                                            }
+                                          }
+                                        },
+                                        "id": "tick-answered",
+                                        "next": {
+                                          "block": {
+                                            "type": "rx_Text_set",
+                                            "fields": {
+                                              "COMPONENT": "feedback",
+                                              "PROP": "text"
+                                            },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "text",
+                                                  "fields": {
+                                                    "TEXT": {
+                                                      "fr": "Trop tard ! ⏰",
+                                                      "en": "Too late! ⏰"
+                                                    }
+                                                  },
+                                                  "id": "tick-late/value"
+                                                }
+                                              }
+                                            },
+                                            "id": "tick-late"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "id": "tick-zero"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "tick",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Chaque seconde : une de moins.",
+                  "en": "Every second: one less."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 3928
+              }
+            },
+            "x": 300,
+            "y": 3928
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "choisir les questions",
+                "en": "pick the questions"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "questions"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "lists_create_with",
+                        "extraState": {
+                          "itemCount": 5
+                        },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Combien de pattes a une araignée ?",
+                                  "en": "How many legs does a spider have?"
+                                }
+                              },
+                              "id": "open-questions/value/add0"
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "De quelle couleur est le ciel quand il fait beau ?",
+                                  "en": "What colour is the sky on a sunny day?"
+                                }
+                              },
+                              "id": "open-questions/value/add1"
+                            }
+                          },
+                          "ADD2": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Combien font 7 × 6 ?",
+                                  "en": "What is 7 × 6?"
+                                }
+                              },
+                              "id": "open-questions/value/add2"
+                            }
+                          },
+                          "ADD3": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Quel animal fait « miaou » ?",
+                                  "en": "Which animal says “meow”?"
+                                }
+                              },
+                              "id": "open-questions/value/add3"
+                            }
+                          },
+                          "ADD4": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Combien de jours dans une semaine ?",
+                                  "en": "How many days in a week?"
+                                }
+                              },
+                              "id": "open-questions/value/add4"
+                            }
+                          }
+                        },
+                        "id": "open-questions/value"
+                      }
+                    }
+                  },
+                  "id": "open-questions",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "Les questions, dans l’ordre.",
+                        "en": "The questions, in order."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": {
+                        "VAR": "choices"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "lists_create_with",
+                            "extraState": {
+                              "itemCount": 5
+                            },
+                            "inputs": {
+                              "ADD0": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": "6|8|10"
+                                  },
+                                  "id": "open-choices/value/add0"
+                                }
+                              },
+                              "ADD1": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": {
+                                      "fr": "Vert|Bleu|Rouge",
+                                      "en": "Green|Blue|Red"
+                                    }
+                                  },
+                                  "id": "open-choices/value/add1"
+                                }
+                              },
+                              "ADD2": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": "42|36|48"
+                                  },
+                                  "id": "open-choices/value/add2"
+                                }
+                              },
+                              "ADD3": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": {
+                                      "fr": "Le chien|Le chat|La vache",
+                                      "en": "The dog|The cat|The cow"
+                                    }
+                                  },
+                                  "id": "open-choices/value/add3"
+                                }
+                              },
+                              "ADD4": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": "5|7|10"
+                                  },
+                                  "id": "open-choices/value/add4"
+                                }
+                              }
+                            },
+                            "id": "open-choices/value"
+                          }
+                        }
+                      },
+                      "id": "open-choices",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "Les 3 réponses possibles, séparées par |",
+                            "en": "The 3 possible answers, split by |"
+                          },
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "variables_set",
+                          "fields": {
+                            "VAR": "answers"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "lists_create_with",
+                                "extraState": {
+                                  "itemCount": 5
+                                },
+                                "inputs": {
+                                  "ADD0": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": "8"
+                                      },
+                                      "id": "open-answers/value/add0"
+                                    }
+                                  },
+                                  "ADD1": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": {
+                                          "fr": "Bleu",
+                                          "en": "Blue"
+                                        }
+                                      },
+                                      "id": "open-answers/value/add1"
+                                    }
+                                  },
+                                  "ADD2": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": "42"
+                                      },
+                                      "id": "open-answers/value/add2"
+                                    }
+                                  },
+                                  "ADD3": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": {
+                                          "fr": "Le chat",
+                                          "en": "The cat"
+                                        }
+                                      },
+                                      "id": "open-answers/value/add3"
+                                    }
+                                  },
+                                  "ADD4": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": "7"
+                                      },
+                                      "id": "open-answers/value/add4"
+                                    }
+                                  }
+                                },
+                                "id": "open-answers/value"
+                              }
+                            }
+                          },
+                          "id": "open-answers",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "La bonne réponse de chaque question.",
+                                "en": "The right answer of each question."
+                              },
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "controls_if",
+                              "inputs": {
+                                "IF0": {
+                                  "block": {
+                                    "type": "logic_compare",
+                                    "fields": {
+                                      "OP": "EQ"
+                                    },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": {
+                                            "VAR": "theme"
+                                          },
+                                          "id": "load-space/if0/a"
+                                        }
+                                      },
+                                      "B": {
+                                        "block": {
+                                          "type": "math_number",
+                                          "fields": {
+                                            "NUM": 2
+                                          },
+                                          "id": "load-space/if0/b"
+                                        }
+                                      }
+                                    },
+                                    "id": "load-space/if0"
+                                  }
+                                },
+                                "DO0": {
+                                  "block": {
+                                    "type": "variables_set",
+                                    "fields": {
+                                      "VAR": "questions"
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "lists_create_with",
+                                          "extraState": {
+                                            "itemCount": 5
+                                          },
+                                          "inputs": {
+                                            "ADD0": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "Quelle planète est la plus proche du Soleil ?",
+                                                    "en": "Which planet is closest to the Sun?"
+                                                  }
+                                                },
+                                                "id": "space-questions/value/add0"
+                                              }
+                                            },
+                                            "ADD1": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "Comment s’appelle notre galaxie ?",
+                                                    "en": "What is our galaxy called?"
+                                                  }
+                                                },
+                                                "id": "space-questions/value/add1"
+                                              }
+                                            },
+                                            "ADD2": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "Quelle est la plus grande planète ?",
+                                                    "en": "Which is the biggest planet?"
+                                                  }
+                                                },
+                                                "id": "space-questions/value/add2"
+                                              }
+                                            },
+                                            "ADD3": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "Qu’est-ce que le Soleil ?",
+                                                    "en": "What is the Sun?"
+                                                  }
+                                                },
+                                                "id": "space-questions/value/add3"
+                                              }
+                                            },
+                                            "ADD4": {
+                                              "block": {
+                                                "type": "text",
+                                                "fields": {
+                                                  "TEXT": {
+                                                    "fr": "Combien de planètes tournent autour du Soleil ?",
+                                                    "en": "How many planets go around the Sun?"
+                                                  }
+                                                },
+                                                "id": "space-questions/value/add4"
+                                              }
+                                            }
+                                          },
+                                          "id": "space-questions/value"
+                                        }
+                                      }
+                                    },
+                                    "id": "space-questions",
+                                    "icons": {
+                                      "comment": {
+                                        "text": {
+                                          "fr": "Les questions, dans l’ordre.",
+                                          "en": "The questions, in order."
+                                        },
+                                        "pinned": false,
+                                        "width": 230,
+                                        "height": 48
+                                      }
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "variables_set",
+                                        "fields": {
+                                          "VAR": "choices"
+                                        },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": {
+                                              "type": "lists_create_with",
+                                              "extraState": {
+                                                "itemCount": 5
+                                              },
+                                              "inputs": {
+                                                "ADD0": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Mercure|Mars|Jupiter",
+                                                        "en": "Mercury|Mars|Jupiter"
+                                                      }
+                                                    },
+                                                    "id": "space-choices/value/add0"
+                                                  }
+                                                },
+                                                "ADD1": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "La Voie lactée|Andromède|La Grande Ourse",
+                                                        "en": "The Milky Way|Andromeda|The Great Bear"
+                                                      }
+                                                    },
+                                                    "id": "space-choices/value/add1"
+                                                  }
+                                                },
+                                                "ADD2": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Saturne|Jupiter|La Terre",
+                                                        "en": "Saturn|Jupiter|Earth"
+                                                      }
+                                                    },
+                                                    "id": "space-choices/value/add2"
+                                                  }
+                                                },
+                                                "ADD3": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Une planète|Une étoile|Une lune",
+                                                        "en": "A planet|A star|A moon"
+                                                      }
+                                                    },
+                                                    "id": "space-choices/value/add3"
+                                                  }
+                                                },
+                                                "ADD4": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": "7|8|9"
+                                                    },
+                                                    "id": "space-choices/value/add4"
+                                                  }
+                                                }
+                                              },
+                                              "id": "space-choices/value"
+                                            }
+                                          }
+                                        },
+                                        "id": "space-choices",
+                                        "icons": {
+                                          "comment": {
+                                            "text": {
+                                              "fr": "Les 3 réponses possibles, séparées par |",
+                                              "en": "The 3 possible answers, split by |"
+                                            },
+                                            "pinned": false,
+                                            "width": 230,
+                                            "height": 68
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "variables_set",
+                                            "fields": {
+                                              "VAR": "answers"
+                                            },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "lists_create_with",
+                                                  "extraState": {
+                                                    "itemCount": 5
+                                                  },
+                                                  "inputs": {
+                                                    "ADD0": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": {
+                                                            "fr": "Mercure",
+                                                            "en": "Mercury"
+                                                          }
+                                                        },
+                                                        "id": "space-answers/value/add0"
+                                                      }
+                                                    },
+                                                    "ADD1": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": {
+                                                            "fr": "La Voie lactée",
+                                                            "en": "The Milky Way"
+                                                          }
+                                                        },
+                                                        "id": "space-answers/value/add1"
+                                                      }
+                                                    },
+                                                    "ADD2": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": "Jupiter"
+                                                        },
+                                                        "id": "space-answers/value/add2"
+                                                      }
+                                                    },
+                                                    "ADD3": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": {
+                                                            "fr": "Une étoile",
+                                                            "en": "A star"
+                                                          }
+                                                        },
+                                                        "id": "space-answers/value/add3"
+                                                      }
+                                                    },
+                                                    "ADD4": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": "8"
+                                                        },
+                                                        "id": "space-answers/value/add4"
+                                                      }
+                                                    }
+                                                  },
+                                                  "id": "space-answers/value"
+                                                }
+                                              }
+                                            },
+                                            "id": "space-answers",
+                                            "icons": {
+                                              "comment": {
+                                                "text": {
+                                                  "fr": "La bonne réponse de chaque question.",
+                                                  "en": "The right answer of each question."
+                                                },
+                                                "pinned": false,
+                                                "width": 230,
+                                                "height": 68
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "id": "load-space",
+                              "next": {
+                                "block": {
+                                  "type": "controls_if",
+                                  "inputs": {
+                                    "IF0": {
+                                      "block": {
+                                        "type": "logic_compare",
+                                        "fields": {
+                                          "OP": "EQ"
+                                        },
+                                        "inputs": {
+                                          "A": {
+                                            "block": {
+                                              "type": "variables_get",
+                                              "fields": {
+                                                "VAR": "theme"
+                                              },
+                                              "id": "load-animals/if0/a"
+                                            }
+                                          },
+                                          "B": {
+                                            "block": {
+                                              "type": "math_number",
+                                              "fields": {
+                                                "NUM": 3
+                                              },
+                                              "id": "load-animals/if0/b"
+                                            }
+                                          }
+                                        },
+                                        "id": "load-animals/if0"
+                                      }
+                                    },
+                                    "DO0": {
+                                      "block": {
+                                        "type": "variables_set",
+                                        "fields": {
+                                          "VAR": "questions"
+                                        },
+                                        "inputs": {
+                                          "VALUE": {
+                                            "block": {
+                                              "type": "lists_create_with",
+                                              "extraState": {
+                                                "itemCount": 5
+                                              },
+                                              "inputs": {
+                                                "ADD0": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Quel est le plus grand animal du monde ?",
+                                                        "en": "What is the biggest animal in the world?"
+                                                      }
+                                                    },
+                                                    "id": "animals-questions/value/add0"
+                                                  }
+                                                },
+                                                "ADD1": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Combien de bosses a un dromadaire ?",
+                                                        "en": "How many humps does a dromedary have?"
+                                                      }
+                                                    },
+                                                    "id": "animals-questions/value/add1"
+                                                  }
+                                                },
+                                                "ADD2": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Que mange surtout le panda ?",
+                                                        "en": "What does a panda mostly eat?"
+                                                      }
+                                                    },
+                                                    "id": "animals-questions/value/add2"
+                                                  }
+                                                },
+                                                "ADD3": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Quel oiseau ne vole pas ?",
+                                                        "en": "Which bird cannot fly?"
+                                                      }
+                                                    },
+                                                    "id": "animals-questions/value/add3"
+                                                  }
+                                                },
+                                                "ADD4": {
+                                                  "block": {
+                                                    "type": "text",
+                                                    "fields": {
+                                                      "TEXT": {
+                                                        "fr": "Où vit le poisson-clown ?",
+                                                        "en": "Where does the clownfish live?"
+                                                      }
+                                                    },
+                                                    "id": "animals-questions/value/add4"
+                                                  }
+                                                }
+                                              },
+                                              "id": "animals-questions/value"
+                                            }
+                                          }
+                                        },
+                                        "id": "animals-questions",
+                                        "icons": {
+                                          "comment": {
+                                            "text": {
+                                              "fr": "Les questions, dans l’ordre.",
+                                              "en": "The questions, in order."
+                                            },
+                                            "pinned": false,
+                                            "width": 230,
+                                            "height": 48
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "variables_set",
+                                            "fields": {
+                                              "VAR": "choices"
+                                            },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "lists_create_with",
+                                                  "extraState": {
+                                                    "itemCount": 5
+                                                  },
+                                                  "inputs": {
+                                                    "ADD0": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": {
+                                                            "fr": "L’éléphant|La baleine bleue|La girafe",
+                                                            "en": "The elephant|The blue whale|The giraffe"
+                                                          }
+                                                        },
+                                                        "id": "animals-choices/value/add0"
+                                                      }
+                                                    },
+                                                    "ADD1": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": "1|2|3"
+                                                        },
+                                                        "id": "animals-choices/value/add1"
+                                                      }
+                                                    },
+                                                    "ADD2": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": {
+                                                            "fr": "Du bambou|Du poisson|Des fraises",
+                                                            "en": "Bamboo|Fish|Strawberries"
+                                                          }
+                                                        },
+                                                        "id": "animals-choices/value/add2"
+                                                      }
+                                                    },
+                                                    "ADD3": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": {
+                                                            "fr": "Le pigeon|Le manchot|L’aigle",
+                                                            "en": "The pigeon|The penguin|The eagle"
+                                                          }
+                                                        },
+                                                        "id": "animals-choices/value/add3"
+                                                      }
+                                                    },
+                                                    "ADD4": {
+                                                      "block": {
+                                                        "type": "text",
+                                                        "fields": {
+                                                          "TEXT": {
+                                                            "fr": "Dans la mer|Dans un lac|Dans une rivière",
+                                                            "en": "In the sea|In a lake|In a river"
+                                                          }
+                                                        },
+                                                        "id": "animals-choices/value/add4"
+                                                      }
+                                                    }
+                                                  },
+                                                  "id": "animals-choices/value"
+                                                }
+                                              }
+                                            },
+                                            "id": "animals-choices",
+                                            "icons": {
+                                              "comment": {
+                                                "text": {
+                                                  "fr": "Les 3 réponses possibles, séparées par |",
+                                                  "en": "The 3 possible answers, split by |"
+                                                },
+                                                "pinned": false,
+                                                "width": 230,
+                                                "height": 68
+                                              }
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "variables_set",
+                                                "fields": {
+                                                  "VAR": "answers"
+                                                },
+                                                "inputs": {
+                                                  "VALUE": {
+                                                    "block": {
+                                                      "type": "lists_create_with",
+                                                      "extraState": {
+                                                        "itemCount": 5
+                                                      },
+                                                      "inputs": {
+                                                        "ADD0": {
+                                                          "block": {
+                                                            "type": "text",
+                                                            "fields": {
+                                                              "TEXT": {
+                                                                "fr": "La baleine bleue",
+                                                                "en": "The blue whale"
+                                                              }
+                                                            },
+                                                            "id": "animals-answers/value/add0"
+                                                          }
+                                                        },
+                                                        "ADD1": {
+                                                          "block": {
+                                                            "type": "text",
+                                                            "fields": {
+                                                              "TEXT": "1"
+                                                            },
+                                                            "id": "animals-answers/value/add1"
+                                                          }
+                                                        },
+                                                        "ADD2": {
+                                                          "block": {
+                                                            "type": "text",
+                                                            "fields": {
+                                                              "TEXT": {
+                                                                "fr": "Du bambou",
+                                                                "en": "Bamboo"
+                                                              }
+                                                            },
+                                                            "id": "animals-answers/value/add2"
+                                                          }
+                                                        },
+                                                        "ADD3": {
+                                                          "block": {
+                                                            "type": "text",
+                                                            "fields": {
+                                                              "TEXT": {
+                                                                "fr": "Le manchot",
+                                                                "en": "The penguin"
+                                                              }
+                                                            },
+                                                            "id": "animals-answers/value/add3"
+                                                          }
+                                                        },
+                                                        "ADD4": {
+                                                          "block": {
+                                                            "type": "text",
+                                                            "fields": {
+                                                              "TEXT": {
+                                                                "fr": "Dans la mer",
+                                                                "en": "In the sea"
+                                                              }
+                                                            },
+                                                            "id": "animals-answers/value/add4"
+                                                          }
+                                                        }
+                                                      },
+                                                      "id": "animals-answers/value"
+                                                    }
+                                                  }
+                                                },
+                                                "id": "animals-answers",
+                                                "icons": {
+                                                  "comment": {
+                                                    "text": {
+                                                      "fr": "La bonne réponse de chaque question.",
+                                                      "en": "The right answer of each question."
+                                                    },
+                                                    "pinned": false,
+                                                    "width": 230,
+                                                    "height": 68
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "id": "load-animals"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "load",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Thème 1 par défaut, sinon le 2 ou le 3.",
+                  "en": "Theme 1 by default, else 2 or 3."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 4518
+              }
+            },
+            "x": 300,
+            "y": 4518
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "mélanger les questions",
+                "en": "shuffle the questions"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "order"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "lists_create_empty",
+                        "id": "mix-order/value"
+                      }
+                    }
+                  },
+                  "id": "mix-order",
+                  "next": {
+                    "block": {
+                      "type": "controls_for",
+                      "fields": {
+                        "VAR": "i"
+                      },
+                      "inputs": {
+                        "FROM": {
+                          "block": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 1
+                            },
+                            "id": "mix-fill/from"
+                          }
+                        },
+                        "TO": {
+                          "block": {
+                            "type": "lists_length",
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "questions"
+                                  },
+                                  "id": "mix-fill/to/value"
+                                }
+                              }
+                            },
+                            "id": "mix-fill/to"
+                          }
+                        },
+                        "BY": {
+                          "block": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 1
+                            },
+                            "id": "mix-fill/by"
+                          }
+                        },
+                        "DO": {
+                          "block": {
+                            "type": "lists_setIndex",
+                            "fields": {
+                              "MODE": "INSERT",
+                              "WHERE": "LAST"
+                            },
+                            "inputs": {
+                              "LIST": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "order"
+                                  },
+                                  "id": "mix-push/list"
+                                }
+                              },
+                              "TO": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "i"
+                                  },
+                                  "id": "mix-push/to"
+                                }
+                              }
+                            },
+                            "id": "mix-push"
+                          }
+                        }
+                      },
+                      "id": "mix-fill",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "D’abord l’ordre 1, 2, 3, 4, 5.",
+                            "en": "First the order 1, 2, 3, 4, 5."
+                          },
+                          "pinned": false,
+                          "width": 230,
+                          "height": 48
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "controls_for",
+                          "fields": {
+                            "VAR": "i"
+                          },
+                          "inputs": {
+                            "FROM": {
+                              "block": {
+                                "type": "lists_length",
+                                "inputs": {
+                                  "VALUE": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": {
+                                        "VAR": "questions"
+                                      },
+                                      "id": "mix-loop/from/value"
+                                    }
+                                  }
+                                },
+                                "id": "mix-loop/from"
+                              }
+                            },
+                            "TO": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 2
+                                },
+                                "id": "mix-loop/to"
+                              }
+                            },
+                            "BY": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 1
+                                },
+                                "id": "mix-loop/by"
+                              }
+                            },
+                            "DO": {
+                              "block": {
+                                "type": "variables_set",
+                                "fields": {
+                                  "VAR": "j"
+                                },
+                                "inputs": {
+                                  "VALUE": {
+                                    "block": {
+                                      "type": "math_random_int",
+                                      "inputs": {
+                                        "FROM": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "fields": {
+                                              "NUM": 1
+                                            },
+                                            "id": "mix-pick/value/from"
+                                          }
+                                        },
+                                        "TO": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": "i"
+                                            },
+                                            "id": "mix-pick/value/to"
+                                          }
+                                        }
+                                      },
+                                      "id": "mix-pick/value"
+                                    }
+                                  }
+                                },
+                                "id": "mix-pick",
+                                "icons": {
+                                  "comment": {
+                                    "text": {
+                                      "fr": "Une place au hasard, jusqu’à i.",
+                                      "en": "A place at random, up to i."
+                                    },
+                                    "pinned": false,
+                                    "width": 230,
+                                    "height": 68
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "variables_set",
+                                    "fields": {
+                                      "VAR": "swap"
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "lists_getIndex",
+                                          "fields": {
+                                            "MODE": "GET",
+                                            "WHERE": "FROM_START"
+                                          },
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": "order"
+                                                },
+                                                "id": "mix-keep/value/value"
+                                              }
+                                            },
+                                            "AT": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": "i"
+                                                },
+                                                "id": "mix-keep/value/at"
+                                              }
+                                            }
+                                          },
+                                          "id": "mix-keep/value"
+                                        }
+                                      }
+                                    },
+                                    "id": "mix-keep",
+                                    "next": {
+                                      "block": {
+                                        "type": "lists_setIndex",
+                                        "fields": {
+                                          "MODE": "SET",
+                                          "WHERE": "FROM_START"
+                                        },
+                                        "inputs": {
+                                          "LIST": {
+                                            "block": {
+                                              "type": "variables_get",
+                                              "fields": {
+                                                "VAR": "order"
+                                              },
+                                              "id": "mix-swap1/list"
+                                            }
+                                          },
+                                          "AT": {
+                                            "block": {
+                                              "type": "variables_get",
+                                              "fields": {
+                                                "VAR": "i"
+                                              },
+                                              "id": "mix-swap1/at"
+                                            }
+                                          },
+                                          "TO": {
+                                            "block": {
+                                              "type": "lists_getIndex",
+                                              "fields": {
+                                                "MODE": "GET",
+                                                "WHERE": "FROM_START"
+                                              },
+                                              "inputs": {
+                                                "VALUE": {
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "fields": {
+                                                      "VAR": "order"
+                                                    },
+                                                    "id": "mix-swap1/to/value"
+                                                  }
+                                                },
+                                                "AT": {
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "fields": {
+                                                      "VAR": "j"
+                                                    },
+                                                    "id": "mix-swap1/to/at"
+                                                  }
+                                                }
+                                              },
+                                              "id": "mix-swap1/to"
+                                            }
+                                          }
+                                        },
+                                        "id": "mix-swap1",
+                                        "next": {
+                                          "block": {
+                                            "type": "lists_setIndex",
+                                            "fields": {
+                                              "MODE": "SET",
+                                              "WHERE": "FROM_START"
+                                            },
+                                            "inputs": {
+                                              "LIST": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": "order"
+                                                  },
+                                                  "id": "mix-swap2/list"
+                                                }
+                                              },
+                                              "AT": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": "j"
+                                                  },
+                                                  "id": "mix-swap2/at"
+                                                }
+                                              },
+                                              "TO": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": "swap"
+                                                  },
+                                                  "id": "mix-swap2/to"
+                                                }
+                                              }
+                                            },
+                                            "id": "mix-swap2",
+                                            "icons": {
+                                              "comment": {
+                                                "text": {
+                                                  "fr": "Échange les places i et j.",
+                                                  "en": "Swaps places i and j."
+                                                },
+                                                "pinned": false,
+                                                "width": 230,
+                                                "height": 48
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "id": "mix-loop",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "De la fin vers le début : chaque place reçoit un numéro tiré parmi ceux qui restent.",
+                                "en": "From the end to the start: each place gets a number drawn from those left."
+                              },
+                              "pinned": false,
+                              "width": 280,
+                              "height": 80
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "mix",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Le mélange de Fisher-Yates : tous les ordres ont la même chance.",
+                  "en": "The Fisher-Yates shuffle: every order has the same chance."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 88,
+                "x": 16,
+                "y": 7162
+              }
+            },
+            "x": 300,
+            "y": 7162
+          }
+        ]
+      },
+      {
+        "key": "results",
+        "name": {
+          "fr": "Résultats",
+          "en": "Results"
+        },
+        "props": {
+          "padding": 24,
+          "gap": 16,
+          "alignItems": "stretch",
+          "justify": "center"
+        },
+        "components": [
+          {
+            "key": "resultTitle",
+            "type": "Text",
+            "name": {
+              "fr": "TitreRésultats",
+              "en": "ResultsTitle"
+            },
+            "props": {
+              "text": {
+                "fr": "🏁 Résultats",
+                "en": "🏁 Results"
+              },
+              "fontSize": 28,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "resultScore",
+            "type": "Text",
+            "name": {
+              "fr": "TexteRésultat",
+              "en": "ResultText"
+            },
+            "props": {
+              "text": "",
+              "fontSize": 20,
+              "align": "center"
+            }
+          },
+          {
+            "key": "recordText",
+            "type": "Text",
+            "name": {
+              "fr": "TexteRecord",
+              "en": "RecordText"
+            },
+            "props": {
+              "text": "",
+              "color": "@primary",
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "replay",
+            "type": "Button",
+            "name": {
+              "fr": "Rejouer",
+              "en": "PlayAgain"
+            },
+            "props": {
+              "text": {
+                "fr": "Rejouer",
+                "en": "Play again"
+              }
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": {
+              "COMPONENT": "results"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Text_set",
+                  "fields": {
+                    "COMPONENT": "resultScore",
+                    "PROP": "text"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "text_join",
+                        "extraState": {
+                          "itemCount": 4
+                        },
+                        "inputs": {
+                          "ADD0": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Tu as ",
+                                  "en": "You got "
+                                }
+                              },
+                              "id": "results-score/value/add0"
+                            }
+                          },
+                          "ADD1": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "score"
+                              },
+                              "id": "results-score/value/add1"
+                            }
+                          },
+                          "ADD2": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": " bonnes réponses sur ",
+                                  "en": " right answers out of "
+                                }
+                              },
+                              "id": "results-score/value/add2"
+                            }
+                          },
+                          "ADD3": {
+                            "block": {
+                              "type": "lists_length",
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "variables_get",
+                                    "fields": {
+                                      "VAR": "questions"
+                                    },
+                                    "id": "results-score/value/add3/value"
+                                  }
+                                }
+                              },
+                              "id": "results-score/value/add3"
+                            }
+                          }
+                        },
+                        "id": "results-score/value"
+                      }
+                    }
+                  },
+                  "id": "results-score",
+                  "next": {
+                    "block": {
+                      "type": "rx_Text_set",
+                      "fields": {
+                        "COMPONENT": "recordText",
+                        "PROP": "text"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_join",
+                            "extraState": {
+                              "itemCount": 2
+                            },
+                            "inputs": {
+                              "ADD0": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": {
+                                      "fr": "Record du thème : ",
+                                      "en": "Theme record: "
+                                    }
+                                  },
+                                  "id": "results-record/value/add0"
+                                }
+                              },
+                              "ADD1": {
+                                "block": {
+                                  "type": "lists_getIndex",
+                                  "fields": {
+                                    "MODE": "GET",
+                                    "WHERE": "FROM_START"
+                                  },
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": {
+                                          "VAR": "records"
+                                        },
+                                        "id": "results-record/value/add1/value"
+                                      }
+                                    },
+                                    "AT": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": {
+                                          "VAR": "theme"
+                                        },
+                                        "id": "results-record/value/add1/at"
+                                      }
+                                    }
+                                  },
+                                  "id": "results-record/value/add1"
+                                }
+                              }
+                            },
+                            "id": "results-record/value"
+                          }
+                        }
+                      },
+                      "id": "results-record"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "results-open",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Le score, à côté du nombre de questions.",
+                  "en": "The score, next to the number of questions."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "replay"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_screen_open",
+                  "fields": {
+                    "SCREEN": "themes"
+                  },
+                  "id": "replay-open"
+                }
+              }
+            },
+            "id": "replay",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "On rejoue.",
+                  "en": "Play again."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 500
+              }
+            },
+            "x": 300,
+            "y": 500
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "load",
+      "target": "block:load"
+    },
+    {
+      "id": "fill",
+      "target": "block:mix-fill"
+    },
+    {
+      "id": "mix",
+      "target": "block:mix-loop"
+    },
+    {
+      "id": "pick",
+      "target": "block:show-pick"
+    },
+    {
+      "id": "record",
+      "target": "block:next-record"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:mix-swap2",
+      "check": {
+        "kind": "stepped",
+        "id": "mix-swap2"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "space",
+      "block": "space-questions",
+      "check": {
+        "kind": "all",
+        "of": [
+          {
+            "kind": "block",
+            "type": "text",
+            "within": "space-questions",
+            "min": 6
+          },
+          {
+            "kind": "block",
+            "type": "text",
+            "within": "space-choices",
+            "min": 6
+          },
+          {
+            "kind": "block",
+            "type": "text",
+            "within": "space-answers",
+            "min": 6
+          }
+        ]
+      }
+    },
+    {
+      "id": "three",
+      "block": "next-end",
+      "check": {
+        "kind": "block",
+        "type": "math_number",
+        "fields": {
+          "NUM": 3
+        },
+        "within": "next-end"
+      }
+    },
+    {
+      "id": "cheer",
+      "block": "next-record",
+      "check": {
+        "kind": "block",
+        "type": "rx_ui_toast",
+        "within": "next-record"
+      }
+    }
+  ]
+}

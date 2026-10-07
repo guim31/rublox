@@ -1,0 +1,43 @@
+{
+  "title": "Adding money",
+  "summary": "A box, a button, and a “total” variable that grows.",
+  "done": "You know how the piggy bank adds what you type.",
+  "steps": {
+    "hello": {
+      "text": "Here is **My piggy bank**! Type a number in the preview and tap “+ Add”."
+    },
+    "add": {
+      "text": "When “Add” is tapped, the **total** variable grows by what is typed."
+    },
+    "number": {
+      "text": "What you type is a **text**. “× 1” turns it into a **number**: else 2 + 3 would make “23”!"
+    },
+    "show": {
+      "text": "The function writes the total followed by “€”."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Add money in the preview: [change total by …] lights up.",
+      "hint": "Type a number in the preview, then tap “+ Add”."
+    },
+    "fast": {
+      "text": "Stop slow motion."
+    }
+  },
+  "challenges": {
+    "euros": {
+      "text": "Write “euros” (or your money) instead of “€”.",
+      "hint": "It is in “show the balance”."
+    },
+    "toast": {
+      "text": "Show a short message when you add money.",
+      "hint": "The block is in the Interface category."
+    },
+    "ten": {
+      "text": "Add a “+10 €” button that adds 10 to the total.",
+      "hint": "Put a button in Design, then [when … is clicked] with [change total by 10]."
+    }
+  }
+}

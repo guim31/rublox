@@ -1,0 +1,468 @@
+{
+  "level": 1,
+  "recipe": {
+    "name": {
+      "fr": "Attrape-étoiles 1",
+      "en": "Star Catcher 1"
+    },
+    "mode": "junior",
+    "theme": {
+      "primary": "#7048e8",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [],
+    "screens": [
+      {
+        "key": "game",
+        "name": {
+          "fr": "Jeu",
+          "en": "Game"
+        },
+        "props": {
+          "padding": 0
+        },
+        "components": [
+          {
+            "key": "sky",
+            "type": "GameScene",
+            "name": {
+              "fr": "Ciel",
+              "en": "Sky"
+            },
+            "props": {
+              "background": "#1b1f4b",
+              "edges": "pass"
+            },
+            "children": [
+              {
+                "key": "moon",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Lune",
+                  "en": "Moon"
+                },
+                "props": {
+                  "costumes": ["🌙"],
+                  "x": 300,
+                  "y": 130,
+                  "width": 72,
+                  "height": 72,
+                  "collision": "none"
+                }
+              },
+              {
+                "key": "star",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Étoile",
+                  "en": "Star"
+                },
+                "props": {
+                  "costumes": ["⭐"],
+                  "x": 180,
+                  "y": -40,
+                  "width": 56,
+                  "height": 56,
+                  "collision": "circle",
+                  "visible": false
+                }
+              },
+              {
+                "key": "basket",
+                "type": "Sprite",
+                "name": {
+                  "fr": "Panier",
+                  "en": "Basket"
+                },
+                "props": {
+                  "costumes": ["🧺"],
+                  "x": 180,
+                  "y": 590,
+                  "width": 96,
+                  "height": 72,
+                  "draggable": true,
+                  "edges": "stop"
+                }
+              }
+            ]
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_GameScene_on_start",
+            "fields": {
+              "COMPONENT": "sky"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "faire tomber une étoile",
+                      "en": "make a star fall"
+                    }
+                  },
+                  "id": "start-drop"
+                }
+              }
+            },
+            "id": "start",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Au départ, une étoile tombe.",
+                  "en": "At the start, a star falls."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "faire tomber une étoile",
+                "en": "make a star fall"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "rx_Sprite_call_goTo",
+                  "fields": {
+                    "COMPONENT": "star"
+                  },
+                  "inputs": {
+                    "ARG0": {
+                      "block": {
+                        "type": "math_random_int",
+                        "inputs": {
+                          "FROM": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 40
+                              },
+                              "id": "drop-place/arg0/from"
+                            }
+                          },
+                          "TO": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 320
+                              },
+                              "id": "drop-place/arg0/to"
+                            }
+                          }
+                        },
+                        "id": "drop-place/arg0"
+                      }
+                    },
+                    "ARG1": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": -30
+                        },
+                        "id": "drop-place/arg1"
+                      }
+                    }
+                  },
+                  "id": "drop-place",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "En haut, à un endroit au hasard.",
+                        "en": "At the top, somewhere at random."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "rx_Sprite_set",
+                      "fields": {
+                        "COMPONENT": "star",
+                        "PROP": "visible"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "logic_boolean",
+                            "fields": {
+                              "BOOL": "TRUE"
+                            },
+                            "id": "drop-show/value"
+                          }
+                        }
+                      },
+                      "id": "drop-show",
+                      "next": {
+                        "block": {
+                          "type": "rx_Sprite_set",
+                          "fields": {
+                            "COMPONENT": "star",
+                            "PROP": "vy"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 150
+                                },
+                                "id": "drop-speed/value"
+                              }
+                            }
+                          },
+                          "id": "drop-speed",
+                          "icons": {
+                            "comment": {
+                              "text": {
+                                "fr": "Vitesse vers le bas (y augmente).",
+                                "en": "Speed downwards (y grows)."
+                              },
+                              "pinned": false,
+                              "width": 230,
+                              "height": 68
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "drop",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Remet l’étoile en haut et la fait tomber.",
+                  "en": "Puts the star back at the top and lets it fall."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 240
+              }
+            },
+            "x": 300,
+            "y": 240
+          },
+          {
+            "type": "rx_Sprite_on_hit",
+            "fields": {
+              "COMPONENT": "star",
+              "FILTER": "basket"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "faire tomber une étoile",
+                      "en": "make a star fall"
+                    }
+                  },
+                  "id": "catch-end"
+                }
+              }
+            },
+            "id": "catch",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Attrapée ! Une autre étoile tombe.",
+                  "en": "Caught! Another star falls."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 544
+              }
+            },
+            "x": 300,
+            "y": 544
+          },
+          {
+            "type": "rx_Sprite_on_edge",
+            "fields": {
+              "COMPONENT": "star",
+              "FILTER": "bottom"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "faire tomber une étoile",
+                      "en": "make a star fall"
+                    }
+                  },
+                  "id": "miss-end"
+                }
+              }
+            },
+            "id": "miss",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Ratée : elle touche le bas.",
+                  "en": "Missed: it touches the bottom."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 744
+              }
+            },
+            "x": 300,
+            "y": 744
+          },
+          {
+            "type": "rx_Sprite_on_drag",
+            "fields": {
+              "COMPONENT": "basket"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "rx_Sprite_set",
+                  "fields": {
+                    "COMPONENT": "basket",
+                    "PROP": "y"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 590
+                        },
+                        "id": "follow-ground/value"
+                      }
+                    }
+                  },
+                  "id": "follow-ground"
+                }
+              }
+            },
+            "id": "follow",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Le panier suit ton doigt, mais reste au sol.",
+                  "en": "The basket follows your finger, but stays on the ground."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 944
+              }
+            },
+            "x": 300,
+            "y": 944
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "start",
+      "target": "block:start"
+    },
+    {
+      "id": "drop",
+      "target": "block:drop"
+    },
+    {
+      "id": "catch",
+      "target": "block:catch"
+    },
+    {
+      "id": "follow",
+      "target": "block:follow"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:drop-place",
+      "check": {
+        "kind": "stepped",
+        "id": "drop-place"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "faster",
+      "block": "drop-speed",
+      "check": {
+        "kind": "blockField",
+        "id": "drop-speed/value",
+        "field": "NUM",
+        "min": 250
+      }
+    },
+    {
+      "id": "higher",
+      "block": "follow-ground",
+      "check": {
+        "kind": "blockField",
+        "id": "follow-ground/value",
+        "field": "NUM",
+        "max": 560
+      }
+    },
+    {
+      "id": "spin",
+      "block": "catch",
+      "check": {
+        "kind": "block",
+        "type": "rx_Sprite_call_turn",
+        "within": "catch"
+      }
+    }
+  ]
+}

@@ -6,6 +6,8 @@ export type FoundBlock = {
   block: BlocklyJson
   /** Types of the enclosing blocks, from the nearest to the top block. */
   ancestors: string[]
+  /** Ids of the enclosing blocks and of the blocks above in the stack, nearest first. */
+  ancestorIds: string[]
   /** The stack's top block is enabled (a disabled stack produces no code). */
   enabled: boolean
 }
@@ -32,13 +34,14 @@ export function allBlocks(doc: ProjectDoc, only?: WorkspaceKey): FoundBlock[] {
     if (only && workspace !== only) continue
     for (const top of Object.values(stacks)) {
       const enabled = top.enabled !== false
-      const visit = (block: BlocklyJson, ancestors: string[]) => {
-        found.push({ workspace, block, ancestors, enabled })
+      const visit = (block: BlocklyJson, ancestors: string[], ancestorIds: string[]) => {
+        found.push({ workspace, block, ancestors, ancestorIds, enabled })
+        const here = typeof block.id === 'string' ? [block.id, ...ancestorIds] : ancestorIds
         for (const { child, enclosing } of children(block)) {
-          visit(child, enclosing ? [block.type, ...ancestors] : ancestors)
+          visit(child, enclosing ? [block.type, ...ancestors] : ancestors, here)
         }
       }
-      visit(top, [])
+      visit(top, [], [])
     }
   }
   return found
@@ -75,4 +78,9 @@ export function countBlocks(doc: ProjectDoc): number {
     }
   }
   return count
+}
+
+/** A block of a project by its id, with the workspace it is in. */
+export function findBlock(doc: ProjectDoc, id: string): FoundBlock | undefined {
+  return allBlocks(doc).find(({ block }) => block.id === id)
 }

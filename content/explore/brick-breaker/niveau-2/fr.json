@@ -1,0 +1,43 @@
+{
+  "title": "Le mur de briques",
+  "summary": "Deux boucles, l’une dans l’autre, construisent un mur de 28 briques.",
+  "done": "Tu as vu deux boucles imbriquées et des clones.",
+  "steps": {
+    "hello": {
+      "text": "Au niveau 2, un mur de briques ! Clique sur **Nouveau** au-dessus des blocs pour voir ce qui a changé."
+    },
+    "wall": {
+      "text": "Une **boucle** répète des blocs. Ici, il y en a deux : pour chaque rangée (1 à 4), on fait 7 colonnes."
+    },
+    "place": {
+      "text": "La position vient des compteurs : x = colonne × 45, y = 60 + rangée × 40. Puis on crée un clone à cet endroit."
+    },
+    "break": {
+      "text": "Une brique touchée par la balle est supprimée, et la balle repart dans l’autre sens."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Regarde : [créer un clone de Brique] s’allume 28 fois, une brique à la fois.",
+      "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
+    },
+    "fast": {
+      "text": "Arrête le ralenti pour jouer à vitesse normale."
+    }
+  },
+  "challenges": {
+    "rows": {
+      "text": "Construis 5 rangées au lieu de 4.",
+      "hint": "C’est la boucle du dehors : « de 1 à 4 »."
+    },
+    "cols": {
+      "text": "Fais 6 colonnes au lieu de 7.",
+      "hint": "C’est la boucle du dedans."
+    },
+    "spin": {
+      "text": "Fais tourner la balle quand elle casse une brique.",
+      "hint": "Pose [tourner Balle de … degrés] dans « quand Brique touche Balle »."
+    }
+  }
+}

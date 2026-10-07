@@ -168,10 +168,11 @@ export function Bubble({
 
   return (
     <>
+      {/* Above Blockly's toolbox (z-index 70), below a dragged block (80). */}
       {layout?.spot ? (
         <div
           aria-hidden="true"
-          className="rx-spotlight pointer-events-none fixed z-[60] rounded-ui transition-[left,top,width,height] duration-200"
+          className="rx-spotlight pointer-events-none fixed z-[74] rounded-ui transition-[left,top,width,height] duration-200"
           style={layout.spot}
           data-testid="tutorial-spotlight"
         />
@@ -181,7 +182,7 @@ export function Bubble({
         aria-label={label}
         data-testid={testId}
         className={cn(
-          'rx-pop fixed z-[61] flex flex-col gap-3 rounded-ui-lg border border-border bg-surface p-4 shadow-3 transition-[left,top] duration-200',
+          'rx-pop fixed z-[75] flex flex-col gap-3 rounded-ui-lg border border-border bg-surface p-4 shadow-3 transition-[left,top] duration-200',
           wide ? 'w-[400px]' : 'w-[340px] junior:w-[370px]',
           !layout && 'invisible',
         )}

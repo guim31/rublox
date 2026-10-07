@@ -1,0 +1,8 @@
+{
+  "id": "star-catcher",
+  "order": 1,
+  "kind": "game",
+  "icon": "🌟",
+  "accent": "indigo",
+  "levels": 4
+}

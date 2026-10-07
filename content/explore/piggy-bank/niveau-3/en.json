@@ -1,0 +1,46 @@
+{
+  "title": "A goal",
+  "summary": "A savings goal, a progress bar and a percentage.",
+  "done": "You saw a percentage and an “if … else”.",
+  "steps": {
+    "hello": {
+      "text": "In level 3, a savings goal and a bar that fills up."
+    },
+    "bar": {
+      "text": "The **percentage**: total ÷ goal × 100. 10 € out of 20 € is 50: the bar is half full."
+    },
+    "min": {
+      "text": "[constrain … low 0 high 100]: the bar never goes below 0 or above 100."
+    },
+    "reached": {
+      "text": "If the total reaches the goal, we celebrate; else, we say how much is missing."
+    },
+    "goal": {
+      "text": "The 🎯 button changes the goal, only if the number typed is above 0."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Add money: the bar block lights up.",
+      "hint": "Type a number in the preview, then tap “+ Add”."
+    },
+    "fast": {
+      "text": "Stop slow motion."
+    }
+  },
+  "challenges": {
+    "party": {
+      "text": "Celebrate the goal with a short message.",
+      "hint": "In the first branch of the [if]."
+    },
+    "words": {
+      "text": "Write your own “goal reached” message.",
+      "hint": "Change the text “🎉 Goal reached!”."
+    },
+    "color": {
+      "text": "Change the colour of the bar when the goal is reached.",
+      "hint": "[set color of GoalBar to …] in the [if]."
+    }
+  }
+}

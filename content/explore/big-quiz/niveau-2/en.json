@@ -1,0 +1,46 @@
+{
+  "title": "A list of questions",
+  "summary": "The questions live in lists, and an “index” variable says where we are.",
+  "done": "You saw lists and an index.",
+  "steps": {
+    "hello": {
+      "text": "In level 2, five questions! Click **New** to see what changed."
+    },
+    "lists": {
+      "text": "A **list** keeps several values in one variable: the questions, the possible answers, the right answers."
+    },
+    "index": {
+      "text": "[item # … of the list] reads one slot. The **index** variable says which one: 1, then 2, then 3…"
+    },
+    "split": {
+      "text": "“6|8|10” is cut at each |: we get a list of 3 answers, one per button."
+    },
+    "next": {
+      "text": "The button adds 1 to the index. After the last question, the index goes back to 1."
+    },
+    "slow": {
+      "text": "Start **slow motion** to see the blocks light up."
+    },
+    "watch": {
+      "text": "Tap “Next question”: the question is read from the list again.",
+      "hint": "Tap an answer in the preview, or click “Restart”."
+    },
+    "fast": {
+      "text": "Stop slow motion."
+    }
+  },
+  "challenges": {
+    "sixth": {
+      "text": "Add a 6th question, its answers and its right answer.",
+      "hint": "Click the gear of the [create list with] blocks to add a slot to the three lists."
+    },
+    "of": {
+      "text": "Write “Question 1 of 5” instead of “1 / 5”.",
+      "hint": "Change the text “/” in “show the question”."
+    },
+    "color": {
+      "text": "Choose another colour for “Wrong”.",
+      "hint": "Click the red colour swatch."
+    }
+  }
+}

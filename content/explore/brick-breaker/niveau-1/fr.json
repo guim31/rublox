@@ -1,0 +1,46 @@
+{
+  "title": "La balle rebondit",
+  "summary": "Une raquette et une balle qui rebondit partout. La vitesse dit où va la balle.",
+  "done": "Tu sais comment la balle bouge et rebondit.",
+  "steps": {
+    "hello": {
+      "text": "Voici le **Casse-briques** ! Glisse la raquette dans l’aperçu pour renvoyer la balle."
+    },
+    "serve": {
+      "text": "Un lutin a une **vitesse x** (vers la droite) et une **vitesse y** (vers le bas). La fonction donne les deux à la balle."
+    },
+    "bounce": {
+      "text": "Quand la balle touche la raquette, sa vitesse y devient négative : elle remonte."
+    },
+    "side": {
+      "text": "Ce calcul compare les x de la balle et de la raquette : touchée à droite, elle part à droite."
+    },
+    "lost": {
+      "text": "Les bords de la scène font rebondir. Si la balle touche le bas, on la relance."
+    },
+    "slow": {
+      "text": "Lance le **ralenti** pour voir les blocs s’allumer."
+    },
+    "watch": {
+      "text": "Renvoie la balle avec la raquette : [mettre vitesse y à -300] s’allume.",
+      "hint": "Attends un peu, ou clique sur « Redémarrer » dans l’aperçu."
+    },
+    "fast": {
+      "text": "Arrête le ralenti pour jouer à vitesse normale."
+    }
+  },
+  "challenges": {
+    "faster": {
+      "text": "Lance la balle plus vite : 350 ou plus.",
+      "hint": "Change le 260 dans « lancer la balle »."
+    },
+    "strong": {
+      "text": "Rebond plus fort : -400 au lieu de -300.",
+      "hint": "Garde le signe moins : il fait remonter la balle."
+    },
+    "spin": {
+      "text": "Fais tourner la balle quand elle touche la raquette.",
+      "hint": "Prends [tourner … de … degrés] chez Balle."
+    }
+  }
+}

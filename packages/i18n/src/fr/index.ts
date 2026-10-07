@@ -2,6 +2,7 @@ import { blocks as baseBlocks } from './blocks.ts'
 import { catalog } from './catalog.ts'
 import { collab } from './collab.ts'
 import { data } from './data.ts'
+import { explore } from './explore.ts'
 import { j6 } from './gallery.ts'
 import { game } from './game.ts'
 import { player } from './publish.ts'
@@ -15,6 +16,8 @@ const studio = {
   data: data.studio,
   ...j6.studio,
   collab,
+  learn: { ...baseStudio.learn, badges: { ...baseStudio.learn.badges, ...explore.badges } },
+  explore: explore.studio,
 }
 const blocks = { ...baseBlocks, game: game.blocks, data: data.blocks }
 const runtime = {

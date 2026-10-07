@@ -76,6 +76,17 @@ export const projectMetaSchema = z.object({
   mode: uiModeSchema,
   /** Language of the app being built: localized defaults are resolved in it. */
   locale: localeSchema,
+  /**
+   * Where the project comes from (J9): a level of an "app to take apart" (`@rublox/explore`).
+   * The editor then offers "Show me what's new" and the level's guided tour.
+   */
+  origin: z
+    .object({
+      kind: z.literal('explore'),
+      app: z.string().min(1).max(64),
+      level: z.number().int().min(1).max(20),
+    })
+    .optional(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 })

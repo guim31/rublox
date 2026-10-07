@@ -394,3 +394,21 @@ svg[display="none"] {
     white-space: nowrap;
   }
 }
+
+/* What a level adds (mint) or changes (yellow), J9: "Show me what's new". */
+.blocklySvg .rx-new-added > .blocklyPath {
+  stroke: var(--c-mint);
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 3px var(--c-mint)) drop-shadow(0 0 2px var(--c-mint));
+}
+.blocklySvg .rx-new-changed > .blocklyPath {
+  stroke: var(--c-yellow);
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 3px var(--c-yellow)) drop-shadow(0 0 2px var(--c-yellow));
+}
+
+/* The text of a block comment sits on Blockly's pale yellow, in dark mode too (J9). */
+.blocklySvg .blocklyTextarea,
+.blocklyBubble .blocklyTextarea {
+  color: #1b1a24;
+}

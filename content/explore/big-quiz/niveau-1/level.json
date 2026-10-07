@@ -1,0 +1,581 @@
+{
+  "level": 1,
+  "recipe": {
+    "name": {
+      "fr": "Le grand quiz 1",
+      "en": "The Big Quiz 1"
+    },
+    "mode": "junior",
+    "theme": {
+      "primary": "#1971c2",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [
+      {
+        "key": "choice",
+        "name": {
+          "fr": "choix",
+          "en": "choice"
+        },
+        "kind": "app",
+        "initial": ""
+      }
+    ],
+    "screens": [
+      {
+        "key": "quiz",
+        "name": {
+          "fr": "Quiz",
+          "en": "Quiz"
+        },
+        "props": {
+          "padding": 20,
+          "gap": 12
+        },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": {
+              "fr": "Titre",
+              "en": "Title"
+            },
+            "props": {
+              "text": {
+                "fr": "❓ Le grand quiz",
+                "en": "❓ The Big Quiz"
+              },
+              "fontSize": 26,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "question",
+            "type": "Text",
+            "name": {
+              "fr": "Question",
+              "en": "Question"
+            },
+            "props": {
+              "text": {
+                "fr": "Combien de pattes a une araignée ?",
+                "en": "How many legs does a spider have?"
+              },
+              "fontSize": 22,
+              "align": "center"
+            }
+          },
+          {
+            "key": "a",
+            "type": "Button",
+            "name": {
+              "fr": "RéponseA",
+              "en": "AnswerA"
+            },
+            "props": {
+              "text": "6",
+              "variant": "outline"
+            }
+          },
+          {
+            "key": "b",
+            "type": "Button",
+            "name": {
+              "fr": "RéponseB",
+              "en": "AnswerB"
+            },
+            "props": {
+              "text": "8",
+              "variant": "outline"
+            }
+          },
+          {
+            "key": "c",
+            "type": "Button",
+            "name": {
+              "fr": "RéponseC",
+              "en": "AnswerC"
+            },
+            "props": {
+              "text": "10",
+              "variant": "outline"
+            }
+          },
+          {
+            "key": "feedback",
+            "type": "Text",
+            "name": {
+              "fr": "Résultat",
+              "en": "Feedback"
+            },
+            "props": {
+              "text": "",
+              "fontSize": 20,
+              "bold": true,
+              "align": "center"
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "a"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "choice"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "rx_Button_get",
+                        "fields": {
+                          "COMPONENT": "a",
+                          "PROP": "text"
+                        },
+                        "id": "click-a-set/value"
+                      }
+                    }
+                  },
+                  "id": "click-a-set",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "vérifier la réponse",
+                          "en": "check the answer"
+                        }
+                      },
+                      "id": "click-a-check"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "click-a",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "On retient le texte du bouton touché.",
+                  "en": "We remember the text of the button tapped."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "b"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "choice"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "rx_Button_get",
+                        "fields": {
+                          "COMPONENT": "b",
+                          "PROP": "text"
+                        },
+                        "id": "click-b-set/value"
+                      }
+                    }
+                  },
+                  "id": "click-b-set",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "vérifier la réponse",
+                          "en": "check the answer"
+                        }
+                      },
+                      "id": "click-b-check"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "click-b",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Pareil pour le bouton B…",
+                  "en": "Same for button B…"
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 292
+              }
+            },
+            "x": 300,
+            "y": 292
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "c"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "choice"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "rx_Button_get",
+                        "fields": {
+                          "COMPONENT": "c",
+                          "PROP": "text"
+                        },
+                        "id": "click-c-set/value"
+                      }
+                    }
+                  },
+                  "id": "click-c-set",
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "vérifier la réponse",
+                          "en": "check the answer"
+                        }
+                      },
+                      "id": "click-c-check"
+                    }
+                  }
+                }
+              }
+            },
+            "id": "click-c",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "… et pour le bouton C.",
+                  "en": "… and for button C."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 544
+              }
+            },
+            "x": 300,
+            "y": 544
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "vérifier la réponse",
+                "en": "check the answer"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "controls_if",
+                  "extraState": {
+                    "hasElse": true
+                  },
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "fields": {
+                          "OP": "EQ"
+                        },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "variables_get",
+                              "fields": {
+                                "VAR": "choice"
+                              },
+                              "id": "check-test/if0/a"
+                            }
+                          },
+                          "B": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": "8"
+                              },
+                              "id": "check-test/if0/b"
+                            }
+                          }
+                        },
+                        "id": "check-test/if0"
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "rx_Text_set",
+                        "fields": {
+                          "COMPONENT": "feedback",
+                          "PROP": "text"
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": {
+                                  "fr": "Bravo ! 🎉",
+                                  "en": "Well done! 🎉"
+                                }
+                              },
+                              "id": "check-yes/value"
+                            }
+                          }
+                        },
+                        "id": "check-yes",
+                        "next": {
+                          "block": {
+                            "type": "rx_Text_set",
+                            "fields": {
+                              "COMPONENT": "feedback",
+                              "PROP": "color"
+                            },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "colour_picker",
+                                  "fields": {
+                                    "COLOUR": "#009900"
+                                  },
+                                  "id": "check-yes-color/value"
+                                }
+                              }
+                            },
+                            "id": "check-yes-color"
+                          }
+                        }
+                      }
+                    },
+                    "ELSE": {
+                      "block": {
+                        "type": "rx_Text_set",
+                        "fields": {
+                          "COMPONENT": "feedback",
+                          "PROP": "text"
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "text_join",
+                              "extraState": {
+                                "itemCount": 2
+                              },
+                              "inputs": {
+                                "ADD0": {
+                                  "block": {
+                                    "type": "text",
+                                    "fields": {
+                                      "TEXT": {
+                                        "fr": "Raté ! C’était : ",
+                                        "en": "Wrong! It was: "
+                                      }
+                                    },
+                                    "id": "check-no/value/add0"
+                                  }
+                                },
+                                "ADD1": {
+                                  "block": {
+                                    "type": "text",
+                                    "fields": {
+                                      "TEXT": "8"
+                                    },
+                                    "id": "check-no/value/add1"
+                                  }
+                                }
+                              },
+                              "id": "check-no/value"
+                            }
+                          }
+                        },
+                        "id": "check-no",
+                        "next": {
+                          "block": {
+                            "type": "rx_Text_set",
+                            "fields": {
+                              "COMPONENT": "feedback",
+                              "PROP": "color"
+                            },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "colour_picker",
+                                  "fields": {
+                                    "COLOUR": "#cc0000"
+                                  },
+                                  "id": "check-no-color/value"
+                                }
+                              }
+                            },
+                            "id": "check-no-color"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "id": "check-test",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "Le choix est-il la bonne réponse ?",
+                        "en": "Is the choice the right answer?"
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
+                    }
+                  }
+                }
+              }
+            },
+            "id": "check",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Compare le choix avec la bonne réponse.",
+                  "en": "Compares the choice with the right answer."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 796
+              }
+            },
+            "x": 300,
+            "y": 796
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "click",
+      "target": "block:click-a"
+    },
+    {
+      "id": "check",
+      "target": "block:check"
+    },
+    {
+      "id": "test",
+      "target": "block:check-test"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:check-test",
+      "check": {
+        "kind": "stepped",
+        "id": "check-test"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "question",
+      "block": "check-test",
+      "check": {
+        "kind": "all",
+        "of": [
+          {
+            "kind": "not",
+            "of": {
+              "kind": "prop",
+              "type": "Text",
+              "prop": "text",
+              "contains": {
+                "fr": "araignée",
+                "en": "spider"
+              }
+            }
+          },
+          {
+            "kind": "blockField",
+            "id": "check-test/if0/b",
+            "field": "TEXT",
+            "not": "8"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cheer",
+      "block": "check-yes",
+      "check": {
+        "kind": "blockField",
+        "id": "check-yes/value",
+        "field": "TEXT",
+        "not": {
+          "fr": "Bravo ! 🎉",
+          "en": "Well done! 🎉"
+        }
+      }
+    },
+    {
+      "id": "toast",
+      "block": "check-test",
+      "check": {
+        "kind": "block",
+        "type": "rx_ui_toast",
+        "within": "check-test"
+      }
+    }
+  ]
+}

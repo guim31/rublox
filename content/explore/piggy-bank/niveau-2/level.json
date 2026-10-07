@@ -1,0 +1,690 @@
+{
+  "level": 2,
+  "recipe": {
+    "name": {
+      "fr": "Ma tirelire 2",
+      "en": "My Piggy Bank 2"
+    },
+    "mode": "junior",
+    "theme": {
+      "primary": "#0ca678",
+      "font": "rounded"
+    },
+    "navigation": "stack",
+    "variables": [
+      {
+        "key": "total",
+        "name": {
+          "fr": "solde",
+          "en": "total"
+        },
+        "kind": "app",
+        "initial": 0
+      },
+      {
+        "key": "moves",
+        "name": {
+          "fr": "mouvements",
+          "en": "moves"
+        },
+        "kind": "app",
+        "initial": []
+      },
+      {
+        "key": "move",
+        "name": {
+          "fr": "mouvement",
+          "en": "move"
+        },
+        "kind": "app",
+        "initial": 0
+      }
+    ],
+    "screens": [
+      {
+        "key": "bank",
+        "name": {
+          "fr": "Tirelire",
+          "en": "PiggyBank"
+        },
+        "props": {
+          "padding": 20,
+          "gap": 14
+        },
+        "components": [
+          {
+            "key": "title",
+            "type": "Text",
+            "name": {
+              "fr": "Titre",
+              "en": "Title"
+            },
+            "props": {
+              "text": {
+                "fr": "🐷 Ma tirelire",
+                "en": "🐷 My piggy bank"
+              },
+              "fontSize": 26,
+              "bold": true,
+              "align": "center"
+            }
+          },
+          {
+            "key": "balance",
+            "type": "Text",
+            "name": {
+              "fr": "Solde",
+              "en": "Balance"
+            },
+            "props": {
+              "text": "0 €",
+              "fontSize": 44,
+              "bold": true,
+              "align": "center",
+              "color": "@primary"
+            }
+          },
+          {
+            "key": "amount",
+            "type": "TextInput",
+            "name": {
+              "fr": "Montant",
+              "en": "Amount"
+            },
+            "props": {
+              "inputType": "number",
+              "placeholder": {
+                "fr": "Combien ?",
+                "en": "How much?"
+              }
+            }
+          },
+          {
+            "key": "actions",
+            "type": "Row",
+            "name": {
+              "fr": "Boutons",
+              "en": "Buttons"
+            },
+            "props": {
+              "gap": 12
+            },
+            "children": [
+              {
+                "key": "add",
+                "type": "Button",
+                "name": {
+                  "fr": "Ajouter",
+                  "en": "Add"
+                },
+                "props": {
+                  "text": {
+                    "fr": "+ Ajouter",
+                    "en": "+ Add"
+                  },
+                  "grow": true
+                }
+              },
+              {
+                "key": "spend",
+                "type": "Button",
+                "name": {
+                  "fr": "Dépenser",
+                  "en": "Spend"
+                },
+                "props": {
+                  "text": {
+                    "fr": "− Dépenser",
+                    "en": "− Spend"
+                  },
+                  "grow": true,
+                  "variant": "outline"
+                }
+              }
+            ]
+          },
+          {
+            "key": "history",
+            "type": "ListView",
+            "name": {
+              "fr": "Historique",
+              "en": "History"
+            },
+            "props": {
+              "items": []
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "type": "rx_Screen_on_open",
+            "fields": {
+              "COMPONENT": "bank"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "procedures_callnoreturn",
+                  "extraState": {
+                    "name": {
+                      "fr": "afficher le solde",
+                      "en": "show the balance"
+                    }
+                  },
+                  "id": "open-show"
+                }
+              }
+            },
+            "id": "open",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "À l’ouverture : le solde.",
+                  "en": "When it opens: the balance."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 40
+              }
+            },
+            "x": 300,
+            "y": 40
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "add"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "lists_setIndex",
+                  "fields": {
+                    "MODE": "INSERT",
+                    "WHERE": "LAST"
+                  },
+                  "inputs": {
+                    "LIST": {
+                      "block": {
+                        "type": "variables_get",
+                        "fields": {
+                          "VAR": "moves"
+                        },
+                        "id": "add-money/list"
+                      }
+                    },
+                    "TO": {
+                      "block": {
+                        "type": "math_arithmetic",
+                        "fields": {
+                          "OP": "MULTIPLY"
+                        },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "rx_TextInput_get",
+                              "fields": {
+                                "COMPONENT": "amount",
+                                "PROP": "text"
+                              },
+                              "id": "add-amount/a"
+                            }
+                          },
+                          "B": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 1
+                              },
+                              "id": "add-amount/b"
+                            }
+                          }
+                        },
+                        "id": "add-amount"
+                      }
+                    }
+                  },
+                  "id": "add-money",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "On note le mouvement dans la liste.",
+                        "en": "We write the movement in the list."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "afficher le solde",
+                          "en": "show the balance"
+                        }
+                      },
+                      "id": "add-show",
+                      "next": {
+                        "block": {
+                          "type": "rx_TextInput_call_clear",
+                          "fields": {
+                            "COMPONENT": "amount"
+                          },
+                          "id": "add-clear"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "add",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Ajouter ce qui est tapé.",
+                  "en": "Add what is typed."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 48,
+                "x": 16,
+                "y": 240
+              }
+            },
+            "x": 300,
+            "y": 240
+          },
+          {
+            "type": "rx_Button_on_click",
+            "fields": {
+              "COMPONENT": "spend"
+            },
+            "inputs": {
+              "DO": {
+                "block": {
+                  "type": "lists_setIndex",
+                  "fields": {
+                    "MODE": "INSERT",
+                    "WHERE": "LAST"
+                  },
+                  "inputs": {
+                    "LIST": {
+                      "block": {
+                        "type": "variables_get",
+                        "fields": {
+                          "VAR": "moves"
+                        },
+                        "id": "spend-money/list"
+                      }
+                    },
+                    "TO": {
+                      "block": {
+                        "type": "math_arithmetic",
+                        "fields": {
+                          "OP": "MINUS"
+                        },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 0
+                              },
+                              "id": "spend-money/to/a"
+                            }
+                          },
+                          "B": {
+                            "block": {
+                              "type": "math_arithmetic",
+                              "fields": {
+                                "OP": "MULTIPLY"
+                              },
+                              "inputs": {
+                                "A": {
+                                  "block": {
+                                    "type": "rx_TextInput_get",
+                                    "fields": {
+                                      "COMPONENT": "amount",
+                                      "PROP": "text"
+                                    },
+                                    "id": "spend-amount/a"
+                                  }
+                                },
+                                "B": {
+                                  "block": {
+                                    "type": "math_number",
+                                    "fields": {
+                                      "NUM": 1
+                                    },
+                                    "id": "spend-amount/b"
+                                  }
+                                }
+                              },
+                              "id": "spend-amount"
+                            }
+                          }
+                        },
+                        "id": "spend-money/to"
+                      }
+                    }
+                  },
+                  "id": "spend-money",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "Une dépense est un nombre négatif.",
+                        "en": "Spending is a negative number."
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 68
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "procedures_callnoreturn",
+                      "extraState": {
+                        "name": {
+                          "fr": "afficher le solde",
+                          "en": "show the balance"
+                        }
+                      },
+                      "id": "spend-show",
+                      "next": {
+                        "block": {
+                          "type": "rx_TextInput_call_clear",
+                          "fields": {
+                            "COMPONENT": "amount"
+                          },
+                          "id": "spend-clear"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "spend",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Dépenser : on note le montant en moins.",
+                  "en": "Spend: we write the amount as a minus."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 544
+              }
+            },
+            "x": 300,
+            "y": 544
+          },
+          {
+            "type": "procedures_defnoreturn",
+            "fields": {
+              "NAME": {
+                "fr": "afficher le solde",
+                "en": "show the balance"
+              }
+            },
+            "inputs": {
+              "STACK": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": "total"
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 0
+                        },
+                        "id": "show-reset/value"
+                      }
+                    }
+                  },
+                  "id": "show-reset",
+                  "icons": {
+                    "comment": {
+                      "text": {
+                        "fr": "On recompte depuis 0…",
+                        "en": "Count again from 0…"
+                      },
+                      "pinned": false,
+                      "width": 230,
+                      "height": 48
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "controls_forEach",
+                      "fields": {
+                        "VAR": "move"
+                      },
+                      "inputs": {
+                        "LIST": {
+                          "block": {
+                            "type": "variables_get",
+                            "fields": {
+                              "VAR": "moves"
+                            },
+                            "id": "show-loop/list"
+                          }
+                        },
+                        "DO": {
+                          "block": {
+                            "type": "math_change",
+                            "fields": {
+                              "VAR": "total"
+                            },
+                            "inputs": {
+                              "DELTA": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": "move"
+                                  },
+                                  "id": "show-sum/delta"
+                                }
+                              }
+                            },
+                            "id": "show-sum"
+                          }
+                        }
+                      },
+                      "id": "show-loop",
+                      "icons": {
+                        "comment": {
+                          "text": {
+                            "fr": "… en ajoutant chaque mouvement de la liste.",
+                            "en": "… adding each movement of the list."
+                          },
+                          "pinned": false,
+                          "width": 230,
+                          "height": 68
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "rx_Text_set",
+                          "fields": {
+                            "COMPONENT": "balance",
+                            "PROP": "text"
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "text_join",
+                                "extraState": {
+                                  "itemCount": 2
+                                },
+                                "inputs": {
+                                  "ADD0": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": {
+                                        "VAR": "total"
+                                      },
+                                      "id": "show-balance/value/add0"
+                                    }
+                                  },
+                                  "ADD1": {
+                                    "block": {
+                                      "type": "text",
+                                      "fields": {
+                                        "TEXT": " €"
+                                      },
+                                      "id": "show-balance/value/add1"
+                                    }
+                                  }
+                                },
+                                "id": "show-balance/value"
+                              }
+                            }
+                          },
+                          "id": "show-balance",
+                          "next": {
+                            "block": {
+                              "type": "rx_ListView_set",
+                              "fields": {
+                                "COMPONENT": "history",
+                                "PROP": "items"
+                              },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "variables_get",
+                                    "fields": {
+                                      "VAR": "moves"
+                                    },
+                                    "id": "show-history/value"
+                                  }
+                                }
+                              },
+                              "id": "show-history"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": "show",
+            "icons": {
+              "comment": {
+                "text": {
+                  "fr": "Le solde n’est jamais gardé : on le recalcule.",
+                  "en": "The balance is never kept: it is computed again."
+                },
+                "pinned": true,
+                "width": 260,
+                "height": 68,
+                "x": 16,
+                "y": 848
+              }
+            },
+            "x": 300,
+            "y": 848
+          }
+        ]
+      }
+    ],
+    "appBlocks": []
+  },
+  "tour": [
+    {
+      "id": "hello",
+      "mood": "wave"
+    },
+    {
+      "id": "push",
+      "target": "block:add-money"
+    },
+    {
+      "id": "spend",
+      "target": "block:spend-money"
+    },
+    {
+      "id": "loop",
+      "target": "block:show-loop"
+    },
+    {
+      "id": "slow",
+      "target": "slow-motion",
+      "check": {
+        "kind": "slowMotion"
+      }
+    },
+    {
+      "id": "watch",
+      "target": "block:show-sum",
+      "check": {
+        "kind": "stepped",
+        "id": "show-sum"
+      },
+      "mood": "think"
+    },
+    {
+      "id": "fast",
+      "target": "slow-motion",
+      "check": {
+        "kind": "not",
+        "of": {
+          "kind": "slowMotion"
+        }
+      }
+    }
+  ],
+  "challenges": [
+    {
+      "id": "toast",
+      "block": "spend",
+      "check": {
+        "kind": "block",
+        "type": "rx_ui_toast",
+        "within": "spend"
+      }
+    },
+    {
+      "id": "red",
+      "block": "show",
+      "check": {
+        "kind": "block",
+        "type": "rx_Text_set",
+        "fields": {
+          "PROP": "color"
+        },
+        "within": "show"
+      }
+    },
+    {
+      "id": "reset",
+      "block": "show-reset",
+      "check": {
+        "kind": "all",
+        "of": [
+          {
+            "kind": "component",
+            "type": "Button",
+            "min": 3
+          },
+          {
+            "kind": "block",
+            "type": "lists_create_empty"
+          }
+        ]
+      }
+    }
+  ]
+}
