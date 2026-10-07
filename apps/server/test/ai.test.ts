@@ -292,5 +292,12 @@ describe('with a (fake) model', () => {
       await admin.request('GET', '/api/ai/usage'),
     )
     expect(usage.entries[0]).toMatchObject({ username: 'alice', kind: 'app-text' })
+    // Unpublished: the address stays reserved, the AI stops.
+    expect((await alice.request('DELETE', `/api/projects/${project.id}/publication`)).status).toBe(
+      200,
+    )
+    const gone = await ask()
+    expect(gone.status).toBe(404)
+    expect(await json(gone)).toEqual({ error: 'not_found' })
   })
 })

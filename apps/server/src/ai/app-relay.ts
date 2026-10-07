@@ -1,4 +1,4 @@
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, eq, isNotNull, isNull } from 'drizzle-orm'
 import { z } from 'zod'
 import { liveLinks, projects, publications } from '../db/schema.ts'
 import { fail } from '../http.ts'
@@ -64,7 +64,14 @@ export class AppAiRelay {
         })
         .from(publications)
         .innerJoin(projects, eq(projects.id, publications.projectId))
-        .where(and(eq(publications.slug, input.slug), isNull(projects.deletedAt)))
+        .where(
+          and(
+            eq(publications.slug, input.slug),
+            // An unpublished app keeps its address, not its AI.
+            isNotNull(publications.currentVersionId),
+            isNull(projects.deletedAt),
+          ),
+        )
       if (!row) fail(404, 'not_found')
       if (!row.allowed) fail(403, 'ai_forbidden')
       billTo = row.ownerId
