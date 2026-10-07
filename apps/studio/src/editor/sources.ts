@@ -5,11 +5,13 @@ import * as Y from 'yjs'
 import { ApiError, api, call, reportSignedOut } from '../lib/api.ts'
 import { currentUserId } from '../lib/session.ts'
 import { loadAssetFile, storeAssetFile } from '../storage/assets.ts'
+import { journalEdits } from '../storage/journal.ts'
 import {
   getSummary,
   openProjectDoc,
   type ProjectAccess,
   type ProjectOwner,
+  projectJournal,
   saveSummary,
   summarize,
 } from '../storage/projects.ts'
@@ -53,11 +55,16 @@ export class GuestSource implements DocSource {
   private listener: () => void = () => {}
   private closed = false
 
+  /** Each edit, kept until IndexedDB confirmed it (a navigation right after it lost it). */
+  private readonly journal: ReturnType<typeof journalEdits>
+
   private constructor(
     readonly id: string,
     readonly ydoc: Y.Doc,
     private readonly persistence: IndexeddbPersistence,
-  ) {}
+  ) {
+    this.journal = journalEdits(ydoc, persistence, projectJournal(id))
+  }
 
   isOwnOrigin(origin: unknown) {
     return origin === this.persistence
@@ -79,10 +86,13 @@ export class GuestSource implements DocSource {
   edited() {
     this.state = 'saving'
     clearTimeout(this.saveTimer)
-    // y-indexeddb stores each update right away; show "Saving…" briefly so it is noticed.
+    // "Saved" once IndexedDB confirmed the edits, and not before 450 ms ("Saving…" is noticed).
     this.saveTimer = setTimeout(() => {
-      this.state = 'saved'
-      this.listener()
+      void this.journal.flush().then(() => {
+        if (this.state !== 'saving' || this.closed) return
+        this.state = 'saved'
+        this.listener()
+      })
     }, 450)
     clearTimeout(this.summaryTimer)
     this.summaryTimer = setTimeout(() => void this.writeSummary(), 600)
@@ -110,6 +120,8 @@ export class GuestSource implements DocSource {
       await this.writeSummary()
     }
     this.closed = true
+    await this.journal.flush().catch(() => {})
+    this.journal.dispose()
     await this.persistence.destroy()
   }
 }

@@ -354,3 +354,9 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **axe et animations** : sous charge, un dialogue encore en fondu (même de 1 ms avec le
   mouvement réduit) donne de faux contrastes ; `await settled(page)` (`e2e/helpers.ts`) avant
   chaque `AxeBuilder`.
+- **IndexedDB et départ de la page** : une transaction encore en cours quand la page part est
+  annulée ; y-indexeddb écrit chaque modification aussitôt, mais une navigation juste après la
+  perdait (projet invité rapatrié sans son dernier bouton). Les modifications d'un projet
+  invité passent d'abord par un journal synchrone (`storage/journal.ts`, `localStorage`), vidé
+  quand IndexedDB a confirmé, rejoué à l'ouverture. Test : `e2e/guest-journal.spec.ts` (fait
+  échouer les transactions comme un départ de page).

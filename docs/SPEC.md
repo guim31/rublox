@@ -799,6 +799,9 @@ README, `CHANGELOG.md`, version 1.0.0 de tous les paquets.
   `@rublox/i18n` que `/locale`, ni aucune valeur de `@rublox/schema` (Zod suivrait).
 - Moteur : `textOn`, `readableOn`, `--rx-on-primary`, `--rx-on-secondary`, `--rx-primary-text`
   (`theme.ts`).
+- Projets invités (correctif après la fusion) : chaque modification est journalisée dans
+  `localStorage` (`rublox:pending:<base>`) jusqu'à ce qu'IndexedDB la confirme, et rejouée par
+  `openProjectDoc` ; « Enregistré » attend cette confirmation (`storage/journal.ts`).
 - Tests : `e2e/a11y-j8.spec.ts` (toute nouvelle page ou dialogue y entre), `e2e/keyboard.spec.ts`,
   `e2e/budget-perf.spec.ts` (le budget casse la CI s'il est dépassé).
 
