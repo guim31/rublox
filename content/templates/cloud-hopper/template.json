@@ -569,11 +569,12 @@
                   "en": "Stick"
                 },
                 "props": {
-                  "x": 76,
-                  "y": 640,
-                  "size": 120,
+                  "x": 70,
+                  "y": 656,
+                  "size": 112,
                   "color": "#2b8fe0",
                   "keys": "arrows",
+                  "opacity": 80,
                   "visible": false
                 }
               },
@@ -587,11 +588,12 @@
                 "props": {
                   "collision": "none",
                   "costumes": ["asset:jump-button"],
-                  "x": 290,
-                  "y": 640,
-                  "width": 84,
-                  "height": 88,
+                  "x": 296,
+                  "y": 656,
+                  "width": 76,
+                  "height": 80,
                   "scroll": 0,
+                  "opacity": 90,
                   "visible": false
                 }
               },
@@ -1267,7 +1269,7 @@
                             "block": {
                               "type": "text",
                               "fields": {
-                                "TEXT": ".P.......E..........B.......E....^^F"
+                                "TEXT": "...P.....E..........B.......E....^^F"
                               },
                               "id": "map-1/value/add10"
                             }
@@ -1404,7 +1406,7 @@
                                 "block": {
                                   "type": "text",
                                   "fields": {
-                                    "TEXT": ".P...E...........................^^F"
+                                    "TEXT": "...P.E...........................^^F"
                                   },
                                   "id": "map-2/value/add10"
                                 }
@@ -1541,7 +1543,7 @@
                                     "block": {
                                       "type": "text",
                                       "fields": {
-                                        "TEXT": ".P..^......=.E..................^.EF"
+                                        "TEXT": "..P........=.E............^.....^.EF"
                                       },
                                       "id": "map-3/value/add10"
                                     }
