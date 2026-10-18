@@ -4,6 +4,7 @@
   "mode": "studio",
   "icon": "🌡️",
   "accent": "coral",
+  "category": "tools",
   "recipe": {
     "name": { "fr": "Convertisseur de températures", "en": "Temperature converter" },
     "theme": { "primary": "#e8590c" },

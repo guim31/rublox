@@ -4,6 +4,7 @@
   "mode": "junior",
   "icon": "🎲",
   "accent": "indigo",
+  "category": "fun",
   "recipe": {
     "name": { "fr": "Lance le dé", "en": "Roll the dice" },
     "theme": { "primary": "#5b4bff" },

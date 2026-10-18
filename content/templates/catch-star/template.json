@@ -4,6 +4,7 @@
   "mode": "junior",
   "icon": "⭐",
   "accent": "mint",
+  "category": "games",
   "recipe": {
     "name": { "fr": "Attrape l’étoile", "en": "Catch the star" },
     "theme": { "primary": "#7048e8", "font": "rounded" },

@@ -64,6 +64,29 @@ export const variableSpecSchema = z
   })
   .strict()
 
+/**
+ * A file that comes with a recipe (J10: the pictures and sounds of the game templates), in
+ * `content/templates/<id>/assets/`. Properties and text blocks name it `asset:<key>`; the
+ * project gets an asset of that hash, and its file is stored when the project is created.
+ */
+export const assetSpecSchema = z
+  .object({
+    key: z.string().regex(/^[a-z0-9-]{1,64}$/),
+    /** The file, in the template's `assets/` folder. */
+    file: z.string().regex(/^[a-z0-9-]+\.(svg|wav)$/),
+    name: localizedText,
+    kind: z.enum(['image', 'sound']),
+    mime: z.enum(['image/svg+xml', 'audio/wav']),
+    size: z.number().int().positive(),
+    sha256: z.string().regex(/^[0-9a-f]{64}$/),
+  })
+  .strict()
+
+export type AssetSpec = z.output<typeof assetSpecSchema>
+
+/** How a recipe names one of its assets in a property or a text: `asset:hero-run-1`. */
+export const ASSET_PREFIX = 'asset:'
+
 export const appSpecSchema = z
   .object({
     name: localizedText,
@@ -75,6 +98,8 @@ export const appSpecSchema = z
     screens: z.array(screenSpecSchema).min(1).max(12),
     /** Stacks of the `app` workspace (app start, shared functions). */
     appBlocks: z.array(blocklyJsonSchema).max(100).default([]),
+    /** Pictures and sounds that come with the recipe (templates only, not the AI). */
+    assets: z.array(assetSpecSchema).max(200).default([]),
   })
   .strict()
 

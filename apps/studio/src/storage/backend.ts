@@ -2,6 +2,7 @@ import type { Locale, ProjectDoc, UiMode } from '@rublox/schema'
 import { api, call } from '../lib/api.ts'
 import { getAll, STORES } from './db.ts'
 import { type ProjectSummary, TRASH_DAYS } from './summaries.ts'
+import type { TemplateFile } from './template-files.ts'
 
 /**
  * The project format, the catalog and Yjs are loaded only to change a project: listing them
@@ -16,8 +17,17 @@ const guest = () => import('./projects.ts')
 export interface ProjectsBackend {
   kind: 'guest' | 'server'
   list(): Promise<ProjectSummary[]>
-  /** A new empty project, or `doc` when given (the demo app). */
-  create(input: { name: string; locale: Locale; mode: UiMode; doc?: ProjectDoc }): Promise<string>
+  /**
+   * A new empty project, or `doc` when given (the demo app, a template), with the files its
+   * assets need (the pictures and sounds of a game template).
+   */
+  create(input: {
+    name: string
+    locale: Locale
+    mode: UiMode
+    doc?: ProjectDoc
+    files?: TemplateFile[]
+  }): Promise<string>
   rename(id: string, name: string): Promise<void>
   duplicate(id: string, name: string): Promise<string>
   setFavorite(id: string, favorite: boolean): Promise<void>
@@ -36,7 +46,13 @@ export const guestBackend: ProjectsBackend = {
     await (await guest()).purgeExpired()
     return (await guest()).listProjects()
   },
-  create: async (input) => (await guest()).createProject(input),
+  create: async (input) => {
+    if (input.files?.length) {
+      const { storeAssetFile } = await import('./assets.ts')
+      for (const { file, kind } of input.files) await storeAssetFile(file, kind)
+    }
+    return (await guest()).createProject(input)
+  },
   rename: async (id, name) => (await guest()).renameProject(id, name),
   duplicate: async (id, name) => (await guest()).duplicateProject(id, name),
   setFavorite: async (id, favorite) => (await guest()).setFavorite(id, favorite),
@@ -59,6 +75,15 @@ export const serverBackend: ProjectsBackend = {
   create: async (input) => {
     const { newProjectState } = await import('./new-state.ts')
     const { id } = await call(api.projects.$post({ json: { state: newProjectState(input) } }))
+    if (input.files?.length) {
+      const { uploadAsset } = await import('./server-assets.ts')
+      try {
+        for (const { file } of input.files) await uploadAsset(id, file)
+      } catch (error) {
+        await call(project.$delete({ param: { projectId: id } })).catch(() => {})
+        throw error
+      }
+    }
     return id
   },
   rename: async (id, name) => {

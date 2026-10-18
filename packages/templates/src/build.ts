@@ -22,6 +22,7 @@ import {
 import { componentBlock, isKnownBlockType, propertyKeysOf } from './blocks.ts'
 import {
   type AppSpec,
+  ASSET_PREFIX,
   appSpecSchema,
   type ComponentSpec,
   type ParsedAppSpec,
@@ -126,6 +127,8 @@ class Builder {
   private readonly screens = new Map<string, ScreenRefs>()
   private readonly screenIds = new Map<string, string>()
   private readonly variables = new Map<string, string>()
+  /** Asset id by key (`asset:<key>`). */
+  private readonly assets = new Map<string, string>()
   private doc!: ProjectDoc
 
   constructor(
@@ -148,6 +151,19 @@ class Builder {
     this.doc = doc
     if (spec.description) doc.meta.description = (spec.description as string).slice(0, 500)
     if (spec.theme) doc.settings.theme = { ...doc.settings.theme, ...spec.theme }
+
+    // Assets: named by key in the recipe, by id in the project.
+    for (const asset of spec.assets) {
+      const id = this.options.stableIds ? `a-${asset.key}` : newId()
+      doc.assets[id] = {
+        name: asset.name as string,
+        kind: asset.kind,
+        mime: asset.mime,
+        size: asset.size,
+        sha256: asset.sha256,
+      }
+      this.assets.set(asset.key, id)
+    }
 
     // Screens first: blocks may open any of them.
     const firstId = doc.screenOrder[0] as string
@@ -269,7 +285,8 @@ class Builder {
   private props(type: string, props: Record<string, unknown>, path: string) {
     const def = getComponentDef(type)
     const result: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(props)) {
+    for (const [key, raw] of Object.entries(props)) {
+      const value = this.assetRefs(raw, `${path}.${key}`)
       const prop = def?.props[key]
       if (!prop || prop.state) {
         this.issue(`${path}.${key}`, `${type} has no property "${key}"`)
@@ -283,6 +300,15 @@ class Builder {
       result[key] = coerced
     }
     return stripDefaults(type, result)
+  }
+
+  /** Replaces `asset:<key>` (alone, or in a list) by the asset's id. */
+  private assetRefs(value: unknown, path: string): unknown {
+    if (Array.isArray(value)) return value.map((item) => this.assetRefs(item, path))
+    if (typeof value !== 'string' || !value.startsWith(ASSET_PREFIX)) return value
+    const id = this.assets.get(value.slice(ASSET_PREFIX.length))
+    if (!id) this.issue(path, `no asset "${value.slice(ASSET_PREFIX.length)}" in the recipe`)
+    return id ?? ''
   }
 
   private fillBlocks(
@@ -328,6 +354,7 @@ class Builder {
       return null
     }
     const fields = (block.fields ?? {}) as Record<string, unknown>
+    if (block.type === 'text') fields.TEXT = this.assetRefs(fields.TEXT, `${path}.fields.TEXT`)
     const component = componentBlock(block.type)
     const here = component?.kind === 'event' ? block.type : event
     if (component) {
@@ -394,6 +421,19 @@ class Builder {
       }
     }
     if ('VAR' in fields) fields.VAR = { id: this.variableRef(fields.VAR) }
+    // Parameters of a function are variables too (J10: "make a platform (x, y, width)").
+    const state = block.extraState as { params?: unknown[] } | undefined
+    if (/^procedures_def/.test(block.type) && Array.isArray(state?.params)) {
+      block.extraState = {
+        ...state,
+        params: state.params.map((param) => {
+          const name =
+            typeof param === 'string' ? param : String((param as { name?: unknown }).name ?? '')
+          const id = this.variableRef(name)
+          return { name: this.variableName(id), id }
+        }),
+      }
+    }
     if (Object.keys(fields).length) block.fields = fields
     const inputs = (block.inputs ?? {}) as Record<
       string,
@@ -431,6 +471,12 @@ class Builder {
       this.issue(`${path}.fields`, `"${String(value)}" is a ${node.type}, not a ${type}`)
     }
     return id
+  }
+
+  private variableName(id: string): string {
+    return (
+      [...this.doc.variables.app, ...this.doc.variables.stored].find((v) => v.id === id)?.name ?? id
+    )
   }
 
   /** A variable by key or name; an unknown name becomes a new app variable (loop counters). */

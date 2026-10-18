@@ -4,6 +4,7 @@
   "mode": "studio",
   "icon": "🧾",
   "accent": "yellow",
+  "category": "tools",
   "recipe": {
     "name": { "fr": "Partage de l’addition", "en": "Split the bill" },
     "theme": { "primary": "#e67700" },

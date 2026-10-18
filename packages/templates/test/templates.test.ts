@@ -12,8 +12,10 @@ import * as Blockly from 'blockly/core'
 import { describe, expect, it } from 'vitest'
 import {
   buildProject,
+  GAME_TEMPLATES,
   GENERAL_BLOCK_TYPES,
   knownBlockTypes,
+  TEMPLATE_CATEGORIES,
   TEMPLATES,
   templateProject,
 } from '../src/index.ts'
@@ -26,8 +28,14 @@ describe('templates', () => {
     expect(TEMPLATES.map((t) => t.id).sort()).toEqual(folders)
   })
 
-  it('has twelve templates', () => {
-    expect(TEMPLATES).toHaveLength(12)
+  it('has the twelve templates of J6 and the games of J10, each in a category', () => {
+    expect(TEMPLATES).toHaveLength(12 + GAME_TEMPLATES.length)
+    expect(TEMPLATES.filter((template) => template.category === 'games')).toHaveLength(
+      1 + GAME_TEMPLATES.length,
+    )
+    for (const template of TEMPLATES) {
+      expect(TEMPLATE_CATEGORIES, template.id).toContain(template.category)
+    }
   })
 
   for (const template of TEMPLATES) {
