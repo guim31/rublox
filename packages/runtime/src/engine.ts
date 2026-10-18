@@ -123,7 +123,10 @@ export type ModuleApi = {
   /** Functions of the `app` workspace, shared by every screen. */
   functions: Record<string, Value>
   rx: {
+    /** At the start of each loop: gives way (and, in a game, waits for the next frame). */
     tick(): Promise<void>
+    /** At the start of each function: gives way after 16 ms, never waits for a frame (J10). */
+    enter(): Promise<void>
     wait(seconds: Value): Promise<void>
     log(...values: Value[]): void
     step(blockId: string): Promise<void>
@@ -1249,6 +1252,14 @@ export class Engine {
             this.lastYield = now()
             check()
           } else if (now() - this.lastYield >= TICK_BUDGET_MS) {
+            await yieldToBrowser()
+            this.lastYield = now()
+            check()
+          }
+        },
+        enter: async () => {
+          check()
+          if (now() - this.lastYield >= TICK_BUDGET_MS) {
             await yieldToBrowser()
             this.lastYield = now()
             check()

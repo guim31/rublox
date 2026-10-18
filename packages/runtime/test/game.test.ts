@@ -501,6 +501,34 @@ describe('game scene, J10 additions', () => {
     engine.dispose()
   })
 
+  it('runs a function called on every frame at every frame, even when it moves things', async () => {
+    const { doc } = game({
+      define: {
+        type: 'procedures_defnoreturn',
+        fields: { NAME: 'step' },
+        inputs: {
+          STACK: {
+            block: {
+              ...call('Sprite', 'basket', 'moveBy', [num(1), num(0)]),
+              next: { block: change(1) },
+            },
+          },
+        },
+      },
+      frame: on('GameScene', 'scene', 'frame', {
+        type: 'procedures_callnoreturn',
+        extraState: { name: 'step' },
+        next: {
+          block: { type: 'procedures_callnoreturn', extraState: { name: 'step' } },
+        },
+      }),
+    })
+    const { engine, frames } = await run(doc)
+    await frames(10)
+    expect(vars(engine).get('score')).toBe(20)
+    engine.dispose()
+  })
+
   it('builds at once while the scene is paused', async () => {
     const { doc } = game({
       start: on('GameScene', 'scene', 'start', {

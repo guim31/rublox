@@ -98,6 +98,32 @@ export const round = (value: Value): Value => ({
   fields: { OP: 'ROUND' },
   inputs: { NUM: { block: value } },
 })
+/** The whole part of a number, rounded down. */
+export const floor = (value: Value): Value => ({
+  type: 'math_round',
+  fields: { OP: 'ROUNDDOWN' },
+  inputs: { NUM: { block: value } },
+})
+/** The remainder of a division. */
+export const modulo = (value: Value, by: Value | number): Value => ({
+  type: 'math_modulo',
+  inputs: {
+    DIVIDEND: { block: value },
+    DIVISOR: { block: typeof by === 'number' ? num(by) : by },
+  },
+})
+/** A number without its sign. */
+export const abs = (value: Value): Value => ({
+  type: 'math_single',
+  fields: { OP: 'ABS' },
+  inputs: { NUM: { block: value } },
+})
+/** The square root of a number. */
+export const sqrt = (value: Value): Value => ({
+  type: 'math_single',
+  fields: { OP: 'ROOT' },
+  inputs: { NUM: { block: value } },
+})
 /** A number kept between `low` and `high`. */
 export const between = (value: Value, low: number, high: number): Value => ({
   type: 'math_constrain',
@@ -130,6 +156,12 @@ export const item = (from: Value, at: Value | number): Value => ({
   type: 'lists_getIndex',
   fields: { MODE: 'GET', WHERE: 'FROM_START' },
   inputs: { VALUE: { block: from }, AT: { block: typeof at === 'number' ? num(at) : at } },
+})
+/** Where an item is in a list, its last place (0 if it is not there). */
+export const lastIndexOf = (list: Value, find: Value): Value => ({
+  type: 'lists_indexOf',
+  fields: { END: 'LAST' },
+  inputs: { VALUE: { block: list }, FIND: { block: find } },
 })
 export const length = (of: Value): Value => ({
   type: 'lists_length',
@@ -242,6 +274,23 @@ export const count = (
       ...chainInput('DO', body),
     },
   })
+/** "repeat until …". */
+export const until = (id: string, test: Value, body: Block[]): Block =>
+  statement(id, {
+    type: 'controls_whileUntil',
+    fields: { MODE: 'UNTIL' },
+    inputs: { BOOL: { block: test }, ...chainInput('DO', body) },
+  })
+/** "repeat while …". */
+export const whileLoop = (id: string, test: Value, body: Block[]): Block =>
+  statement(id, {
+    type: 'controls_whileUntil',
+    fields: { MODE: 'WHILE' },
+    inputs: { BOOL: { block: test }, ...chainInput('DO', body) },
+  })
+/** Leaves the loop it is in ("break out"). */
+export const stopLoop = (id: string): Block =>
+  statement(id, { type: 'controls_flow_statements', fields: { FLOW: 'BREAK' } })
 export const forEach = (id: string, name: string, of: Value, body: Block[]): Block =>
   statement(id, {
     type: 'controls_forEach',

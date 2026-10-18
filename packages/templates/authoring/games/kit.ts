@@ -70,6 +70,11 @@ export type KitOptions = {
   /** Where the title and its hint stand (y). */
   titleY?: number
   titleSize?: number
+  /** Where the score stands during a game (y), and its colour. */
+  scoreY?: number
+  scoreColor?: string
+  /** Where the best score stands on the title screen (y). */
+  bestY?: number
 }
 
 const PLAY = { fr: 'Jouer', en: 'Play' }
@@ -100,9 +105,18 @@ const text = (
 export function kitComponents(o: KitOptions): ComponentSource[] {
   const titleY = o.titleY ?? 190
   return [
-    text('scoreText', { fr: 'TexteScore', en: 'ScoreText' }, '0', 180, 56, 44, o.textColor, {
-      visible: false,
-    }),
+    text(
+      'scoreText',
+      { fr: 'TexteScore', en: 'ScoreText' },
+      '0',
+      180,
+      o.scoreY ?? 56,
+      44,
+      o.scoreColor ?? o.textColor,
+      {
+        visible: false,
+      },
+    ),
     text(
       'titleText',
       { fr: 'TexteTitre', en: 'TitleText' },
@@ -140,7 +154,15 @@ export function kitComponents(o: KitOptions): ComponentSource[] {
     text('playLabel', { fr: 'TexteJouer', en: 'PlayLabel' }, PLAY, 180, 466, 32, '#ffffff', {
       outline: false,
     }),
-    text('bestText', { fr: 'TexteRecord', en: 'BestText' }, '', 180, 550, 22, o.textColor),
+    text(
+      'bestText',
+      { fr: 'TexteRecord', en: 'BestText' },
+      '',
+      180,
+      o.bestY ?? 550,
+      22,
+      o.textColor,
+    ),
     {
       key: 'panel',
       type: 'Sprite',
