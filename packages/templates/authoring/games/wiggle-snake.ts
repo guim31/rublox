@@ -284,7 +284,7 @@ function blocks(): Block[] {
     ),
     note(
       fn('settings', FN.settings, [
-        note(setVar('set-pace', 'pace', num(0.18)), {
+        note(setVar('set-pace', 'pace', num(0.2)), {
           fr: 'Le temps entre deux pas, au début (en secondes).',
           en: 'The time between two steps, at the start (in seconds).',
         }),
@@ -317,7 +317,7 @@ function blocks(): Block[] {
       fn('prepare', PREPARE, [
         call('p-clones', 'GameScene', scene, 'deleteClones'),
         set('p-unpause', 'GameScene', scene, 'paused', bool(false)),
-        note(setVar('p-path', 'path', list(num(308), num(408), num(508))), {
+        note(setVar('p-path', 'path', list(num(8), num(108), num(208))), {
           fr: 'Le chemin du serpent : une case = colonne × 100 + ligne. La dernière, c’est la tête.',
           en: 'The snake’s path: a cell = column × 100 + row. The last one is the head.',
         }),
@@ -329,11 +329,11 @@ function blocks(): Block[] {
         setVar('p-nx', 'nextX', num(1)),
         setVar('p-ny', 'nextY', num(0)),
         setVar('p-bonus', 'bonusCell', num(-1)),
-        setVar('p-cell', 'cell', num(508)),
-        forEach('p-rings', 'cell', list(num(308), num(408)), [
+        setVar('p-cell', 'cell', num(208)),
+        forEach('p-rings', 'cell', list(num(8), num(108)), [
           run('p-ring', PLACE, { n: v('cell') }),
         ]),
-        call('p-head', 'Sprite', 'head', 'goTo', cellX(num(508)), cellY(num(508))),
+        call('p-head', 'Sprite', 'head', 'goTo', cellX(num(208)), cellY(num(208))),
         set('p-head-costume', 'Sprite', 'head', 'costume', num(1)),
         set('p-head-turn', 'Sprite', 'head', 'rotation', num(0)),
         set('p-head-show', 'Sprite', 'head', 'visible', bool(true)),
@@ -695,7 +695,7 @@ export const WIGGLE_SNAKE: GameSource = {
   theme: { primary: '#2f8f46', font: 'rounded' },
   variables: [
     ...KIT_VARIABLES,
-    { key: 'pace', name: { fr: 'rythme', en: 'pace' }, initial: 0.18 },
+    { key: 'pace', name: { fr: 'rythme', en: 'pace' }, initial: 0.2 },
     { key: 'fastest', name: { fr: 'rythmeMax', en: 'fastest' }, initial: 0.075 },
     { key: 'faster', name: { fr: 'accélération', en: 'speedUp' }, initial: 0.005 },
     { key: 'bonusEvery', name: { fr: 'bonusTous', en: 'bonusEvery' }, initial: 5 },
@@ -804,7 +804,7 @@ export const WIGGLE_SNAKE: GameSource = {
       key: 'clock',
       type: 'Timer',
       name: { fr: 'Rythme', en: 'Pace' },
-      props: { interval: 0.18, repeat: true, autostart: false },
+      props: { interval: 0.2, repeat: true, autostart: false },
     },
     {
       key: 'bonusClock',

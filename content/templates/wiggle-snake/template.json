@@ -56,7 +56,7 @@
           "en": "pace"
         },
         "kind": "app",
-        "initial": 0.18
+        "initial": 0.2
       },
       {
         "key": "fastest",
@@ -680,7 +680,7 @@
               "en": "Pace"
             },
             "props": {
-              "interval": 0.18,
+              "interval": 0.2,
               "repeat": true,
               "autostart": false
             }
@@ -834,7 +834,7 @@
                       "block": {
                         "type": "math_number",
                         "fields": {
-                          "NUM": 0.18
+                          "NUM": 0.2
                         },
                         "id": "set-pace/value"
                       }
@@ -2423,7 +2423,7 @@
                                     "block": {
                                       "type": "math_number",
                                       "fields": {
-                                        "NUM": 308
+                                        "NUM": 8
                                       },
                                       "id": "p-path/value/add0"
                                     }
@@ -2432,7 +2432,7 @@
                                     "block": {
                                       "type": "math_number",
                                       "fields": {
-                                        "NUM": 408
+                                        "NUM": 108
                                       },
                                       "id": "p-path/value/add1"
                                     }
@@ -2441,7 +2441,7 @@
                                     "block": {
                                       "type": "math_number",
                                       "fields": {
-                                        "NUM": 508
+                                        "NUM": 208
                                       },
                                       "id": "p-path/value/add2"
                                     }
@@ -2618,7 +2618,7 @@
                                                                   "block": {
                                                                     "type": "math_number",
                                                                     "fields": {
-                                                                      "NUM": 508
+                                                                      "NUM": 208
                                                                     },
                                                                     "id": "p-cell/value"
                                                                   }
@@ -2643,7 +2643,7 @@
                                                                             "block": {
                                                                               "type": "math_number",
                                                                               "fields": {
-                                                                                "NUM": 308
+                                                                                "NUM": 8
                                                                               },
                                                                               "id": "p-rings/list/add0"
                                                                             }
@@ -2652,7 +2652,7 @@
                                                                             "block": {
                                                                               "type": "math_number",
                                                                               "fields": {
-                                                                                "NUM": 408
+                                                                                "NUM": 108
                                                                               },
                                                                               "id": "p-rings/list/add1"
                                                                             }
@@ -2709,7 +2709,7 @@
                                                                                 "block": {
                                                                                   "type": "math_number",
                                                                                   "fields": {
-                                                                                    "NUM": 508
+                                                                                    "NUM": 208
                                                                                   },
                                                                                   "id": "p-head/arg0/arg0"
                                                                                 }
@@ -2733,7 +2733,7 @@
                                                                                 "block": {
                                                                                   "type": "math_number",
                                                                                   "fields": {
-                                                                                    "NUM": 508
+                                                                                    "NUM": 208
                                                                                   },
                                                                                   "id": "p-head/arg1/arg0"
                                                                                 }
