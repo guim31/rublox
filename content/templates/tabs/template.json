@@ -4,6 +4,7 @@
   "mode": "studio",
   "icon": "🗂️",
   "accent": "indigo",
+  "category": "learn",
   "recipe": {
     "name": { "fr": "Appli à onglets", "en": "Tabbed app" },
     "theme": { "primary": "#5b4bff" },

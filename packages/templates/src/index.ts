@@ -1,5 +1,6 @@
 export * from './blocks.ts'
 export * from './build.ts'
 export * from './content.ts'
+export * from './games.ts'
 export * from './reference.ts'
 export * from './spec.ts'

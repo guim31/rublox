@@ -10,6 +10,7 @@ import {
   eventArgsOf,
   eventBlockType,
   getterBlockType,
+  isChoiceArg,
   isFieldArg,
   methodBlockType,
   setterBlockType,
@@ -50,9 +51,12 @@ const MARKER = new RegExp(`^\\s*${MARK_START}'((?:[^'\\\\]|\\\\.)*)'${MARK_END}\
  *
  * - variables are the app's (`app.score`), except function parameters;
  * - functions and event handlers are `async`, calls and waits use `await`;
- * - every loop starts with `await rx.tick()`, so an endless loop never freezes anything;
+ * - every loop starts with `await rx.tick()`, so an endless loop never freezes anything, and
+ *   every function with `await rx.enter()`, so an endless recursion does not either;
  * - only event blocks and function definitions produce code: a loose block does nothing.
  */
+const FUNCTION_TRAP = 'await rx.enter();\n'
+
 export class RubloxGenerator extends JavascriptGenerator {
   context!: BlocksContext
   /** Component names the code uses, for the `const { … } = components` line. */
@@ -259,9 +263,9 @@ function installBlockGenerators(generator: Gen): void {
     return g.withParameters(ids, () => {
       const params = ids.map((id) => g.getVariableName(id))
       let body = g.statementToCode(block, 'STACK')
-      if (g.INFINITE_LOOP_TRAP) {
-        body = g.prefixLines(g.injectId(g.INFINITE_LOOP_TRAP, block), g.INDENT) + body
-      }
+      // An endless recursion gives way too, but a call never waits for the next frame of a
+      // game (J10): "on every frame" may call functions without skipping frames.
+      body = g.prefixLines(g.injectId(FUNCTION_TRAP, block), g.INDENT) + body
       const returned = block.getInput('RETURN') ? g.valueToCode(block, 'RETURN', Order.NONE) : ''
       if (returned) body += `${g.INDENT}return ${returned};\n`
       const code = `async function ${name}(${params.join(', ')}) {\n${body}}\n`
@@ -324,9 +328,11 @@ function installBlockGenerators(generator: Gen): void {
       f[methodBlockType(def.type, method)] = (block, g) => {
         const name = g.componentName(block.getFieldValue('COMPONENT'))
         const args = Object.values(info.args).map((arg, index) =>
-          isFieldArg(arg)
-            ? (g.componentName(block.getFieldValue(`ARG${index}`)) ?? 'null')
-            : g.valueToCode(block, `ARG${index}`, Order.NONE) || 'null',
+          isChoiceArg(arg)
+            ? quote(String(block.getFieldValue(`ARG${index}`) ?? ''))
+            : isFieldArg(arg)
+              ? (g.componentName(block.getFieldValue(`ARG${index}`)) ?? 'null')
+              : g.valueToCode(block, `ARG${index}`, Order.NONE) || 'null',
         )
         const call = `${info.async ? 'await ' : ''}${name}.${method}(${args.join(', ')})`
         if (info.returns)

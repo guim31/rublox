@@ -4,6 +4,7 @@
   "mode": "junior",
   "icon": "🦁",
   "accent": "mint",
+  "category": "fun",
   "recipe": {
     "name": { "fr": "Le quiz des animaux", "en": "The animal quiz" },
     "theme": { "primary": "#0ca678", "font": "rounded" },

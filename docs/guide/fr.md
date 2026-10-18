@@ -91,7 +91,12 @@ modèles fournis ([capture](../screenshots/j6/junior-light-templates.png)) :
 
 | Junior | Studio |
 |---|---|
-| Dis bonjour, Lance le dé, Le quiz des animaux, Qui fait la vaisselle ?, Mon carnet de dessin, Tableau des scores, Le minuteur des dents, Attrape l’étoile | Partage de l’addition, Convertisseur de températures, Liste de courses, Appli à onglets |
+| Dis bonjour, Lance le dé, Le quiz des animaux, Qui fait la vaisselle ?, Mon carnet de dessin, Tableau des scores, Le minuteur des dents, Attrape l’étoile, Abeille Zigzag, Robot Fonceur, Palet Éclair | Partage de l’addition, Convertisseur de températures, Liste de courses, Appli à onglets, Saute-Nuage, Serpentin, Patrouille Galactique |
+
+Les modèles sont rangés par catégories : « Jeux », « Pour s’amuser », « Utiles au quotidien » et
+« Pour apprendre » (« Tous » les montre tous). Chaque carte montre une image du modèle et son mode,
+Junior (« Pour débuter, en mode Junior ») ou Studio (« Pour aller plus loin, en mode Studio »). Les
+jeux sont décrits en 10.8. ([capture](../screenshots/j10/junior-light-new-project.png))
 
 **Autres boutons.** « Importer » ouvre un fichier `.rublox` (voir 6.5). « Créer avec l’IA »
 n’apparaît que si l’assistant IA est activé (section 9).
@@ -1035,6 +1040,51 @@ composant Son.
 Ouvre la palette de commandes (Ctrl/Cmd + K) et choisis « Ouvrir la démo de jeu : Attrape les
 fruits ». Un jeu complet est créé, fait uniquement de blocs : joue, regarde ses blocs, modifie-le.
 Le modèle « Attrape l’étoile » est un autre point de départ.
+
+### 10.7 Caméra, clavier, glisser et animation
+
+- **Un monde plus grand que l’écran** : donne à la scène une « largeur du monde » (ou une
+  « hauteur du monde »), puis « caméra de … : suivre … » ton héros. La caméra le rejoint, le suit en
+  douceur et s’arrête aux bords du monde. « x de la caméra » et « y de la caméra » la placent à la
+  main ; « secouer … pendant … s » la fait trembler (une explosion, un choc).
+- **Défilement** d’un lutin : 100 % (par défaut) il bouge avec le monde, 0 % il reste fixé à
+  l’écran (un bouton, une vie), entre les deux il défile plus lentement, comme un décor lointain
+  (parallaxe). Un texte de scène reste fixé à l’écran (0 %) par défaut.
+- **Le clavier** sur un ordinateur : « quand on appuie sur … dans … », « quand on lâche … dans … »
+  (flèches, espace, Entrée, W A S D, Z Q) et « touche … enfoncée dans … » dans un « si ». Un
+  joystick se pilote aussi au clavier (« touches du clavier » : « Flèches » ou « Z Q S D (ou W A S D) ») ;
+  deux joysticks se tiennent en même temps, un doigt chacun.
+- **Glisser le doigt** : « quand on glisse le doigt … sur … » (vers le haut, le bas, la gauche, la
+  droite).
+- **Un lutin** peut être « retourné » (il regarde de l’autre côté), « animer … du costume … au
+  costume …, … images par seconde » fait défiler ses costumes tout seuls (« arrêter l’animation
+  de … »), « mettre … devant tout » et « mettre … derrière tout » changent l’ordre d’affichage.
+  « Image répétée (mosaïque) » couvre toute sa taille avec son image (un sol, un mur). Sa « valeur »
+  est un nombre à lui, propre à chaque clone (des points de vie).
+- **Plateformes** : un lutin solide qui ne « se laisse pas pousser » est une plateforme ; s’il
+  bouge, il emmène ce qui est posé dessus. « Posé sur quelque chose » dit si un lutin tient debout
+  (pour ne sauter que depuis le sol).
+
+### 10.8 Les modèles de jeux
+
+Six jeux complets, à jouer puis à modifier (« Nouveau projet », catégorie « Jeux ») :
+
+| Jeu | Mode | Comment on joue |
+|---|---|---|
+| Abeille Zigzag | Junior | Touche l’écran pour voler entre les colonnes de miel ; médailles de bronze, d’argent et d’or. |
+| Robot Fonceur | Junior | Course sans fin : saute et glisse (boutons, doigt glissé vers le haut ou le bas, espace et flèches) ; ramasse les boulons ; le jour, la nuit, de plus en plus vite. |
+| Palet Éclair | Junior | Hockey à deux sur le même téléphone : un joystick chacun (au clavier, Z Q S D et les flèches) ; premier à 7 buts. |
+| Saute-Nuage | Studio | Plateformes : cours, saute, écrase les scarabées, évite les piques, atteins le drapeau ; trois niveaux plus larges que l’écran. |
+| Serpentin | Studio | Le serpent grandit à chaque fruit : glisse le doigt, touche les flèches ou utilise le clavier. |
+| Patrouille Galactique | Studio | Tir spatial : déplace le vaisseau au joystick, il tire tout seul ; vagues d’ennemis, bonus, un vaisseau mère toutes les quatre vagues. |
+
+Chaque jeu a un écran titre (« Jouer », le record), un écran de fin (« Rejouer ») et garde ton
+record sur l’appareil. Dans les blocs, la fonction « réglages » est marquée **« Change-moi ! »** :
+ses nombres règlent le jeu (vies, vitesse, gravité…), essaie d’autres valeurs. Les images et les
+sons sont dans les fichiers du projet : remplace-les par les tiens. Les niveaux de Saute-Nuage sont
+des lignes de texte dans la fonction « dessiner les niveaux » : un caractère par case (`=` sol, `o`
+pièce, `E` scarabée, `^` piques…), à toi de dessiner les tiens.
+([captures](../screenshots/j10/))
 
 ---
 

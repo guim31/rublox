@@ -63,8 +63,14 @@ describe('catalog completeness', () => {
       for (const [key, method] of Object.entries(def.methods)) {
         const text = strings.methods[key] ?? ''
         expect(text, `${locale}.methods.${key}`).toContain('%1')
-        Object.keys(method.args).forEach((_, index) => {
+        Object.entries(method.args).forEach(([name, arg], index) => {
           expect(text, `${locale}.methods.${key} arg ${index}`).toContain(`%${index + 2}`)
+          for (const value of arg.values ?? []) {
+            expect(
+              strings.argValues?.[name]?.[value],
+              `${locale}.argValues.${name}.${value}`,
+            ).toBeTruthy()
+          }
         })
       }
       // No stray strings for things that do not exist.

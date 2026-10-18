@@ -36,33 +36,15 @@ import toothbrushEn from '../../../content/templates/toothbrush/en.json' with { 
 import toothbrushFr from '../../../content/templates/toothbrush/fr.json' with { type: 'json' }
 import toothbrush from '../../../content/templates/toothbrush/template.json' with { type: 'json' }
 import { buildProjectOrThrow } from './build.ts'
-import type { AppSpec } from './spec.ts'
+import { GAME_TEMPLATES } from './games.ts'
+import { type Template, template } from './template.ts'
 
-/** Texts of a template card, in one language. */
-export type TemplateTexts = { title: string; description: string }
-
-/** A project to start from (SPEC § 4.8), offered when a project is created. */
-export type Template = {
-  id: string
-  order: number
-  /** The mode it suits best (the dialog shows it, it does not hide it). */
-  mode: UiMode
-  /** An emoji for the card. */
-  icon: string
-  /** A colour of the Rublox palette for the card: indigo, coral, yellow, mint. */
-  accent: 'indigo' | 'coral' | 'yellow' | 'mint'
-  recipe: AppSpec
-  texts: Record<Locale, TemplateTexts>
-}
-
-// Content is data (`content/`, SPEC § 6.2): a template is a `template.json` (the recipe of
-// the app) and one text file per language. Adding one = a folder + one line below.
-function template(data: unknown, fr: unknown, en: unknown): Template {
-  return {
-    ...(data as Omit<Template, 'texts'>),
-    texts: { fr: fr as TemplateTexts, en: en as TemplateTexts },
-  }
-}
+export {
+  TEMPLATE_CATEGORIES,
+  type Template,
+  type TemplateCategory,
+  type TemplateTexts,
+} from './template.ts'
 
 export const TEMPLATES: readonly Template[] = [
   template(dice, diceFr, diceEn),
@@ -77,6 +59,7 @@ export const TEMPLATES: readonly Template[] = [
   template(converter, converterFr, converterEn),
   template(tabs, tabsFr, tabsEn),
   template(catchStar, catchStarFr, catchStarEn),
+  ...GAME_TEMPLATES,
 ].sort((a, b) => a.order - b.order)
 
 export function getTemplate(id: string): Template | undefined {

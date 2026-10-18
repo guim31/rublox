@@ -4,6 +4,7 @@
   "mode": "junior",
   "icon": "🏆",
   "accent": "yellow",
+  "category": "tools",
   "recipe": {
     "name": { "fr": "Tableau des scores", "en": "Scoreboard" },
     "theme": { "primary": "#c2410c", "font": "rounded" },

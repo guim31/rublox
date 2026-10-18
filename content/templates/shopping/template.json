@@ -4,6 +4,7 @@
   "mode": "studio",
   "icon": "🛒",
   "accent": "mint",
+  "category": "tools",
   "recipe": {
     "name": { "fr": "Liste de courses", "en": "Shopping list" },
     "theme": { "primary": "#12b886" },

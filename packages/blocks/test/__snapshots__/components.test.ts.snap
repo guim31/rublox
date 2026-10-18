@@ -496,9 +496,17 @@ exports[`generated code of each component > GameScene 1`] = `
     Scene1.backgroundImage = 'https://example.com/a.png';
     Scene1.edges = 'x';
     Scene1.paused = true;
+    Scene1.worldWidth = 2;
+    Scene1.worldHeight = 2;
+    Scene1.cameraX = 2;
+    Scene1.cameraY = 2;
     Scene1.pause();
     Scene1.resume();
     Scene1.deleteClones();
+    Scene1.follow(Scene1);
+    Scene1.stopFollowing();
+    Scene1.shake(2);
+    rx.log(Scene1.isKeyPressed('left'));
     rx.log(Scene1.visible);
     rx.log(Scene1.width);
     rx.log(Scene1.height);
@@ -509,6 +517,10 @@ exports[`generated code of each component > GameScene 1`] = `
     rx.log(Scene1.backgroundImage);
     rx.log(Scene1.edges);
     rx.log(Scene1.paused);
+    rx.log(Scene1.worldWidth);
+    rx.log(Scene1.worldHeight);
+    rx.log(Scene1.cameraX);
+    rx.log(Scene1.cameraY);
   });
 
   Scene1.onStart(async () => {
@@ -522,6 +534,18 @@ exports[`generated code of each component > GameScene 1`] = `
   Scene1.onTap(async (event) => {
     rx.log(event.x);
     rx.log(event.y);
+  });
+
+  Scene1.onKeyDown(null, async (event) => {
+    rx.log(event.key);
+  });
+
+  Scene1.onKeyUp(null, async (event) => {
+    rx.log(event.key);
+  });
+
+  Scene1.onSwipe(null, async (event) => {
+    rx.log(event.direction);
   });
 }
 "
@@ -635,10 +659,12 @@ exports[`generated code of each component > Joystick 1`] = `
     Joystick1.opacity = 2;
     Joystick1.x = 2;
     Joystick1.y = 2;
+    Joystick1.keys = 'x';
     rx.log(Joystick1.visible);
     rx.log(Joystick1.opacity);
     rx.log(Joystick1.x);
     rx.log(Joystick1.y);
+    rx.log(Joystick1.keys);
     rx.log(Joystick1.dx);
     rx.log(Joystick1.dy);
   });
@@ -1042,6 +1068,7 @@ exports[`generated code of each component > SceneText 1`] = `
     Score1.rotation = 2;
     Score1.fontSize = 2;
     Score1.color = '#ff6b5c';
+    Score1.scroll = 2;
     rx.log(Score1.visible);
     rx.log(Score1.opacity);
     rx.log(Score1.text);
@@ -1050,6 +1077,7 @@ exports[`generated code of each component > SceneText 1`] = `
     rx.log(Score1.rotation);
     rx.log(Score1.fontSize);
     rx.log(Score1.color);
+    rx.log(Score1.scroll);
   });
 
   Score1.onTap(async () => {
@@ -1224,12 +1252,50 @@ exports[`generated code of each component > Sprite 1`] = `
     Lutin1.edges = 'x';
     Lutin1.collision = 'x';
     Lutin1.solid = true;
+    Lutin1.flipX = true;
+    Lutin1.tiled = true;
+    Lutin1.scroll = 2;
+    Lutin1.value = 2;
+    Lutin1.pushable = true;
     Lutin1.moveForward(2);
     Lutin1.moveBy(2, 2);
     Lutin1.goTo(2, 2);
     await Lutin1.glideTo(2, 2, 2);
     Lutin1.turn(2);
-    Lutin1.pointTowards(null);
+    Lutin1.pointTowards(Lutin1);
+    Lutin1.pointAt(2, 2);
+    Lutin1.nextCostume();
+    Lutin1.clone();
+    Lutin1.delete();
+    rx.log(Lutin1.isTouching(Lutin1));
+    rx.log(Lutin1.distanceTo(Lutin1));
+    Lutin1.toFront();
+    Lutin1.toBack();
+    Lutin1.animate(2, 2, 2);
+    Lutin1.stopAnimation();
+    rx.log(Lutin1.visible);
+    rx.log(Lutin1.opacity);
+    rx.log(Lutin1.costume);
+    rx.log(Lutin1.x);
+    rx.log(Lutin1.y);
+    rx.log(Lutin1.width);
+    rx.log(Lutin1.height);
+    rx.log(Lutin1.rotation);
+    rx.log(Lutin1.draggable);
+    rx.log(Lutin1.vx);
+    rx.log(Lutin1.vy);
+    rx.log(Lutin1.gravity);
+    rx.log(Lutin1.bounce);
+    rx.log(Lutin1.edges);
+    rx.log(Lutin1.collision);
+    rx.log(Lutin1.solid);
+    rx.log(Lutin1.isClone);
+    rx.log(Lutin1.flipX);
+    rx.log(Lutin1.tiled);
+    rx.log(Lutin1.scroll);
+    rx.log(Lutin1.value);
+    rx.log(Lutin1.pushable);
+    rx.log(Lutin1.onGround);
   });
 
   Lutin1.onTap(async (Lutin1) => {

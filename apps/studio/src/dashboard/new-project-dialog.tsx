@@ -1,5 +1,11 @@
 import type { Locale, ProjectDoc } from '@rublox/schema'
-import { TEMPLATES, type Template, templateProject } from '@rublox/templates'
+import {
+  TEMPLATE_CATEGORIES,
+  TEMPLATES,
+  type Template,
+  type TemplateCategory,
+  templateProject,
+} from '@rublox/templates'
 import { FilePlus2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,6 +14,7 @@ import { Dialog } from '../components/ui/dialog.tsx'
 import { Input } from '../components/ui/input.tsx'
 import { cn } from '../lib/cn.ts'
 import { summarize } from '../storage/projects.ts'
+import { templateCover } from '../storage/template-files.ts'
 import { ProjectThumbnail } from './thumbnail.tsx'
 
 const ACCENTS: Record<Template['accent'], string> = {
@@ -36,9 +43,13 @@ function previewsOf(locale: Locale): Map<string, ProjectDoc> {
   return docs
 }
 
+type Filter = 'all' | TemplateCategory
+
 /**
- * "New project" (SPEC § 4.8): a name, and a blank project or one of the 12 templates
- * (`content/templates/`), built in the language of the app.
+ * "New project" (SPEC § 4.8): a name, and a blank project or one of the 18 templates
+ * (`content/templates/`), built in the language of the app. J10: the templates are sorted by
+ * category (games first), and a game shows an animated picture of itself instead of its first
+ * screen in miniature.
  */
 export function NewProjectDialog(props: {
   open: boolean
@@ -53,6 +64,7 @@ export function NewProjectDialog(props: {
   const [touched, setTouched] = useState(false)
   const [chosen, setChosen] = useState<Template | null>(null)
   const [busy, setBusy] = useState(false)
+  const [filter, setFilter] = useState<Filter>('all')
   const docs = useMemo(
     () => (props.open ? previewsOf(props.locale) : null),
     [props.open, props.locale],
@@ -63,6 +75,7 @@ export function NewProjectDialog(props: {
       setName(props.defaultName)
       setTouched(false)
       setChosen(null)
+      setFilter('all')
     }
   }, [props.open, props.defaultName])
 
@@ -71,12 +84,69 @@ export function NewProjectDialog(props: {
     if (!touched) setName(template ? template.texts[props.locale].title : props.defaultName)
   }
 
+  const card = (template: Template) => {
+    const doc = docs?.get(template.id)
+    if (!doc) return null
+    const texts = template.texts[props.locale]
+    const cover = templateCover(template)
+    return (
+      <Choice
+        key={template.id}
+        selected={chosen?.id === template.id}
+        onSelect={() => choose(template)}
+        title={`${template.icon} ${texts.title}`}
+        text={texts.description}
+        badge={t(`templates.modes.${template.mode}`)}
+        badgeTone={template.mode}
+        badgeHint={t(`newProject.modeHint.${template.mode}`)}
+        testId={`template-${template.id}`}
+        visual={
+          cover ? (
+            <img
+              src={cover}
+              alt=""
+              draggable={false}
+              className="size-full object-cover"
+              data-testid="template-cover"
+            />
+          ) : (
+            <div
+              className={cn('relative size-full [--thumb-scale:0.34]', ACCENTS[template.accent])}
+            >
+              <div className="absolute inset-x-5 top-3 bottom-0 overflow-hidden rounded-t-[14px] border-4 border-b-0 border-text/85 bg-surface">
+                <ProjectThumbnail preview={summarize(doc).preview} dark={props.dark} />
+              </div>
+            </div>
+          )
+        }
+      />
+    )
+  }
+
+  const blank = (
+    <Choice
+      selected={chosen === null}
+      onSelect={() => choose(null)}
+      title={t('templates.blank')}
+      text={t('templates.blankText')}
+      testId="template-blank"
+      visual={
+        <div className="grid size-full place-items-center bg-surface-2 text-muted">
+          <FilePlus2 size={36} strokeWidth={1.5} />
+        </div>
+      }
+    />
+  )
+
+  const byCategory = (category: TemplateCategory) =>
+    TEMPLATES.filter((template) => template.category === category)
+
   return (
     <Dialog
       open={props.open}
       onOpenChange={(value) => !value && props.onClose()}
       title={t('templates.title')}
-      className="w-[min(94vw,900px)]"
+      className="w-[min(96vw,1040px)]"
     >
       <form
         className="flex flex-col gap-4"
@@ -107,47 +177,55 @@ export function NewProjectDialog(props: {
         </label>
         <fieldset className="min-w-0">
           <legend className="mb-2 text-ui-sm font-strong">{t('templates.choose')}</legend>
-          <div className="grid max-h-[min(56vh,520px)] grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3 overflow-y-auto p-1 junior:grid-cols-[repeat(auto-fill,minmax(170px,1fr))]">
-            <Choice
-              selected={chosen === null}
-              onSelect={() => choose(null)}
-              title={t('templates.blank')}
-              text={t('templates.blankText')}
-              testId="template-blank"
-              visual={
-                <div className="grid size-full place-items-center bg-surface-2 text-muted">
-                  <FilePlus2 size={36} strokeWidth={1.5} />
-                </div>
-              }
-            />
-            {TEMPLATES.map((template) => {
-              const doc = docs?.get(template.id)
-              if (!doc) return null
-              const texts = template.texts[props.locale]
-              return (
-                <Choice
-                  key={template.id}
-                  selected={chosen?.id === template.id}
-                  onSelect={() => choose(template)}
-                  title={`${template.icon} ${texts.title}`}
-                  text={texts.description}
-                  badge={t(`templates.modes.${template.mode}`)}
-                  testId={`template-${template.id}`}
-                  visual={
-                    <div
-                      className={cn(
-                        'relative size-full [--thumb-scale:0.34]',
-                        ACCENTS[template.accent],
-                      )}
-                    >
-                      <div className="absolute inset-x-5 top-3 bottom-0 overflow-hidden rounded-t-[14px] border-4 border-b-0 border-text/85 bg-surface">
-                        <ProjectThumbnail preview={summarize(doc).preview} dark={props.dark} />
-                      </div>
-                    </div>
-                  }
-                />
-              )
-            })}
+          <fieldset className="mb-3 flex flex-wrap gap-1.5">
+            <legend className="sr-only">{t('newProject.categoriesLabel')}</legend>
+            {(['all', ...TEMPLATE_CATEGORIES] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={filter === value}
+                data-testid={`template-category-${value}`}
+                onClick={() => setFilter(value)}
+                className={cn(
+                  'inline-flex h-control items-center gap-1.5 rounded-full border px-3 text-ui-sm font-strong transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-primary',
+                  filter === value
+                    ? 'border-primary bg-primary text-on-primary'
+                    : 'border-border bg-surface text-text hover:border-border-strong',
+                )}
+              >
+                {t(`newProject.categories.${value}`)}
+                {value === 'all' ? null : (
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 text-ui-sm',
+                      filter === value ? 'bg-on-primary/20' : 'bg-surface-2 text-muted',
+                    )}
+                  >
+                    {byCategory(value).length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </fieldset>
+          <div
+            className="flex max-h-[min(56vh,560px)] flex-col gap-5 overflow-y-auto p-1"
+            data-testid="template-list"
+          >
+            {filter === 'all' ? (
+              <>
+                <Section title={t('newProject.blankSection')}>{blank}</Section>
+                {TEMPLATE_CATEGORIES.map((category) => (
+                  <Section key={category} title={t(`newProject.categories.${category}`)}>
+                    {byCategory(category).map(card)}
+                  </Section>
+                ))}
+              </>
+            ) : (
+              <Section title={t(`newProject.categories.${filter}`)}>
+                {blank}
+                {byCategory(filter).map(card)}
+              </Section>
+            )}
           </div>
         </fieldset>
         <div className="flex justify-end gap-2">
@@ -161,12 +239,25 @@ export function NewProjectDialog(props: {
   )
 }
 
+function Section(props: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-2">
+      <h3 className="text-ui-sm font-strong text-muted">{props.title}</h3>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-3 junior:grid-cols-[repeat(auto-fill,minmax(190px,1fr))]">
+        {props.children}
+      </div>
+    </section>
+  )
+}
+
 function Choice(props: {
   selected: boolean
   onSelect: () => void
   title: string
   text: string
   badge?: string
+  badgeTone?: 'junior' | 'studio'
+  badgeHint?: string
   visual: React.ReactNode
   testId: string
 }) {
@@ -192,7 +283,15 @@ function Choice(props: {
         <span className="flex items-start justify-between gap-2">
           <span className="font-strong leading-tight">{props.title}</span>
           {props.badge ? (
-            <span className="shrink-0 rounded-full bg-surface-2 px-1.5 py-0.5 text-ui-sm text-muted">
+            <span
+              title={props.badgeHint}
+              className={cn(
+                'shrink-0 rounded-full px-1.5 py-0.5 text-ui-sm',
+                props.badgeTone === 'studio'
+                  ? 'bg-primary-soft text-primary-text'
+                  : 'bg-mint-soft text-mint-text',
+              )}
+            >
               {props.badge}
             </span>
           ) : null}

@@ -34,6 +34,14 @@ export const SceneText = defineComponent({
     bold: prop.boolean({ default: true, group: 'style' }),
     outline: prop.boolean({ default: true, group: 'style' }),
     align: prop.enum(['left', 'center', 'right'], { default: 'center', group: 'style' }),
+    scroll: prop.number({
+      default: 0,
+      min: 0,
+      max: 200,
+      step: 10,
+      group: 'layout',
+      blocks: 'get-set',
+    }),
   },
   events: { tap: event({ junior: true }) },
   strings: {
@@ -41,7 +49,7 @@ export const SceneText = defineComponent({
       label: 'Texte de scène',
       prefix: 'Score',
       description: 'Un texte posé dans la scène : score, vies, message.',
-      help: 'Un texte de scène se place où tu veux dans une scène de jeu, par-dessus les lutins. Change son texte avec des blocs pour afficher le score ou les vies.',
+      help: 'Un texte de scène se place où tu veux dans une scène de jeu, par-dessus les lutins. Change son texte avec des blocs pour afficher le score ou les vies. Il reste fixé à l’écran quand la caméra bouge (défilement 0 %).',
       example: 'Mettre texte de Score à « Score : » + score',
       props: {
         text: 'texte',
@@ -53,6 +61,7 @@ export const SceneText = defineComponent({
         bold: 'gras',
         outline: 'contour clair',
         align: 'alignement',
+        scroll: 'défilement avec la caméra (%)',
       },
       events: { tap: 'quand on touche %1' },
       methods: {},
@@ -62,7 +71,7 @@ export const SceneText = defineComponent({
       label: 'Scene text',
       prefix: 'Score',
       description: 'A text in the scene: score, lives, a message.',
-      help: 'A scene text goes anywhere in a game scene, over the sprites. Change its text with blocks to show the score or the lives.',
+      help: 'A scene text goes anywhere in a game scene, over the sprites. Change its text with blocks to show the score or the lives. It stays fixed on the screen when the camera moves (scrolling 0%).',
       example: 'Set text of Score to "Score: " + score',
       props: {
         text: 'text',
@@ -74,6 +83,7 @@ export const SceneText = defineComponent({
         bold: 'bold',
         outline: 'light outline',
         align: 'alignment',
+        scroll: 'scrolling with the camera (%)',
       },
       events: { tap: 'when %1 is tapped' },
       methods: {},

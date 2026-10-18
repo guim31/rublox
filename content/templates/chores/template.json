@@ -4,6 +4,7 @@
   "mode": "junior",
   "icon": "🧽",
   "accent": "coral",
+  "category": "tools",
   "recipe": {
     "name": { "fr": "Qui fait la vaisselle ?", "en": "Who does the dishes?" },
     "theme": { "primary": "#f0643c", "font": "rounded" },

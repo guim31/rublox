@@ -4,6 +4,7 @@
   "mode": "junior",
   "icon": "🎨",
   "accent": "coral",
+  "category": "fun",
   "recipe": {
     "name": { "fr": "Mon carnet de dessin", "en": "My sketchbook" },
     "theme": { "primary": "#e8590c", "font": "rounded" },

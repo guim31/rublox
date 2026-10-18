@@ -8,6 +8,7 @@ import {
   BLOCK_TYPES,
   eventBlockType,
   getterBlockType,
+  isChoiceArg,
   isFieldArg,
   methodBlockType,
   propertyKeys,
@@ -71,6 +72,10 @@ function componentItems(id: string, type: string, all: boolean, context: BlocksC
     const fields: Record<string, string> = { COMPONENT: id }
     const inputs: Record<string, unknown> = {}
     Object.values(info.args).forEach((arg, index) => {
+      if (isChoiceArg(arg)) {
+        fields[`ARG${index}`] = String(arg.default ?? arg.values?.[0] ?? '')
+        return
+      }
       if (isFieldArg(arg)) {
         const other = otherOf(context, arg.componentType, id)
         if (other) fields[`ARG${index}`] = other

@@ -12,7 +12,9 @@
       "!**/routeTree.gen.ts",
       "!!**/drizzle/meta",
       "!!docs/screenshots",
-      "!!**/__snapshots__"
+      "!!**/__snapshots__",
+      "!!content/templates/*/assets",
+      "!!content/templates/*/cover.svg"
     ]
   }
 }

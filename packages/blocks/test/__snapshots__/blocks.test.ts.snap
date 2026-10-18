@@ -19,7 +19,7 @@ exports[`generated code > writes app variables in app, and makes functions async
   const { Bouton1 } = components;
 
   async function double(n) {
-    await rx.tick();
+    await rx.enter();
     return n * 2;
   }
 

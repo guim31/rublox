@@ -4,6 +4,7 @@
   "mode": "junior",
   "icon": "🪥",
   "accent": "indigo",
+  "category": "tools",
   "recipe": {
     "name": { "fr": "Le minuteur des dents", "en": "Toothbrush timer" },
     "theme": { "primary": "#3b5bdb", "font": "rounded" },

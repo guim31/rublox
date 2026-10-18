@@ -22,10 +22,12 @@ useful apps without writing code. Version **1.0.0** — see the [changelog](CHAN
 - **Two modes**: _Junior_ (playful, guided, simple blocks, a mascot) and _Studio_ (dense,
   complete, with the code view). Light and dark, French and English.
 - **Learn**: interactive tutorials, challenges with stars, badges, a help sheet for every block
-  and component, a glossary, guided tours, and 12 templates to start from.
+  and component, a glossary, guided tours, and 18 templates to start from, six of them complete
+  games.
 - **Data and services**: tables (local or shared, CSV), web API connections whose secrets stay
   on the server, maps (OpenFreeMap) and charts bound to tables.
-- **Game mode**: free placement, costumes, gravity, bounces, collisions, clones, a joystick.
+- **Game mode**: free placement, costumes and animation, gravity, bounces, collisions, platforms,
+  clones, joysticks, keyboard and swipes, a camera that follows the hero across a wider world.
 - **Together**: accounts by invitation, family, class and team spaces where a parent or a teacher
   manages child accounts without e-mail, real-time co-editing, version history, sharing, a
   gallery with remixes.
@@ -56,7 +58,7 @@ projects in the browser.
 
 ## Self-hosting
 
-Rublox ships as one Docker image, `ghcr.io/guim31/rublox` (`:1.1.0`, `:latest`, or `:edge` for
+Rublox ships as one Docker image, `ghcr.io/guim31/rublox` (`:1.2.0`, `:latest`, or `:edge` for
 `main`), that serves the studio, the API, the WebSockets and the published apps. An example
 with PostgreSQL is in [`docker/compose.yaml`](docker/compose.yaml):
 

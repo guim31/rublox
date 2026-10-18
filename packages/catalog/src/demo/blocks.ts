@@ -53,6 +53,11 @@ export function on(
   }
 }
 
+/** The same "when …" block, for one choice of its filter (`'space'`, a component id…). */
+export function filtered(block: BlocklyJson, filter: string): BlocklyJson {
+  return { ...block, fields: { ...(block.fields as object), FILTER: filter } }
+}
+
 export function set(type: string, component: string, prop: string, value: BlocklyJson) {
   return {
     type: `rx_${type}_set`,

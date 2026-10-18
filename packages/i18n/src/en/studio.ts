@@ -5,7 +5,16 @@ import { publish } from './publish.ts'
 
 export const studio: Omit<
   Messages['studio'],
-  'game' | 'data' | 'blockSheets' | 'gallery' | 'templates' | 'ai' | 'collab' | 'explore' | 'learn'
+  | 'game'
+  | 'data'
+  | 'blockSheets'
+  | 'gallery'
+  | 'templates'
+  | 'ai'
+  | 'collab'
+  | 'explore'
+  | 'learn'
+  | 'newProject'
 > &
   Pick<typeof learning, 'learn'> &
   Pick<typeof learning, 'blockSheets'> = {

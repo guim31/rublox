@@ -133,6 +133,10 @@ export function Dashboard({ openNew }: { openNew: boolean }) {
         doc: template
           ? (await import('@rublox/templates')).templateProject(template, { locale, mode, name })
           : undefined,
+        // A game template comes with its pictures and sounds (J10).
+        files: template?.recipe.assets?.length
+          ? await (await import('../storage/template-files.ts')).templateFiles(template)
+          : undefined,
       }),
   )
   const rename = useProjectMutation(({ id, name }: { id: string; name: string }) =>
