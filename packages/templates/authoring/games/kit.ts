@@ -70,11 +70,15 @@ export type KitOptions = {
   /** Where the title and its hint stand (y). */
   titleY?: number
   titleSize?: number
+  /** How far under the title the hint stands. */
+  hintGap?: number
   /** Where the score stands during a game (y), and its colour. */
   scoreY?: number
   scoreColor?: string
   /** Where the best score stands on the title screen (y). */
   bestY?: number
+  /** A light glow around the texts (for dark texts); off for light texts on a dark game. */
+  glow?: boolean
 }
 
 const PLAY = { fr: 'Jouer', en: 'Play' }
@@ -101,6 +105,9 @@ const text = (
   props: { text: value, x, y, fontSize: size, color, ...extra },
 })
 
+/** Texts drawn on the game itself (not on a button or the panel) follow the `glow` option. */
+const onGame = (o: KitOptions) => (o.glow === false ? { outline: false } : {})
+
 /** The texts and buttons of the title and end screens, to put last in the scene (in front). */
 export function kitComponents(o: KitOptions): ComponentSource[] {
   const titleY = o.titleY ?? 190
@@ -114,6 +121,7 @@ export function kitComponents(o: KitOptions): ComponentSource[] {
       44,
       o.scoreColor ?? o.textColor,
       {
+        ...onGame(o),
         visible: false,
       },
     ),
@@ -125,16 +133,18 @@ export function kitComponents(o: KitOptions): ComponentSource[] {
       titleY,
       o.titleSize ?? 42,
       o.textColor,
+      onGame(o),
     ),
     text(
       'hintText',
       { fr: 'TexteAide', en: 'HintText' },
       o.hint,
       180,
-      titleY + 62,
+      titleY + (o.hintGap ?? 62),
       19,
       o.textColor,
       {
+        ...onGame(o),
         bold: false,
       },
     ),
@@ -162,6 +172,7 @@ export function kitComponents(o: KitOptions): ComponentSource[] {
       o.bestY ?? 550,
       22,
       o.textColor,
+      onGame(o),
     ),
     {
       key: 'panel',

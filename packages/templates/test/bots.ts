@@ -146,7 +146,39 @@ function hockey(side: 'blue' | 'red') {
   }
 }
 
+/** Shooter: stays under the nearest enemy (or the mothership), away from the shots. */
+function shooter(p: Player) {
+  if (p.frame === 20) p.press('enter')
+  for (const key of ['enter', 'left', 'right', 'up', 'down']) p.release(key)
+  if (p.variable('state') !== 'play') return
+  const fr = p.world.bodies.some((body) => body.name === 'Vaisseau')
+  const ship = p.body(fr ? 'Vaisseau' : 'Ship')
+  const sx = Number(ship.values.x)
+  const sy = Number(ship.values.y)
+  const enemies = p.clones(fr ? 'Ennemi' : 'Enemy')
+  const boss = p.body(fr ? 'VaisseauMère' : 'Mothership')
+  const targets = boss.values.visible === true ? [boss] : enemies
+  const target = targets.sort(
+    (a, b) => Math.abs(Number(a.values.x) - sx) - Math.abs(Number(b.values.x) - sx),
+  )[0]
+  let goal = target ? Number(target.values.x) : 180
+  // A shot coming close above: step aside.
+  const danger = p
+    .clones(fr ? 'TirEnnemi' : 'EnemyShot')
+    .find(
+      (shot) =>
+        Math.abs(Number(shot.values.x) - sx) < 40 &&
+        sy - Number(shot.values.y) < 160 &&
+        sy > Number(shot.values.y),
+    )
+  if (danger) goal = Number(danger.values.x) > sx ? sx - 80 : sx + 80
+  if (goal < sx - 6) p.press('left')
+  if (goal > sx + 6) p.press('right')
+  if (sy < 530) p.press('down')
+}
+
 export const BOTS: Record<string, Bot> = {
+  'galaxy-patrol': { goodScore: 200, good: shooter, lazy: lazy(60), lazySeconds: 60 },
   'puck-clash': {
     goodScore: 3,
     // Blue plays well against a slow red (red moves one frame in four).

@@ -56,6 +56,13 @@ export async function play(
     // The project's files, by asset id: what the studio gives the preview.
     assetUrl: (value) => (doc.assets[value] ? `https://example.com/${value}` : undefined),
   })
+  // The same chance at every run: a game played twice gives the same game (no flaky test).
+  let seed = 20261018
+  const random = Math.random
+  Math.random = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0
+    return seed / 2 ** 32
+  }
   // jsdom does not play sounds: playing one does nothing, as on a muted phone.
   HTMLMediaElement.prototype.play = () => Promise.resolve()
   HTMLMediaElement.prototype.pause = () => {}
@@ -122,6 +129,7 @@ export async function play(
     if (frame % 10 === 0) samples.push(Object.fromEntries(vars))
   }
   stage.remove()
+  Math.random = random
   return { logs, engine, samples }
 }
 

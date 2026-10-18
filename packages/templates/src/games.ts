@@ -1,6 +1,11 @@
 import buzzyBeeEn from '../../../content/templates/buzzy-bee/en.json' with { type: 'json' }
 import buzzyBeeFr from '../../../content/templates/buzzy-bee/fr.json' with { type: 'json' }
 import buzzyBee from '../../../content/templates/buzzy-bee/template.json' with { type: 'json' }
+import galaxyPatrolEn from '../../../content/templates/galaxy-patrol/en.json' with { type: 'json' }
+import galaxyPatrolFr from '../../../content/templates/galaxy-patrol/fr.json' with { type: 'json' }
+import galaxyPatrol from '../../../content/templates/galaxy-patrol/template.json' with {
+  type: 'json',
+}
 import puckClashEn from '../../../content/templates/puck-clash/en.json' with { type: 'json' }
 import puckClashFr from '../../../content/templates/puck-clash/fr.json' with { type: 'json' }
 import puckClash from '../../../content/templates/puck-clash/template.json' with { type: 'json' }
@@ -23,5 +28,6 @@ export const GAME_TEMPLATES: readonly Template[] = [
   template(buzzyBee, buzzyBeeFr, buzzyBeeEn),
   template(wiggleSnake, wiggleSnakeFr, wiggleSnakeEn),
   template(roboDash, roboDashFr, roboDashEn),
+  template(galaxyPatrol, galaxyPatrolFr, galaxyPatrolEn),
   template(puckClash, puckClashFr, puckClashEn),
 ]

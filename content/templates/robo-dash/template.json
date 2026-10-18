@@ -200,7 +200,10 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": ["asset:sky-day", "asset:sky-night"],
+                  "costumes": [
+                    "asset:sky-day",
+                    "asset:sky-night"
+                  ],
                   "x": 180,
                   "y": 360,
                   "width": 360,
@@ -216,7 +219,9 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": ["asset:mountains"],
+                  "costumes": [
+                    "asset:mountains"
+                  ],
                   "tiled": true,
                   "x": 360,
                   "y": 480,
@@ -233,7 +238,9 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": ["asset:city"],
+                  "costumes": [
+                    "asset:city"
+                  ],
                   "tiled": true,
                   "x": 360,
                   "y": 520,
@@ -250,7 +257,9 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": ["asset:road"],
+                  "costumes": [
+                    "asset:road"
+                  ],
                   "tiled": true,
                   "x": 360,
                   "y": 660,
@@ -267,7 +276,9 @@
                 },
                 "props": {
                   "collision": "box",
-                  "costumes": ["asset:road"],
+                  "costumes": [
+                    "asset:road"
+                  ],
                   "x": 180,
                   "y": 640,
                   "width": 360,
@@ -286,7 +297,9 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": ["asset:shade"],
+                  "costumes": [
+                    "asset:shade"
+                  ],
                   "x": 180,
                   "y": 360,
                   "width": 360,
@@ -303,7 +316,9 @@
                 },
                 "props": {
                   "collision": "circle",
-                  "costumes": ["asset:bolt"],
+                  "costumes": [
+                    "asset:bolt"
+                  ],
                   "x": -100,
                   "y": 540,
                   "width": 34,
@@ -319,7 +334,11 @@
                 },
                 "props": {
                   "collision": "box",
-                  "costumes": ["asset:crate", "asset:barrier", "asset:drone"],
+                  "costumes": [
+                    "asset:crate",
+                    "asset:barrier",
+                    "asset:drone"
+                  ],
                   "x": -200,
                   "y": 573,
                   "width": 54,
@@ -359,7 +378,9 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": ["asset:jump-button"],
+                  "costumes": [
+                    "asset:jump-button"
+                  ],
                   "x": 300,
                   "y": 670,
                   "width": 76,
@@ -376,7 +397,9 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": ["asset:slide-button"],
+                  "costumes": [
+                    "asset:slide-button"
+                  ],
                   "x": 60,
                   "y": 670,
                   "width": 76,
@@ -445,7 +468,9 @@
                   "en": "PlayButton"
                 },
                 "props": {
-                  "costumes": ["asset:button"],
+                  "costumes": [
+                    "asset:button"
+                  ],
                   "x": 180,
                   "y": 470,
                   "width": 220,
@@ -495,7 +520,9 @@
                   "en": "Panel"
                 },
                 "props": {
-                  "costumes": ["asset:panel"],
+                  "costumes": [
+                    "asset:panel"
+                  ],
                   "x": 180,
                   "y": 360,
                   "width": 300,
@@ -573,7 +600,9 @@
                   "en": "AgainButton"
                 },
                 "props": {
-                  "costumes": ["asset:button"],
+                  "costumes": [
+                    "asset:button"
+                  ],
                   "x": 180,
                   "y": 480,
                   "width": 220,
