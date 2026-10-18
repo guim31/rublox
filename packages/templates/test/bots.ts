@@ -17,6 +17,7 @@ const lazy =
   (_seconds: number) =>
   ({ frame, press, release, variable }: Player) => {
     release('enter')
+    if (frame === 0) lazyOver = undefined
     if (frame === 30) press('enter')
     if (variable('state') === 'over') {
       lazyOver ??= frame
@@ -102,9 +103,67 @@ function runner(p: Player) {
     p.press('space')
 }
 
+/**
+ * Air hockey: one side steers its bat with its keys (W A S D for blue, the arrows for red),
+ * behind the puck when it is in its half, back home otherwise.
+ */
+function hockey(side: 'blue' | 'red') {
+  return (p: Player) => {
+    if (p.frame === 20) p.press('enter')
+    const keys =
+      side === 'blue'
+        ? { left: 'a', right: 'd', up: 'w', down: 's' }
+        : { left: 'left', right: 'right', up: 'up', down: 'down' }
+    if (p.frame === 22) p.release('enter')
+    if (p.variable('state') !== 'play') {
+      for (const key of Object.values(keys)) p.release(key)
+      return
+    }
+    const fr = p.world.bodies.some((body) => body.name === 'Palet')
+    const puck = p.body(fr ? 'Palet' : 'Puck')
+    const bat = p.body(side === 'blue' ? (fr ? 'Bleu' : 'Blue') : fr ? 'Rouge' : 'Red')
+    const px = Number(puck.values.x)
+    const py = Number(puck.values.y)
+    const mine = side === 'blue' ? py > 360 : py < 360
+    // Aim at the side of the goal the other bat does not cover, from behind the puck.
+    const other = p.body(side === 'blue' ? (fr ? 'Rouge' : 'Red') : fr ? 'Bleu' : 'Blue')
+    const gap = Number(other.values.x) - 180
+    const aim = {
+      x: Math.abs(gap) > 30 ? (gap > 0 ? 130 : 230) : px < 180 ? 130 : 230,
+      y: side === 'blue' ? 0 : 720,
+    }
+    const length = Math.hypot(px - aim.x, py - aim.y) || 1
+    const target = mine
+      ? { x: px + ((px - aim.x) / length) * 44, y: py + ((py - aim.y) / length) * 44 }
+      : { x: 180, y: side === 'blue' ? 620 : 100 }
+    const bx = Number(bat.values.x)
+    const by = Number(bat.values.y)
+    const go = (key: string, on: boolean) => (on ? p.press(key) : p.release(key))
+    go(keys.left, target.x < bx - 4)
+    go(keys.right, target.x > bx + 4)
+    go(keys.up, target.y < by - 4)
+    go(keys.down, target.y > by + 4)
+  }
+}
+
 export const BOTS: Record<string, Bot> = {
-  'robo-dash': { goodScore: 600, good: runner, lazy: lazy(12), lazySeconds: 12 },
-  'wiggle-snake': { goodScore: 10, good: snake, lazy: lazy(12), lazySeconds: 12 },
+  'puck-clash': {
+    goodScore: 3,
+    // Blue plays well against a slow red (red moves one frame in four).
+    good: (p) => {
+      hockey('blue')(p)
+      if (p.frame % 4 === 0) hockey('red')(p)
+      else for (const key of ['left', 'right', 'up', 'down']) p.release(key)
+    },
+    // Blue does nothing: red wins, then Enter starts again.
+    lazy: (p) => {
+      lazy(0)(p)
+      hockey('red')(p)
+    },
+    lazySeconds: 100,
+  },
+  'robo-dash': { goodScore: 600, good: runner, lazy: lazy(20), lazySeconds: 20 },
+  'wiggle-snake': { goodScore: 10, good: snake, lazy: lazy(20), lazySeconds: 20 },
   'buzzy-bee': {
     goodScore: 12,
     good: (p) => {

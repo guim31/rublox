@@ -349,6 +349,7 @@ const KIT = {
   },
   overTitle: { fr: 'Boum !', en: 'Crash!' },
   textColor: '#1b2a4f',
+  bestY: 300,
   buttonColor: ['#ff9f43', '#e8590c'] as [string, string],
   panelColor: ['#f1f5ff', '#4a5a8c'] as [string, string],
 }

@@ -275,6 +275,10 @@ export function kitBlocks(o: {
   onTitle: Block[]
   onStart: Block[]
   onEnd: Block[]
+  /** Run last at the end of a game (the texts of the end screen may be changed there). */
+  afterEnd?: Block[]
+  /** Without a best score (a game for two): the end screen says who won instead. */
+  noRecord?: boolean
   /** The score's text: the number alone by default. */
   scoreText?: Block[]
 }): Block[] {
@@ -313,20 +317,31 @@ export function kitBlocks(o: {
       fn('k-end', FN.end, [
         setVar('k-end-state', 'state', str(STATE.over)),
         ...o.onEnd,
-        when(
-          'k-end-record',
-          cmp(v('score'), '>', v('best')),
-          [
-            note(setVar('k-end-best', 'best', v('score')), {
-              fr: 'Le record est une variable stockée : il reste sur le téléphone.',
-              en: 'The best score is a stored variable: it stays on the phone.',
-            }),
-            call('k-end-record-sound', 'Sound', 'sndRecord', 'play'),
-          ],
-          [call('k-end-over-sound', 'Sound', 'sndOver', 'play')],
-        ),
-        set('k-end-final', 'SceneText', 'finalText', 'text', join(str(SCORE), v('score'))),
-        set('k-end-record-text', 'SceneText', 'recordText', 'text', join(str(BEST), v('best'))),
+        ...(o.noRecord
+          ? []
+          : [
+              when(
+                'k-end-record',
+                cmp(v('score'), '>', v('best')),
+                [
+                  note(setVar('k-end-best', 'best', v('score')), {
+                    fr: 'Le record est une variable stockée : il reste sur le téléphone.',
+                    en: 'The best score is a stored variable: it stays on the phone.',
+                  }),
+                  call('k-end-record-sound', 'Sound', 'sndRecord', 'play'),
+                ],
+                [call('k-end-over-sound', 'Sound', 'sndOver', 'play')],
+              ),
+              set('k-end-final', 'SceneText', 'finalText', 'text', join(str(SCORE), v('score'))),
+              set(
+                'k-end-record-text',
+                'SceneText',
+                'recordText',
+                'text',
+                join(str(BEST), v('best')),
+              ),
+            ]),
+        ...(o.afterEnd ?? []),
         ...show('k-end-show', OVER_GROUP, true, KINDS),
       ]),
       {

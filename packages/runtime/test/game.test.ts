@@ -529,6 +529,28 @@ describe('game scene, J10 additions', () => {
     engine.dispose()
   })
 
+  it('never lets a push take a sprite through the edges', async () => {
+    const { doc } = game(
+      {},
+      {
+        basket: {
+          x: 100,
+          y: 60,
+          vx: 0,
+          vy: -300,
+          solid: true,
+          pushable: false,
+          collision: 'circle',
+        },
+        apple: { x: 100, y: 20, solid: true, collision: 'circle', width: 30, height: 30 },
+      },
+    )
+    const { engine, frames, body } = await run(doc)
+    await frames(20)
+    expect(body('apple').values.y as number).toBeGreaterThanOrEqual(15)
+    engine.dispose()
+  })
+
   it('builds at once while the scene is paused', async () => {
     const { doc } = game({
       start: on('GameScene', 'scene', 'start', {

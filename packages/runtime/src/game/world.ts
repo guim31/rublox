@@ -725,6 +725,18 @@ export class World {
       : { kind: 'box', x, y, hw: w / 2, hh: h / 2 }
   }
 
+  /** Keeps a body that stops or bounces at the edges inside them (after a push). */
+  private keepInside(body: Body): void {
+    const v = body.values
+    const mode = v.edges === 'scene' || v.edges === undefined ? this.scene.values.edges : v.edges
+    if (mode !== 'stop' && mode !== 'bounce') return
+    const { width, height } = this.size()
+    const { hw, hh } = extent(this.shape(body))
+    const x = Math.max(hw, Math.min(width - hw, num(v.x)))
+    const y = Math.max(hh, Math.min(height - hh, num(v.y)))
+    if (x !== num(v.x) || y !== num(v.y)) this.move(body, x, y)
+  }
+
   /** Stops, bounces or lets through at the scene's edges, and reports the edges touched. */
   private edges(body: Body): void {
     const v = body.values
@@ -878,6 +890,8 @@ export class World {
         num(v.x) + sign * hit.nx * hit.depth * share,
         num(v.y) + sign * hit.ny * hit.depth * share,
       )
+      // A bat cannot push a puck through the edge of the table.
+      this.keepInside(body)
     }
     // Speeds along the contact: they bounce if they come closer.
     const relative =

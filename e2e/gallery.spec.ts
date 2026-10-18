@@ -54,7 +54,7 @@ test('a template gives a working app, in guest mode too', async ({ page }) => {
   await page.getByRole('button', { name: 'Nouveau projet' }).first().click()
   const dialog = page.getByRole('dialog')
   // The templates (twelve, and the games of J10), and the blank project.
-  await expect(dialog.locator('label[data-testid^="template-"]')).toHaveCount(16)
+  await expect(dialog.locator('label[data-testid^="template-"]')).toHaveCount(17)
   await dialog.getByTestId('template-dice').click()
   // The name follows the chosen template until it is typed.
   await expect(dialog.getByRole('textbox', { name: 'Nom du projet' })).toHaveValue('Lance le dé')
