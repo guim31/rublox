@@ -4,7 +4,43 @@ All notable changes to Rublox. The format follows [Keep a Changelog](https://kee
 and versions follow [Semantic Versioning](https://semver.org/). The specification, in French,
 is [`docs/SPEC.md`](docs/SPEC.md); its § 0 says what each milestone settled and why.
 
-## [1.1.0] — 2026-10-07
+## [1.2.0] — 2026-10-18
+
+Game templates: six complete, original games to play first, then to open up and change.
+
+### Templates
+
+- **Six game templates**, in French and English, each with a title screen, a best score kept on
+  the device, sounds, a difficulty that rises, and an end screen with “Play again”:
+  **Buzzy Bee** (tap to fly between honey columns, medals), **Robo Dash** (an endless run with
+  jumps, slides, parallax and day and night), **Puck Clash** (air hockey for two on the same
+  phone, one joystick each), **Cloud Hopper** (a platformer: three levels wider than the screen,
+  moving platforms, beetles to stomp, a flag), **Wiggle Snake** (the snake that grows, by swipes,
+  arrows or keyboard) and **Galaxy Patrol** (a space shooter with waves, power-ups and a
+  mothership).
+- Their pictures and sounds are drawn and synthesised for Rublox and come with the project:
+  replace them with your own. Their blocks are grouped into named functions with short comments,
+  and the numbers that tune each game sit at the top, marked “Change me!”.
+- The **New project** dialog sorts templates into categories (Games, For fun, Everyday helpers,
+  To learn), with an animated picture of each template and its mode, Junior or Studio.
+
+### Game mode
+
+- **Camera**: a world bigger than the scene, a camera that follows a sprite, camera shake, and
+  sprites that scroll more slowly than the world (parallax) or stay fixed on the screen.
+- **Keyboard** (“when a key is pressed”, “key is down”), **swipes**, and joysticks driven by the
+  arrows or W A S D; two joysticks can be held at once.
+- **Sprites**: flipped, repeated picture (tiles), costume animation, bring to the front or send to
+  the back, a value of their own for each clone, platforms that carry what stands on them, and
+  “standing on something”.
+- Solid sprites bounce by their speed relative to each other: a bat now sends a resting puck off.
+
+### Fixed
+
+- A function called on every frame no longer skips a frame.
+- A sprite pushed by another one no longer goes through the edges of the scene.
+
+
 
 Apps to take apart: for children who have done the first tutorials and want to understand how a
 real app works, before building their own.

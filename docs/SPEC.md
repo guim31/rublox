@@ -18,6 +18,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J7 | Mode jeu : scène, lutins, physique | fait (PR #5), voir § 0.6 |
 | J8 | Finitions : accessibilité, performances, sécurité, mise en production | fait (PR #12), voir § 0.10 ; version 1.0.0 |
 | J9 | Applis à décortiquer (demandé le 07/10/2026) | fait (PR #14), voir § 0.11 ; version 1.1.0 |
+| J10 | Modèles de jeux (demandé le 18/10/2026) | fait (PR #16), voir § 0.12 ; version 1.2.0 |
 
 ### 0.1 Ce que le J0 a fixé (06/10/2026)
 
@@ -884,6 +885,107 @@ vérifiés en direct, « Montre-moi ce qui est nouveau », progression et 4 badg
   généré, exécuté 20 s dans le moteur sur chaque écran sans erreur ; identifiants gardés d’un
   niveau au suivant ; visite et défis cohérents), `e2e/explore.spec.ts`, `e2e/a11y-j9.spec.ts`.
 
+### 0.12 Ce que le J10 a fixé (18/10/2026)
+
+**Fait** : six modèles de jeux en FR et EN (`content/templates/<id>/`), chacun avec son écran
+titre (nom, « Jouer », record), sa partie, son écran de fin (« Rejouer »), son record stocké, ses
+sons, une difficulté qui monte et des réglages « Change-moi ! » en tête des blocs :
+**Abeille Zigzag** (`buzzy-bee`, Junior : toucher pour voler entre des colonnes de miel à trou
+tiré au hasard, médailles bronze, argent, or, vitesse qui monte), **Saute-Nuage**
+(`cloud-hopper`, Studio : plateformes solides et mobiles, pièces, scarabées qui patrouillent et
+s’écrasent, piques, ressort, drapeau ; trois niveaux plus larges que l’écran décrits par des
+lignes de texte, caméra qui suit le héros, trois vies), **Serpentin** (`wiggle-snake`, Studio :
+grille au rythme d’un minuteur, glisser, flèches à l’écran ou clavier ; la queue est une liste de
+cases et des clones, murs et morsure, fruits bonus, accélération), **Robot Fonceur**
+(`robo-dash`, Junior : course sans fin, sauter et glisser, obstacles au hasard, décor en trois
+couches de parallaxe, boulons, jour et nuit, vitesse qui monte), **Patrouille Galactique**
+(`galaxy-patrol`, Studio : vaisseau au joystick, tirs automatiques en clones, vagues en formation
+qui tirent, bonus tir triple, bouclier et vie, vaisseau mère avec barre de vie toutes les quatre
+vagues, étoiles en deux couches qui défilent) et **Palet Éclair** (`puck-clash`, Junior : hockey
+sur coussin d’air à deux sur le même téléphone, deux joysticks tenus en même temps, palet qui
+rebondit, buts, premier à 7 ; victoires de chaque couleur stockées). Images (SVG, plusieurs
+costumes) et sons (WAV) dessinés et synthétisés pour Rublox par un script versionné, livrés comme
+fichiers du projet. Dialogue « Nouveau projet » rangé par catégories (Jeux, Pour s’amuser, Utiles
+au quotidien, Pour apprendre), avec une image par modèle et son mode. Le moteur de jeu gagne une
+caméra, le clavier, le glisser du doigt, le retournement, l’ordre d’affichage, l’animation des
+costumes, les plateformes et un rebond par vitesse relative (ci-dessous).
+
+**Écarts au cahier des charges, et pourquoi**
+
+- **Les jeux s’écrivent en TypeScript, se rangent en JSON**, comme les applis du J9 : le petit
+  langage de `packages/explore/authoring/dsl.ts` est passé dans `packages/templates/authoring/`
+  (l’explore le réexporte), une fonction par jeu dans `authoring/games/`, et
+  `pnpm --filter @rublox/templates content` écrit `template.json`, `fr.json`, `en.json`,
+  `assets/` et `cover.svg` (puis `pnpm format`). Un test échoue si le contenu n’est plus à jour.
+  Les éléments communs (écran titre, de fin, record, sons de clic et de fin, « Rejouer », Entrée
+  pour jouer) viennent d’un kit (`authoring/games/kit.ts`) : les six jeux se ressemblent et se
+  lisent pareil.
+- **Images et sons générés par code** (`authoring/games/svg.ts`, `sfx.ts`) : rien n’est repris
+  d’ailleurs, les fichiers sont petits (140 à 270 Ko par jeu) et refaits à l’identique (hasard à
+  graine). Les sons sont des WAV synthétisés (22 050 Hz, 16 bits, mono), pas des OGG : aucun
+  encodeur à ajouter, lus partout.
+- **Un aperçu animé dessiné plutôt qu’une capture** : chaque modèle a un `cover.svg` dessiné
+  avec ses propres images, une petite scène animée en CSS (l’abeille passe entre les colonnes, le
+  robot saute, le palet rebondit…), figée si l’utilisateur demande moins de mouvement. Une capture d’écran animée pèserait des centaines de Ko par jeu dans le
+  studio, et ne suivrait pas les modifications des jeux.
+- **Une même recette pour les deux langues** : seuls les textes changent (noms des composants,
+  des variables et des fonctions, commentaires). Les clés des composants restent anglaises.
+- **Les niveaux de Saute-Nuage sont des lignes de texte** dans un bloc « créer une liste »
+  (`=` sol, `#` terre, `o` pièce, `E` scarabée, `^` piques, `~` nuage qui bouge, `B` ressort, `F`
+  drapeau, `P` départ) : l’élève voit et change le niveau sans éditeur à part. La scène est mise en
+  pause le temps de le construire (une boucle n’attend pas l’image suivante quand la scène est en
+  pause), sinon on verrait le niveau se dessiner.
+- **Équilibrage vérifié par des robots** (`packages/templates/test/bots.ts`) : pour chaque jeu, en
+  FR et EN, un bon joueur simulé tient 60 s et marque des points sans aucun avertissement dans la
+  console, un joueur qui ne fait rien perd, et Entrée relance une partie (hasard à graine). Les
+  seuils sont dans le test.
+- **Toutes les scènes font 360 × 720**, la taille d’un téléphone en portrait, sans bandes.
+- **Palet Éclair n’a pas de record** (on ne bat pas un score à deux) : il compte les victoires de
+  chaque couleur, stockées.
+- **Un bloc « fonction » qui démarre attend moins** : une fonction commençait par `rx.tick()`, ce
+  qui la faisait céder la main et sauter une image quand elle était appelée « à chaque image » ;
+  elle commence maintenant par `rx.enter()`, qui ne cède la main qu’au bout de 16 ms de calcul
+  (une boucle sans fin dans une fonction récursive ne fige toujours rien).
+- **Rebonds entre lutins** : deux lutins solides rebondissaient chacun sur sa propre vitesse ; ils
+  rebondissent maintenant selon leur vitesse l’un par rapport à l’autre, sinon une crosse ne
+  pouvait pas lancer un palet arrêté. Un lutin poussé ne traverse jamais les bords qui l’arrêtent.
+
+**Contrats pour les jalons suivants**
+
+- Catalogue : `ArgDef.values` (argument de méthode à valeurs fixes, menu dans le bloc ;
+  `ComponentStrings.argValues` pour leurs textes) ; `GAME_KEYS` (`left`, `right`, `up`, `down`,
+  `space`, `enter`, `w`, `a`, `s`, `d`, `z`, `q`) et `SWIPE_DIRECTIONS`.
+- Scène de jeu : propriétés `worldWidth`, `worldHeight` (0 = la scène), `cameraX`, `cameraY` ;
+  évènements `keyDown`, `keyUp` (filtre et argument `key`), `swipe` (filtre et argument
+  `direction`, au-delà de 36 unités) ; méthodes `follow(sprite)` (la caméra rejoint la cible au
+  premier pas puis la suit en douceur, sans sortir du monde), `stopFollowing`, `shake(seconds)`,
+  `isKeyPressed(key)`. Le clavier est écouté sur la fenêtre de l’appli quand la scène est
+  affichée ; ZQSD vaut WASD.
+- Lutin : `flipX`, `tiled` (image répétée sur toute la taille), `scroll` (0 à 200 % : comment il
+  suit la caméra ; 100 par défaut, 0 pour un affichage fixe), `value` (nombre propre à chaque
+  clone), `pushable` (faux : une plateforme qui emmène ce qui est posé dessus), `onGround`
+  (état, remis à faux à chaque image) ; méthodes `toFront`, `toBack`, `animate(first, last, fps)`
+  (arrêtée par `stopAnimation` ou un changement de costume). Texte de scène : `scroll` (0 par
+  défaut : un score reste à l’écran). Joystick : `keys` (`none`, `arrows`, `wasd`) ; plusieurs
+  joysticks se tiennent en même temps, un doigt chacun.
+- Moteur : `World.keyDown(key)` et `keyUp(key)`, `gameKey(event)` ; `rx.enter()` en tête des
+  fonctions générées.
+- `@rublox/templates` : `AppSpec.assets` (`key`, `file`, `name`, `kind` image ou son, `mime`,
+  `size`, `sha256`), cité dans les propriétés et les blocs par `asset:<clé>` (`ASSET_PREFIX`) ;
+  identifiants `a-<clé>` avec `stableIds`. `Template.category` (`TEMPLATE_CATEGORIES` : `games`,
+  `fun`, `tools`, `learn`) et `Template.cover` ; `GAME_TEMPLATES`. Paramètres des fonctions dans
+  les recettes (`procedures_defnoreturn` avec `params`, appels avec leurs arguments).
+- Studio : `templateFiles(template)` et `templateCover(id)` (`storage/template-files.ts`, fichiers
+  servis par Vite) ; `backend.create(…, { files })` les range dans le projet invité ou les envoie
+  au serveur (le projet est supprimé si un envoi échoue). Chaînes du J10 :
+  `packages/i18n/src/{fr,en}/games.ts` (espace `studio`, `newProject.*`).
+- Tests : `packages/runtime/test/game.test.ts` (caméra, clavier, deux joysticks, glisser,
+  retournement, animation, ordre, plateformes, palet, construction en pause),
+  `packages/templates/test/games.test.ts` (chaque jeu joué 60 s par un robot en FR et EN, perdu
+  sans joueur, relancé), `e2e/games.spec.ts` (une courte partie de chaque jeu dans l’aperçu),
+  `e2e/a11y-j10.spec.ts`, `e2e/templates-perf.spec.ts` (JavaScript par image de chaque jeu,
+  processeur ralenti ×4 : moins de 5 ms, la moitié d’une image exigée).
+
 ## 1. En bref
 
 Rublox est un clone libre de [Thunkable](https://thunkable.com) : on construit de vraies applis
@@ -1623,6 +1725,26 @@ Acceptation : les 16 niveaux s’ouvrent, tournent sans erreur dans l’aperçu 
 EN ; un test de bout en bout parcourt la visite guidée d’un niveau et réussit un de ses défis ; un
 test vérifie, pour chaque appli, que les identifiants des blocs d’un niveau se retrouvent au
 niveau suivant ; des captures du parcours en Junior et en Studio.
+
+### J10 — Modèles de jeux
+
+Demandé par Guilhem le 18/10/2026 : six modèles de jeux complets, originaux, en FR et EN, pour
+partir d’un vrai jeu et le modifier : plateformes à plusieurs niveaux plus larges que l’écran, tir
+spatial vertical avec vagues, bonus et boss, jeu d’envol entre des obstacles avec médailles,
+serpent sur une grille, course sans fin avec parallaxe et jour/nuit, duel à deux sur le même
+téléphone. Chacun avec écran titre, partie, écran de fin et « Rejouer », record stocké, sons,
+difficulté progressive, vraies images (plusieurs costumes) et sons générés par un script
+versionné, blocs lisibles (fonctions nommées, commentaires, réglages « Change-moi ! »), mode Junior
+ou Studio affiché. Ce qui manque au moteur s’y ajoute de façon générale (caméra, clavier, glisser,
+retournement, ordre d’affichage, animation…), avec ses blocs, ses textes, son aide, ses tests et
+sa place dans la démo. Le dialogue « Nouveau projet » se range par catégories, avec un aperçu de
+chaque jeu.
+
+Acceptation : les 6 modèles existent en FR et EN, se chargent dans Blockly sans bloc inconnu et
+tournent au moins 60 s simulées sans erreur ; un test de bout en bout par modèle (une action change
+le jeu, une partie perdue montre l’écran de fin, « Rejouer » relance) ; tests unitaires des
+ajouts du moteur ; captures de chaque jeu en cours de partie, en clair et en sombre, et du
+nouveau dialogue (`docs/screenshots/j10/`).
 
 ## 9. Hors périmètre
 

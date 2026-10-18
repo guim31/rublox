@@ -88,7 +88,12 @@ or a **template**, a small ready-made app, then “Create from this template”.
 
 | Junior | Studio |
 |---|---|
-| Say hello, Roll the dice, The animal quiz, Who does the dishes?, My sketchbook, Scoreboard, Toothbrush timer, Catch the star | Split the bill, Temperature converter, Shopping list, Tabbed app |
+| Say hello, Roll the dice, The animal quiz, Who does the dishes?, My sketchbook, Scoreboard, Toothbrush timer, Catch the star, Buzzy Bee, Robo Dash, Puck Clash | Split the bill, Temperature converter, Shopping list, Tabbed app, Cloud Hopper, Wiggle Snake, Galaxy Patrol |
+
+Templates are sorted into categories: “Games”, “For fun”, “Everyday helpers” and “To learn” (“All”
+shows them all). Each card shows a picture of the template and its mode, Junior (“For beginners, in
+Junior mode”) or Studio (“To go further, in Studio mode”). The games are described in 10.8.
+([screenshot](../screenshots/j10/junior-light-new-project.png))
 
 **Other buttons.** “Import” opens a `.rublox` file (see 6.5). “Create with AI” only shows when the
 AI assistant is turned on (section 9).
@@ -972,6 +977,49 @@ text, such as a score, in the scene. For sounds, use the Sound component.
 Open the command palette (Ctrl/Cmd + K) and choose “Open the game demo: Catch the fruit”. A complete
 game is created, made only of blocks: play it, look at its blocks, change it. The “Catch the star”
 template is another starting point.
+
+### 10.7 Camera, keyboard, swipes and animation
+
+- **A world bigger than the screen**: give the scene a “world width” (or a “world height”), then
+  “camera of …: follow …” your hero. The camera joins it, follows it smoothly and stops at the
+  edges of the world. “camera x” and “camera y” place it by hand; “shake … for … s” makes it tremble
+  (an explosion, a crash).
+- A sprite’s **scrolling**: at 100% (the default) it moves with the world, at 0% it stays fixed on
+  the screen (a button, a life), in between it scrolls more slowly, like a faraway background
+  (parallax). A scene text stays fixed on the screen (0%) by default.
+- **The keyboard** on a computer: “when … is pressed in …”, “when … is released in …” (arrows,
+  space, Enter, W A S D, Z Q) and “key … is down in …” inside an “if”. A joystick is driven by the
+  keyboard too (“keyboard keys”: “Arrows” or “W A S D (or Z Q S D)”); two joysticks can be held at
+  once, one finger each.
+- **Swipes**: “when a finger swipes … on …” (up, down, left, right).
+- **A sprite** can be “flipped” (it faces the other way); “animate … from costume … to costume …, …
+  frames per second” flips through its costumes on its own (“stop animating …”); “bring … to the
+  front” and “send … to the back” change the drawing order. “Repeated picture (tiles)” covers its
+  whole size with its picture (a floor, a wall). Its “value” is a number of its own, different for
+  each clone (health points).
+- **Platforms**: a solid sprite that “can be pushed” turned off is a platform; when it moves, it
+  carries whatever stands on it. “Standing on something” tells whether a sprite stands on its feet
+  (to jump only from the ground).
+
+### 10.8 The game templates
+
+Six complete games, to play and then to change (“New project”, “Games” category):
+
+| Game | Mode | How to play |
+|---|---|---|
+| Buzzy Bee | Junior | Tap the screen to fly between the honey columns; bronze, silver and gold medals. |
+| Robo Dash | Junior | An endless run: jump and slide (buttons, swipes up or down, space and arrows); grab the bolts; day, night, faster and faster. |
+| Puck Clash | Junior | Air hockey for two on the same phone: one joystick each (on a keyboard, W A S D and the arrows); first to 7 goals. |
+| Cloud Hopper | Studio | A platformer: run, jump, stomp the beetles, avoid the spikes, reach the flag; three levels wider than the screen. |
+| Wiggle Snake | Studio | The snake grows with each fruit: swipe, tap the arrows or use the keyboard. |
+| Galaxy Patrol | Studio | A space shooter: move the ship with the joystick, it fires on its own; waves of enemies, power-ups, a mothership every four waves. |
+
+Each game has a title screen (“Play”, the best score), an end screen (“Play again”) and keeps your
+best score on the device. In the blocks, the “settings” function is marked **“Change me!”**: its
+numbers tune the game (lives, speed, gravity…), try other values. The pictures and sounds are in the
+project’s files: replace them with yours. Cloud Hopper’s levels are lines of text in the “draw the
+levels” function: one character per cell (`=` ground, `o` coin, `E` beetle, `^` spikes…), draw your
+own. ([screenshots](../screenshots/j10/))
 
 ---
 

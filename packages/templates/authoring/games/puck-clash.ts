@@ -165,7 +165,6 @@ const WINS = { fr: 'Victoires : Bleu ', en: 'Wins: Blue ' }
 const RED = { fr: ' · Rouge ', en: ' · Red ' }
 
 const play = () => cmp(v('state'), '=', str(STATE.play))
-const minus = (value: Block) => math(num(0), '-', value)
 
 const sprite = (key: string, name: { fr: string; en: string }, props: Record<string, unknown>) => ({
   key,

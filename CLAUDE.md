@@ -104,6 +104,13 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   ~3 min), `npx playwright test --project=e2e e2e/explore.spec.ts e2e/a11y-j9.spec.ts`. Après une
   modification d'un niveau : `pnpm --filter @rublox/explore content` puis `pnpm format`. Captures :
   `npx playwright test --project=screenshots e2e/screenshots-j9.spec.ts` → `docs/screenshots/j9/`.
+- Modèles de jeux (J10) : après une modification de `packages/templates/authoring/games/`,
+  `pnpm --filter @rublox/templates content` puis `pnpm format` (images, sons, couvertures et JSON
+  régénérés à l'identique). Les robots : `cd packages/templates && npx vitest run
+  test/games.test.ts` (chaque jeu 60 s simulées en FR et EN). Dans le navigateur :
+  `npx playwright test --project=e2e e2e/games.spec.ts e2e/a11y-j10.spec.ts` ; débit :
+  `npx playwright test --project=perf --no-deps e2e/templates-perf.spec.ts`. Captures :
+  `npx playwright test --project=screenshots e2e/screenshots-j10.spec.ts` → `docs/screenshots/j10/`.
 - `pnpm --filter @rublox/server db:generate` : migration Drizzle après un changement de
   `apps/server/src/db/schema.ts`.
 - `docker build -f docker/Dockerfile .` et `docker compose -f docker/compose.yaml up`.
@@ -153,6 +160,13 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   précédent), puis `pnpm --filter @rublox/explore content` et `pnpm format`. Une nouvelle appli :
   `authoring/apps.ts`, `src/content.ts` (imports JSON), son badge dans `EXPLORE_BADGES`
   (`@rublox/learn`) et ses textes dans `packages/i18n/src/{fr,en}/explore.ts`.
+- Un modèle de jeu (J10) : un fichier `packages/templates/authoring/games/<appli>.ts` (une
+  `GameSource` : composants, blocs du petit langage `authoring/dsl.ts`, images SVG de `svg.ts`,
+  sons de `sfx.ts`, écran titre, fin et record par le kit `kit.ts`), une ligne dans
+  `authoring/games/index.ts` et dans `src/games.ts` (imports JSON), un robot dans
+  `test/bots.ts`, puis `pnpm --filter @rublox/templates content` et `pnpm format`. Une catégorie
+  par modèle (`category` de `template.json`). Les fichiers d'un modèle (`assets/`, `cover.svg`)
+  sont servis au studio par Vite (`storage/template-files.ts`).
 - Tout ce qui touche l'IA côté studio se montre seulement si `useFeatures().ai` (ou `aiAllowed()`
   hors React) ; un composant qui a besoin de l'IA va dans `AI_TYPES` (`lib/features.ts`).
 - Une information partagée avec les autres éditeurs (présence) : un champ de `PresenceState`
@@ -386,3 +400,24 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
 - **Moteur et minuteurs dans Vitest** : `vi.useFakeTimers()` puis `vi.advanceTimersByTimeAsync`
   à chaque image fait sonner les composants Minuteur (`packages/explore/test/run.test.ts`) ; le
   chargement du module (`import` d'une adresse `data:`) n'utilise pas de minuteur.
+- **Texte d'un bloc dans le SVG** : `textContent` d'un bloc ne suit pas l'ordre de lecture (les
+  étiquettes viennent après les champs et les blocs imbriqués) ; trouver un bloc par **son**
+  champ (`filter({ has: locator(':scope > .blocklyVariableField', { hasText }) })`,
+  `e2e/games.spec.ts`), jamais par une expression ancrée sur son texte.
+- **Fonctions appelées à chaque image** : le code d'une fonction commençait par `rx.tick()`, qui
+  cède la main et lui faisait rater une image sur deux ; c'est `rx.enter()`, qui ne cède qu'au
+  bout de 16 ms de calcul. Une boucle dans une scène en pause n'attend pas l'image suivante : de
+  quoi construire un niveau d'un coup.
+- **Nouveau dossier de `content/templates/`** : Vite ne voit les fichiers d'un modèle
+  (`import.meta.glob`) qu'au démarrage ; relancer `pnpm dev` après en avoir ajouté un.
+- **Tests des jeux** : `Math.random` est remplacé par un hasard à graine (`test/play.ts`), sinon
+  un robot perd au hasard ; un état gardé au niveau du module (par exemple « le robot a déjà
+  perdu ») se remet à zéro à la première image de chaque partie.
+- **Collisions entre lutins solides** : un lutin immobile n'est pas poussé (un mur), sauf par un
+  lutin qui ne se laisse pas pousser ou qu'on glisse (une crosse) ; après la poussée,
+  `keepInside` le garde dans la scène (le palet sortait de la table).
+- **Captures et badges** : un modèle fait gagner plusieurs badges à l'ouverture, autant de
+  toasts ; les fermer tous (`screenshots-j10.spec.ts`).
+- **Biome et contenu généré** : les SVG des modèles (`content/templates/*/assets`, `cover.svg`)
+  sont exclus de Biome ; un remplacement de texte dans un fichier passé par `pnpm format` doit
+  vérifier que son motif existe encore (le formatage le déplace).

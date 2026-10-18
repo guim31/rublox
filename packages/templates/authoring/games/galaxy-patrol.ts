@@ -5,7 +5,6 @@ import {
   bool,
   call,
   change,
-  choose,
   cmp,
   count,
   fn,
@@ -351,7 +350,6 @@ const LIVES = { fr: 'afficher les vies', en: 'show the lives' }
 const NEXT = { fr: 'vague suivante', en: 'next wave' }
 
 const play = () => cmp(v('state'), '=', str(STATE.play))
-const minus = (value: Block) => math(num(0), '-', value)
 const self = (key: string, name: string) => prop('Sprite', key, name)
 
 const sprite = (key: string, name: { fr: string; en: string }, props: Record<string, unknown>) => ({
