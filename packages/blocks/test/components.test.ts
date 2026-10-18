@@ -7,6 +7,7 @@ import {
   eventBlockType,
   generateWorkspaceCode,
   getterBlockType,
+  isFieldArg,
   methodBlockType,
   propertyKeys,
   setterBlockType,
@@ -74,12 +75,19 @@ function stacksFor(def: ComponentDef, id: string, rootId: string): Record<string
     })
   }
   for (const [name, method] of Object.entries(def.methods)) {
+    // A component or a choice is a field of the block, any other argument a value input.
+    const args = Object.values(method.args).map((arg, index) => [`ARG${index}`, arg] as const)
     const inputs = Object.fromEntries(
-      Object.values(method.args).map((arg, index) => [`ARG${index}`, { block: sample(arg.kind) }]),
+      args
+        .filter(([, arg]) => !isFieldArg(arg))
+        .map(([key, arg]) => [key, { block: sample(arg.kind) }]),
+    )
+    const fields = Object.fromEntries(
+      args.filter(([, arg]) => isFieldArg(arg)).map(([key, arg]) => [key, arg.values?.[0] ?? id]),
     )
     const call: BlocklyJson = {
       type: methodBlockType(def.type, name),
-      fields: { COMPONENT: id },
+      fields: { COMPONENT: id, ...fields },
       inputs,
     }
     statements.push(

@@ -8,6 +8,7 @@ import {
   num,
   sceneTextStyle,
   spriteStyle,
+  tileStyle,
 } from '../game/draw.ts'
 import { type Renderer, rootAttributes, useExpose } from './types.ts'
 
@@ -80,7 +81,9 @@ export const SpriteRenderer: Renderer = (p) => {
       className="rx-body rx-body-Sprite"
       style={{ ...p.style, ...box }}
     >
-      {costume?.kind === 'image' ? (
+      {costume?.kind === 'image' && p.props.tiled === true ? (
+        <span className="rx-body-tiles" style={tileStyle(costume.src)} />
+      ) : costume?.kind === 'image' ? (
         <img src={costume.src} alt="" draggable={false} />
       ) : costume ? (
         <span>{costume.text}</span>

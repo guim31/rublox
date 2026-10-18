@@ -5,6 +5,7 @@ import {
   bool,
   call,
   eventValue,
+  filtered,
   get,
   join,
   log,
@@ -285,12 +286,18 @@ export function createDemoProject(input: {
     c('snapshot', 'Image', { height: 100, fit: 'contain' }),
     c('canvas', 'Canvas', { height: 200 }),
     button('clear', L.clear, { variant: 'ghost' }),
-    // Game mode (J7): a small scene with a sprite to tap and a joystick to steer it.
-    c('scene', 'GameScene', { height: 240, grow: false, sceneWidth: 360, sceneHeight: 240 }, [
-      c('ball', 'Sprite', { costumes: ['⚽', '🏀'], x: 180, y: 110, edges: 'stop' }),
-      c('sceneText', 'SceneText', { x: 180, y: 28 }),
-      c('stick', 'Joystick', { x: 70, y: 170, size: 100 }),
-    ]),
+    // Game mode (J7): a small scene with a sprite to tap and a joystick to steer it; J10: a
+    // world twice as wide that the camera scrolls, keys, swipes, an animated, flipped sprite.
+    c(
+      'scene',
+      'GameScene',
+      { height: 240, grow: false, sceneWidth: 360, sceneHeight: 240, worldWidth: 720 },
+      [
+        c('ball', 'Sprite', { costumes: ['⚽', '🏀'], x: 180, y: 110, edges: 'stop' }),
+        c('sceneText', 'SceneText', { x: 180, y: 28 }),
+        c('stick', 'Joystick', { x: 70, y: 170, size: 100 }),
+      ],
+    ),
   ])
 
   const deviceButtons: [string, string][] = [
@@ -485,6 +492,20 @@ export function createDemoProject(input: {
     on('Sprite', 'tap', 'ball', [call('Sprite', 'ball', 'nextCostume')]),
     on('Joystick', 'move', 'stick', [
       call('Sprite', 'ball', 'moveBy', [eventValue('dx'), eventValue('dy')]),
+      set('Sprite', 'ball', 'flipX', {
+        type: 'logic_compare',
+        fields: { OP: 'LT' },
+        inputs: { A: { block: eventValue('dx') }, B: { block: num(0) } },
+      }),
+    ]),
+    on('GameScene', 'start', 'scene', [
+      { type: 'rx_GameScene_call_follow', fields: { COMPONENT: 'scene', ARG0: 'ball' } },
+      call('Sprite', 'ball', 'animate', [num(1), num(2), num(2)]),
+    ]),
+    filtered(on('GameScene', 'keyDown', 'scene', [call('Sprite', 'ball', 'toFront')]), 'space'),
+    on('GameScene', 'swipe', 'scene', [
+      call('GameScene', 'scene', 'shake', [num(0.3)]),
+      set('SceneText', 'sceneText', 'text', eventValue('direction')),
     ]),
     on('Video', 'ended', 'video', [log(text('video'))]),
     on('Lottie', 'complete', 'lottie', [log(text('lottie'))]),

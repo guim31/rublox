@@ -400,12 +400,17 @@ export type ArgDef = {
   kind: PropKind | 'component'
   componentType?: string
   default?: unknown
+  /**
+   * The choices of an `enum` argument, picked in a dropdown of the block (labels in
+   * `strings.argValues[arg]`); the generated code passes the value as a text.
+   */
+  values?: readonly string[]
 }
 
 /** An argument of an event or a method: `arg('number')`, `arg('number', { default: 10 })`. */
 export function arg(
   kind: ArgDef['kind'],
-  options: { componentType?: string; default?: unknown } = {},
+  options: { componentType?: string; default?: unknown; values?: readonly string[] } = {},
 ): ArgDef {
   return { kind, ...options }
 }
@@ -527,6 +532,8 @@ export type ComponentStrings = {
   args?: Record<string, string>
   /** Labels of event filter choices, by event, with `any`: `{ edge: { any: 'un bord', … } }`. */
   filters?: Record<string, Record<string, string>>
+  /** Labels of the choices of `enum` method arguments, by argument: `{ key: { space: … } }`. */
+  argValues?: Record<string, Record<string, string>>
 }
 
 export type ComponentDef = {

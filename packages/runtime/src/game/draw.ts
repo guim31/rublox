@@ -27,8 +27,25 @@ export function costumeOf(
   return src ? { kind: 'image', src } : { kind: 'glyph', text: value }
 }
 
-/** Size and place of a sprite: its center at (x, y), turned by `rotation` degrees. */
-export function spriteStyle(values: Values): {
+/** Where the camera looks (J10): what to take off a body's place, already scaled by its scroll. */
+export type Offset = { x: number; y: number }
+
+const NO_OFFSET: Offset = { x: 0, y: 0 }
+
+/** How much a body follows the camera: 1 with the world, 0 fixed on the screen. */
+export function scrollOf(type: string, values: Values): number {
+  if (type === 'Joystick') return 0
+  return Math.max(0, num(values.scroll, type === 'SceneText' ? 0 : 100)) / 100
+}
+
+/**
+ * Size and place of a sprite: its center at (x, y), turned by `rotation` degrees, mirrored
+ * when `flipX`, moved by the camera's `offset`.
+ */
+export function spriteStyle(
+  values: Values,
+  offset: Offset = NO_OFFSET,
+): {
   width: string
   height: string
   transform: string
@@ -36,17 +53,31 @@ export function spriteStyle(values: Values): {
 } {
   const w = num(values.width, 64)
   const h = num(values.height, 64)
+  const x = Math.round((num(values.x) - w / 2 - offset.x) * 100) / 100
+  const y = Math.round((num(values.y) - h / 2 - offset.y) * 100) / 100
   return {
     width: `${w}px`,
     height: `${h}px`,
-    transform: `translate(${num(values.x) - w / 2}px, ${num(values.y) - h / 2}px) rotate(${num(values.rotation)}deg)`,
+    transform: `translate(${x}px, ${y}px) rotate(${num(values.rotation)}deg)${values.flipX === true ? ' scaleX(-1)' : ''}`,
     fontSize: `${Math.min(w, h) * 0.82}px`,
+  }
+}
+
+/** A repeated picture (`tiled`): tiles as high as the sprite, side by side. */
+export function tileStyle(src: string): Record<string, string> {
+  return {
+    backgroundImage: `url(${JSON.stringify(src)})`,
+    backgroundSize: 'auto 100%',
+    backgroundRepeat: 'repeat-x',
   }
 }
 
 const ANCHOR: Record<string, string> = { left: '0', center: '-50%', right: '-100%' }
 
-export function sceneTextStyle(values: Values): {
+export function sceneTextStyle(
+  values: Values,
+  offset: Offset = NO_OFFSET,
+): {
   transform: string
   fontSize: string
   color: string
@@ -57,7 +88,7 @@ export function sceneTextStyle(values: Values): {
   const align = String(values.align ?? 'center')
   const outline = values.outline !== false
   return {
-    transform: `translate(${num(values.x)}px, ${num(values.y)}px) translate(${ANCHOR[align] ?? '-50%'}, -50%) rotate(${num(values.rotation)}deg)`,
+    transform: `translate(${num(values.x) - offset.x}px, ${num(values.y) - offset.y}px) translate(${ANCHOR[align] ?? '-50%'}, -50%) rotate(${num(values.rotation)}deg)`,
     fontSize: `${num(values.fontSize, 28)}px`,
     color: cssColor(values.color) ?? '#1b1a24',
     fontWeight: values.bold === false ? '500' : '800',

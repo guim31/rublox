@@ -1,6 +1,11 @@
 export * from './common.ts'
 export * from './component.ts'
-export { SCENE_CHILD_TYPES } from './components/game-scene.ts'
+export {
+  GAME_KEYS,
+  type GameKey,
+  SCENE_CHILD_TYPES,
+  SWIPE_DIRECTIONS,
+} from './components/game-scene.ts'
 export * from './define.ts'
 export * from './demo/demo.ts'
 export * from './demos/bouncing.ts'

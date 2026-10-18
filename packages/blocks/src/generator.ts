@@ -10,6 +10,7 @@ import {
   eventArgsOf,
   eventBlockType,
   getterBlockType,
+  isChoiceArg,
   isFieldArg,
   methodBlockType,
   setterBlockType,
@@ -324,9 +325,11 @@ function installBlockGenerators(generator: Gen): void {
       f[methodBlockType(def.type, method)] = (block, g) => {
         const name = g.componentName(block.getFieldValue('COMPONENT'))
         const args = Object.values(info.args).map((arg, index) =>
-          isFieldArg(arg)
-            ? (g.componentName(block.getFieldValue(`ARG${index}`)) ?? 'null')
-            : g.valueToCode(block, `ARG${index}`, Order.NONE) || 'null',
+          isChoiceArg(arg)
+            ? quote(String(block.getFieldValue(`ARG${index}`) ?? ''))
+            : isFieldArg(arg)
+              ? (g.componentName(block.getFieldValue(`ARG${index}`)) ?? 'null')
+              : g.valueToCode(block, `ARG${index}`, Order.NONE) || 'null',
         )
         const call = `${info.async ? 'await ' : ''}${name}.${method}(${args.join(', ')})`
         if (info.returns)

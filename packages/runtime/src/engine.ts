@@ -1097,7 +1097,7 @@ export class Engine {
           if (live && node && def) {
             const coerced = def.props[key]?.coerce(value)
             if (coerced === undefined || def.props[key]?.state) this.invalid(node.name, key, value)
-            else live.world.set(live.body, key, coerced)
+            else live.world.write(live.body, key, coerced)
             return true
           }
           this.writeProp(instance, componentId, key, value)

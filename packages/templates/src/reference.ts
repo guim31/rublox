@@ -48,7 +48,13 @@ export function catalogReference(): string {
     const methods = Object.entries(def.methods).map(([name, info]) => {
       const args = Object.entries(info.args).map(
         ([arg, argDef]) =>
-          `${arg}:${argDef.kind === 'component' ? `${argDef.componentType} (a field)` : argDef.kind}`,
+          `${arg}:${
+            argDef.kind === 'component'
+              ? `${argDef.componentType} (a field)`
+              : argDef.values?.length
+                ? `"${argDef.values.join('|')}" (a field)`
+                : argDef.kind
+          }`,
       )
       return `${name}(${args.join(', ')})${info.returns ? ` -> ${info.returns}` : ''}`
     })
@@ -74,7 +80,7 @@ Component blocks (Type = the component type):
 - rx_<Type>_on_<event>: fields COMPONENT (+ FILTER when the event has one); statement input DO. A top block.
 - rx_<Type>_get: fields COMPONENT, PROP (a readable property). Value.
 - rx_<Type>_set: fields COMPONENT, PROP (a writable property); input VALUE. Statement.
-- rx_<Type>_call_<method>: field COMPONENT; inputs ARG0, ARG1… in the method's order (a component argument is a field ARGn holding a name). Statement, or value when the method returns something.
+- rx_<Type>_call_<method>: field COMPONENT; inputs ARG0, ARG1… in the method's order (a component argument is a field ARGn holding a name; a choice argument is a field ARGn holding one of its values). Statement, or value when the method returns something.
 - rx_event_value: field ARG (one of the args of the enclosing event). Value, only inside that event.
 
 General blocks:

@@ -367,6 +367,10 @@ class Builder {
               arg.componentType ?? component.def.type,
               `${path}.ARG${index}`,
             )
+          } else if (arg.kind === 'enum' && arg.values?.length) {
+            const value = String(fields[`ARG${index}`] ?? arg.default ?? '')
+            if (arg.values.includes(value)) fields[`ARG${index}`] = value
+            else this.issue(`${path}.fields.ARG${index}`, `use one of: ${arg.values.join(', ')}`)
           }
         })
       }

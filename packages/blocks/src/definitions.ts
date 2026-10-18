@@ -145,7 +145,21 @@ function filterField(def: ComponentDef, event: string, filter: EventFilter): Blo
 
 /** Is a method or event argument chosen in a dropdown (a component) rather than plugged in? */
 export function isFieldArg(arg: ArgDef | undefined): boolean {
-  return arg?.kind === 'component'
+  return arg?.kind === 'component' || isChoiceArg(arg)
+}
+
+/** Is a method argument one of a few values, picked in a dropdown (a key)? */
+export function isChoiceArg(arg: ArgDef | undefined): boolean {
+  return arg?.kind === 'enum' && Boolean(arg.values?.length)
+}
+
+/** The dropdown of an `enum` method argument. */
+function choiceField(def: ComponentDef, name: string, values: readonly string[]): Blockly.Field {
+  const label = (value: string) =>
+    componentStrings(def.type, getBlocksLocale())?.argValues?.[name]?.[value] ?? value
+  return asField(
+    new Blockly.FieldDropdown(() => values.map((value): [string, string] => [label(value), value])),
+  )
 }
 
 function defineComponentBlocks(def: ComponentDef): void {
@@ -226,12 +240,18 @@ function defineComponentBlocks(def: ComponentDef): void {
         const template = strings.methods[name] ?? name
         const pieces = parts(template)
         const args = Object.values(method.args)
+        const names = Object.keys(method.args)
         let input: Blockly.Input = this.appendDummyInput()
         for (const part of pieces) {
           if (part === 1) input.appendField(asField(new ComponentField(def.type)), 'COMPONENT')
           else if (typeof part === 'number') {
             const arg = args[part - 2]
-            if (isFieldArg(arg)) {
+            if (arg && isChoiceArg(arg)) {
+              input.appendField(
+                choiceField(def, names[part - 2] ?? '', arg.values ?? []),
+                `ARG${part - 2}`,
+              )
+            } else if (isFieldArg(arg)) {
               input.appendField(
                 asField(new ComponentField(arg?.componentType ?? def.type)),
                 `ARG${part - 2}`,

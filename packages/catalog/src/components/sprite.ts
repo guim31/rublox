@@ -78,6 +78,19 @@ export const Sprite = defineComponent({
     }),
     solid: prop.boolean({ default: false, group: 'advanced', blocks: 'get-set' }),
     isClone: prop.boolean({ default: false, group: 'advanced', blocks: 'get', state: true }),
+    flipX: prop.boolean({ default: false, group: 'style', junior: true, blocks: 'get-set' }),
+    tiled: prop.boolean({ default: false, group: 'style', blocks: 'get-set' }),
+    scroll: prop.number({
+      default: 100,
+      min: 0,
+      max: 200,
+      step: 10,
+      group: 'layout',
+      blocks: 'get-set',
+    }),
+    value: prop.number({ default: 0, group: 'advanced', blocks: 'get-set' }),
+    pushable: prop.boolean({ default: true, group: 'advanced', blocks: 'get-set' }),
+    onGround: prop.boolean({ default: false, group: 'advanced', blocks: 'get', state: true }),
   },
   events: {
     tap: event({ junior: true }),
@@ -120,13 +133,24 @@ export const Sprite = defineComponent({
     delete: method({ junior: true }),
     isTouching: method({ junior: true, args: { target: sprite }, returns: 'boolean' }),
     distanceTo: method({ args: { target: sprite }, returns: 'number' }),
+    toFront: method({ junior: true }),
+    toBack: method({ junior: true }),
+    animate: method({
+      junior: true,
+      args: {
+        first: { kind: 'number', default: 1 },
+        last: { kind: 'number', default: 2 },
+        fps: { kind: 'number', default: 8 },
+      },
+    }),
+    stopAnimation: method(),
   },
   strings: {
     fr: {
       label: 'Lutin',
       prefix: 'Lutin',
       description: 'Un personnage ou un objet qui bouge dans la scène.',
-      help: 'Un lutin est une image ou un émoji posé dans une scène de jeu. Il peut avancer, tourner, glisser, tomber avec la gravité, rebondir, et savoir quand il touche un autre lutin ou un bord. Ses costumes sont ses différentes images. Crée des clones pour faire apparaître plein de copies : dans les blocs « quand … », le nom du lutin désigne alors le clone concerné. Un clone qui sort complètement de la scène disparaît tout seul.',
+      help: 'Un lutin est une image ou un émoji posé dans une scène de jeu. Il peut avancer, tourner, glisser, tomber avec la gravité, rebondir, et savoir quand il touche un autre lutin ou un bord. Ses costumes sont ses différentes images : « animer » les fait défiler tout seuls, « retourné » le fait regarder de l’autre côté. Crée des clones pour faire apparaître plein de copies : dans les blocs « quand … », le nom du lutin désigne alors le clone concerné, et sa « valeur » lui est propre (ses points de vie, par exemple). Un clone qui sort complètement de la scène disparaît tout seul. Un lutin solide posé sur un autre est « posé sur quelque chose » ; s’il ne se laisse pas pousser, c’est une plateforme qui emmène ceux qui sont dessus. « Défilement » dit comment il suit la caméra : 100 % avec le monde, 0 % fixé à l’écran, entre les deux pour un décor lointain.',
       example: 'Quand Pomme touche Panier, ajouter 1 au score puis supprimer Pomme',
       props: {
         costumes: 'costumes',
@@ -145,6 +169,12 @@ export const Sprite = defineComponent({
         collision: 'forme des collisions',
         solid: 'solide',
         isClone: 'est un clone',
+        flipX: 'retourné',
+        tiled: 'image répétée (mosaïque)',
+        scroll: 'défilement avec la caméra (%)',
+        value: 'valeur',
+        pushable: 'se laisse pousser',
+        onGround: 'posé sur quelque chose',
       },
       events: {
         tap: 'quand on touche %1',
@@ -167,6 +197,10 @@ export const Sprite = defineComponent({
         delete: 'supprimer %1',
         isTouching: '%1 touche %2',
         distanceTo: 'distance de %1 à %2',
+        toFront: 'mettre %1 devant tout',
+        toBack: 'mettre %1 derrière tout',
+        animate: 'animer %1 du costume %2 au costume %3, %4 images par seconde',
+        stopAnimation: 'arrêter l’animation de %1',
       },
       enums: {
         edges: {
@@ -193,7 +227,7 @@ export const Sprite = defineComponent({
       label: 'Sprite',
       prefix: 'Sprite',
       description: 'A character or an object that moves in the scene.',
-      help: 'A sprite is an image or an emoji in a game scene. It can move, turn, glide, fall with gravity, bounce, and tell when it touches another sprite or an edge. Its costumes are its different pictures. Create clones to make many copies appear: in "when …" blocks, the sprite’s name then means the clone concerned. A clone that leaves the scene completely disappears on its own.',
+      help: 'A sprite is an image or an emoji in a game scene. It can move, turn, glide, fall with gravity, bounce, and tell when it touches another sprite or an edge. Its costumes are its different pictures: "animate" flips through them on its own, "flipped" makes it face the other way. Create clones to make many copies appear: in "when …" blocks, the sprite’s name then means the clone concerned, and its "value" is its own (its health points, for instance). A clone that leaves the scene completely disappears on its own. A solid sprite resting on another one is "standing on something"; if it cannot be pushed, it is a platform that carries whoever stands on it. "Scrolling" says how it follows the camera: 100% with the world, 0% fixed on the screen, in between for a faraway background.',
       example: 'When Apple touches Basket, add 1 to the score then delete Apple',
       props: {
         costumes: 'costumes',
@@ -212,6 +246,12 @@ export const Sprite = defineComponent({
         collision: 'collision shape',
         solid: 'solid',
         isClone: 'is a clone',
+        flipX: 'flipped',
+        tiled: 'repeated picture (tiles)',
+        scroll: 'scrolling with the camera (%)',
+        value: 'value',
+        pushable: 'can be pushed',
+        onGround: 'standing on something',
       },
       events: {
         tap: 'when %1 is tapped',
@@ -234,6 +274,10 @@ export const Sprite = defineComponent({
         delete: 'delete %1',
         isTouching: '%1 touches %2',
         distanceTo: 'distance from %1 to %2',
+        toFront: 'bring %1 to the front',
+        toBack: 'send %1 to the back',
+        animate: 'animate %1 from costume %2 to costume %3, %4 frames per second',
+        stopAnimation: 'stop animating %1',
       },
       enums: {
         edges: {
