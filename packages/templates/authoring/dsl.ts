@@ -167,6 +167,17 @@ export const length = (of: Value): Value => ({
   type: 'lists_length',
   inputs: { VALUE: { block: of } },
 })
+/** The letter at `at` (from 1) of a text. */
+export const charAt = (text: Value, at: Value | number): Value => ({
+  type: 'text_charAt',
+  fields: { WHERE: 'FROM_START' },
+  inputs: { VALUE: { block: text }, AT: { block: typeof at === 'number' ? num(at) : at } },
+})
+/** The number of letters of a text. */
+export const textLength = (text: Value): Value => ({
+  type: 'text_length',
+  inputs: { VALUE: { block: text } },
+})
 export const split = (text: Value, by: Text): Value => ({
   type: 'lists_split',
   fields: { MODE: 'SPLIT' },

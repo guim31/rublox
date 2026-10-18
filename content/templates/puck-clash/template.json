@@ -182,9 +182,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:rink"
-                  ],
+                  "costumes": ["asset:rink"],
                   "x": 180,
                   "y": 360,
                   "width": 360,
@@ -200,9 +198,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:spark"
-                  ],
+                  "costumes": ["asset:spark"],
                   "x": -100,
                   "y": -100,
                   "width": 56,
@@ -220,10 +216,7 @@
                 },
                 "props": {
                   "collision": "circle",
-                  "costumes": [
-                    "asset:puck",
-                    "asset:puck-glow"
-                  ],
+                  "costumes": ["asset:puck", "asset:puck-glow"],
                   "x": 180,
                   "y": 360,
                   "width": 44,
@@ -241,9 +234,7 @@
                 },
                 "props": {
                   "collision": "circle",
-                  "costumes": [
-                    "asset:bat-blue"
-                  ],
+                  "costumes": ["asset:bat-blue"],
                   "x": 180,
                   "y": 620,
                   "width": 68,
@@ -262,9 +253,7 @@
                 },
                 "props": {
                   "collision": "circle",
-                  "costumes": [
-                    "asset:bat-red"
-                  ],
+                  "costumes": ["asset:bat-red"],
                   "x": 180,
                   "y": 100,
                   "width": 68,
@@ -417,14 +406,13 @@
                   "en": "PlayButton"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:button"
-                  ],
+                  "costumes": ["asset:button"],
                   "x": 180,
                   "y": 470,
                   "width": 220,
                   "height": 80,
-                  "collision": "none"
+                  "collision": "none",
+                  "scroll": 0
                 }
               },
               {
@@ -469,14 +457,13 @@
                   "en": "Panel"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:panel"
-                  ],
+                  "costumes": ["asset:panel"],
                   "x": 180,
                   "y": 360,
                   "width": 300,
                   "height": 340,
                   "collision": "none",
+                  "scroll": 0,
                   "visible": false
                 }
               },
@@ -549,14 +536,13 @@
                   "en": "AgainButton"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:button"
-                  ],
+                  "costumes": ["asset:button"],
                   "x": 180,
                   "y": 480,
                   "width": 220,
                   "height": 80,
                   "collision": "none",
+                  "scroll": 0,
                   "visible": false
                 }
               },

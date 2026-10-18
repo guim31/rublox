@@ -28,7 +28,8 @@ describe('templates', () => {
     expect(TEMPLATES.map((t) => t.id).sort()).toEqual(folders)
   })
 
-  it('has the twelve templates of J6 and the games of J10, each in a category', () => {
+  it('has the twelve templates of J6 and the six games of J10, each in a category', () => {
+    expect(GAME_TEMPLATES).toHaveLength(6)
     expect(TEMPLATES).toHaveLength(12 + GAME_TEMPLATES.length)
     expect(TEMPLATES.filter((template) => template.category === 'games')).toHaveLength(
       1 + GAME_TEMPLATES.length,

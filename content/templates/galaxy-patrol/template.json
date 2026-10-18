@@ -272,9 +272,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:stars"
-                  ],
+                  "costumes": ["asset:stars"],
                   "x": 180,
                   "y": 360,
                   "width": 360,
@@ -291,9 +289,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:stars"
-                  ],
+                  "costumes": ["asset:stars"],
                   "x": 180,
                   "y": -360,
                   "width": 360,
@@ -310,9 +306,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:planet"
-                  ],
+                  "costumes": ["asset:planet"],
                   "x": 280,
                   "y": 160,
                   "width": 120,
@@ -329,11 +323,7 @@
                 },
                 "props": {
                   "collision": "circle",
-                  "costumes": [
-                    "asset:triple",
-                    "asset:shield",
-                    "asset:life"
-                  ],
+                  "costumes": ["asset:triple", "asset:shield", "asset:life"],
                   "x": -100,
                   "y": -100,
                   "width": 40,
@@ -350,9 +340,7 @@
                 },
                 "props": {
                   "collision": "box",
-                  "costumes": [
-                    "asset:laser"
-                  ],
+                  "costumes": ["asset:laser"],
                   "x": -100,
                   "y": -200,
                   "width": 10,
@@ -369,9 +357,7 @@
                 },
                 "props": {
                   "collision": "circle",
-                  "costumes": [
-                    "asset:bullet"
-                  ],
+                  "costumes": ["asset:bullet"],
                   "x": -100,
                   "y": -300,
                   "width": 18,
@@ -388,11 +374,7 @@
                 },
                 "props": {
                   "collision": "box",
-                  "costumes": [
-                    "asset:saucer",
-                    "asset:wasp",
-                    "asset:crab"
-                  ],
+                  "costumes": ["asset:saucer", "asset:wasp", "asset:crab"],
                   "x": -100,
                   "y": -400,
                   "width": 50,
@@ -409,10 +391,7 @@
                 },
                 "props": {
                   "collision": "box",
-                  "costumes": [
-                    "asset:boss",
-                    "asset:boss-hurt"
-                  ],
+                  "costumes": ["asset:boss", "asset:boss-hurt"],
                   "x": 180,
                   "y": -80,
                   "width": 180,
@@ -429,11 +408,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:boom-1",
-                    "asset:boom-2",
-                    "asset:boom-3"
-                  ],
+                  "costumes": ["asset:boom-1", "asset:boom-2", "asset:boom-3"],
                   "x": -100,
                   "y": -500,
                   "width": 64,
@@ -450,10 +425,7 @@
                 },
                 "props": {
                   "collision": "box",
-                  "costumes": [
-                    "asset:ship-1",
-                    "asset:ship-2"
-                  ],
+                  "costumes": ["asset:ship-1", "asset:ship-2"],
                   "x": 180,
                   "y": 560,
                   "width": 56,
@@ -470,9 +442,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:bubble"
-                  ],
+                  "costumes": ["asset:bubble"],
                   "x": 180,
                   "y": 560,
                   "width": 88,
@@ -489,9 +459,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:bar-frame"
-                  ],
+                  "costumes": ["asset:bar-frame"],
                   "x": 180,
                   "y": 92,
                   "width": 220,
@@ -508,9 +476,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:bar-fill"
-                  ],
+                  "costumes": ["asset:bar-fill"],
                   "x": 180,
                   "y": 92,
                   "width": 210,
@@ -527,9 +493,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:heart"
-                  ],
+                  "costumes": ["asset:heart"],
                   "x": 30,
                   "y": 38,
                   "width": 30,
@@ -670,14 +634,13 @@
                   "en": "PlayButton"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:button"
-                  ],
+                  "costumes": ["asset:button"],
                   "x": 180,
                   "y": 470,
                   "width": 220,
                   "height": 80,
-                  "collision": "none"
+                  "collision": "none",
+                  "scroll": 0
                 }
               },
               {
@@ -723,14 +686,13 @@
                   "en": "Panel"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:panel"
-                  ],
+                  "costumes": ["asset:panel"],
                   "x": 180,
                   "y": 360,
                   "width": 300,
                   "height": 340,
                   "collision": "none",
+                  "scroll": 0,
                   "visible": false
                 }
               },
@@ -803,14 +765,13 @@
                   "en": "AgainButton"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:button"
-                  ],
+                  "costumes": ["asset:button"],
                   "x": 180,
                   "y": 480,
                   "width": 220,
                   "height": 80,
                   "collision": "none",
+                  "scroll": 0,
                   "visible": false
                 }
               },
@@ -6184,10 +6145,7 @@
                                                       "fr": "faire une explosion",
                                                       "en": "make an explosion"
                                                     },
-                                                    "params": [
-                                                      "boomX",
-                                                      "boomY"
-                                                    ]
+                                                    "params": ["boomX", "boomY"]
                                                   },
                                                   "inputs": {
                                                     "ARG0": {
@@ -6270,10 +6228,7 @@
                                                                 "fr": "lâcher un bonus",
                                                                 "en": "drop a power-up"
                                                               },
-                                                              "params": [
-                                                                "boomX",
-                                                                "boomY"
-                                                              ]
+                                                              "params": ["boomX", "boomY"]
                                                             },
                                                             "inputs": {
                                                               "ARG0": {
@@ -8176,10 +8131,7 @@
                                                                     "fr": "faire une explosion",
                                                                     "en": "make an explosion"
                                                                   },
-                                                                  "params": [
-                                                                    "boomX",
-                                                                    "boomY"
-                                                                  ]
+                                                                  "params": ["boomX", "boomY"]
                                                                 },
                                                                 "inputs": {
                                                                   "ARG0": {
@@ -8668,10 +8620,7 @@
                                 "fr": "faire une explosion",
                                 "en": "make an explosion"
                               },
-                              "params": [
-                                "boomX",
-                                "boomY"
-                              ]
+                              "params": ["boomX", "boomY"]
                             },
                             "inputs": {
                               "ARG0": {
@@ -9024,10 +8973,7 @@
                                                             "fr": "faire une explosion",
                                                             "en": "make an explosion"
                                                           },
-                                                          "params": [
-                                                            "boomX",
-                                                            "boomY"
-                                                          ]
+                                                          "params": ["boomX", "boomY"]
                                                         },
                                                         "inputs": {
                                                           "ARG0": {

@@ -423,6 +423,13 @@ class Builder {
     if ('VAR' in fields) fields.VAR = { id: this.variableRef(fields.VAR) }
     // Parameters of a function are variables too (J10: "make a platform (x, y, width)").
     const state = block.extraState as { params?: unknown[] } | undefined
+    // A call names the parameters it passes as the function names them.
+    if (/^procedures_call/.test(block.type) && Array.isArray(state?.params)) {
+      block.extraState = {
+        ...state,
+        params: state.params.map((param) => this.variableName(this.variableRef(param))),
+      }
+    }
     if (/^procedures_def/.test(block.type) && Array.isArray(state?.params)) {
       block.extraState = {
         ...state,

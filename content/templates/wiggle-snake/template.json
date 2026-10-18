@@ -290,9 +290,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:board"
-                  ],
+                  "costumes": ["asset:board"],
                   "x": 180,
                   "y": 310,
                   "width": 360,
@@ -308,10 +306,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:fruit",
-                    "asset:fruit-squash"
-                  ],
+                  "costumes": ["asset:fruit", "asset:fruit-squash"],
                   "x": 285,
                   "y": 325,
                   "width": 30,
@@ -328,10 +323,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:bonus",
-                    "asset:bonus-dim"
-                  ],
+                  "costumes": ["asset:bonus", "asset:bonus-dim"],
                   "x": 75,
                   "y": 145,
                   "width": 32,
@@ -348,10 +340,7 @@
                 },
                 "props": {
                   "collision": "box",
-                  "costumes": [
-                    "asset:ring-light",
-                    "asset:ring-dark"
-                  ],
+                  "costumes": ["asset:ring-light", "asset:ring-dark"],
                   "x": -100,
                   "y": -100,
                   "width": 28,
@@ -367,9 +356,7 @@
                 },
                 "props": {
                   "collision": "box",
-                  "costumes": [
-                    "asset:ring-light"
-                  ],
+                  "costumes": ["asset:ring-light"],
                   "x": -100,
                   "y": -100,
                   "width": 16,
@@ -386,10 +373,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:head",
-                    "asset:head-hurt"
-                  ],
+                  "costumes": ["asset:head", "asset:head-hurt"],
                   "x": 165,
                   "y": 325,
                   "width": 32,
@@ -406,9 +390,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:arrow"
-                  ],
+                  "costumes": ["asset:arrow"],
                   "x": 180,
                   "y": 592,
                   "width": 72,
@@ -425,9 +407,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:arrow"
-                  ],
+                  "costumes": ["asset:arrow"],
                   "x": 92,
                   "y": 636,
                   "width": 72,
@@ -444,9 +424,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:arrow"
-                  ],
+                  "costumes": ["asset:arrow"],
                   "x": 268,
                   "y": 636,
                   "width": 72,
@@ -463,9 +441,7 @@
                 },
                 "props": {
                   "collision": "none",
-                  "costumes": [
-                    "asset:arrow"
-                  ],
+                  "costumes": ["asset:arrow"],
                   "x": 180,
                   "y": 680,
                   "width": 72,
@@ -534,14 +510,13 @@
                   "en": "PlayButton"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:button"
-                  ],
+                  "costumes": ["asset:button"],
                   "x": 180,
                   "y": 470,
                   "width": 220,
                   "height": 80,
-                  "collision": "none"
+                  "collision": "none",
+                  "scroll": 0
                 }
               },
               {
@@ -586,14 +561,13 @@
                   "en": "Panel"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:panel"
-                  ],
+                  "costumes": ["asset:panel"],
                   "x": 180,
                   "y": 360,
                   "width": 300,
                   "height": 340,
                   "collision": "none",
+                  "scroll": 0,
                   "visible": false
                 }
               },
@@ -666,14 +640,13 @@
                   "en": "AgainButton"
                 },
                 "props": {
-                  "costumes": [
-                    "asset:button"
-                  ],
+                  "costumes": ["asset:button"],
                   "x": 180,
                   "y": 480,
                   "width": 220,
                   "height": 80,
                   "collision": "none",
+                  "scroll": 0,
                   "visible": false
                 }
               },
@@ -2696,9 +2669,7 @@
                                                                             "fr": "poser un anneau",
                                                                             "en": "put a ring"
                                                                           },
-                                                                          "params": [
-                                                                            "n"
-                                                                          ]
+                                                                          "params": ["n"]
                                                                         },
                                                                         "inputs": {
                                                                           "ARG0": {
@@ -2731,9 +2702,7 @@
                                                                                 "fr": "x de la case",
                                                                                 "en": "x of cell"
                                                                               },
-                                                                              "params": [
-                                                                                "n"
-                                                                              ]
+                                                                              "params": ["n"]
                                                                             },
                                                                             "inputs": {
                                                                               "ARG0": {
@@ -2757,9 +2726,7 @@
                                                                                 "fr": "y de la case",
                                                                                 "en": "y of cell"
                                                                               },
-                                                                              "params": [
-                                                                                "n"
-                                                                              ]
+                                                                              "params": ["n"]
                                                                             },
                                                                             "inputs": {
                                                                               "ARG0": {
@@ -3223,9 +3190,7 @@
                             "fr": "x de la case",
                             "en": "x of cell"
                           },
-                          "params": [
-                            "n"
-                          ]
+                          "params": ["n"]
                         },
                         "inputs": {
                           "ARG0": {
@@ -3249,9 +3214,7 @@
                             "fr": "y de la case",
                             "en": "y of cell"
                           },
-                          "params": [
-                            "n"
-                          ]
+                          "params": ["n"]
                         },
                         "inputs": {
                           "ARG0": {
@@ -4295,9 +4258,7 @@
                                                               "fr": "poser un anneau",
                                                               "en": "put a ring"
                                                             },
-                                                            "params": [
-                                                              "n"
-                                                            ]
+                                                            "params": ["n"]
                                                           },
                                                           "inputs": {
                                                             "ARG0": {
@@ -4394,9 +4355,7 @@
                                                                             "fr": "x de la case",
                                                                             "en": "x of cell"
                                                                           },
-                                                                          "params": [
-                                                                            "n"
-                                                                          ]
+                                                                          "params": ["n"]
                                                                         },
                                                                         "inputs": {
                                                                           "ARG0": {
@@ -4420,9 +4379,7 @@
                                                                             "fr": "y de la case",
                                                                             "en": "y of cell"
                                                                           },
-                                                                          "params": [
-                                                                            "n"
-                                                                          ]
+                                                                          "params": ["n"]
                                                                         },
                                                                         "inputs": {
                                                                           "ARG0": {
@@ -5059,10 +5016,7 @@
                             "fr": "tourner",
                             "en": "turn"
                           },
-                          "params": [
-                            "dx",
-                            "dy"
-                          ]
+                          "params": ["dx", "dy"]
                         },
                         "inputs": {
                           "ARG0": {
@@ -5130,10 +5084,7 @@
                                 "fr": "tourner",
                                 "en": "turn"
                               },
-                              "params": [
-                                "dx",
-                                "dy"
-                              ]
+                              "params": ["dx", "dy"]
                             },
                             "inputs": {
                               "ARG0": {
@@ -5201,10 +5152,7 @@
                                     "fr": "tourner",
                                     "en": "turn"
                                   },
-                                  "params": [
-                                    "dx",
-                                    "dy"
-                                  ]
+                                  "params": ["dx", "dy"]
                                 },
                                 "inputs": {
                                   "ARG0": {
@@ -5272,10 +5220,7 @@
                                         "fr": "tourner",
                                         "en": "turn"
                                       },
-                                      "params": [
-                                        "dx",
-                                        "dy"
-                                      ]
+                                      "params": ["dx", "dy"]
                                     },
                                     "inputs": {
                                       "ARG0": {
@@ -5375,10 +5320,7 @@
                             "fr": "tourner",
                             "en": "turn"
                           },
-                          "params": [
-                            "dx",
-                            "dy"
-                          ]
+                          "params": ["dx", "dy"]
                         },
                         "inputs": {
                           "ARG0": {
@@ -5446,10 +5388,7 @@
                                 "fr": "tourner",
                                 "en": "turn"
                               },
-                              "params": [
-                                "dx",
-                                "dy"
-                              ]
+                              "params": ["dx", "dy"]
                             },
                             "inputs": {
                               "ARG0": {
@@ -5517,10 +5456,7 @@
                                     "fr": "tourner",
                                     "en": "turn"
                                   },
-                                  "params": [
-                                    "dx",
-                                    "dy"
-                                  ]
+                                  "params": ["dx", "dy"]
                                 },
                                 "inputs": {
                                   "ARG0": {
@@ -5588,10 +5524,7 @@
                                         "fr": "tourner",
                                         "en": "turn"
                                       },
-                                      "params": [
-                                        "dx",
-                                        "dy"
-                                      ]
+                                      "params": ["dx", "dy"]
                                     },
                                     "inputs": {
                                       "ARG0": {
@@ -5658,10 +5591,7 @@
                       "fr": "tourner",
                       "en": "turn"
                     },
-                    "params": [
-                      "dx",
-                      "dy"
-                    ]
+                    "params": ["dx", "dy"]
                   },
                   "inputs": {
                     "ARG0": {
@@ -5718,10 +5648,7 @@
                       "fr": "tourner",
                       "en": "turn"
                     },
-                    "params": [
-                      "dx",
-                      "dy"
-                    ]
+                    "params": ["dx", "dy"]
                   },
                   "inputs": {
                     "ARG0": {
@@ -5765,10 +5692,7 @@
                       "fr": "tourner",
                       "en": "turn"
                     },
-                    "params": [
-                      "dx",
-                      "dy"
-                    ]
+                    "params": ["dx", "dy"]
                   },
                   "inputs": {
                     "ARG0": {
@@ -5812,10 +5736,7 @@
                       "fr": "tourner",
                       "en": "turn"
                     },
-                    "params": [
-                      "dx",
-                      "dy"
-                    ]
+                    "params": ["dx", "dy"]
                   },
                   "inputs": {
                     "ARG0": {
@@ -6206,9 +6127,7 @@
                                     "fr": "x de la case",
                                     "en": "x of cell"
                                   },
-                                  "params": [
-                                    "n"
-                                  ]
+                                  "params": ["n"]
                                 },
                                 "inputs": {
                                   "ARG0": {
@@ -6232,9 +6151,7 @@
                                     "fr": "y de la case",
                                     "en": "y of cell"
                                   },
-                                  "params": [
-                                    "n"
-                                  ]
+                                  "params": ["n"]
                                 },
                                 "inputs": {
                                   "ARG0": {
@@ -6385,9 +6302,7 @@
                                     "fr": "x de la case",
                                     "en": "x of cell"
                                   },
-                                  "params": [
-                                    "n"
-                                  ]
+                                  "params": ["n"]
                                 },
                                 "inputs": {
                                   "ARG0": {
@@ -6411,9 +6326,7 @@
                                     "fr": "y de la case",
                                     "en": "y of cell"
                                   },
-                                  "params": [
-                                    "n"
-                                  ]
+                                  "params": ["n"]
                                 },
                                 "inputs": {
                                   "ARG0": {

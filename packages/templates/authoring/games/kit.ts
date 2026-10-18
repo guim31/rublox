@@ -159,6 +159,7 @@ export function kitComponents(o: KitOptions): ComponentSource[] {
         width: 220,
         height: 80,
         collision: 'none',
+        scroll: 0,
       },
     },
     text('playLabel', { fr: 'TexteJouer', en: 'PlayLabel' }, PLAY, 180, 466, 32, '#ffffff', {
@@ -185,6 +186,7 @@ export function kitComponents(o: KitOptions): ComponentSource[] {
         width: 300,
         height: 340,
         collision: 'none',
+        scroll: 0,
         visible: false,
       },
     },
@@ -221,6 +223,7 @@ export function kitComponents(o: KitOptions): ComponentSource[] {
         width: 220,
         height: 80,
         collision: 'none',
+        scroll: 0,
         visible: false,
       },
     },

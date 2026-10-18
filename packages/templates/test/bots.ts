@@ -177,7 +177,76 @@ function shooter(p: Player) {
   if (sy < 530) p.press('down')
 }
 
+/**
+ * Platformer: runs right, jumps before a hole, spikes, a beetle or a wall, and waits for a
+ * moving cloud to come close before jumping on it.
+ */
+function platformer(p: Player) {
+  if (p.frame === 20) p.press('enter')
+  for (const key of ['enter', 'space']) p.release(key)
+  if (p.variable('state') !== 'play') {
+    p.release('right')
+    return
+  }
+  const fr = p.world.bodies.some((body) => body.name === 'Héros')
+  const hero = p.body(fr ? 'Héros' : 'Hero')
+  const hx = Number(hero.values.x)
+  const hy = Number(hero.values.y)
+  const feet = hy + 25
+  const ground = p.clones(fr ? 'Sol' : 'Ground')
+  const clouds = p.clones(fr ? 'NuageMobile' : 'MovingCloud')
+  const solidUnder = (x: number) =>
+    [...ground, ...clouds].some((body) => {
+      const w = Number(body.values.width) / 2
+      const top = Number(body.values.y) - Number(body.values.height) / 2
+      return Math.abs(Number(body.values.x) - x) <= w && top >= feet - 100 && top <= feet + 200
+    })
+  const ahead = (names: string[], range: number, below = 60) =>
+    names
+      .flatMap((name) => p.clones(name))
+      .some((body) => {
+        const dx = Number(body.values.x) - hx
+        const dy = Number(body.values.y) - hy
+        return dx > 0 && dx < range && dy > -60 && dy < below
+      })
+  const wall = ground.some((body) => {
+    const left = Number(body.values.x) - Number(body.values.width) / 2
+    const top = Number(body.values.y) - Number(body.values.height) / 2
+    return left - hx > 0 && left - hx < 40 && top < feet - 8 && top > hy - 120
+  })
+  const hole = !solidUnder(hx + 24)
+  // The end of what it stands on (a platform's edge): jump off rather than drop.
+  const ledge = ![...ground, ...clouds].some((body) => {
+    const w = Number(body.values.width) / 2
+    const top = Number(body.values.y) - Number(body.values.height) / 2
+    return Math.abs(Number(body.values.x) - (hx + 24)) <= w && Math.abs(top - feet) < 8
+  })
+  // Over a hole, wait on the edge for a cloud to come under the way.
+  const nearCloud = clouds.some((cloud) => Math.abs(Number(cloud.values.x) - hx) < 360)
+  const waitCloud = hole && !solidUnder(hx + 130) && nearCloud
+  if (waitCloud && !solidUnder(hx + 80)) p.release('right')
+  else p.press('right')
+  const danger =
+    ahead(fr ? ['Piques'] : ['Spikes'], 60) || ahead(fr ? ['Scarabée'] : ['Beetle'], 110, 160)
+  if (
+    hero.values.onGround === true &&
+    (danger || wall || (ledge && !waitCloud) || (hole && solidUnder(hx + 110)))
+  )
+    p.press('space')
+}
+
 export const BOTS: Record<string, Bot> = {
+  'cloud-hopper': {
+    goodScore: 400,
+    good: platformer,
+    // Runs right without ever jumping: falls into the first hole, three times.
+    lazy: (p) => {
+      lazy(0)(p)
+      if (p.variable('state') === 'play') p.press('right')
+      else p.release('right')
+    },
+    lazySeconds: 30,
+  },
   'galaxy-patrol': { goodScore: 200, good: shooter, lazy: lazy(60), lazySeconds: 60 },
   'puck-clash': {
     goodScore: 3,
