@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test'
+import { type CDPSession, expect, type Frame, type Locator, type Page } from '@playwright/test'
 
 /** Sets the interface preferences before the first load (mode, theme, language). */
 export async function usePrefs(
@@ -298,4 +298,70 @@ export async function settled(page: Page) {
           animation.effect?.getComputedTiming().iterations === Number.POSITIVE_INFINITY,
       ),
   )
+}
+
+/** The live preview's frame (another origin). */
+export async function previewFrame(page: Page): Promise<Frame> {
+  const handle = await page.getByTestId('preview-frame').elementHandle()
+  const frame = await handle?.contentFrame()
+  if (!frame) throw new Error('no preview frame')
+  return frame
+}
+
+/** Frames per second over `seconds`, and the 95th percentile of the frame time. */
+export function frameRate(frame: Frame, seconds: number) {
+  return frame.evaluate(async (duration) => {
+    const intervals: number[] = []
+    let last = performance.now()
+    const end = last + duration * 1000
+    await new Promise<void>((resolve) => {
+      const tick = (now: number) => {
+        intervals.push(now - last)
+        last = now
+        if (now < end) requestAnimationFrame(tick)
+        else resolve()
+      }
+      requestAnimationFrame(tick)
+    })
+    intervals.shift()
+    const sorted = [...intervals].sort((a, b) => a - b)
+    const total = intervals.reduce((sum, value) => sum + value, 0)
+    return {
+      fps: Math.round((intervals.length / total) * 10000) / 10,
+      p95: Math.round((sorted[Math.floor(sorted.length * 0.95)] ?? 0) * 10) / 10,
+    }
+  }, seconds)
+}
+
+/** Milliseconds of JavaScript per frame spent in `World.frame` (sampled by the profiler). */
+export async function gameScriptPerFrame(session: CDPSession, frame: Frame, seconds: number) {
+  await session.send('Profiler.enable')
+  await session.send('Profiler.setSamplingInterval', { interval: 100 })
+  await session.send('Profiler.start')
+  const rate = await frameRate(frame, seconds)
+  const { profile } = await session.send('Profiler.stop')
+  const samples = profile.samples ?? []
+  const interval = (profile.endTime - profile.startTime) / 1000 / Math.max(1, samples.length)
+  const hits = new Map<number, number>()
+  for (const id of samples) hits.set(id, (hits.get(id) ?? 0) + 1)
+  const nodes = new Map(profile.nodes.map((node) => [node.id, node]))
+  const subtree = (id: number): number =>
+    (hits.get(id) ?? 0) +
+    (nodes.get(id)?.children ?? []).reduce((sum, child) => sum + subtree(child), 0)
+  let game = 0
+  let script = 0
+  const outside = new Set(['(idle)', '(program)', '(root)'])
+  for (const node of profile.nodes) {
+    if (!outside.has(node.callFrame.functionName)) script += hits.get(node.id) ?? 0
+  }
+  for (const node of profile.nodes) {
+    // `World.frame` keeps its name in the build (class methods are not renamed).
+    if (node.callFrame.functionName === 'frame') game += subtree(node.id)
+  }
+  const frames = rate.fps * seconds
+  const perFrame = (count: number) =>
+    Math.round(((count * interval) / Math.max(1, frames)) * 100) / 100
+  // `gameMs`: the engine's frame; `scriptMs`: all the JavaScript of the preview (the blocks'
+  // code included, which runs in promises after the frame).
+  return { ...rate, gameMs: perFrame(game), scriptMs: perFrame(script) }
 }

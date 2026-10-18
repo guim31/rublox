@@ -1,6 +1,12 @@
-import type { CDPSession, Frame, Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
-import { newProject, openBlocks, openDemo } from './helpers.ts'
+import {
+  frameRate,
+  gameScriptPerFrame,
+  newProject,
+  openBlocks,
+  openDemo,
+  previewFrame,
+} from './helpers.ts'
 
 /**
  * Performance of the game mode (SPEC § 8, J7): 50 sprites that bounce and collide, in the
@@ -13,62 +19,6 @@ import { newProject, openBlocks, openDemo } from './helpers.ts'
  *   average phone. A frame lasts 16.7 ms at 60 frames per second.
  * The numbers are printed and attached to the report; the PR quotes them.
  */
-
-async function previewFrame(page: Page): Promise<Frame> {
-  const handle = await page.getByTestId('preview-frame').elementHandle()
-  const frame = await handle?.contentFrame()
-  if (!frame) throw new Error('no preview frame')
-  return frame
-}
-
-/** Frames per second over `seconds`, and the 95th percentile of the frame time. */
-function frameRate(frame: Frame, seconds: number) {
-  return frame.evaluate(async (duration) => {
-    const intervals: number[] = []
-    let last = performance.now()
-    const end = last + duration * 1000
-    await new Promise<void>((resolve) => {
-      const tick = (now: number) => {
-        intervals.push(now - last)
-        last = now
-        if (now < end) requestAnimationFrame(tick)
-        else resolve()
-      }
-      requestAnimationFrame(tick)
-    })
-    intervals.shift()
-    const sorted = [...intervals].sort((a, b) => a - b)
-    const total = intervals.reduce((sum, value) => sum + value, 0)
-    return {
-      fps: Math.round((intervals.length / total) * 10000) / 10,
-      p95: Math.round((sorted[Math.floor(sorted.length * 0.95)] ?? 0) * 10) / 10,
-    }
-  }, seconds)
-}
-
-/** Milliseconds of JavaScript per frame spent in `World.frame` (sampled by the profiler). */
-async function gameScriptPerFrame(session: CDPSession, frame: Frame, seconds: number) {
-  await session.send('Profiler.enable')
-  await session.send('Profiler.setSamplingInterval', { interval: 100 })
-  await session.send('Profiler.start')
-  const rate = await frameRate(frame, seconds)
-  const { profile } = await session.send('Profiler.stop')
-  const samples = profile.samples ?? []
-  const interval = (profile.endTime - profile.startTime) / 1000 / Math.max(1, samples.length)
-  const hits = new Map<number, number>()
-  for (const id of samples) hits.set(id, (hits.get(id) ?? 0) + 1)
-  const nodes = new Map(profile.nodes.map((node) => [node.id, node]))
-  const subtree = (id: number): number =>
-    (hits.get(id) ?? 0) +
-    (nodes.get(id)?.children ?? []).reduce((sum, child) => sum + subtree(child), 0)
-  let game = 0
-  for (const node of profile.nodes) {
-    // `World.frame` keeps its name in the build (class methods are not renamed).
-    if (node.callFrame.functionName === 'frame') game += subtree(node.id)
-  }
-  const frames = rate.fps * seconds
-  return { ...rate, gameMs: Math.round(((game * interval) / Math.max(1, frames)) * 100) / 100 }
-}
 
 test('50 sprites stay well within the frame budget', async ({ page }, testInfo) => {
   test.setTimeout(120_000)
