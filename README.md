@@ -58,7 +58,7 @@ projects in the browser.
 
 ## Self-hosting
 
-Rublox ships as one Docker image, `ghcr.io/guim31/rublox` (`:1.2.0`, `:latest`, or `:edge` for
+Rublox ships as one Docker image, `ghcr.io/guim31/rublox` (`:1.2.1`, `:latest`, or `:edge` for
 `main`), that serves the studio, the API, the WebSockets and the published apps. An example
 with PostgreSQL is in [`docker/compose.yaml`](docker/compose.yaml):
 

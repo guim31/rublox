@@ -1,5 +1,5 @@
 import { type Browser, expect, type Page, test } from '@playwright/test'
-import { openBlocks, preview, usePrefs } from './helpers.ts'
+import { openBlocks, preview, tap, usePrefs } from './helpers.ts'
 
 /**
  * PR screenshots of J10 (SPEC § 7): the "New project" dialog on its games, Junior and Studio,
@@ -97,15 +97,13 @@ for (const [game, mode, wait] of GAMES) {
         await badge.first().locator('[data-close-button]').click({ force: true })
         await page.waitForTimeout(150)
       }
-      await play.dispatchEvent('pointerdown', { pointerId: 1, bubbles: true })
-      await play.dispatchEvent('pointerup', { pointerId: 1, bubbles: true })
+      await tap(play)
       // The bee would fall at once: a few taps keep it flying.
       if (game === 'buzzy-bee') {
         const stage = app.locator('[data-rx-stage]')
-        for (let tap = 0; tap < 5; tap++) {
+        for (let count = 0; count < 5; count++) {
           await page.waitForTimeout(220)
-          await stage.dispatchEvent('pointerdown', { pointerId: 1, bubbles: true })
-          await stage.dispatchEvent('pointerup', { pointerId: 1, bubbles: true })
+          await tap(stage)
         }
       }
       await page.waitForTimeout(wait)

@@ -1,5 +1,5 @@
 import { expect, type FrameLocator, type Locator, type Page, test } from '@playwright/test'
-import { editField, openBlocks, preview } from './helpers.ts'
+import { clickInPreview, editField, openBlocks, preview, tap } from './helpers.ts'
 
 /**
  * The game templates (J10): each one is created from the "New project" dialog, played a
@@ -35,12 +35,6 @@ async function fromGame(page: Page, id: string) {
 /** A sprite or a text of the running scene, by name (the original, not a clone). */
 function body(app: FrameLocator, name: string): Locator {
   return app.locator(`[data-rx-stage] [data-rx-name="${name}"]:not([data-rx-clone])`)
-}
-
-/** A tap on a sprite (the preview is scaled: a mouse click would land beside it). */
-async function tap(target: Locator) {
-  await target.dispatchEvent('pointerdown', { pointerId: 1, bubbles: true })
-  await target.dispatchEvent('pointerup', { pointerId: 1, bubbles: true })
 }
 
 /** A key pressed (or released) in the preview, as the keyboard of a computer would. */
@@ -139,9 +133,12 @@ test('Abeille Zigzag: a tap makes the bee fly, a bump ends the game, Rejouer sta
   page,
 }) => {
   const { app, errors } = await fromGame(page, 'buzzy-bee')
-  await tap(body(app, 'BoutonJouer'))
+  // "Jouer" answers a real click of the mouse, through the scaled preview (1.2.1).
+  await expect(body(app, 'BoutonJouer')).toHaveCSS('pointer-events', 'auto')
+  await clickInPreview(page, body(app, 'BoutonJouer'))
   const bee = body(app, 'Abeille')
   await expect(body(app, 'TexteScore')).toBeVisible()
+  await expect(body(app, 'BoutonJouer')).toBeHidden()
   // Tapping the meadow sends the bee up.
   await expect(async () => {
     const before = await at(bee)

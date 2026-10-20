@@ -10,7 +10,7 @@ import {
 import type { BlocklyJson, ProjectDoc } from '@rublox/schema'
 import { describe, expect, it } from 'vitest'
 import { Engine, FrameClock, type LogEntry, type World } from '../src/index.ts'
-import { dataLoader, flush, num } from './helpers.ts'
+import { dataLoader, flush, num, text } from './helpers.ts'
 
 /** A clock that only moves when the test says so. */
 function manualClock() {
@@ -604,6 +604,117 @@ describe('the bouncing demo', () => {
       expect(body.values.y as number).toBeLessThanOrEqual(640)
     }
     expect(logs).toEqual([])
+    engine.dispose()
+  })
+})
+
+/**
+ * Touches reach what listens (1.2.1). The renderer exposes the stage as soon as the screen
+ * shows, before the app's code registers its handlers: what the first draw decided about
+ * `pointer-events` must be revised when a handler arrives, for the original and its clones,
+ * and revised again when the app restarts with other blocks.
+ */
+describe('a tap reaches the sprite that listens', () => {
+  /** Draws the scene as the renderer does: at the first snapshot, before the code runs. */
+  function mountEarly(engine: Engine) {
+    const stage = document.createElement('div')
+    stage.getBoundingClientRect = () => ({ left: 0, top: 0, width: 360, height: 640 }) as DOMRect
+    engine.subscribe(() => {
+      const screen = engine.getSnapshot().screen
+      if (screen && !engine.live(screen.key, 'scene')?.stage) {
+        engine.expose(screen.key, 'scene', { stage })
+      }
+    })
+    return stage
+  }
+
+  async function start(doc: ProjectDoc) {
+    const clock = manualClock()
+    const engine = new Engine({
+      doc,
+      code: generateProjectCode(doc),
+      host: { log: () => {} },
+      loadModule: dataLoader,
+      clock,
+    })
+    const stage = mountEarly(engine)
+    await engine.start()
+    await flush()
+    const frame = async () => {
+      clock.step(1 / 60)
+      await flush()
+    }
+    return { engine, stage, frame }
+  }
+
+  const touches = (stage: HTMLElement, name: string, clone = false) =>
+    stage.querySelector<HTMLElement>(
+      `[data-rx-name="${name}"]${clone ? '[data-rx-clone]' : ':not([data-rx-clone])'}`,
+    )?.style.pointerEvents
+
+  const tapBasket = {
+    tap: on('Sprite', 'basket', 'tap', set('SceneText', 'score', 'text', text('touché'))),
+  }
+
+  it('takes touches once a handler is registered, after the first draw', async () => {
+    const { doc } = game(tapBasket)
+    const { engine, stage, frame } = await start(doc)
+    expect(stage.querySelector('[data-rx-name="Panier"]')).not.toBeNull()
+    expect(touches(stage, 'Panier')).toBe('auto')
+    // A decorative sprite lets the touch through, to the scene behind it.
+    expect(touches(stage, 'Pomme')).toBe('none')
+    // And the handler runs when the sprite is touched.
+    stage
+      .querySelector('[data-rx-name="Panier"]')
+      ?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    await flush()
+    await frame()
+    expect(stage.querySelector('[data-rx-name="Score"]')?.textContent).toBe('touché')
+    engine.dispose()
+  })
+
+  it('takes touches when the handler came before the first draw', async () => {
+    const { doc } = game(tapBasket)
+    const { engine, world } = await run(doc)
+    const stage = document.createElement('div')
+    world.mount(stage, () => undefined)
+    expect(touches(stage, 'Panier')).toBe('auto')
+    expect(touches(stage, 'Pomme')).toBe('none')
+    engine.dispose()
+  })
+
+  it('gives its clones the same touches, made before or after the handler', async () => {
+    const { doc } = game({
+      ...tapBasket,
+      start: on('GameScene', 'scene', 'start', call('Sprite', 'basket', 'clone')),
+    })
+    const { engine, stage, frame } = await start(doc)
+    await frame()
+    expect(touches(stage, 'Panier', true)).toBe('auto')
+    // A clone made now, with the handler in place, takes touches too.
+    const world = engine.live(engine.getSnapshot().screen!.key, 'scene') as World
+    world.cloneOf(world.original('basket')!)
+    await frame()
+    expect(
+      [...stage.querySelectorAll<HTMLElement>('[data-rx-name="Panier"][data-rx-clone]')].map(
+        (clone) => clone.style.pointerEvents,
+      ),
+    ).toEqual(['auto', 'auto'])
+    engine.dispose()
+  })
+
+  it('revises the touches when the app restarts with other blocks', async () => {
+    const { doc } = game(tapBasket)
+    const { engine, stage, frame } = await start(doc)
+    expect(touches(stage, 'Panier')).toBe('auto')
+    const next = structuredClone(doc)
+    next.blocks[next.screenOrder[0]!] = {
+      tap: on('Sprite', 'apple', 'tap', set('SceneText', 'score', 'text', text('pomme'))),
+    }
+    await engine.update(next, generateProjectCode(next))
+    await frame()
+    expect(touches(stage, 'Panier')).toBe('none')
+    expect(touches(stage, 'Pomme')).toBe('auto')
     engine.dispose()
   })
 })
