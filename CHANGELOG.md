@@ -16,6 +16,11 @@ is [`docs/SPEC.md`](docs/SPEC.md); its § 0 says what each milestone settled and
   the sprite and its clones, at once; an app restarted with other blocks revises it again. A
   sprite that listens to nothing still lets the touch reach the scene (“when the scene is
   tapped”).
+- **Published games had no pictures.** A published app, an exported website and the live test
+  on a phone drew the sprites of a game scene as the name of their picture, in text: the game
+  scenes get their files from the engine, which these three players had not told where the
+  files live. They do now; the end-to-end tests publish a game and click “Play” on its own
+  origin.
 - The end-to-end tests tap sprites the way a finger does (through the browser's hit test, or a
   real click through the scaled preview), so that such a regression fails them.
 

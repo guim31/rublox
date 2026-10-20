@@ -59,6 +59,8 @@ export function LiveView({ token }: { token: string }) {
             locale: next.meta.locale,
             mode: next.meta.mode,
             appId: `live:${next.meta.id}`,
+            // The game scenes draw their sprites through the engine, not through React (1.2.1).
+            assetUrl: assetResolver(() => doc.current ?? next),
             services: serverServices(() => ({ kind: 'live', token })),
             ai: serverAi({ token }),
             host: {

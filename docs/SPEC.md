@@ -19,6 +19,7 @@ ordre. Chaque session de code le lit en entier avant de commencer, et met à jou
 | J8 | Finitions : accessibilité, performances, sécurité, mise en production | fait (PR #12), voir § 0.10 ; version 1.0.0 |
 | J9 | Applis à décortiquer (demandé le 07/10/2026) | fait (PR #14), voir § 0.11 ; version 1.1.0 |
 | J10 | Modèles de jeux (demandé le 18/10/2026) | fait (PR #16), voir § 0.12 ; version 1.2.0 |
+| 1.2.1 | Correctif : les lutins des jeux ne répondaient à aucun toucher, les jeux publiés n'avaient pas d'images (constaté le 20/10/2026) | fait (PR #17) ; `World.listenersChanged()`, `assetUrl` du moteur dans le lecteur |
 
 ### 0.1 Ce que le J0 a fixé (06/10/2026)
 
