@@ -1,5 +1,14 @@
 import { expect, type FrameLocator, type Locator, type Page, test } from '@playwright/test'
-import { editField, openBlocks, preview } from './helpers.ts'
+import {
+  ADMIN,
+  clickInPreview,
+  editField,
+  openBlocks,
+  preview,
+  signIn,
+  tap,
+  unique,
+} from './helpers.ts'
 
 /**
  * The game templates (J10): each one is created from the "New project" dialog, played a
@@ -10,8 +19,12 @@ import { editField, openBlocks, preview } from './helpers.ts'
 
 test.describe.configure({ mode: 'parallel' })
 
-/** Creates a project from a game template and opens its blocks, with the preview. */
-async function fromGame(page: Page, id: string) {
+/**
+ * Creates a project from a template of the Games category and opens its blocks, with the
+ * preview. A game template (J10) shows an animated cover in the dialog; the star game (J7)
+ * does not.
+ */
+async function fromTemplate(page: Page, id: string, cover = true) {
   const errors: string[] = []
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text())
@@ -20,14 +33,23 @@ async function fromGame(page: Page, id: string) {
   await page.getByRole('button', { name: 'Nouveau projet' }).first().click()
   const dialog = page.getByRole('dialog')
   await dialog.getByTestId('template-category-games').click()
-  await expect(dialog.getByTestId(`template-${id}`).getByTestId('template-cover')).toBeVisible()
+  if (cover) {
+    await expect(dialog.getByTestId(`template-${id}`).getByTestId('template-cover')).toBeVisible()
+  }
   await dialog.getByTestId(`template-${id}`).click()
   await dialog.getByRole('button', { name: 'Créer depuis ce modèle' }).click()
   await page.waitForURL(/\/p\/[^/]+/, { timeout: 30_000 })
   await openBlocks(page)
   const app = preview(page)
+  return { app, errors }
+}
+
+/** A game template (J10), on its title screen. */
+async function fromGame(page: Page, id: string) {
+  const { app, errors } = await fromTemplate(page, id)
   // The title screen: the game's name and "Jouer", drawn with the template's pictures.
   await expect(body(app, 'BoutonJouer')).toBeVisible()
+  await expect(page.getByRole('dialog')).toBeHidden()
   await expect(body(app, 'BoutonJouer').locator('img')).toHaveJSProperty('complete', true)
   return { app, errors }
 }
@@ -35,12 +57,6 @@ async function fromGame(page: Page, id: string) {
 /** A sprite or a text of the running scene, by name (the original, not a clone). */
 function body(app: FrameLocator, name: string): Locator {
   return app.locator(`[data-rx-stage] [data-rx-name="${name}"]:not([data-rx-clone])`)
-}
-
-/** A tap on a sprite (the preview is scaled: a mouse click would land beside it). */
-async function tap(target: Locator) {
-  await target.dispatchEvent('pointerdown', { pointerId: 1, bubbles: true })
-  await target.dispatchEvent('pointerup', { pointerId: 1, bubbles: true })
 }
 
 /** A key pressed (or released) in the preview, as the keyboard of a computer would. */
@@ -139,9 +155,12 @@ test('Abeille Zigzag: a tap makes the bee fly, a bump ends the game, Rejouer sta
   page,
 }) => {
   const { app, errors } = await fromGame(page, 'buzzy-bee')
-  await tap(body(app, 'BoutonJouer'))
+  // "Jouer" answers a real click of the mouse, through the scaled preview (1.2.1).
+  await expect(body(app, 'BoutonJouer')).toHaveCSS('pointer-events', 'auto')
+  await clickInPreview(page, body(app, 'BoutonJouer'))
   const bee = body(app, 'Abeille')
   await expect(body(app, 'TexteScore')).toBeVisible()
+  await expect(body(app, 'BoutonJouer')).toBeHidden()
   // Tapping the meadow sends the bee up.
   await expect(async () => {
     const before = await at(bee)
@@ -188,6 +207,13 @@ test('Robot Fonceur: space makes the robot jump, a crash ends the game, Rejouer 
     await press(app, ' ')
     await expect.poll(async () => (await at(robot)).y, { timeout: 400 }).toBeLessThan(before.y - 20)
   }).toPass({ timeout: 5_000 })
+  // The buttons of the screen answer a tap that goes through the hit test (1.2.1).
+  await expect(async () => {
+    const before = await at(robot)
+    await tap(body(app, 'BoutonSaut'))
+    await expect.poll(async () => (await at(robot)).y, { timeout: 400 }).toBeLessThan(before.y - 20)
+  }).toPass({ timeout: 5_000 })
+  await expect(body(app, 'BoutonGlisse')).toHaveCSS('pointer-events', 'auto')
   // The score is the distance run: it goes up on its own.
   await expect(body(app, 'TexteScore')).not.toHaveText('0')
   // Nothing more: the first obstacle stops it.
@@ -205,6 +231,7 @@ test('Patrouille Galactique: the ship moves and shoots, a hit ends the game, Rej
   await expect(body(app, 'BoutonJouer')).toBeVisible()
   await tap(body(app, 'BoutonJouer'))
   const ship = body(app, 'Vaisseau')
+  await expect(body(app, 'Manette')).toHaveCSS('pointer-events', 'auto')
   const before = await at(ship)
   await press(app, 'ArrowLeft', 300)
   await expect.poll(async () => (await at(ship)).x).toBeLessThan(before.x - 20)
@@ -226,6 +253,8 @@ test('Palet Éclair: two players steer their bats, a goal ends a game to 1, Rejo
   const blue = body(app, 'Bleu')
   const red = body(app, 'Rouge')
   const puck = body(app, 'Palet')
+  await expect(body(app, 'JoystickBleu')).toHaveCSS('pointer-events', 'auto')
+  await expect(body(app, 'JoystickRouge')).toHaveCSS('pointer-events', 'auto')
   // Both bats at once: W A S D for blue, the arrows for red.
   const blueBefore = await at(blue)
   const redBefore = await at(red)
@@ -273,6 +302,13 @@ test('Saute-Nuage: the hero runs with the arrows, falls into a hole, Rejouer sta
   await tap(body(app, 'BoutonJouer'))
   const hero = body(app, 'Héros')
   await expect(body(app, 'TexteNiveau')).toHaveText('Niveau 1')
+  await expect(body(app, 'Manette')).toHaveCSS('pointer-events', 'auto')
+  // A tap on the jump button, through the hit test, makes the hero jump (1.2.1).
+  await expect(async () => {
+    const before = await at(hero)
+    await tap(body(app, 'BoutonSaut'))
+    await expect.poll(async () => (await at(hero)).y, { timeout: 400 }).toBeLessThan(before.y - 20)
+  }).toPass({ timeout: 5_000 })
   // Running right, without jumping: the camera follows, the hero falls into the first hole
   // three times.
   const start = await at(hero)
@@ -284,4 +320,46 @@ test('Saute-Nuage: the hero runs with the arrows, falls into a hole, Rejouer sta
   await replay(app, 5_000)
   await expect(hero).toBeVisible()
   await quietConsole(page, errors)
+})
+
+test('Attrape l’étoile (J7): a tap on the star, through the hit test, scores', async ({ page }) => {
+  const { app, errors } = await fromTemplate(page, 'catch-star', false)
+  const star = body(app, 'Etoile')
+  await expect(star).toBeVisible()
+  await expect(star).toHaveCSS('pointer-events', 'auto')
+  // The moon is decorative: a touch goes through it, to the sky.
+  await expect(body(app, 'Lune')).toHaveCSS('pointer-events', 'none')
+  const score = body(app, 'Score')
+  const before = await score.textContent()
+  await tap(star)
+  await expect(score).not.toHaveText(before ?? '')
+  await quietConsole(page, errors)
+})
+
+test('a published game answers a real click on its player origin', async ({ page, context }) => {
+  await signIn(page, ADMIN.username, ADMIN.password)
+  const { app } = await fromGame(page, 'buzzy-bee')
+  await expect(body(app, 'BoutonJouer')).toHaveCSS('pointer-events', 'auto')
+  const slug = `abeille-${unique().toLowerCase()}`
+  await page.getByTestId('publish-open').click()
+  await page.getByTestId('publish-slug').fill(slug)
+  await expect(page.getByText('Adresse libre')).toBeVisible()
+  await page.getByTestId('publish-submit').click()
+  await expect(page.getByTestId('publish-state')).toHaveText('En ligne · Version 1')
+  const url = await page.getByTestId('publish-url').inputValue()
+
+  const played = await context.newPage()
+  await played.goto(url)
+  const play = played.locator('[data-rx-stage] [data-rx-name="BoutonJouer"]:not([data-rx-clone])')
+  await expect(play).toBeVisible()
+  await expect(play.locator('img')).toHaveJSProperty('complete', true)
+  await expect(play).toHaveCSS('pointer-events', 'auto')
+  const box = await play.boundingBox()
+  if (!box) throw new Error('no Jouer button')
+  await played.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+  await expect(play).toBeHidden()
+  await expect(
+    played.locator('[data-rx-stage] [data-rx-name="TexteScore"]:not([data-rx-clone])'),
+  ).toBeVisible()
+  await played.close()
 })

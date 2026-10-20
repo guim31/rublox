@@ -418,6 +418,13 @@ payés, choix non évidents. Le compléter dès qu'un piège est découvert.
   `keepInside` le garde dans la scène (le palet sortait de la table).
 - **Captures et badges** : un modèle fait gagner plusieurs badges à l'ouverture, autant de
   toasts ; les fermer tous (`screenshots-j10.spec.ts`).
+- **`dispatchEvent` sur un lutin contourne `pointer-events`** : un tap de test doit passer par
+  `elementFromPoint` (`tap()` de `e2e/helpers.ts`, qui échoue si le centre de la cible n'est pas
+  atteint) ou par un vrai clic à travers l'aperçu réduit (`clickInPreview()`). La CI de la 1.2.0
+  était verte alors qu'aucun bouton de jeu ne répondait : la scène est dessinée (`mount` →
+  `render`) **avant** que le code de l'appli enregistre ses gestionnaires, et `touchable` était
+  figé au premier dessin ; depuis 1.2.1, `World.listenersChanged()` le recalcule à chaque
+  enregistrement (jamais par image).
 - **Biome et contenu généré** : les SVG des modèles (`content/templates/*/assets`, `cover.svg`)
   sont exclus de Biome ; un remplacement de texte dans un fichier passé par `pnpm format` doit
   vérifier que son motif existe encore (le formatage le déplace).

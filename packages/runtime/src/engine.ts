@@ -1060,6 +1060,8 @@ export class Engine {
                   { fn: fn as Handler, filter, busy: false },
                 ])
                 instance.handlers.set(componentId, byEvent)
+                // A sprite with a tap handler now takes touches (its world draws that).
+                instance.game?.worldOf(componentId)?.listenersChanged(componentId)
               }
             }
           }

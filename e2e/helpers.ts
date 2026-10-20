@@ -365,3 +365,50 @@ export async function gameScriptPerFrame(session: CDPSession, frame: Frame, seco
   // code included, which runs in promises after the frame).
   return { ...rate, gameMs: perFrame(game), scriptMs: perFrame(script) }
 }
+
+/**
+ * A tap on an element of a running app, as a finger gives it: the pointer events go to what is
+ * drawn at the centre of the target (`elementFromPoint`), so a target that lets touches
+ * through (`pointer-events: none`, a sprite nobody listens to) is not reached, as in a real
+ * browser. The preview is scaled: a mouse click of Playwright would land beside the target;
+ * `dispatchEvent` on the target would bypass the hit test and hide a sprite that cannot be
+ * tapped (the 1.2.0 regression).
+ */
+export async function tap(target: Locator): Promise<void> {
+  await target.evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    const x = rect.left + rect.width / 2
+    const y = rect.top + rect.height / 2
+    const hit = element.ownerDocument.elementFromPoint(x, y)
+    if (!hit || !element.contains(hit)) {
+      const describe = (node: Element | null) =>
+        node
+          ? `<${node.tagName.toLowerCase()}${[...node.attributes]
+              .filter((attribute) => attribute.name.startsWith('data-rx'))
+              .map((attribute) => ` ${attribute.name}="${attribute.value}"`)
+              .join('')}>`
+          : 'nothing'
+      throw new Error(
+        `a tap at the centre of ${describe(element)} reaches ${describe(hit)} instead`,
+      )
+    }
+    const init = { pointerId: 1, bubbles: true, clientX: x, clientY: y, isPrimary: true }
+    hit.dispatchEvent(new PointerEvent('pointerdown', init))
+    hit.dispatchEvent(new PointerEvent('pointerup', init))
+  })
+}
+
+/**
+ * A real mouse click on an element of the live preview, through the scaled phone: what the
+ * browser hits at that point gets the click, as in production.
+ */
+export async function clickInPreview(page: Page, target: Locator): Promise<void> {
+  const frame = await page.getByTestId('preview-frame').boundingBox()
+  if (!frame) throw new Error('no preview frame')
+  const { x, y, width } = await target.evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, width: innerWidth }
+  })
+  const scale = frame.width / width
+  await page.mouse.click(frame.x + x * scale, frame.y + y * scale)
+}

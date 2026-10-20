@@ -44,6 +44,8 @@ export function PublishedView({
         locale: app.doc.meta.locale,
         mode: app.doc.meta.mode,
         appId: `app:${app.appId}`,
+        // The game scenes draw their sprites through the engine, not through React (1.2.1).
+        assetUrl: assetResolver(() => app.doc, base === './' ? './' : '/'),
         // On the apps origin, the server's relay and shared data; an exported site has none.
         services: slug
           ? serverServices(() => ({ kind: 'app', slug }))

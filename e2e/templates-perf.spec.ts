@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { gameScriptPerFrame, openBlocks, previewFrame, usePrefs } from './helpers.ts'
+import { gameScriptPerFrame, openBlocks, previewFrame, tap, usePrefs } from './helpers.ts'
 
 /**
  * Performance of the game templates (SPEC § 8, J10): each game, being played in the live
@@ -31,8 +31,7 @@ for (const [game, player] of GAMES) {
     const frame = await previewFrame(page)
     const play = frame.locator('[data-rx-stage] [data-rx-name="BoutonJouer"]:not([data-rx-clone])')
     await expect(play.locator('img')).toHaveJSProperty('complete', true)
-    await play.dispatchEvent('pointerdown', { pointerId: 1, bubbles: true })
-    await play.dispatchEvent('pointerup', { pointerId: 1, bubbles: true })
+    await tap(play)
     // The player, played by the page itself (no round trip through Playwright).
     await frame.evaluate((player) => {
       const stage = document.querySelector('[data-rx-stage]')

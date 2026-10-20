@@ -4,6 +4,26 @@ All notable changes to Rublox. The format follows [Keep a Changelog](https://kee
 and versions follow [Semantic Versioning](https://semver.org/). The specification, in French,
 is [`docs/SPEC.md`](docs/SPEC.md); its § 0 says what each milestone settled and why.
 
+## [1.2.1] — 2026-10-20
+
+### Fixed
+
+- **Game sprites answered no tap.** In 1.2.0, the six game templates could not be started: “Play”,
+  “Play again”, the arrows of Wiggle Snake and every other sprite with a tap handler let the
+  touch through to the scene, with the mouse as with a finger. The scene was drawn before the
+  app's code registered its handlers, and whether a sprite takes touches was decided once, at
+  that first draw. A handler registered on a sprite now makes its world revise that decision for
+  the sprite and its clones, at once; an app restarted with other blocks revises it again. A
+  sprite that listens to nothing still lets the touch reach the scene (“when the scene is
+  tapped”).
+- **Published games had no pictures.** A published app, an exported website and the live test
+  on a phone drew the sprites of a game scene as the name of their picture, in text: the game
+  scenes get their files from the engine, which these three players had not told where the
+  files live. They do now; the end-to-end tests publish a game and click “Play” on its own
+  origin.
+- The end-to-end tests tap sprites the way a finger does (through the browser's hit test, or a
+  real click through the scaled preview), so that such a regression fails them.
+
 ## [1.2.0] — 2026-10-18
 
 Game templates: six complete, original games to play first, then to open up and change.
@@ -166,5 +186,7 @@ mode, audited for security, accessibility and performance.
   property edit reaches the canvas in less than 50 ms; all three are measured by
   `e2e/budget-perf.spec.ts`.
 
+[1.2.1]: https://github.com/guim31/rublox/releases/tag/v1.2.1
+[1.2.0]: https://github.com/guim31/rublox/releases/tag/v1.2.0
 [1.1.0]: https://github.com/guim31/rublox/releases/tag/v1.1.0
 [1.0.0]: https://github.com/guim31/rublox/releases/tag/v1.0.0

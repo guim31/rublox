@@ -34,7 +34,10 @@ export type Body = {
   drawn?: string
   /** Style values written to the element, to write only what changed. */
   styles?: Map<string, string>
-  /** Whether it takes touches (draggable, or a handler listens): known after the first draw. */
+  /**
+   * Whether it takes touches (draggable, or a handler listens). Computed at the first draw and
+   * again when the handlers of its component change (`listenersChanged`): never per frame.
+   */
   touchable?: boolean
   /** Edges touched at the last frame, one bit each (`EDGES` order). */
   edgesTouched: number
@@ -1013,6 +1016,25 @@ export class World {
       this.host.listens(id, 'tap') ||
       (body.type === 'Sprite' && (this.host.listens(id, 'drag') || this.host.listens(id, 'drop')))
     )
+  }
+
+  /**
+   * The handlers of a component changed (the app registered one): its bodies, the original and
+   * its clones, take touches or let them through to what is behind, from now on. The first draw
+   * happens before the app's code runs (the renderer exposes the stage first), so what it
+   * computed is stale; a decorative sprite must still let a tap reach the scene.
+   */
+  listenersChanged(componentId: ComponentId): void {
+    let changed = false
+    for (const body of this.bodies) {
+      if (body.componentId !== componentId || body.deleted) continue
+      const touchable = this.interactive(body)
+      if (body.touchable === touchable) continue
+      body.touchable = touchable
+      body.dirty = true
+      changed = true
+    }
+    if (changed && this.drawingOn) this.render()
   }
 
   /** Writes what changed to the DOM: transforms, costumes, texts. */
